@@ -1491,7 +1491,7 @@ void KidsizeStrategy::strategymain()
                 for (int multisingleSTEP = 0; multisingleSTEP <= 10; multisingleSTEP++)
                 {
                     //ROS_INFO("First crw");
-                    ros_com->sendBodySector(7);
+                    //ros_com->sendBodySector(7);
                     tool->Delay(800);
                 }
                 for (int multisingleSTEP = 0; multisingleSTEP <= 20; multisingleSTEP++)
@@ -1523,11 +1523,11 @@ void KidsizeStrategy::strategymain()
                     {
                         break;
                     }
-                    ros_com->sendBodySector(7);
+                    //ros_com->sendBodySector(7);
                     tool->Delay(800);
                 }
                 tool->Delay(500);
-                ros_com->sendBodySector(8);
+                //ros_com->sendBodySector(8);
                 tool->Delay(11000);
                 ros_com->sendBodySector(29);
                 continuousValue_x = 0;
