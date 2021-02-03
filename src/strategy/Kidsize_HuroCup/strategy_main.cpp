@@ -395,7 +395,7 @@ void KidsizeStrategy::strategymain()
                                 ros::spinOnce();
                             }
                     }
-                    if (continuousValue_x < 1200) //直走加速區間
+                    if (continuousValue_x < 2000) //直走加速區間
                     {
                         continuousValue_x += 100;
                         IMUSlope();
@@ -468,7 +468,7 @@ void KidsizeStrategy::strategymain()
                             ros::spinOnce();
                         }
                 }
-                if (continuousValue_x < 1200)
+                if (continuousValue_x < 2000)
                 {
                     continuousValue_x += 100; 
                     IMUSlope();
@@ -1487,11 +1487,11 @@ void KidsizeStrategy::strategymain()
                 ros_com->sendBodySector(5);
                 tool->Delay(1000);
                 ros_com->sendBodySector(6);
-                tool->Delay(10000);
+                tool->Delay(20000);
                 for (int multisingleSTEP = 0; multisingleSTEP <= 10; multisingleSTEP++)
                 {
                     //ROS_INFO("First crw");
-                    ros_com->sendBodySector(7);
+                    //ros_com->sendBodySector(7);
                     tool->Delay(800);
                 }
                 for (int multisingleSTEP = 0; multisingleSTEP <= 20; multisingleSTEP++)
@@ -1523,11 +1523,11 @@ void KidsizeStrategy::strategymain()
                     {
                         break;
                     }
-                    ros_com->sendBodySector(7);
+                    //ros_com->sendBodySector(7);
                     tool->Delay(800);
                 }
                 tool->Delay(500);
-                ros_com->sendBodySector(8);
+                //ros_com->sendBodySector(8);
                 tool->Delay(11000);
                 ros_com->sendBodySector(29);
                 continuousValue_x = 0;
@@ -1705,6 +1705,7 @@ void KidsizeStrategy::strategymain()
             ros_com->sendBodySector(29);
             tool->Delay(2000);
             first_cnt = 0;
+            ROS_INFO("stop");
         }
         m_state = P_INIT;
         readwalkinggait();
@@ -1947,15 +1948,15 @@ void KidsizeStrategy::FaceToFinialLineFun() //正對終點方向修正的步態�
     {
         if (abs(IMU_slope) >= 41)
         {
-            continous_angle_offest = 9;
+            continous_angle_offest = 6;
         }
         else if (abs(IMU_slope) >= 28 && abs(IMU_slope) < 41)
         {
-            continous_angle_offest = 6;
+            continous_angle_offest = 4;
         }
         else if (abs(IMU_slope) > 4 && abs(IMU_slope) < 28)
         {
-            continous_angle_offest = 4;
+            continous_angle_offest = 2;
         }
         else
         {
@@ -1966,15 +1967,15 @@ void KidsizeStrategy::FaceToFinialLineFun() //正對終點方向修正的步態�
     {
         if (abs(IMU_slope) >= 41)
         {
-            continous_angle_offest = -8;
+            continous_angle_offest = -6;
         }
         else if (abs(IMU_slope) >= 28 && abs(IMU_slope) < 41)
         {
-            continous_angle_offest = -5;
+            continous_angle_offest = -4;
         }
         else if (abs(IMU_slope) > 4 && abs(IMU_slope) < 28)
         {
-            continous_angle_offest = -3;
+            continous_angle_offest = -2;
         }
         else
         {
