@@ -395,7 +395,7 @@ void KidsizeStrategy::strategymain()
                                 ros::spinOnce();
                             }
                     }
-                    if (continuousValue_x < 3200) //直走加速區間
+                    if (continuousValue_x < 2000) //直走加速區間
                     {
                         continuousValue_x += 100;
                         IMUSlope();
@@ -468,7 +468,7 @@ void KidsizeStrategy::strategymain()
                             ros::spinOnce();
                         }
                 }
-                if (continuousValue_x < 3200)
+                if (continuousValue_x < 2000)
                 {
                     continuousValue_x += 100; 
                     IMUSlope();
@@ -1948,15 +1948,15 @@ void KidsizeStrategy::FaceToFinialLineFun() //正對終點方向修正的步態�
     {
         if (abs(IMU_slope) >= 41)
         {
-            continous_angle_offest = 9;
+            continous_angle_offest = 6;
         }
         else if (abs(IMU_slope) >= 28 && abs(IMU_slope) < 41)
         {
-            continous_angle_offest = 6;
+            continous_angle_offest = 4;
         }
         else if (abs(IMU_slope) > 4 && abs(IMU_slope) < 28)
         {
-            continous_angle_offest = 4;
+            continous_angle_offest = 2;
         }
         else
         {
@@ -1967,15 +1967,15 @@ void KidsizeStrategy::FaceToFinialLineFun() //正對終點方向修正的步態�
     {
         if (abs(IMU_slope) >= 41)
         {
-            continous_angle_offest = -8;
+            continous_angle_offest = -6;
         }
         else if (abs(IMU_slope) >= 28 && abs(IMU_slope) < 41)
         {
-            continous_angle_offest = -5;
+            continous_angle_offest = -4;
         }
         else if (abs(IMU_slope) > 4 && abs(IMU_slope) < 28)
         {
-            continous_angle_offest = -3;
+            continous_angle_offest = -2;
         }
         else
         {
