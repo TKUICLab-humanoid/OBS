@@ -40,7 +40,7 @@ void KidsizeStrategy::strategymain()
             if (!Continuous_flag) //起步步態
             {
                 ros_com->sendBodySector(4); //動作磁區
-                tool->Delay(1000);
+                tool->Delay(2000);
                 ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); //ros_com->sendBodyAuto(-450, 0, 0,-3, WalkingMode::ContinuousStep,IMU_continuous);
 
                 tool->Delay(1300);
@@ -395,7 +395,7 @@ void KidsizeStrategy::strategymain()
                                 ros::spinOnce();
                             }
                     }
-                    if (continuousValue_x < 2000) //直走加速區間
+                    if (continuousValue_x < 2800) //直走加速區間
                     {
                         continuousValue_x += 100;
                         IMUSlope();
@@ -468,7 +468,7 @@ void KidsizeStrategy::strategymain()
                             ros::spinOnce();
                         }
                 }
-                if (continuousValue_x < 2000)
+                if (continuousValue_x < 2800)
                 {
                     continuousValue_x += 100; 
                     IMUSlope();
@@ -1582,7 +1582,7 @@ void KidsizeStrategy::strategymain()
             case continuousValue_Rt:
                 walking_state_string = "continousValue_Rt";
                 SlopeCalculate();
-                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] - 6, IMU_continuous);
+                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] - 2, IMU_continuous);
                 strategy_info->get_image_flag = true;
                 ros::spinOnce();
                 continuousValue_x = 0;
@@ -1591,7 +1591,7 @@ void KidsizeStrategy::strategymain()
             case continuousValue_Lt:
                 walking_state_string = "continousValue_Lt";
                 SlopeCalculate();
-                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] + 6, IMU_continuous);
+                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] + 2, IMU_continuous);
                 strategy_info->get_image_flag = true;
                 ros::spinOnce();
                 continuousValue_x = 0;
@@ -1600,7 +1600,7 @@ void KidsizeStrategy::strategymain()
             case continuousValue_R2t:
                 walking_state_string = "continousValue_R2t";
                 SlopeCalculate();
-                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] - 7, IMU_continuous);
+                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] - 3, IMU_continuous);
                 strategy_info->get_image_flag = true;
                 ros::spinOnce();
                 continuousValue_x = 0;
@@ -1609,7 +1609,7 @@ void KidsizeStrategy::strategymain()
             case continuousValue_L2t:
                 walking_state_string = "continousValue_L2t";
                 SlopeCalculate();
-                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] + 7, IMU_continuous);
+                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] + 3, IMU_continuous);
                 strategy_info->get_image_flag = true;
                 ros::spinOnce();
                 continuousValue_x = 0;
