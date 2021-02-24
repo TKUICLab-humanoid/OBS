@@ -519,6 +519,7 @@ void KidsizeStrategy::strategymain()
                         IMUSlope();
                         FaceToFinialLineFun();
                         ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + continous_angle_offest, IMU_continuous); 
+                        tool->Delay(50);
                         strategy_info->get_image_flag = true;
                         ros::spinOnce();
                     }
@@ -1948,15 +1949,15 @@ void KidsizeStrategy::FaceToFinialLineFun() //正對終點方向修正的步態�
     {
         if (abs(IMU_slope) >= 41)
         {
-            continous_angle_offest = 6;
+            continous_angle_offest = 4;
         }
         else if (abs(IMU_slope) >= 28 && abs(IMU_slope) < 41)
         {
-            continous_angle_offest = 4;
+            continous_angle_offest = 2;
         }
         else if (abs(IMU_slope) > 4 && abs(IMU_slope) < 28)
         {
-            continous_angle_offest = 2;
+            continous_angle_offest = 1;
         }
         else
         {
@@ -1967,15 +1968,15 @@ void KidsizeStrategy::FaceToFinialLineFun() //正對終點方向修正的步態�
     {
         if (abs(IMU_slope) >= 41)
         {
-            continous_angle_offest = -6;
+            continous_angle_offest = -4;
         }
         else if (abs(IMU_slope) >= 28 && abs(IMU_slope) < 41)
         {
-            continous_angle_offest = -4;
+            continous_angle_offest = -2;
         }
         else if (abs(IMU_slope) > 4 && abs(IMU_slope) < 28)
         {
-            continous_angle_offest = -2;
+            continous_angle_offest = -1;
         }
         else
         {
