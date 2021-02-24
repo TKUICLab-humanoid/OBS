@@ -182,7 +182,7 @@ void OBSimage::strategymain()
             printf("\n");
 ////////////////////////////////////opencv/////////////////////////////////////////////
             cv::resize(image, publish_image, cv::Size(320, 240),CV_INTER_LINEAR);
-			cv::imshow("publish_image",publish_image);
+			//cv::imshow("publish_image",publish_image);
 			cv::waitKey(1);
             msg_compressimage = cv_bridge::CvImage(std_msgs::Header(), "bgr8", publish_image).toImageMsg();
             pub_colormodel.publish(msg_compressimage);
