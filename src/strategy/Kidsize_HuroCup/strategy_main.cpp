@@ -75,11 +75,11 @@ void KidsizeStrategy::strategymain()
             insideFMcnt = 0;                                            //有幾行為危險區(深度於焦點內)
             in_reddoor_flag = false;                                    //add
             sideline_zero_flag = true;                                  //add
-            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300); //頭部馬達刻度(上下)
+            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1623, 300); //頭部馬達刻度(上下)
             tool->Delay(100);
-            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300);
+            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1623, 300);
             tool->Delay(100);
-            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300);
+            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1623, 300);
             tool->Delay(100);
             ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300); //頭部馬達刻度（左右）左正右負
             tool->Delay(100);
@@ -1251,11 +1251,11 @@ void KidsizeStrategy::strategymain()
             {
                 first_enter_door = true;
                 m_state = P_MATRIX_CALCULATE;
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1623, 100);
                 tool->Delay(100);
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1623, 100);
                 tool->Delay(100);
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1623, 100);
                 tool->Delay(100);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 100);
                 tool->Delay(100);
@@ -1442,11 +1442,11 @@ void KidsizeStrategy::strategymain()
             {
                 first_enter_door = true;
                 m_state = P_MATRIX_CALCULATE;
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1623, 100);
                 tool->Delay(100);
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1623, 100);
                 tool->Delay(100);
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1623, 100);
                 tool->Delay(100);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 100);
                 tool->Delay(100);
