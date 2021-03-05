@@ -337,9 +337,9 @@ void KidsizeStrategy::strategymain()
             {
                 for (int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++) 
                 {
-                    if (strategy_info->color_mask_subject[5][i].size > 1000) //紅色面積 > 1000    
+                    if (strategy_info->color_mask_subject[5][i].size > 1050) //紅色面積 > 1000    
                     {
-                        //ROS_INFO("P_DOOR");
+                        ROS_INFO("Area = %d",strategy_info->color_mask_subject[5][i].size);  
                         continuousValue_x = dirdata[30]; //注意如果一次減百位數 讀檔端不能有無法被整除的數出現
                         IMUSlope();
                         FaceToFinialLineFun(); //計算有無正對障礙物之副函式 
@@ -1245,6 +1245,10 @@ void KidsizeStrategy::strategymain()
         case P_DOOR: //紅門策略
             printinfo();
             m_state_string = "P_DOOR";
+            if (zero_flag == true) 
+            {
+                zero_flag = false; 
+            }
             Red_Door_flag = false;
             Blue_obs_flag = false;
             if (strategy_info->color_mask_subject_cnts[5] == 0)
@@ -1991,15 +1995,15 @@ void KidsizeStrategy::traverse() //正對障終點方向修正的步態補償之
     {
         if (abs(IMU_slope) > 15)
         {
-            continous_angle_offest = 2;
+            continous_angle_offest = 4;
         }
         else if (abs(IMU_slope) > 10 && abs(IMU_slope) <= 15)
         {
-            continous_angle_offest = 1;
+            continous_angle_offest = 3;
         }
         else if (abs(IMU_slope) > 5 && abs(IMU_slope) <= 10)
         {
-            continous_angle_offest = 0;
+            continous_angle_offest = 2;
         }
         else
         {
@@ -2010,15 +2014,15 @@ void KidsizeStrategy::traverse() //正對障終點方向修正的步態補償之
     {
         if (abs(IMU_slope) > 15)
         {
-            continous_angle_offest = -2;
+            continous_angle_offest = -4;
         }
         else if (abs(IMU_slope) > 10 && abs(IMU_slope) <= 15)
         {
-            continous_angle_offest = -1;
+            continous_angle_offest = -2;
         }
         else if (abs(IMU_slope) > 5 && abs(IMU_slope) <= 10)
         {
-            continous_angle_offest = 0;
+            continous_angle_offest = -1;
         }
         else
         {
@@ -2293,7 +2297,8 @@ void KidsizeStrategy::sideline()
                 }
             }
             printinfo();
-            sidelineslope = (float)(TopYellowPoint - BottomYellowPoint) / (float)(cntBottomYellow_x - cntTopYellow_x);
+            //sidelineslope = (float)(TopYellowPoint - BottomYellowPoint) / (float)(cntBottomYellow_x - cntTopYellow_x);
+            sidelineslope = 0;
             tool->Delay(1000);
 
             if (sidelineslope > 0)
@@ -2346,11 +2351,15 @@ void KidsizeStrategy::printinfo()
     }
     else
         ROS_INFO("zero_flag = false");
+
     ROS_INFO("%s",walking_state_string.c_str());
     ROS_INFO("continuousValue_x = %5d", continuousValue_x);
     ROS_INFO("[30] = %5d [31] = %5d [32] = %5d", dirdata[30], dirdata[31], dirdata[32]);
     ROS_INFO("[33] = %5d [34] = %5d [35] = %5d", dirdata[33], dirdata[34], dirdata[35]);
     ROS_INFO("[36] = %5d [37] = %5d [38] = %5d", dirdata[36], dirdata[37], dirdata[38]);
+    ROS_INFO("TopYellowPoint = %5d BottomYellowPoint = %5d", TopYellowPoint, BottomYellowPoint);
+    ROS_INFO("cntBottomYellow_x = %5d cntTopYellow_x = %5d", cntBottomYellow_x, cntTopYellow_x);
+ 
     if (leftsidelinewarning)
         ROS_INFO("leftsidelinewarning = true");
     else
