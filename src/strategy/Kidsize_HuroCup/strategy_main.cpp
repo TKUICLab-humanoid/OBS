@@ -1248,7 +1248,9 @@ void KidsizeStrategy::strategymain()
             if (zero_flag == true) 
             {
                 zero_flag = false; 
+				ROS_INFO("(P_DOOR)zero_flag = false");
             }
+	
             Red_Door_flag = false;
             Blue_obs_flag = false;
             if (strategy_info->color_mask_subject_cnts[5] == 0)
