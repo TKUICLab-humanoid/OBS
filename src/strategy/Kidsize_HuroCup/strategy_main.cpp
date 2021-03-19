@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 
 void KidsizeStrategy::strategymain()
 {
-    int FocusMatrix[32] = {3, 3, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 3, 3}; //攝影機內之焦點矩陣
+    int FocusMatrix[32] = {1, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 2, 2, 2, 1}; //攝影機內之焦點矩陣
     int FocusMatrix_R[32] = {4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1};
     int FocusMatrix_L[32] = {1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4};
     int LeftMove[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 21};
@@ -75,11 +75,11 @@ void KidsizeStrategy::strategymain()
             insideFMcnt = 0;                                            //有幾行為危險區(深度於焦點內)
             in_reddoor_flag = false;                                    //add
             sideline_zero_flag = true;                                  //add
-            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300); //頭部馬達刻度(上下)
+            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1613, 300); //頭部馬達刻度(上下)
             tool->Delay(100);
-            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300);
+            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1613, 300);
             tool->Delay(100);
-            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300);
+            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1613, 300);
             tool->Delay(100);
             ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300); //頭部馬達刻度（左右）左正右負
             tool->Delay(100);
@@ -337,9 +337,8 @@ void KidsizeStrategy::strategymain()
             {
                 for (int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++) 
                 {
-                    if (strategy_info->color_mask_subject[5][i].size > 1000) //紅色面積 > 1000    
+                    if (strategy_info->color_mask_subject[5][i].size > 1050) //紅色面積 > 1000    
                     {
-                        //ROS_INFO("P_DOOR");
                         continuousValue_x = dirdata[30]; //注意如果一次減百位數 讀檔端不能有無法被整除的數出現
                         IMUSlope();
                         FaceToFinialLineFun(); //計算有無正對障礙物之副函式 
@@ -395,7 +394,7 @@ void KidsizeStrategy::strategymain()
                                 ros::spinOnce();
                             }
                     }
-                    if (continuousValue_x < 2800) //直走加速區間
+                    if (continuousValue_x < 3500) //直走加速區間
                     {
                         continuousValue_x += 100;
                         IMUSlope();
@@ -468,7 +467,7 @@ void KidsizeStrategy::strategymain()
                             ros::spinOnce();
                         }
                 }
-                if (continuousValue_x < 2800)
+                if (continuousValue_x < 3500)
                 {
                     continuousValue_x += 100; 
                     IMUSlope();
@@ -497,7 +496,7 @@ void KidsizeStrategy::strategymain()
             }
             if (abs(LMoveValue - RMoveValue) < 8 && LMoveValue > 10 && RMoveValue > 10) 
             {
-                //ROS_INFO("<20");
+                ROS_INFO("<20");
                 if (continuousValue_x > dirdata[30])
                 {
                     while (continuousValue_x > dirdata[30])
@@ -519,6 +518,7 @@ void KidsizeStrategy::strategymain()
                         IMUSlope();
                         FaceToFinialLineFun();
                         ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + continous_angle_offest, IMU_continuous); 
+                        tool->Delay(50);
                         strategy_info->get_image_flag = true;
                         ros::spinOnce();
                     }
@@ -1048,7 +1048,7 @@ void KidsizeStrategy::strategymain()
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2647, 600); 
                 tool->Delay(100);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2647, 600);
-                tool->Delay(1600);
+                tool->Delay(1100);
                 strategy_info->get_image_flag = true; 
                 ros::spinOnce();
                 head_direction = RHD_Right;
@@ -1244,17 +1244,21 @@ void KidsizeStrategy::strategymain()
         case P_DOOR: //紅門策略
             printinfo();
             m_state_string = "P_DOOR";
+            if (zero_flag == true) 
+            {
+                zero_flag = false; 
+            }
             Red_Door_flag = false;
             Blue_obs_flag = false;
             if (strategy_info->color_mask_subject_cnts[5] == 0)
             {
                 first_enter_door = true;
                 m_state = P_MATRIX_CALCULATE;
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1613, 100);
                 tool->Delay(100);
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1613, 100);
                 tool->Delay(100);
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1613, 100);
                 tool->Delay(100);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 100);
                 tool->Delay(100);
@@ -1441,11 +1445,11 @@ void KidsizeStrategy::strategymain()
             {
                 first_enter_door = true;
                 m_state = P_MATRIX_CALCULATE;
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1613, 100);
                 tool->Delay(100);
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1613, 100);
                 tool->Delay(100);
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1613, 100);
                 tool->Delay(100);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 100);
                 tool->Delay(100);
@@ -1582,7 +1586,7 @@ void KidsizeStrategy::strategymain()
             case continuousValue_Rt:
                 walking_state_string = "continousValue_Rt";
                 SlopeCalculate();
-                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] - 2, IMU_continuous);
+                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] + continous_angle_offest, IMU_continuous);
                 strategy_info->get_image_flag = true;
                 ros::spinOnce();
                 continuousValue_x = 0;
@@ -1591,7 +1595,7 @@ void KidsizeStrategy::strategymain()
             case continuousValue_Lt:
                 walking_state_string = "continousValue_Lt";
                 SlopeCalculate();
-                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] + 2, IMU_continuous);
+                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] + continous_angle_offest, IMU_continuous);
                 strategy_info->get_image_flag = true;
                 ros::spinOnce();
                 continuousValue_x = 0;
@@ -1600,7 +1604,7 @@ void KidsizeStrategy::strategymain()
             case continuousValue_R2t:
                 walking_state_string = "continousValue_R2t";
                 SlopeCalculate();
-                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] - 3, IMU_continuous);
+                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] + continous_angle_offest, IMU_continuous);
                 strategy_info->get_image_flag = true;
                 ros::spinOnce();
                 continuousValue_x = 0;
@@ -1609,7 +1613,7 @@ void KidsizeStrategy::strategymain()
             case continuousValue_L2t:
                 walking_state_string = "continousValue_L2t";
                 SlopeCalculate();
-                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] + 3, IMU_continuous);
+                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] + continous_angle_offest, IMU_continuous);
                 strategy_info->get_image_flag = true;
                 ros::spinOnce();
                 continuousValue_x = 0;
@@ -1921,11 +1925,11 @@ void KidsizeStrategy::IMUSlope()
 {
     if (Continuous_flag)
     {
-        if (5 < strategy_info->getIMUValue().Yaw && strategy_info->getIMUValue().Yaw <= 180)
+        if (4 < strategy_info->getIMUValue().Yaw && strategy_info->getIMUValue().Yaw <= 180)
         {
             IMU_slope = strategy_info->getIMUValue().Yaw;
         }
-        else if (-5 > strategy_info->getIMUValue().Yaw && strategy_info->getIMUValue().Yaw >= -179)
+        else if (-4 > strategy_info->getIMUValue().Yaw && strategy_info->getIMUValue().Yaw >= -179)
         {
             IMU_slope = strategy_info->getIMUValue().Yaw;
         }
@@ -1948,15 +1952,15 @@ void KidsizeStrategy::FaceToFinialLineFun() //正對終點方向修正的步態�
     {
         if (abs(IMU_slope) >= 41)
         {
-            continous_angle_offest = 6;
+            continous_angle_offest = 4;
         }
         else if (abs(IMU_slope) >= 28 && abs(IMU_slope) < 41)
         {
-            continous_angle_offest = 4;
+            continous_angle_offest = 2;
         }
         else if (abs(IMU_slope) > 4 && abs(IMU_slope) < 28)
         {
-            continous_angle_offest = 2;
+            continous_angle_offest = 1;
         }
         else
         {
@@ -1967,15 +1971,15 @@ void KidsizeStrategy::FaceToFinialLineFun() //正對終點方向修正的步態�
     {
         if (abs(IMU_slope) >= 41)
         {
-            continous_angle_offest = -6;
+            continous_angle_offest = -4;
         }
         else if (abs(IMU_slope) >= 28 && abs(IMU_slope) < 41)
         {
-            continous_angle_offest = -4;
+            continous_angle_offest = -2;
         }
         else if (abs(IMU_slope) > 4 && abs(IMU_slope) < 28)
         {
-            continous_angle_offest = -2;
+            continous_angle_offest = -1;
         }
         else
         {
@@ -1990,15 +1994,15 @@ void KidsizeStrategy::traverse() //正對障終點方向修正的步態補償之
     {
         if (abs(IMU_slope) > 15)
         {
-            continous_angle_offest = 2;
+            continous_angle_offest = 4;
         }
         else if (abs(IMU_slope) > 10 && abs(IMU_slope) <= 15)
         {
-            continous_angle_offest = 1;
+            continous_angle_offest = 3;
         }
-        else if (abs(IMU_slope) > 5 && abs(IMU_slope) <= 10)
+        else if (abs(IMU_slope) > 4 && abs(IMU_slope) <= 10)
         {
-            continous_angle_offest = 0;
+            continous_angle_offest = 2;
         }
         else
         {
@@ -2009,15 +2013,15 @@ void KidsizeStrategy::traverse() //正對障終點方向修正的步態補償之
     {
         if (abs(IMU_slope) > 15)
         {
-            continous_angle_offest = -2;
+            continous_angle_offest = -4;
         }
         else if (abs(IMU_slope) > 10 && abs(IMU_slope) <= 15)
         {
-            continous_angle_offest = -1;
+            continous_angle_offest = -3;
         }
-        else if (abs(IMU_slope) > 5 && abs(IMU_slope) <= 10)
+        else if (abs(IMU_slope) > 4 && abs(IMU_slope) <= 10)
         {
-            continous_angle_offest = 0;
+            continous_angle_offest = -2;
         }
         else
         {
@@ -2265,7 +2269,8 @@ void KidsizeStrategy::sideline()
     {
         cntTopYellow_x = 0;
         cntBottomYellow_x = 0;
-        if (strategy_info->color_mask_subject[1][i].size > 35 && strategy_info->color_mask_subject[1][i].YMax > 230)
+        ROS_INFO("Area = %d",strategy_info->color_mask_subject[1][i].size);
+        if ( strategy_info->color_mask_subject[1][i].size > 35 && strategy_info->color_mask_subject[1][i].YMax > 230)
         {
             BottomYellowPoint = (strategy_info->color_mask_subject[1][i].YMax) * 320;
             TopYellowPoint = (strategy_info->color_mask_subject[1][i].YMin) * 320;
@@ -2345,11 +2350,15 @@ void KidsizeStrategy::printinfo()
     }
     else
         ROS_INFO("zero_flag = false");
+	
+	ROS_INFO("continous_angle_offest = %d",continous_angle_offest);
+
     ROS_INFO("%s",walking_state_string.c_str());
     ROS_INFO("continuousValue_x = %5d", continuousValue_x);
     ROS_INFO("[30] = %5d [31] = %5d [32] = %5d", dirdata[30], dirdata[31], dirdata[32]);
     ROS_INFO("[33] = %5d [34] = %5d [35] = %5d", dirdata[33], dirdata[34], dirdata[35]);
     ROS_INFO("[36] = %5d [37] = %5d [38] = %5d", dirdata[36], dirdata[37], dirdata[38]);
+
     if (leftsidelinewarning)
         ROS_INFO("leftsidelinewarning = true");
     else
