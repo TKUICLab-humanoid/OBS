@@ -339,7 +339,6 @@ void KidsizeStrategy::strategymain()
                 {
                     if (strategy_info->color_mask_subject[5][i].size > 1050) //紅色面積 > 1000    
                     {
-                        ROS_INFO("Area = %d",strategy_info->color_mask_subject[5][i].size);  
                         continuousValue_x = dirdata[30]; //注意如果一次減百位數 讀檔端不能有無法被整除的數出現
                         IMUSlope();
                         FaceToFinialLineFun(); //計算有無正對障礙物之副函式 
@@ -497,7 +496,7 @@ void KidsizeStrategy::strategymain()
             }
             if (abs(LMoveValue - RMoveValue) < 8 && LMoveValue > 10 && RMoveValue > 10) 
             {
-                //ROS_INFO("<20");
+                ROS_INFO("<20");
                 if (continuousValue_x > dirdata[30])
                 {
                     while (continuousValue_x > dirdata[30])
@@ -2271,7 +2270,7 @@ void KidsizeStrategy::sideline()
         cntTopYellow_x = 0;
         cntBottomYellow_x = 0;
         ROS_INFO("Area = %d",strategy_info->color_mask_subject[1][i].size);
-        if (strategy_info->color_mask_subject[1][i].size < 2000 && strategy_info->color_mask_subject[1][i].size > 35 && strategy_info->color_mask_subject[1][i].YMax > 230)
+        if ( strategy_info->color_mask_subject[1][i].size > 35 && strategy_info->color_mask_subject[1][i].YMax > 230)
         {
             BottomYellowPoint = (strategy_info->color_mask_subject[1][i].YMax) * 320;
             TopYellowPoint = (strategy_info->color_mask_subject[1][i].YMin) * 320;
@@ -2351,15 +2350,15 @@ void KidsizeStrategy::printinfo()
     }
     else
         ROS_INFO("zero_flag = false");
+	
+	ROS_INFO("continous_angle_offest = %d",continous_angle_offest);
 
     ROS_INFO("%s",walking_state_string.c_str());
     ROS_INFO("continuousValue_x = %5d", continuousValue_x);
     ROS_INFO("[30] = %5d [31] = %5d [32] = %5d", dirdata[30], dirdata[31], dirdata[32]);
     ROS_INFO("[33] = %5d [34] = %5d [35] = %5d", dirdata[33], dirdata[34], dirdata[35]);
     ROS_INFO("[36] = %5d [37] = %5d [38] = %5d", dirdata[36], dirdata[37], dirdata[38]);
-    ROS_INFO("TopYellowPoint = %5d BottomYellowPoint = %5d", TopYellowPoint, BottomYellowPoint);
-    ROS_INFO("cntBottomYellow_x = %5d cntTopYellow_x = %5d", cntBottomYellow_x, cntTopYellow_x);
- 
+
     if (leftsidelinewarning)
         ROS_INFO("leftsidelinewarning = true");
     else
