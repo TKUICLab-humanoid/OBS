@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 
 void KidsizeStrategy::strategymain()
 {
-    int FocusMatrix[32] = {1, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 2, 2, 2, 1}; //攝影機內之焦點矩陣
+    int FocusMatrix[32] = {2, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 3, 3, 3, 2}; //攝影機內之焦點矩陣
     int FocusMatrix_R[32] = {4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1};
     int FocusMatrix_L[32] = {1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4};
     int LeftMove[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 21};
@@ -39,11 +39,11 @@ void KidsizeStrategy::strategymain()
 
             if (!Continuous_flag) //起步步態
             {
-                ros_com->sendBodySector(4); //動作磁區
-                tool->Delay(2000);
+                //ros_com->sendBodySector(4); //動作磁區
+                //tool->Delay(2000);
                 ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); //ros_com->sendBodyAuto(-450, 0, 0,-3, WalkingMode::ContinuousStep,IMU_continuous);
 
-                tool->Delay(1300);
+                tool->Delay(500);
                 Continuous_flag = true;
             }
             if (dirmap[0])  
@@ -75,19 +75,19 @@ void KidsizeStrategy::strategymain()
             insideFMcnt = 0;                                            //有幾行為危險區(深度於焦點內)
             in_reddoor_flag = false;                                    //add
             sideline_zero_flag = true;                                  //add
-            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1613, 300); //頭部馬達刻度(上下)
+            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300); //頭部馬達刻度(上下)
             tool->Delay(100);
-            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1613, 300);
+            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300);
             tool->Delay(100);
-            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1613, 300);
+            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300);
             tool->Delay(100);
             ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300); //頭部馬達刻度（左右）左正右負
             tool->Delay(100);
             ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);
             tool->Delay(100);
             ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);
+            tool->Delay(200);
 
-            tool->Delay(1000);
             stand_flag = true;                    //站起來
             strategy_info->get_image_flag = true; //擷取影像
             first_continuous_flag = false;        // "< 20" 內，第一步進左移或右移的旗標，就繼續走下去，不要左右走一直卡在障礙物前  
@@ -1148,7 +1148,7 @@ void KidsizeStrategy::strategymain()
                                 walking_state_string = "j%100 continousValue_Ry";
                                 if (dirdata[34] >= Ry_fastest)
                                 {
-                                    dirdata[34] = -1500; 
+                                    dirdata[34] -= 1500; 
                                     strategy_info->get_image_flag = true;
                                     ros::spinOnce();
                                     IMUSlope();
@@ -1226,7 +1226,7 @@ void KidsizeStrategy::strategymain()
                                 walking_state_string = "j%100 continousValue_Ly";
                                 if (dirdata[37] <= Ly_fastest)
                                 {
-                                    dirdata[37] = 1500; 
+                                    dirdata[37] += 1500; 
                                     strategy_info->get_image_flag = true;
                                     ros::spinOnce();
                                     IMUSlope();
@@ -1257,11 +1257,11 @@ void KidsizeStrategy::strategymain()
             {
                 first_enter_door = true;
                 m_state = P_MATRIX_CALCULATE;
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1613, 100);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
                 tool->Delay(100);
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1613, 100);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
                 tool->Delay(100);
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1613, 100);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
                 tool->Delay(100);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 100);
                 tool->Delay(100);
@@ -1448,11 +1448,11 @@ void KidsizeStrategy::strategymain()
             {
                 first_enter_door = true;
                 m_state = P_MATRIX_CALCULATE;
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1613, 100);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
                 tool->Delay(100);
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1613, 100);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
                 tool->Delay(100);
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1613, 100);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
                 tool->Delay(100);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 100);
                 tool->Delay(100);
@@ -1997,7 +1997,7 @@ void KidsizeStrategy::traverse() //正對障終點方向修正的步態補償之
     {
         if (abs(IMU_slope) > 15)
         {
-            continous_angle_offest = 4;
+            continous_angle_offest = 5;
         }
         else if (abs(IMU_slope) > 10 && abs(IMU_slope) <= 15)
         {
