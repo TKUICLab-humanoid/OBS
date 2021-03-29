@@ -1494,23 +1494,23 @@ void KidsizeStrategy::strategymain()
                 ros_com->sendBodySector(5);
                 tool->Delay(1000);
                 ros_com->sendBodySector(6);
-                tool->Delay(20000);
+                tool->Delay(10000);
                 for (int multisingleSTEP = 0; multisingleSTEP <= 10; multisingleSTEP++)
                 {
-                    //ROS_INFO("First crw");
-                    //ros_com->sendBodySector(7);
+                    ROS_INFO("First crw");
+                    ros_com->sendBodySector(7);
                     tool->Delay(800);
                 }
                 for (int multisingleSTEP = 0; multisingleSTEP <= 20; multisingleSTEP++)
                 {
-                    //ROS_INFO("Second crw");
+                    ROS_INFO("Second crw");
                     strategy_info->get_image_flag = true;
                     ros::spinOnce();
                     for (int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)
                     {
                         if (strategy_info->color_mask_subject[2][i].size > 32000)
                         {
-                            //ROS_INFO("stand up1");
+                            ROS_INFO("stand up1");
                             crw_up = true;
                             break;
                         }
@@ -1521,7 +1521,7 @@ void KidsizeStrategy::strategymain()
                     {
                         if (strategy_info->color_mask_subject[1][i].size > 35000)
                         {
-                            //ROS_INFO("stand up2");
+                            ROS_INFO("stand up2");
                             crw_up = true;
                             break;
                         }
@@ -1530,7 +1530,7 @@ void KidsizeStrategy::strategymain()
                     {
                         break;
                     }
-                    //ros_com->sendBodySector(7);
+                    ros_com->sendBodySector(7);
                     tool->Delay(800);
                 }
                 tool->Delay(500);
