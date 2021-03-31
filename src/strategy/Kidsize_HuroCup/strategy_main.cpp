@@ -39,9 +39,9 @@ void KidsizeStrategy::strategymain()
 
             if (!Continuous_flag) //起步步態
             {
-                //ros_com->sendBodySector(4); //動作磁區
-                //tool->Delay(2000);
-                ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); //ros_com->sendBodyAuto(-450, 0, 0,-3, WalkingMode::ContinuousStep,IMU_continuous);
+                ros_com->sendBodySector(4); //動作磁區
+                tool->Delay(1000);
+                ros_com->sendBodyAuto(400, -100, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); //ros_com->sendBodyAuto(-450, 0, 0,-3, WalkingMode::ContinuousStep,IMU_continuous);
 
                 tool->Delay(500);
                 Continuous_flag = true;
@@ -395,7 +395,7 @@ void KidsizeStrategy::strategymain()
                                 ros::spinOnce();
                             }
                     }
-                    if (continuousValue_x < 3500) //直走加速區間
+                    if (continuousValue_x < 4000) //直走加速區間
                     {
                         continuousValue_x += 100;
                         IMUSlope();
@@ -468,7 +468,7 @@ void KidsizeStrategy::strategymain()
                             ros::spinOnce();
                         }
                 }
-                if (continuousValue_x < 3500)
+                if (continuousValue_x < 4000)
                 {
                     continuousValue_x += 100; 
                     IMUSlope();
@@ -877,6 +877,7 @@ void KidsizeStrategy::strategymain()
                             {
 
                                 walking_state = continuousValue_Ly; 
+                                //ROS_INFO("Ly1");
                                 m_state = P_WALKINGGAIT; 
                             }
                         }
@@ -1019,6 +1020,7 @@ void KidsizeStrategy::strategymain()
                                     }
                                 }
                                 walking_state = continuousValue_Ly; 
+                                //ROS_INFO("Ly2");
                                 m_state = P_WALKINGGAIT; 
                             }
                         }
@@ -1164,7 +1166,8 @@ void KidsizeStrategy::strategymain()
                 {
                     dirdata[37] = 0;
                     Turnhead_flag = false;              
-                    walking_state = continuousValue_Ly; 
+                    //walking_state = continuousValue_Ly; 
+                   // ROS_INFO("Ly3");
                     for (int j = 0;; j++)
                     {
                         if (j % 100 == 0)
@@ -1494,7 +1497,7 @@ void KidsizeStrategy::strategymain()
                 ros_com->sendBodySector(5);
                 tool->Delay(1000);
                 ros_com->sendBodySector(6);
-                tool->Delay(10000);
+                tool->Delay(5000);
                 for (int multisingleSTEP = 0; multisingleSTEP <= 10; multisingleSTEP++)
                 {
                     ROS_INFO("First crw");
@@ -1708,9 +1711,9 @@ void KidsizeStrategy::strategymain()
             }
             stand_flag = false;
             ros_com->sendBodySector(5);
-            tool->Delay(2000);
+            tool->Delay(1000);
             ros_com->sendBodySector(29);
-            tool->Delay(2000);
+            tool->Delay(1000);
             first_cnt = 0;
             ROS_INFO("stop");
         }
@@ -2327,6 +2330,7 @@ void KidsizeStrategy::sideline()
                     else if (rightsidelinewarning == true)
                     {
                         walking_state = continuousValue_Ly;
+                        ROS_INFO("Ly3");
                         break;
                     }
                 }
