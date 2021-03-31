@@ -39,8 +39,8 @@ void KidsizeStrategy::strategymain()
 
             if (!Continuous_flag) //起步步態
             {
-                //ros_com->sendBodySector(4); //動作磁區
-                //tool->Delay(2000);
+                ros_com->sendBodySector(4); //動作磁區
+                tool->Delay(1000);
                 ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); //ros_com->sendBodyAuto(-450, 0, 0,-3, WalkingMode::ContinuousStep,IMU_continuous);
 
                 tool->Delay(500);
@@ -321,7 +321,7 @@ void KidsizeStrategy::strategymain()
                         ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 1447, 600);
                         tool->Delay(100);
                         ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 1447, 600);
-                        tool->Delay(800);
+                        tool->Delay(700);
                         strategy_info->get_image_flag = true;
                         ros::spinOnce();
                         true_RMoveValue = 0;
@@ -529,7 +529,7 @@ void KidsizeStrategy::strategymain()
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 1447, 600);
                 tool->Delay(100);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 1447, 600);
-                tool->Delay(800);
+                tool->Delay(700);
                 strategy_info->get_image_flag = true; 
                 ros::spinOnce();
                 head_direction = RHD_Center; 
@@ -1290,6 +1290,10 @@ void KidsizeStrategy::strategymain()
                     Center_door = true;
                     if (strategy_info->color_mask_subject[5][i].size > 300)
                     {
+                        printf("-----------------------------------------------------");
+                        printf("strategy_info->color_mask_subject[5][i].size = %d\n",strategy_info->color_mask_subject[5][i].size);
+                        printf("-----------------------------------------------------");
+
                         Red_Door_flag = true;
                         printinfo();
 
@@ -1336,6 +1340,9 @@ void KidsizeStrategy::strategymain()
                             }
                             if (strategy_info->color_mask_subject[2][j].size > 300)
                             {
+                                printf("-----------------------------------------------------");
+                                printf("strategy_info->color_mask_subject[2][j].size = %d\n",strategy_info->color_mask_subject[2][j].size);
+                                printf("-----------------------------------------------------");
                                 Blue_obs_flag = true;
                                 if (First_flag)
                                 {
@@ -1496,7 +1503,7 @@ void KidsizeStrategy::strategymain()
                 {
                     ROS_INFO("First crw");
                     ros_com->sendBodySector(7);
-                    tool->Delay(1000);
+                    tool->Delay(2200);
                 }
                 for (int multisingleSTEP = 0; multisingleSTEP <= 20; multisingleSTEP++)
                 {
@@ -1586,7 +1593,7 @@ void KidsizeStrategy::strategymain()
             case continuousValue_Rt:
                 walking_state_string = "continousValue_Rt";
                 SlopeCalculate();
-                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] + continous_angle_offest, IMU_continuous);
+                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] + continous_angle_offest - 3, IMU_continuous);
                 strategy_info->get_image_flag = true;
                 ros::spinOnce();
                 continuousValue_x = 0;
@@ -1595,7 +1602,7 @@ void KidsizeStrategy::strategymain()
             case continuousValue_Lt:
                 walking_state_string = "continousValue_Lt";
                 SlopeCalculate();
-                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] + continous_angle_offest, IMU_continuous);
+                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] + continous_angle_offest + 3, IMU_continuous);
                 strategy_info->get_image_flag = true;
                 ros::spinOnce();
                 continuousValue_x = 0;
@@ -2352,6 +2359,7 @@ void KidsizeStrategy::printinfo()
         ROS_INFO("zero_flag = false");
 	
 	ROS_INFO("continous_angle_offest = %d",continous_angle_offest);
+	ROS_INFO("angle_offset = %d",angle_offset);
 
     ROS_INFO("%s",walking_state_string.c_str());
     ROS_INFO("continuousValue_x = %5d", continuousValue_x);
