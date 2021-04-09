@@ -1147,7 +1147,7 @@ void KidsizeStrategy::strategymain()
                                 walking_state_string = "j%100 continousValue_Ry";
                                 if (dirdata[34] >= Ry_fastest)
                                 {
-                                    dirdata[34] = -2500; 
+                                    dirdata[34] -= 500; 
                                     strategy_info->get_image_flag = true;
                                     ros::spinOnce();
                                     IMUSlope();
@@ -2304,7 +2304,7 @@ void KidsizeStrategy::sideline()
                 }
             }
             printinfo();
-            sidelineslope = (float)(TopYellowPoint - BottomYellowPoint) / (float)(cntBottomYellow_x - cntTopYellow_x);
+            //sidelineslope = (float)(TopYellowPoint - BottomYellowPoint) / (float)(cntBottomYellow_x - cntTopYellow_x);
             tool->Delay(1000);
 
             if (sidelineslope > 0)
