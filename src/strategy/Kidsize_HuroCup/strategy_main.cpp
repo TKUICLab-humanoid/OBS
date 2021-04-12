@@ -493,6 +493,8 @@ void KidsizeStrategy::strategymain()
             {
                 RMoveValue += RightMove[i] * FilterMatrix[i]; 
                 LMoveValue += LeftMove[i] * FilterMatrix[i];
+                ROS_INFO("r:%d",RMoveValue);
+                ROS_INFO("l:%d",LMoveValue);
             }
             if (abs(LMoveValue - RMoveValue) < 8 && LMoveValue > 10 && RMoveValue > 10) 
             {
