@@ -91,7 +91,7 @@ void KidsizeStrategy::strategymain()
             stand_flag = true;                    //站起來
             strategy_info->get_image_flag = true; //擷取影像
             first_continuous_flag = false;        // "< 20" 內，第一步進左移或右移的旗標，就繼續走下去，不要左右走一直卡在障礙物前  
-            Ry_fastest = dirdata[34];             //將讀檔內的值丟掉自訂變數內  
+            Ry_fastest = dirdata[34];             //將讀檔內的值丟到自訂變數內  
             Ly_fastest = dirdata[37];            
             m_obs_vector.clear();
             m_state = P_MATRIX_CALCULATE;
