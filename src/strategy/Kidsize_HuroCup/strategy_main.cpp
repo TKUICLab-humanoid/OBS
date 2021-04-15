@@ -41,7 +41,7 @@ void KidsizeStrategy::strategymain()
             {
                 ros_com->sendBodySector(4); //動作磁區
                 tool->Delay(1000);
-                ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); //ros_com->sendBodyAuto(-450, 0, 0,-3, WalkingMode::ContinuousStep,IMU_continuous);
+                ros_com->sendBodyAuto(dirdata[30], dirdata[31], dirdata[32], 0, WalkingMode::ContinuousStep, IMU_continuous); //ros_com->sendBodyAuto(-450, 0, 0,-3, WalkingMode::ContinuousStep,IMU_continuous);
 
                 tool->Delay(500);
                 Continuous_flag = true;
@@ -400,7 +400,7 @@ void KidsizeStrategy::strategymain()
                                 ros::spinOnce();
                             }
                     }
-                    if (continuousValue_x < 2500) //直走加速區間
+                    if (continuousValue_x < 3000) //直走加速區間
                     {
                         continuousValue_x += 100;
                         IMUSlope();
@@ -478,7 +478,7 @@ void KidsizeStrategy::strategymain()
                             ros::spinOnce();
                         }
                 }
-                if (continuousValue_x < 2500)
+                if (continuousValue_x < 3000)
                 {
                     continuousValue_x += 100; 
                     IMUSlope();
@@ -1557,7 +1557,7 @@ void KidsizeStrategy::strategymain()
                     tool->Delay(800);
                 }
                 tool->Delay(500);
-                //ros_com->sendBodySector(8);
+                ros_com->sendBodySector(8);
                 tool->Delay(11000);
                 ros_com->sendBodySector(29);
                 continuousValue_x = 0;
