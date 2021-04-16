@@ -24,7 +24,7 @@ void KidsizeStrategy::strategymain()
     int FocusMatrix[32] = {3, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 4, 4, 4, 3}; //攝影機內之焦點矩陣
     int FocusMatrix_R[32] = {4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1};
     int FocusMatrix_L[32] = {1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4};
-    int LeftMove[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 21};
+    int LeftMove[32]  = { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  2,  3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 21};
     int RightMove[32] = {21, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     if (strategy_info->getStrategyStart()) //策略指撥開啟
@@ -137,6 +137,7 @@ void KidsizeStrategy::strategymain()
         case P_MATRIX_CALCULATE: 
             printinfo();
             m_state_string = "P_MATRIX_CALCULATE";
+            ROS_INFO("P_MATRIX_CALCULATE___");
             compareObs = 10000;
             obs_data.size = 0;
             insideFMcnt = 0;
@@ -211,10 +212,10 @@ void KidsizeStrategy::strategymain()
                     }
                     if (abs(m_obs_vector[i + 1].x_min - m_obs_vector[i].x_max) < 20) //兩障礙物的邊相減 < 20（20/32） 
                     {
-                        ///ROS_INFO("NO Road");
+                        ROS_INFO("NO Road");
                         first_continuous_flag = true; 
 
-                        ///ROS_INFO(">2obs");
+                        ROS_INFO(">2obs");
                         m_state = P_FM_TURNHEAD;             
                         if (continuousValue_x > dirdata[30]) 
                         {           
@@ -276,7 +277,7 @@ void KidsizeStrategy::strategymain()
                     }
                 }
             }
-            else
+            else  //m_obs_vector.size() <=1
             {
                 if (m_obs_vector.size() == 1) 
                 {
@@ -338,6 +339,11 @@ void KidsizeStrategy::strategymain()
                         break;
                     }
                 }
+               
+                
+                ROS_INFO("m_obs_vector.size != 1 ");
+                ROS_INFO("m_obs_vector.size() = %d",m_obs_vector.size());
+
             }
             if (strategy_info->color_mask_subject_cnts[5] != 0) //障礙物為紅色    
             {
@@ -439,6 +445,7 @@ void KidsizeStrategy::strategymain()
         case P_FIND_WALKINGSTATE: 
             printinfo();
             m_state_string = "P_FIND_WALKINGSTATE";
+            ROS_INFO("P_FIND_WALKINGSTATE______");
             RMoveValue = 0;                             //畫面中右權重值
             LMoveValue = 0;                             //畫面中左權重值
             for (int i = 3; i < 28; i++) 
@@ -507,7 +514,7 @@ void KidsizeStrategy::strategymain()
             }
             if (abs(LMoveValue - RMoveValue) < 8 && LMoveValue > 10 && RMoveValue > 10) 
             {
-                ROS_INFO("<20");
+                ROS_INFO("<20---1");
                 if (continuousValue_x > dirdata[30])
                 {
                     while (continuousValue_x > dirdata[30])
@@ -553,11 +560,14 @@ void KidsizeStrategy::strategymain()
             {
                 if (LMoveValue < RMoveValue) 
                 {
-                    //ROS_INFO("RMove");
+                    ROS_INFO("RMove");
+                    ROS_INFO("RMoveValue = %d,LMoveValue = %d",RMoveValue,LMoveValue);
+                    ROS_INFO("m_obs_vector.size() = %d",m_obs_vector.size());
                     if (m_finish_obs_vector.size() == 1) 
                     {
                         if (m_finish_obs_vector[0].y > 8) //距離障礙物的y值 > 8時開始減速    
                         {
+                            ROS_INFO("RMOVE_y>8");
                             if (walking_state == continuousValue_Ry)
                             {
                                 while(dirdata[34] != dirdata[31])    
@@ -606,6 +616,7 @@ void KidsizeStrategy::strategymain()
                         }
                         else 
                         {
+                            ROS_INFO("RMOVE_y<8");
                             if (m_finish_obs_vector[0].y > 5) //距離障礙物的y值 > 5時開始減速    
                             {
                                 if (walking_state == continuousValue_Ry)
@@ -784,12 +795,15 @@ void KidsizeStrategy::strategymain()
                 }
                 else 
                 {
-                    //ROS_INFO("LMove");
+                    ROS_INFO("LMove");
+                    ROS_INFO("RMoveValue = %d,LMoveValue = %d",RMoveValue,LMoveValue);
+                    ROS_INFO("m_obs_vector.size() = %d",m_obs_vector.size());
                     if (m_finish_obs_vector.size() == 1) 
                     {
                         ROS_INFO("size=1");
                         if (m_finish_obs_vector[0].y > 8) 
                         {
+                            ROS_INFO("LMOVE_y>8");
                             if (walking_state == continuousValue_Ry)
                             {
                                 while(dirdata[34] != dirdata[31])                 
@@ -838,8 +852,10 @@ void KidsizeStrategy::strategymain()
                         }
                         else
                         {
+                            ROS_INFO("LMOVE_y<8");
                             if (m_finish_obs_vector[0].y > 5) 
                             {
+                                ROS_INFO("LMOVE_y>5");
                                 if (walking_state == continuousValue_Ry)
                                 {
                                     while(dirdata[34] != dirdata[31])
@@ -1047,6 +1063,7 @@ void KidsizeStrategy::strategymain()
         case P_FM_TURNHEAD: 
             printinfo();
             m_state_string = "P_FM_TURNHEAD";
+            ROS_INFO("P_FM_TURNHEAD_______");
             switch (head_direction) 
             {
             case RHD_Center: //對障礙物辨識以及計算      
@@ -1183,7 +1200,7 @@ void KidsizeStrategy::strategymain()
                     dirdata[37] = Ly_fastest;
                     Turnhead_flag = false;              
                     //walking_state = continuousValue_Ly; 
-                   // ROS_INFO("Ly3");
+                    ROS_INFO("Ly3");
                     for (int j = 0;; j++)
                     {
                         if (j % 100 == 0)
@@ -2372,7 +2389,7 @@ void KidsizeStrategy::sideline()
 }
 void KidsizeStrategy::printinfo()
 {
-    ROS_INFO("\n\n\n");
+    ROS_INFO("\n\n");
     ROS_INFO("%s", m_state_string.c_str());
     if (zero_flag)
     {
@@ -2387,10 +2404,10 @@ void KidsizeStrategy::printinfo()
     ROS_INFO("%s",walking_state_string.c_str());
     ROS_INFO("continuousValue_x = %5d", continuousValue_x);
     ROS_INFO("[30] = %5d [31] = %5d [32] = %5d", dirdata[30], dirdata[31], dirdata[32]);
-    ROS_INFO("[33] = %5d [34] = %5d [35] = %5d", dirdata[33], dirdata[34], dirdata[35]);
-    ROS_INFO("[36] = %5d [37] = %5d [38] = %5d", dirdata[36], dirdata[37], dirdata[38]);
+    //ROS_INFO("[33] = %5d [34] = %5d [35] = %5d", dirdata[33], dirdata[34], dirdata[35]);
+    //ROS_INFO("[36] = %5d [37] = %5d [38] = %5d", dirdata[36], dirdata[37], dirdata[38]);
 
-    if (leftsidelinewarning)
+    /*if (leftsidelinewarning)
         ROS_INFO("leftsidelinewarning = true");
     else
         ROS_INFO("leftsidelinewarning = false");
@@ -2401,7 +2418,7 @@ void KidsizeStrategy::printinfo()
     ROS_INFO("true_RMoveValue = %d", true_RMoveValue);
     ROS_INFO("true_LMoveValue = %d", true_LMoveValue);
     ROS_INFO("/////////////Red Door/////////////");
-    ROS_INFO("Red Door slope_avg = %f", slope_avg);
+    ROS_INFO("Red Door slope_avg = %f", slope_avg);*/
     if (Center_door)
         ROS_INFO("center_door = true");
     else
