@@ -1559,16 +1559,17 @@ void KidsizeStrategy::strategymain()
                 ros_com->sendHeadMotor(HeadMotorID::VerticalID, 2500, 600);
                 Continuous_flag = false;
                 ros_com->sendBodySector(5);
-                tool->Delay(1000);
+                tool->Delay(1300);
                 ros_com->sendBodySector(6);
-                tool->Delay(4000);
+                tool->Delay(5500);
 
-                for (int multisingleSTEP = 0; multisingleSTEP <= 10; multisingleSTEP++)
+                for (int multisingleSTEP = 0; multisingleSTEP <= 3; multisingleSTEP++)
                 {
                     ROS_INFO("First crw");
                     ros_com->sendBodySector(7);
                     tool->Delay(1000);
                 }
+
                 for (int multisingleSTEP = 0; multisingleSTEP <= 20; multisingleSTEP++)
                 {
                     ROS_INFO("Second crw");
@@ -1576,7 +1577,8 @@ void KidsizeStrategy::strategymain()
                     ros::spinOnce();
                     for (int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)
                     {
-                        if (strategy_info->color_mask_subject[2][i].size > 32000)
+                        ROS_INFO("blueobs size: %d ",strategy_info->color_mask_subject[2][i].size);
+                        if (strategy_info->color_mask_subject[2][i].size > 30000)
                         {
                             ROS_INFO("stand up1");
                             crw_up = true;
@@ -1587,6 +1589,7 @@ void KidsizeStrategy::strategymain()
                     ros::spinOnce();
                     for (int i = 0; i < strategy_info->color_mask_subject_cnts[1]; i++)
                     {
+                        ROS_INFO("yelobs size: %d ",strategy_info->color_mask_subject[1][i].size);
                         if (strategy_info->color_mask_subject[1][i].size > 35000)
                         {
                             ROS_INFO("stand up2");
@@ -1729,7 +1732,7 @@ void KidsizeStrategy::strategymain()
                 }
                 SlopeCalculate();
                 traverse();
-                give_angle();
+                //give_angle();
                 facetodoorfun();
                 ros_com->sendContinuousValue(dirdata[33], dirdata[34], 0, dirdata[35] + continous_angle_offest, IMU_continuous);
                 strategy_info->get_image_flag = true;
@@ -1749,7 +1752,7 @@ void KidsizeStrategy::strategymain()
                 }
                 SlopeCalculate();
                 traverse();
-                give_angle();
+                //give_angle();
                 facetodoorfun();
                 ros_com->sendContinuousValue(dirdata[36], dirdata[37], 0, dirdata[38] + continous_angle_offest, IMU_continuous);
                 strategy_info->get_image_flag = true;
@@ -1846,7 +1849,7 @@ void KidsizeStrategy::SlopeCalculate() //計算斜率之副函式
     int slope_Y[4];
     float slope[3];
     slope_avg = 1000000.0;
-    slope_avg_blue = 1000000.0;
+    //slope_avg_blue = 1000000.0;
     if (!in_reddoor_flag)
     {
         ///ROS_INFO("not in_reddoor_flag!!");
@@ -1940,7 +1943,7 @@ void KidsizeStrategy::SlopeCalculate() //計算斜率之副函式
             slope[0] = float(slope_Y[1] - slope_Y[0]) / float(slope_rand[1] - slope_rand[0]);
             slope[1] = float(slope_Y[2] - slope_Y[1]) / float(slope_rand[2] - slope_rand[1]);
             slope[2] = float(slope_Y[3] - slope_Y[2]) / float(slope_rand[3] - slope_rand[2]);
-            slope_avg_blue = (slope[0] + slope[1] + slope[2]) / 3;
+            //slope_avg_blue = (slope[0] + slope[1] + slope[2]) / 3;
         }
         else
         {
@@ -2184,24 +2187,37 @@ void KidsizeStrategy::facetodoorfun() //正對紅門修正之副函式
 
     if (first_enter_door)
     {
-        if (slope_avg < 0.5 && slope_avg >= 0.25)
+        
+        if (slope_avg < 0.5 && slope_avg >= 0.25)//need rt
         {
             continous_angle_offest = -3;
             m_state = P_WALKINGGAIT;
         }
-        else if (slope_avg > -0.5 && slope_avg <= -0.25)
+        else if (slope_avg > -0.5 && slope_avg <= -0.25)//need lt
         {
             continous_angle_offest = 3;
             m_state = P_WALKINGGAIT;
         }
 
-        else if (slope_avg > 0 && slope_avg < 0.25)
+        else if (slope_avg > 0 && slope_avg < 0.125)
+        {
+            continous_angle_offest = -1;
+            m_state = P_WALKINGGAIT;
+            first_enter_door = false;
+        }
+        else if (slope_avg < 0 && slope_avg > -0.125)
+        {
+            continous_angle_offest = 1;
+            m_state = P_WALKINGGAIT;
+            first_enter_door = false;
+        }
+        else if (slope_avg > 0.125 && slope_avg < 0.25)
         {
             continous_angle_offest = -2;
             m_state = P_WALKINGGAIT;
             first_enter_door = false;
         }
-        else if (slope_avg < 0 && slope_avg > -0.25)
+        else if (slope_avg < 0.125 && slope_avg > -0.25)
         {
             continous_angle_offest = 2;
             m_state = P_WALKINGGAIT;
