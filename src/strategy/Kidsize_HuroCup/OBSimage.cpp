@@ -1,4 +1,5 @@
 #include "strategy/OBSimage.h"
+#include <time.h>
 
 int totalL = 0;
 int totalR = 0;
@@ -25,61 +26,59 @@ int main(int argc, char** argv)
 
 void OBSimage::strategymain()
 {
-    
+    clock_t start, end;
+    cv::Mat mask128 (240,320,CV_8UC1, cv::Scalar(128));
+    cv::Mat mask0 (240,320,CV_8UC1, cv::Scalar(0));
+    std::vector<cv::Mat> rgbChannels(3);
+    cv::Mat roi;
+    //cv::namedWindow("opencv resize", cv::WINDOW_NORMAL);
+    //cv::namedWindow("10*10", cv::WINDOW_NORMAL);
+
 	if(strategy_info->getStrategyStart())
 	{	
-            cv::Mat compressimage(24,32,CV_8UC3);
-            /*for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10 ; compress_height++)
+
+            cv::Mat ori_image = strategy_info->cvimg->image;
+            start = clock();
+            cv::Mat image;
+            cv::resize(ori_image, image, cv::Size(32, 24));
+            end = clock();
+            ROS_INFO("opencv resize time: %f", double(end-start)/CLOCKS_PER_SEC);
+            //cv::imshow("opencv resize", image);
+
+            
+            start = clock();
+            cv::Mat compress_img = cv::Mat::zeros(24,32,CV_8UC1);
+
+	        cv::split(ori_image, rgbChannels);
+            cv::Mat B = rgbChannels[0];
+            cv::Mat G = rgbChannels[1];
+            cv::Mat R = rgbChannels[2];
+
+            cv::Mat maskB = B == mask128;
+            cv::Mat maskG = G == mask0;
+            cv::Mat maskR = R == mask128;
+
+            cv::bitwise_and(maskB, maskG, maskB);
+            cv::bitwise_and(maskB, maskR, maskB);
+
+            for(int r = 0; r < 24; r++)
             {
-                for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10 ; compress_width++)
+                for (int c = 0; c < 32; c++)
                 {
-                    bValue = (compressimage.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-                    gValue = (compressimage.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-                    rValue = (compressimage.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
-                    for(int lheight = 0 ; lheight < 10 ; lheight++)
+                    roi = maskB(cv::Rect(c*10, r*10, 10, 10));
+                    int val = cv::countNonZero(roi);
+                    if(val > 20)
                     {
-                        for(int lwidth = 0 ; lwidth < 10 ; lwidth++)
-                        {
-						ROS_INFO("%d",strategyinfo->Label_Model[(lheight+compress_height*10)*IMAGEWIDTH+(lwidth+compress_width*10)]);
-                            if(strategyinfo->Label_Model[(lheight+compress_height*10)*IMAGEWIDTH+(lwidth+compress_width*10)] == BlueLabel)
-                            {
-                                color_cnt++;                            
-                            }
-                            else if(strategyinfo->Label_Model[(lheight+compress_height*10)*IMAGEWIDTH+(lwidth+compress_width*10)] == RedLabel)
-                            {
-                                color_cnt+=2;
-                            }
-                        }
+                        *(compress_img.data + (r*32+c)) = 255;
                     }
-					//ROS_INFO("%d",color_cnt);
-                    if(color_cnt < 50)
-                    {
-                        *bValue = 0;
-                        *gValue = 0;
-                        *rValue = 0;
-						//printf("0  ");
-                    }
-                    else if(color_cnt <= 150)
-                    {
-                        *bValue = 128;
-                        *gValue = 0;
-                        *rValue = 128;
-						//printf("1  ");
-                    }
-                    else
-                    {
-                        *bValue = 255;
-                        *gValue = 255;
-                        *rValue = 0;
-                    }
-                    color_cnt = 0;
                 }
-				//printf("\n");
             }
-			cv::resize(compressimage, publish_image, cv::Size(320, 240),CV_INTER_LINEAR);
-			msg_compressimage = cv_bridge::CvImage(std_msgs::Header(), "bgr8", publish_image).toImageMsg();
-            pub_colormodel.publish(msg_compressimage);*/
-            cv::Mat image = strategy_info->cvimg->image;
+
+            end = clock();
+            ROS_INFO("10*10 time: %f", double(end-start)/CLOCKS_PER_SEC);
+            //cv::imshow("10*10", compress_img);
+            //cv::waitKey(1);
+
             for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
             {
                 DeepMatrix_cnt[compress_width] = 0;
@@ -130,56 +129,21 @@ void OBSimage::strategymain()
 					}
                 }
             }
-			/*for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10 ; compress_width++)
-            {
-                for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10  ; compress_height++)
-                {
-                    bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-                    gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-                    rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
-					if(*rValue == 128 &&  *gValue == 0 && *bValue == 128)
-					{
-						printf("1  ");
-					}
-					else
-					{
-						printf("0  ");
-					}
-				}
-				printf("\n");
-			}*/
-			for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10  ; compress_height++)
-            {
-                for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10 ; compress_width++)
-                {
-                    bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-                    gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-                    rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
-					if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
-					{
-						printf("1  ");
-					}
-					else
-					{
-						printf("0  ");
-					}
-				}
-				printf("\n");
-			}
+
             totalL = 0;
             totalR = 0;
             for(int i = 0; i < 32 ;i++)
             {
                 deepmatrix.DeepMatrix.push_back(DeepMatrix_cnt[i]);
-                printf("%d,",DeepMatrix_cnt[i]);
+                //printf("%d,",DeepMatrix_cnt[i]);
                 //printf("%d,",deepmatrix.DeepMatrix[i]);
                     totalL += DeepMatrix_cnt[i]*DeepMatrix_cnt[i];
                     totalR += DeepMatrix_cnt[i]*DeepMatrix_cnt[i];
             }
-            printf("totalL = %d\ntotalR = %d", totalL,totalR);
+            //printf("totalL = %d\ntotalR = %d", totalL,totalR);
             DeepMatrix_Publish.publish(deepmatrix);
             deepmatrix.DeepMatrix.clear();
-            printf("\n");
+            //printf("\n");
 ////////////////////////////////////opencv/////////////////////////////////////////////
             cv::resize(image, publish_image, cv::Size(320, 240),CV_INTER_LINEAR);
 			//cv::imshow("publish_image",publish_image);
