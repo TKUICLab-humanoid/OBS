@@ -5,6 +5,7 @@ int totalL = 0;
 int totalR = 0;
 int Left[32]= {1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4};
 int Right[32]={4,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1};
+int DeepM_D[32]={0};
 int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "OBSimage");
@@ -78,6 +79,28 @@ void OBSimage::strategymain()
             ROS_INFO("10*10 time: %f", double(end-start)/CLOCKS_PER_SEC);
             //cv::imshow("10*10", compress_img);
             //cv::waitKey(1);
+
+
+            
+            
+            for(int c = 0; c < 32; c++)
+            {
+                
+                for(int r = 23; r >= 0; r--)
+                {
+                    if(*(compress_img.data + (r*32+c)))
+                    {
+                        DeepM_D[c] = 23 - r;
+                        break;
+                    }
+                }
+            }
+
+            for(int i = 0; i < 32; i++)
+            {
+                ROS_INFO("%d D: %d", i, DeepM_D[i]);
+            }
+            
 
             for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
             {
