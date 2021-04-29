@@ -1,11 +1,11 @@
 #include "strategy/OBSimage.h"
 #include <time.h>
 
-int totalL = 0;
-int totalR = 0;
-int Left[32]= {1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4};
-int Right[32]={4,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1};
-int DeepM_D[32]={0};
+// int totalL = 0;
+// int totalR = 0;
+// int Left[32]= {1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4};
+// int Right[32]={4,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1};
+
 int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "OBSimage");
@@ -32,19 +32,25 @@ void OBSimage::strategymain()
     cv::Mat mask0 (240,320,CV_8UC1, cv::Scalar(0));
     std::vector<cv::Mat> rgbChannels(3);
     cv::Mat roi;
-    //cv::namedWindow("opencv resize", cv::WINDOW_NORMAL);
-    //cv::namedWindow("10*10", cv::WINDOW_NORMAL);
+    cv::namedWindow("opencv resize", cv::WINDOW_NORMAL);
+    cv::namedWindow("10*10", cv::WINDOW_NORMAL);
+    int DeepM_D[32]={0};
+    //int Focus_area[32]={0};
+    int Focus_area[32]={1,2,6,8,9,9,10,10,11,11,12,12,13,13,13,14,14,13,13,13,12,12,11,11,10,10,9,9,8,6,2,1};
+    int OBS_inArea[32]={0};
+    int turn_right=0;
+    int turn_left=0;
 
 	if(strategy_info->getStrategyStart())
 	{	
-
+//===============transfer image from 320*240 to 32*24=======================
             cv::Mat ori_image = strategy_info->cvimg->image;
             start = clock();
             cv::Mat image;
             cv::resize(ori_image, image, cv::Size(32, 24));
             end = clock();
-            ROS_INFO("opencv resize time: %f", double(end-start)/CLOCKS_PER_SEC);
-            //cv::imshow("opencv resize", image);
+            // ROS_INFO("opencv resize time: %f", double(end-start)/CLOCKS_PER_SEC);
+            cv::imshow("opencv resize", image);
 
             
             start = clock();
@@ -76,13 +82,10 @@ void OBSimage::strategymain()
             }
 
             end = clock();
-            ROS_INFO("10*10 time: %f", double(end-start)/CLOCKS_PER_SEC);
-            //cv::imshow("10*10", compress_img);
-            //cv::waitKey(1);
-
-
-            
-            
+            // ROS_INFO("10*10 time: %f", double(end-start)/CLOCKS_PER_SEC);
+            cv::imshow("10*10", compress_img);
+            cv::waitKey(1);
+//======================deep matrix D========================================          
             for(int c = 0; c < 32; c++)
             {
                 
@@ -93,88 +96,139 @@ void OBSimage::strategymain()
                         DeepM_D[c] = 23 - r;
                         break;
                     }
+                    else
+                    {
+                        DeepM_D[c] = 23;
+                    }
                 }
             }
-
+            // for(int i = 0; i < 32; i++)
+            // {
+            //     ROS_INFO("%d D: %d", i, DeepM_D[i]);
+            // }         
+//=======================Focus area===========================================
+            // for(int i = 0; i < 32; i++)
+            // {
+            //     if(i < 16)
+            //     {
+            //         Focus_area[i] = i + 1;
+            //     }
+            //     else
+            //     {
+            //         Focus_area[i] = 32 - i;
+            //     }
+            // }
+            // for(int i = 0; i < 32; i++)
+            // {
+            //     ROS_INFO("%d F: %d", i, Focus_area[i]);
+            // }
+//=======================OBS in Focus area=====================================  
             for(int i = 0; i < 32; i++)
             {
-                ROS_INFO("%d D: %d", i, DeepM_D[i]);
-            }
-            
-
-            for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
-            {
-                DeepMatrix_cnt[compress_width] = 0;
-                for(int compress_height = IMAGEHEIGHT/10 - 1 ; compress_height > -1 ; compress_height--)
+                if(Focus_area[i] >= DeepM_D[i])
                 {
-                    bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-                    gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-                    rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
-
-                    if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
-                    {
-                        //DeepMatrix_cnt[compress_width]++;
-						if((compress_height - 1) > -1)
-						{
-							bValue = (image.data + (((compress_height - 1)*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-                        	gValue = (image.data + (((compress_height - 1)*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-                        	rValue = (image.data + (((compress_height - 1)*IMAGEWIDTH/10 + compress_width) * 3 + 2));
-                        	if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
-                        	{
-                            //DeepMatrix_cnt[compress_width]++;
-								if((compress_height - 2) > -1)
-								{
-									bValue = (image.data + (((compress_height - 2)*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-                        			gValue = (image.data + (((compress_height - 2)*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-                       				rValue = (image.data + (((compress_height - 2)*IMAGEWIDTH/10 + compress_width) * 3 + 2));
-                        			if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
-                        			{
-                            			DeepMatrix_cnt[compress_width] = (IMAGEHEIGHT/10 - 1) - compress_height;
-										break;
-                        			}
-								}
-								else
-								{
-									DeepMatrix_cnt[compress_width] = 22;
-									break;
-								}
-                        	}
-						}
-						else
-						{
-							DeepMatrix_cnt[compress_width] = 23;
-							break;
-						}
-                    }
-					if(compress_height == 0)
-					{
-						DeepMatrix_cnt[compress_width] = 24;
-					}
+                    OBS_inArea[i] = Focus_area[i] - DeepM_D[i];
+                }
+                else
+                {
+                    OBS_inArea[i] = 0;
                 }
             }
-
-            totalL = 0;
-            totalR = 0;
-            for(int i = 0; i < 32 ;i++)
+            // for(int i = 0; i < 32; i++)
+            // {
+            //     ROS_INFO("%d OBS_inArea: %d", i, OBS_inArea[i]);
+            // }
+//=========================Calculate WL&WR=====================================
+            for(int i = 0; i < 32; i++)
             {
-                deepmatrix.DeepMatrix.push_back(DeepMatrix_cnt[i]);
-                //printf("%d,",DeepMatrix_cnt[i]);
-                //printf("%d,",deepmatrix.DeepMatrix[i]);
-                    totalL += DeepMatrix_cnt[i]*DeepMatrix_cnt[i];
-                    totalR += DeepMatrix_cnt[i]*DeepMatrix_cnt[i];
+                turn_right = turn_right + (32-i)*OBS_inArea[i];
+                turn_left = turn_left + (i+1)*OBS_inArea[i];
+                // ROS_INFO("%d turn_right: %d", i, turn_right);
+                // ROS_INFO("%d turn_left: %d", i, turn_left);
             }
-            //printf("totalL = %d\ntotalR = %d", totalL,totalR);
-            DeepMatrix_Publish.publish(deepmatrix);
-            deepmatrix.DeepMatrix.clear();
-            //printf("\n");
-////////////////////////////////////opencv/////////////////////////////////////////////
-            cv::resize(image, publish_image, cv::Size(320, 240),CV_INTER_LINEAR);
-			//cv::imshow("publish_image",publish_image);
-			cv::waitKey(1);
-            msg_compressimage = cv_bridge::CvImage(std_msgs::Header(), "bgr8", publish_image).toImageMsg();
-            pub_colormodel.publish(msg_compressimage);
-            image.release();
-////////////////////////////////////opencv////////////////////////////////////////////
+            // ROS_INFO("turn_right: %d", turn_right);
+            // ROS_INFO("turn_left: %d", turn_left);
+            if(turn_right >=turn_left)
+            {
+                ROS_INFO("turn_right: %d", turn_right);
+            }
+            else
+            {
+                ROS_INFO("turn_left: %d", turn_left);
+            }
+//             for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
+//             {
+//                 DeepMatrix_cnt[compress_width] = 0;
+//                 for(int compress_height = IMAGEHEIGHT/10 - 1 ; compress_height > -1 ; compress_height--)
+//                 {
+//                     bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
+//                     gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
+//                     rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
+
+//                     if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
+//                     {
+//                         //DeepMatrix_cnt[compress_width]++;
+// 						if((compress_height - 1) > -1)
+// 						{
+// 							bValue = (image.data + (((compress_height - 1)*IMAGEWIDTH/10 + compress_width) * 3 + 0));
+//                         	gValue = (image.data + (((compress_height - 1)*IMAGEWIDTH/10 + compress_width) * 3 + 1));
+//                         	rValue = (image.data + (((compress_height - 1)*IMAGEWIDTH/10 + compress_width) * 3 + 2));
+//                         	if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
+//                         	{
+//                             //DeepMatrix_cnt[compress_width]++;
+// 								if((compress_height - 2) > -1)
+// 								{
+// 									bValue = (image.data + (((compress_height - 2)*IMAGEWIDTH/10 + compress_width) * 3 + 0));
+//                         			gValue = (image.data + (((compress_height - 2)*IMAGEWIDTH/10 + compress_width) * 3 + 1));
+//                        				rValue = (image.data + (((compress_height - 2)*IMAGEWIDTH/10 + compress_width) * 3 + 2));
+//                         			if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
+//                         			{
+//                             			DeepMatrix_cnt[compress_width] = (IMAGEHEIGHT/10 - 1) - compress_height;
+// 										break;
+//                         			}
+// 								}
+// 								else
+// 								{
+// 									DeepMatrix_cnt[compress_width] = 22;
+// 									break;
+// 								}
+//                         	}
+// 						}
+// 						else
+// 						{
+// 							DeepMatrix_cnt[compress_width] = 23;
+// 							break;
+// 						}
+//                     }
+// 					if(compress_height == 0)
+// 					{
+// 						DeepMatrix_cnt[compress_width] = 24;
+// 					}
+//                 }
+//             }
+
+//             totalL = 0;
+//             totalR = 0;
+//             for(int i = 0; i < 32 ;i++)
+//             {
+//                 deepmatrix.DeepMatrix.push_back(DeepMatrix_cnt[i]);
+//                 //printf("%d,",DeepMatrix_cnt[i]);
+//                 //printf("%d,",deepmatrix.DeepMatrix[i]);
+//                     totalL += DeepMatrix_cnt[i]*DeepMatrix_cnt[i];
+//                     totalR += DeepMatrix_cnt[i]*DeepMatrix_cnt[i];
+//             }
+//             //printf("totalL = %d\ntotalR = %d", totalL,totalR);
+//             DeepMatrix_Publish.publish(deepmatrix);
+//             deepmatrix.DeepMatrix.clear();
+//             //printf("\n");
+// ////////////////////////////////////opencv/////////////////////////////////////////////
+//             cv::resize(image, publish_image, cv::Size(320, 240),CV_INTER_LINEAR);
+// 			//cv::imshow("publish_image",publish_image);
+// 			cv::waitKey(1);
+//             msg_compressimage = cv_bridge::CvImage(std_msgs::Header(), "bgr8", publish_image).toImageMsg();
+//             pub_colormodel.publish(msg_compressimage);
+//             image.release();
+// ////////////////////////////////////opencv////////////////////////////////////////////
         }
     
 	else
