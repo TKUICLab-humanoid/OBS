@@ -49,11 +49,7 @@ public:
 	~OBSimage(){};
 	void strategymain();
 
-	int DeepMatrix_cnt[32];
-	int color_cnt;
-	bool blue_flag = false;
-	float color_flag;
-	unsigned char *rValue, *gValue, *bValue;
+	strategy::DeepMatrix msg_distance;
 
 	sensor_msgs::ImagePtr msg_compressimage;
     cv::Mat publish_image;
@@ -63,10 +59,16 @@ public:
 	ToolInstance *tool;
 	StrategyInfoInstance *strategy_info;
 
-	
-
 	ros::Publisher DeepMatrix_Publish;
-
-
 	strategy::DeepMatrix deepmatrix;	
+};
+class OBSImageAlgorithm
+{
+	OBSImageAlgorithm();
+
+	cv::Mat compress_image(cv::Mat ori_img);
+	std::vector<int> calc_deep_matrix(cv::Mat compress_img);
+	std::vector<int> calc_obs_in_area_array(std::vector<int> deep_matrix);
+	
+	
 };

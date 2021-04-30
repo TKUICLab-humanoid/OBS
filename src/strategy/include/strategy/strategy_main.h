@@ -134,6 +134,7 @@ public:
 	SensorMode IMU_continuous;
 	SensorMode IMU_single;
 
+
 	int DeepMatrixValue[32];
 	int FilterMatrix[32];
 	int RMoveValue = 0;
@@ -236,6 +237,9 @@ public:
 	void traverse();
 	void sideline();
 	void printinfo();
+
+	int dx;
+	int dy;
 };
 
 //bool isStart = false;

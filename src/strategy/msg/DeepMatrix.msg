@@ -1,1 +1,2 @@
-int32[] DeepMatrix
+int32 dx
+int32 dy
