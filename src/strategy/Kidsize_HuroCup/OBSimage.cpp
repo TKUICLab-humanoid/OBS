@@ -57,24 +57,35 @@ void OBSimage::strategymain()
         
         start = clock();
         cv::Mat compress_img = cv::Mat::zeros(24,32,CV_8UC1);
+        cv::Mat binary_blue;
+        cv::Mat binary_yellow;
+        cv::Mat binary_OBS;
 
         cv::split(ori_image, rgbChannels);
         cv::Mat B = rgbChannels[0];
         cv::Mat G = rgbChannels[1];
         cv::Mat R = rgbChannels[2];
-
+//===============Blue=========================
         cv::Mat maskB = B == mask128;
         cv::Mat maskG = G == mask0;
         cv::Mat maskR = R == mask128;
 
-        cv::bitwise_and(maskB, maskG, maskB);
-        cv::bitwise_and(maskB, maskR, maskB);
+        cv::bitwise_and(maskB, maskG, binary_blue);
+        cv::bitwise_and(binary_blue, maskR, binary_blue);
+//===============Yellow=======================
+        maskG = G == mask128; //maskB is already mask128
+        maskR = R == mask0;
+        cv::bitwise_and(maskB, maskG, binary_yellow);
+        cv::bitwise_and(binary_yellow, maskR, binary_yellow);
+        cv::bitwise_or(binary_yellow, binary_blue, binary_OBS);
+
+
 
         for(int r = 0; r < 24; r++)
         {
             for (int c = 0; c < 32; c++)
             {
-                roi = maskB(cv::Rect(c*10, r*10, 10, 10));
+                roi = binary_OBS(cv::Rect(c*10, r*10, 10, 10));
                 int val = cv::countNonZero(roi);
                 if(val > 20)
                 {
