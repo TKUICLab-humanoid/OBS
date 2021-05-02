@@ -29,9 +29,10 @@ void KidsizeStrategy::strategymain()
 
     if (strategy_info->getStrategyStart()) //策略指撥開啟
     {
-        if(dx <= 3)
+
+        if(dx <= -10)
             ROS_INFO("no go");
-        else if(dx <= 10)
+        else if(dx <= 0)
             ROS_INFO("go");
         else
             ROS_INFO("go go");

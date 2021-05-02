@@ -127,15 +127,17 @@ void OBSimage::strategymain()
     //=======================OBS in Focus area=====================================  
         for(int i = 0; i < 32; i++)
         {
-            if(Focus_area[i] >= DeepM_D[i])
-            {
-                OBS_inArea[i] = Focus_area[i] - DeepM_D[i];
-            }
-            else
-            {
-                OBS_inArea[i] = 0;
-            }
+            // if(Focus_area[i] >= DeepM_D[i])
+            // {
+            //     OBS_inArea[i] = Focus_area[i] - DeepM_D[i];
+            // }
+            // else
+            // {
+            //     OBS_inArea[i] = 0;
+            // }
+            OBS_inArea[i] = DeepM_D[i] - Focus_area[i];
         }
+        
         // for(int i = 0; i < 32; i++)
         // {
         //     ROS_INFO("%d OBS_inArea: %d", i, OBS_inArea[i]);
@@ -143,32 +145,36 @@ void OBSimage::strategymain()
     //=========================Calculate WL&WR=====================================
         for(int i = 0; i < 32; i++)
         {
-            turn_right = turn_right + (32-i)*OBS_inArea[i];
-            turn_left = turn_left + (i+1)*OBS_inArea[i];
-            // ROS_INFO("%d turn_right: %d", i, turn_right);
-            // ROS_INFO("%d turn_left: %d", i, turn_left);
+            if(OBS_inArea[i] < 0)
+            {
+                turn_right = turn_right + (32-i)*(-OBS_inArea[i]);
+                turn_left = turn_left + (i+1)*(-OBS_inArea[i]);
+                // ROS_INFO("%d turn_right: %d", i, turn_right);
+                // ROS_INFO("%d turn_left: %d", i, turn_left);
+            }
         }
         // ROS_INFO("turn_right: %d", turn_right);
         // ROS_INFO("turn_left: %d", turn_left);
-        // if(turn_right >=turn_left)
-        // {
-        //     ROS_INFO("turn_right: %d", turn_right);
-        // }
-        // else
-        // {
-        //     ROS_INFO("turn_left: %d", turn_left);
-        // }
-    //=========================Calculate Dx&Dy&Xc&Xb=====================================
+        if(turn_right >=turn_left)
+        {
+            ROS_INFO("turn_right: %d", turn_right);
+        }
+        else
+        {
+            ROS_INFO("turn_left: %d", turn_left);
+        }
+    //=========================Calculate Dx&Dy&Yc&Yb=====================================
         for(int i = 0; i < 32; i++)
         {
-            if(OBS_inArea[i])
+            if(OBS_inArea[i] < 0)
             {
                 cnt++;
                 yc += i;
             }
-            if(DeepM_D[i] < dx)
+
+            if(OBS_inArea[i] < dx)
             {
-                dx = DeepM_D[i];
+                dx = OBS_inArea[i];
             }
         }
         if(cnt)
