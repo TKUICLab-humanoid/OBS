@@ -93,8 +93,38 @@ enum Head_direction
     RHD_Left
 };
 
-using namespace std;
+enum Forward_Status
+{
+    FORWARD_STOP,
+    FORWARD_SMALL,
+    FORWARD_BIG
+};
 
+
+using namespace std;
+class ForwardParam
+{
+	public:
+	int small = 500;
+	int big = 1500;
+	int stop = 0;
+};
+class TurnParam
+{
+	public:
+	int left_small = 0;
+	int left_big = 0;
+	int no_turn = 0;
+	int right_small = 0;
+	int right_big = 0;
+};
+class WalkingParam
+{
+	public:
+	int x = 0;
+	int y = 0;
+	int theta = 0;
+};
 class KidsizeStrategy 
 {
 public:
@@ -240,6 +270,14 @@ public:
 
 	int dx;
 	int dy;
+	bool walking = false;
+
+	ForwardParam _forwardParam;
+	TurnParam _turnParam;
+	WalkingParam _walkingParam;
+	void calc_Forward();
+	void calc_Turn();
+	void load_OBS_param();
 };
 
 //bool isStart = false;

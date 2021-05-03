@@ -1,6 +1,6 @@
 #include "strategy/OBSimage.h"
 #include <time.h>
-
+/*
 int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "OBSimage");
@@ -18,6 +18,196 @@ int main(int argc, char** argv)
         
 	}
 	return 0;
+}
+*/
+
+int main(int argc, char** argv)
+{
+	ros::init(argc, argv, "OBSimageAlgorithm");
+	ros::NodeHandle nh;
+
+    ros::Publisher DeepMatrix_Publish = nh.advertise<strategy::DeepMatrix>("/strategy/DeepMatrix_Topic", 1);
+
+	RosCommunicationInstance *ros_com = RosCommunicationInstance::getInstance();
+    StrategyInfoInstance *strategy_info = StrategyInfoInstance::getInstance();
+
+	OBSImageAlgorithm obsImageAlgorithm;
+
+	ros::Rate loop_rate(30);
+	
+    int dx = 0, dy = 0;
+    strategy::DeepMatrix msg_distance;
+
+	while (nh.ok()) 
+	{
+
+	    if(strategy_info->getStrategyStart())
+	    {	
+            cv::Mat label_image = strategy_info->cvimg->image;
+
+            std::tie(dx, dy) = obsImageAlgorithm.excute(label_image);
+
+            msg_distance.dx = dx;
+            msg_distance.dy = dy;
+
+            DeepMatrix_Publish.publish(msg_distance);
+        }
+        ros::spinOnce();
+		loop_rate.sleep();
+        
+	}
+	return 0;
+}
+void OBSImageAlgorithm::split_img_channels(cv::Mat bgr_img)
+{
+    std::vector<cv::Mat> rgbChannels(3);
+    cv::split(bgr_img, rgbChannels);
+
+    matB = rgbChannels[0];
+    matG = rgbChannels[1];
+    matR = rgbChannels[2];
+}
+
+cv::Mat OBSImageAlgorithm::labelImg2Binary(cv::Mat matBValue, cv::Mat matGValue, cv::Mat matRValue)
+{
+    cv::Mat mat_binary;
+
+    cv::Mat maskB = matB == matBValue;
+    cv::Mat maskG = matG == matGValue;
+    cv::Mat maskR = matR == matRValue;
+
+    cv::bitwise_and(maskB, maskG, mat_binary);
+    cv::bitwise_and(mat_binary, maskR, mat_binary);
+
+    return mat_binary;
+}
+
+cv::Mat OBSImageAlgorithm::compress_image(cv::Mat ori_img)
+{
+    cv::Mat compress_img = cv::Mat::zeros(24, 32, CV_8UC1);
+
+    cv::Mat binary_OBS;
+
+    split_img_channels(ori_img);
+
+    cv::Mat binary_blueObs = labelImg2Binary(value128, value0, value128);
+    cv::Mat binary_yellowObs = labelImg2Binary(value128, value128, value0);
+
+    cv::bitwise_or(binary_yellowObs, binary_blueObs, binary_OBS);
+
+    cv::Mat roi;
+    for (int r = 0; r < 24; r++)
+    {
+        for (int c = 0; c < 32; c++)
+        {
+            roi = binary_OBS(cv::Rect(c * 10, r * 10, 10, 10));
+            int val = cv::countNonZero(roi);
+            if (val > 20)
+            {
+                *(compress_img.data + (r * 32 + c)) = 255;
+            }
+        }
+    }
+
+    return compress_img;
+}
+
+std::vector<int> OBSImageAlgorithm::calc_deep_matrix(cv::Mat compress_img)
+{
+    std::vector<int> DeepM_D(32, 23);
+    for (int c = 0; c < 32; c++)
+    {
+
+        for (int r = 23; r >= 0; r--)
+        {
+            if (*(compress_img.data + (r * 32 + c)))
+            {
+                DeepM_D[c] = 23 - r;
+                break;
+            }
+        }
+    }
+
+    return DeepM_D;
+}
+
+std::vector<int> OBSImageAlgorithm::calc_obs_in_area_array(std::vector<int> deep_matrix)
+{
+    std::vector<int> OBS_inArea(32, 0);
+    for (int i = 0; i < 32; i++)
+    {
+        OBS_inArea[i] = deep_matrix[i] - Focus_area[i];
+    }
+    return OBS_inArea;
+}
+
+std::tuple<int, int> OBSImageAlgorithm::calc_wl_wr(std::vector<int> deepMatrix, std::vector<int> obs_inArea)
+{
+    int turn_right = 0;
+    int turn_left = 0;
+    for (int i = 0; i < 32; i++)
+    {
+        if (obs_inArea[i] < 0)
+        {
+            turn_right = turn_right + (32 - i) * (-obs_inArea[i]);
+            turn_left = turn_left + (i + 1) * (-obs_inArea[i]);
+        }
+    }
+    if (turn_right)
+        turn_right = turn_right + (23 - deepMatrix[0]);
+    if (turn_left)
+        turn_left = turn_left + (23 - deepMatrix[31]);
+
+    return std::make_tuple(turn_left, turn_right);
+}
+
+std::tuple<int, int> OBSImageAlgorithm::calc_dx_dy(int wl, int wr, std::vector<int> obs_inArea)
+{
+    int dx = 23;
+    int dy = 0;
+    int yb = 0;
+    int yc = 0;
+    int cnt = 0;
+    //Calculate Dx&Dy&Yc&Yb
+    for (int i = 0; i < 32; i++)
+    {
+        if (obs_inArea[i] < 0)
+        {
+            cnt++;
+            yc += i;
+        }
+
+        if (obs_inArea[i] < dx)
+        {
+            dx = obs_inArea[i];
+        }
+    }
+    if (cnt)
+        yc = yc / cnt;
+
+    if (wl > wr)
+        yb = 31;
+    else
+        yb = 0;
+
+    dy = yc - yb;
+
+    return std::make_tuple(dx, dy);
+}
+
+std::tuple<int, int> OBSImageAlgorithm::excute(cv::Mat label_img)
+{
+    int wl = 0, wr = 0;
+
+    cv::Mat compress_img = compress_image(label_img);
+
+    std::vector<int> deep_matrix = calc_deep_matrix(compress_img);
+
+    std::vector<int> obs_inArea = calc_obs_in_area_array(deep_matrix);
+
+    std::tie(wl, wr) = calc_wl_wr(deep_matrix, obs_inArea);
+
+    return calc_dx_dy(wl, wr, obs_inArea);
 }
 
 void OBSimage::strategymain()

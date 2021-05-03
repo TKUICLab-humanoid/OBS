@@ -6,9 +6,10 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     KidsizeStrategy KidsizeStrategy(nh);
 
-    ros::Rate loop_rate(30);
+    ros::Rate loop_rate(2);
 
     KidsizeStrategy.initparameterpath();
+    KidsizeStrategy.load_OBS_param();
 
     while (nh.ok())
     {
@@ -19,44 +20,126 @@ int main(int argc, char **argv)
     return 0;
 }
 
+void KidsizeStrategy::calc_Forward()
+{
+    int x_limit;
+    if(dx <= -10)
+    {
+        x_limit = _forwardParam.stop;
+        ROS_INFO("no go");       
+    }
+    else if(dx <= 0)
+    {  
+        x_limit = _forwardParam.small;
+        ROS_INFO("go");
+    }
+    else
+    {
+        x_limit = _forwardParam.big;
+        ROS_INFO("go go");
+    }
+    if(x_limit > _walkingParam.x)
+    {
+        _walkingParam.x += 100;
+    }
+    else if(x_limit < _walkingParam.x)
+    {
+        _walkingParam.x -= 100;
+    }
+}
+void KidsizeStrategy::calc_Turn()
+{
+    int y_limit;
+    if(dy <= -13)
+    {
+        y_limit = _turnParam.left_big;
+        ROS_INFO("very left");
+    }    
+    else if (dy <= -5)
+    {
+        y_limit = _turnParam.left_small;
+        ROS_INFO("normal left");
+    }  
+    else if (dy <= 5)
+    {
+        y_limit = _turnParam.no_turn;
+        ROS_INFO("no turn");
+    } 
+    else if (dy <= 13)
+    {
+        y_limit = _turnParam.right_small;
+        ROS_INFO("normal right");
+    }   
+    else
+    {
+        y_limit = _turnParam.right_big;
+        ROS_INFO("very right");
+    }
+    if(y_limit > _walkingParam.theta)
+    {
+        _walkingParam.theta += 1;
+    }
+    else if(y_limit < _walkingParam.theta)
+    {
+        _walkingParam.theta -= 1;
+    }  
+}
+void KidsizeStrategy::load_OBS_param()
+{
+    fstream fin;
+    string sTmp;
+    char line[100];
+    char path[200];
+    strcpy(path, parameter_path.c_str());
+    strcat(path, "/OBS_param.ini");
+    fin.open(path, ios::in);
+    char temp[100];
+    try
+    {
+        fin.getline(temp, sizeof(temp));
+        _forwardParam.small = tool->readvalue(fin, "forward_small", 0);
+        _forwardParam.big = tool->readvalue(fin, "forward_big", 0);
+        _forwardParam.stop = tool->readvalue(fin, "forward_stop", 0);
+        _turnParam.left_small = tool->readvalue(fin, "left_small", 0);
+        _turnParam.left_big = tool->readvalue(fin, "left_big", 0);
+        _turnParam.no_turn = tool->readvalue(fin, "no_turn", 0);
+        _turnParam.right_small = tool->readvalue(fin, "right_small", 0);
+        _turnParam.right_big = tool->readvalue(fin, "right_big", 0);
+        fin.getline(temp, sizeof(temp));
+        _walkingParam.x = tool->readvalue(fin, "walking_x_offset", 0);
+        _walkingParam.y = tool->readvalue(fin, "walking_y_offset", 0);
+        _walkingParam.theta = tool->readvalue(fin, "walking_theta_offset", 0);
+        fin.close();
+    }
+    catch (exception e)
+    {
+    }
+}
 void KidsizeStrategy::strategymain()
 {
-    // int FocusMatrix[32] = {3, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 4, 4, 4, 3}; //攝影機內之焦點矩陣
-    // int FocusMatrix_R[32] = {4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1};
-    // int FocusMatrix_L[32] = {1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4};
-    // int LeftMove[32]  = { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  2,  3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 21};
-    // int RightMove[32] = {21, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
     if (strategy_info->getStrategyStart()) //策略指撥開啟
     {
-
-        if(dx <= -10)
-            ROS_INFO("no go");
-        else if(dx <= 0)
-            ROS_INFO("go");
-        else
-            ROS_INFO("go go");
-
-        if(dy <= -13)
-            ROS_INFO("very left, %d", dy);
-        else if (dy <= -5)
-            ROS_INFO("normal left, %d", dy);
-        else if (dy <= 5)
-            ROS_INFO("no turn, %d", dy);
-        else if (dy <= 13)
-            ROS_INFO("normal right, %d", dy);
-        else
-            ROS_INFO("very right, %d", dy);
+        if(!walking)
+        {
+            ros_com->sendBodySector(4);
+            tool->Delay(1000);
+            ros_com->sendBodyAuto(_walkingParam.x, _walkingParam.y, 0,_walkingParam.theta, WalkingMode::ContinuousStep, IMU_continuous);
+            walking = true;
+        }
+        calc_Forward();
+        calc_Turn();
+        ros_com->sendContinuousValue(_walkingParam.x, _walkingParam.y, 0, _walkingParam.theta, IMU_continuous);
+        ROS_INFO("_walkingParam.x: %d, _walkingParam.theta: %d", _walkingParam.x, _walkingParam.theta);
     }
     else //策略指撥關閉
     {
         if (stand_flag == true)
         {
             //ROS_INFO("handdown");
-            if (Continuous_flag)
+            if (walking)
             {
                 ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); //關閉連續步態
-                Continuous_flag = false;
+                walking = false;
                 tool->Delay(1500);
             }
             stand_flag = false;
