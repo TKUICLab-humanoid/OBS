@@ -164,16 +164,18 @@ void OBSimage::strategymain()
                 // ROS_INFO("%d turn_left: %d", i, turn_left);
             }
         }
+        turn_right = turn_right + (23-DeepM_D[0]);
+        turn_left = turn_left + (23-DeepM_D[31]);
         // ROS_INFO("turn_right: %d", turn_right);
         // ROS_INFO("turn_left: %d", turn_left);
-        if(turn_right >=turn_left)
-        {
-            ROS_INFO("turn_right: %d", turn_right);
-        }
-        else
-        {
-            ROS_INFO("turn_left: %d", turn_left);
-        }
+        // if(turn_right >=turn_left)
+        // {
+        //     ROS_INFO("turn_right: %d", turn_right);
+        // }
+        // else
+        // {
+        //     ROS_INFO("turn_left: %d", turn_left);
+        // }
     //=========================Calculate Dx&Dy&Yc&Yb=====================================
         for(int i = 0; i < 32; i++)
         {
@@ -197,6 +199,8 @@ void OBSimage::strategymain()
             yb = 0;
 
         dy = yc - yb;
+
+        // ROS_INFO("yb: %d", yb);
 
         msg_distance.dx = dx;
         msg_distance.dy = dy;

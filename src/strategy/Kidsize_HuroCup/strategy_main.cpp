@@ -38,15 +38,15 @@ void KidsizeStrategy::strategymain()
             ROS_INFO("go go");
 
         if(dy <= -13)
-            ROS_INFO("very left");
+            ROS_INFO("very left, %d", dy);
         else if (dy <= -5)
-            ROS_INFO("normal left");
+            ROS_INFO("normal left, %d", dy);
         else if (dy <= 5)
-            ROS_INFO("no turn");
+            ROS_INFO("no turn, %d", dy);
         else if (dy <= 13)
-            ROS_INFO("normal right");
+            ROS_INFO("normal right, %d", dy);
         else
-            ROS_INFO("very right");
+            ROS_INFO("very right, %d", dy);
     }
     else //策略指撥關閉
     {
