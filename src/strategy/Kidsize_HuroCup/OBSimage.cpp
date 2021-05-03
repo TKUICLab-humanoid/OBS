@@ -164,8 +164,10 @@ void OBSimage::strategymain()
                 // ROS_INFO("%d turn_left: %d", i, turn_left);
             }
         }
-        turn_right = turn_right + (23-DeepM_D[0]);
-        turn_left = turn_left + (23-DeepM_D[31]);
+        if(turn_right)
+            turn_right = turn_right + (23-DeepM_D[0]);
+        if(turn_left)
+            turn_left = turn_left + (23-DeepM_D[31]);
         // ROS_INFO("turn_right: %d", turn_right);
         // ROS_INFO("turn_left: %d", turn_left);
         // if(turn_right >=turn_left)
