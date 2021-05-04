@@ -109,6 +109,8 @@ void KidsizeStrategy::load_OBS_param()
         _walkingParam.x = tool->readvalue(fin, "walking_x_offset", 0);
         _walkingParam.y = tool->readvalue(fin, "walking_y_offset", 0);
         _walkingParam.theta = tool->readvalue(fin, "walking_theta_offset", 0);
+        _forwardParam.stop = _walkingParam.x;
+        _turnParam.no_turn = _walkingParam.theta;
         fin.close();
     }
     catch (exception e)
@@ -121,6 +123,7 @@ void KidsizeStrategy::strategymain()
     {
         if(!walking)
         {
+            load_OBS_param();
             ros_com->sendBodySector(4);
             tool->Delay(1000);
             ros_com->sendBodyAuto(_walkingParam.x, _walkingParam.y, 0,_walkingParam.theta, WalkingMode::ContinuousStep, IMU_continuous);
