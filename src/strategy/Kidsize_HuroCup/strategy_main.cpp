@@ -136,6 +136,9 @@ void KidsizeStrategy::strategymain()
     }
     else //策略指撥關閉
     {
+        _walkingParam.x = 0;
+        _walkingParam.y  = 0;
+        _walkingParam.theta = 0;
         if (stand_flag == true)
         {
             //ROS_INFO("handdown");
@@ -154,7 +157,6 @@ void KidsizeStrategy::strategymain()
             ROS_INFO("stop");
         }
         m_state = P_INIT;
-        readwalkinggait();
     }
 }
 
