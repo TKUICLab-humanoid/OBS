@@ -41,8 +41,7 @@ void KidsizeStrategy::strategymain()
             {
                 ros_com->sendBodySector(4); //動作磁區
                 tool->Delay(1000);
-                ros_com->sendBodyAuto(dirdata[30], dirdata[31], dirdata[32], 0, WalkingMode::ContinuousStep, IMU_continuous); //ros_com->sendBodyAuto(-450, 0, 0,-3, WalkingMode::ContinuousStep,IMU_continuous);
-
+                ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); //ros_com->sendBodyAuto(-450, 0, 0,-3, WalkingMode::ContinuousStep,IMU_continuous);
                 tool->Delay(500);
                 Continuous_flag = true;
             }
@@ -91,7 +90,7 @@ void KidsizeStrategy::strategymain()
             stand_flag = true;                    //站起來
             strategy_info->get_image_flag = true; //擷取影像
             first_continuous_flag = false;        // "< 20" 內，第一步進左移或右移的旗標，就繼續走下去，不要左右走一直卡在障礙物前  
-            Ry_fastest = dirdata[34];             //將讀檔內的值丟掉自訂變數內  
+            Ry_fastest = dirdata[34];             //將讀檔內的值丟到自訂變數內  
             Ly_fastest = dirdata[37];            
             m_obs_vector.clear();
             m_state = P_MATRIX_CALCULATE;
@@ -328,7 +327,7 @@ void KidsizeStrategy::strategymain()
                         ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 1447, 600);
                         tool->Delay(100);
                         ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 1447, 600);
-                        tool->Delay(800);
+                        tool->Delay(700);
                         strategy_info->get_image_flag = true;
                         ros::spinOnce();
                         true_RMoveValue = 0;
@@ -513,6 +512,8 @@ void KidsizeStrategy::strategymain()
             {
                 RMoveValue += RightMove[i] * FilterMatrix[i]; 
                 LMoveValue += LeftMove[i] * FilterMatrix[i];
+                ROS_INFO("r:%d",RMoveValue);
+                ROS_INFO("l:%d",LMoveValue);
             }
             if (abs(LMoveValue - RMoveValue) < 8 && LMoveValue > 10 && RMoveValue > 10) 
             {
@@ -549,7 +550,7 @@ void KidsizeStrategy::strategymain()
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 1447, 600);
                 tool->Delay(100);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 1447, 600);
-                tool->Delay(800);
+                tool->Delay(700);
                 strategy_info->get_image_flag = true; 
                 ros::spinOnce();
                 head_direction = RHD_Center; 
@@ -1188,6 +1189,7 @@ void KidsizeStrategy::strategymain()
                                 walking_state_string = "j%100 continousValue_Ry";
                                 if (dirdata[34] >= Ry_fastest)
                                 {
+
                                     dirdata[34] -= 500;
                                     tool->Delay(50); 
                                     strategy_info->get_image_flag = true;
@@ -1274,9 +1276,7 @@ void KidsizeStrategy::strategymain()
                                 walking_state_string = "j%100 continousValue_Ly";
                                 if (dirdata[37] <= Ly_fastest)
                                 {
-                                    dirdata[37] += 500; 
-                                    tool->Delay(50);
-                                    tool->Delay(30);
+                                    dirdata[37] = 2000; 
                                     strategy_info->get_image_flag = true;
                                     ros::spinOnce();
                                     IMUSlope();
@@ -1344,6 +1344,10 @@ void KidsizeStrategy::strategymain()
                     Center_door = true;
                     if (strategy_info->color_mask_subject[5][i].size > 300)
                     {
+                        printf("-----------------------------------------------------");
+                        printf("strategy_info->color_mask_subject[5][i].size = %d\n",strategy_info->color_mask_subject[5][i].size);
+                        printf("-----------------------------------------------------");
+
                         Red_Door_flag = true;
                         printinfo();
 
@@ -1388,8 +1392,11 @@ void KidsizeStrategy::strategymain()
                                 m_state = P_CRAWL;
                                 break;
                             }
-                            if (strategy_info->color_mask_subject[2][j].size > 500)
+                            if (strategy_info->color_mask_subject[2][j].size > 300)
                             {
+                                printf("-----------------------------------------------------");
+                                printf("strategy_info->color_mask_subject[2][j].size = %d\n",strategy_info->color_mask_subject[2][j].size);
+                                printf("-----------------------------------------------------");
                                 Blue_obs_flag = true;
                                 if (First_flag)
                                 {
@@ -1546,12 +1553,13 @@ void KidsizeStrategy::strategymain()
                 ros_com->sendBodySector(5);
                 tool->Delay(1000);
                 ros_com->sendBodySector(6);
-                tool->Delay(5000);
+                tool->Delay(3000);
+
                 for (int multisingleSTEP = 0; multisingleSTEP <= 10; multisingleSTEP++)
                 {
                     ROS_INFO("First crw");
                     ros_com->sendBodySector(7);
-                    tool->Delay(800);
+                    tool->Delay(2200);
                 }
                 for (int multisingleSTEP = 0; multisingleSTEP <= 20; multisingleSTEP++)
                 {
@@ -1583,7 +1591,8 @@ void KidsizeStrategy::strategymain()
                         break;
                     }
                     ros_com->sendBodySector(7);
-                    tool->Delay(800);
+                    tool->Delay(500);
+
                 }
                 tool->Delay(500);
                 ros_com->sendBodySector(8);
@@ -2086,11 +2095,11 @@ void KidsizeStrategy::traverse() //正對障終點方向修正的步態補償之
         }
         else if (abs(IMU_slope) > 10 && abs(IMU_slope) <= 15)
         {
-            continous_angle_offest = 3;
+            continous_angle_offest = 2;
         }
         else if (abs(IMU_slope) > 4 && abs(IMU_slope) <= 10)
         {
-            continous_angle_offest = 2;
+            continous_angle_offest = 1;
         }
         else
         {
@@ -2385,7 +2394,7 @@ void KidsizeStrategy::sideline()
                 }
             }
             printinfo();
-            sidelineslope = (float)(TopYellowPoint - BottomYellowPoint) / (float)(cntBottomYellow_x - cntTopYellow_x);
+            //sidelineslope = (float)(TopYellowPoint - BottomYellowPoint) / (float)(cntBottomYellow_x - cntTopYellow_x);
             tool->Delay(1000);
 
             if (sidelineslope > 0)
@@ -2441,6 +2450,7 @@ void KidsizeStrategy::printinfo()
         ROS_INFO("zero_flag = false");
 	
 	ROS_INFO("continous_angle_offest = %d",continous_angle_offest);
+	ROS_INFO("angle_offset = %d",angle_offset);
 
     ROS_INFO("%s",walking_state_string.c_str());
     ROS_INFO("continuousValue_x = %5d", continuousValue_x);
