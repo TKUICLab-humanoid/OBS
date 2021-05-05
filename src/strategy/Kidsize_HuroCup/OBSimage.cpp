@@ -53,8 +53,7 @@ int main(int argc, char** argv)
             DeepMatrix_Publish.publish(msg_distance);
         }
         ros::spinOnce();
-		loop_rate.sleep();
-        
+		loop_rate.sleep();        
 	}
 	return 0;
 }
@@ -191,6 +190,9 @@ std::tuple<int, int> OBSImageAlgorithm::calc_dx_dy(int wl, int wr, std::vector<i
         yb = 0;
 
     dy = yc - yb;
+
+    // ROS_INFO("WL: %d, WR: %d", wl, wr);
+    // ROS_INFO("dx: %d, dy: %d", dx, dy);
 
     return std::make_tuple(dx, dy);
 }
@@ -392,7 +394,7 @@ void OBSimage::strategymain()
 
         dy = yc - yb;
 
-        // ROS_INFO("yb: %d", yb);
+        // ROS_INFO("dx: %d, dy: %d", dx, dy);
 
         msg_distance.dx = dx;
         msg_distance.dy = dy;
