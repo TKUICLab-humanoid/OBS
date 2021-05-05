@@ -6,7 +6,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     KidsizeStrategy KidsizeStrategy(nh);
 
-    ros::Rate loop_rate(2);
+    ros::Rate loop_rate(10);
 
     KidsizeStrategy.initparameterpath();
     KidsizeStrategy.load_OBS_param();
@@ -124,10 +124,11 @@ void KidsizeStrategy::strategymain()
         if(!walking)
         {
             load_OBS_param();
-            ros_com->sendBodySector(4);
-            tool->Delay(1000);
+            // ros_com->sendBodySector(4);
+            // tool->Delay(1000);
             ros_com->sendBodyAuto(_walkingParam.x, _walkingParam.y, 0,_walkingParam.theta, WalkingMode::ContinuousStep, IMU_continuous);
             walking = true;
+            stand_flag = true;
         }
         calc_Forward();
         calc_Turn();
@@ -136,9 +137,7 @@ void KidsizeStrategy::strategymain()
     }
     else //策略指撥關閉
     {
-        _walkingParam.x = 0;
-        _walkingParam.y  = 0;
-        _walkingParam.theta = 0;
+        walking = false;
         if (stand_flag == true)
         {
             //ROS_INFO("handdown");
@@ -149,14 +148,14 @@ void KidsizeStrategy::strategymain()
                 tool->Delay(1500);
             }
             stand_flag = false;
-            ros_com->sendBodySector(5);
-            tool->Delay(1000);
+            // ros_com->sendBodySector(5);
+            // tool->Delay(1000);
             ros_com->sendBodySector(29);
             tool->Delay(1000);
             first_cnt = 0;
             ROS_INFO("stop");
         }
-        m_state = P_INIT;
+        // m_state = P_INIT;
     }
 }
 
