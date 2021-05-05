@@ -21,19 +21,21 @@ int main(int argc, char **argv)
 
 void KidsizeStrategy::strategymain()
 {
-    int FocusMatrix[32] = {3, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 4, 4, 4, 3}; //攝影機內之焦點矩陣
+    int FocusMatrix[32] = {4, 5, 5, 5, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 5, 5, 5, 4}; //攝影機內之焦點矩陣
     int FocusMatrix_R[32] = {4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1};
     int FocusMatrix_L[32] = {1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4};
     int LeftMove[32]  = { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  2,  3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 21};
     int RightMove[32] = {21, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
+    int i_test = 0;
     if (strategy_info->getStrategyStart()) //策略指撥開啟
     {
         switch (m_state)
         {
         case P_INIT:
             printinfo();
+            ROS_INFO("info1");
             m_state_string = "P_INIT";
+            ROS_INFO("P_INIT______");
             readwalkinggait(); 
             load_dirtxt();
 
@@ -135,6 +137,7 @@ void KidsizeStrategy::strategymain()
 
         case P_MATRIX_CALCULATE: 
             printinfo();
+            ROS_INFO("info2");
             m_state_string = "P_MATRIX_CALCULATE";
             ROS_INFO("P_MATRIX_CALCULATE___");
             compareObs = 10000;
@@ -443,6 +446,7 @@ void KidsizeStrategy::strategymain()
             break;                
         case P_FIND_WALKINGSTATE: 
             printinfo();
+            ROS_INFO("info3");
             m_state_string = "P_FIND_WALKINGSTATE";
             ROS_INFO("P_FIND_WALKINGSTATE______");
             ROS_INFO("IMU = %f", strategy_info->getIMUValue().Yaw);
@@ -512,8 +516,8 @@ void KidsizeStrategy::strategymain()
             {
                 RMoveValue += RightMove[i] * FilterMatrix[i]; 
                 LMoveValue += LeftMove[i] * FilterMatrix[i];
-                ROS_INFO("r:%d",RMoveValue);
-                ROS_INFO("l:%d",LMoveValue);
+                //ROS_INFO("r:%d",RMoveValue);
+                //ROS_INFO("l:%d",LMoveValue);
             }
             if (abs(LMoveValue - RMoveValue) < 8 && LMoveValue > 10 && RMoveValue > 10) 
             {
@@ -1067,6 +1071,7 @@ void KidsizeStrategy::strategymain()
             break;          
         case P_FM_TURNHEAD: 
             printinfo();
+            ROS_INFO("info4");
             m_state_string = "P_FM_TURNHEAD";
             ROS_INFO("P_FM_TURNHEAD_______");
     
@@ -1082,6 +1087,7 @@ void KidsizeStrategy::strategymain()
                 {
                     true_RMoveValue = 0;
                     printinfo();
+                    ROS_INFO("info5");
                 }
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2647, 600); 
                 tool->Delay(100);
@@ -1103,6 +1109,7 @@ void KidsizeStrategy::strategymain()
                 {
                     true_LMoveValue = 0;
                     printinfo();
+                    ROS_INFO("info6");
                 }
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 600);
                 tool->Delay(100);
@@ -1130,6 +1137,7 @@ void KidsizeStrategy::strategymain()
                     for (int j = 0;; j++)
                     {
                         printinfo();
+                        ROS_INFO("info7");
                         traverse();
                         if (j % 100 == 0)
                         {
@@ -1291,11 +1299,16 @@ void KidsizeStrategy::strategymain()
                 break;
             }
             printinfo();
+            ROS_INFO("info8");
             break;   
         case P_DOOR: //紅門策略
-            printinfo();
+            //printinfo();
             m_state_string = "P_DOOR";
 		    ROS_INFO("P_DOOR____________");
+            if(first_enter_door == true)
+                    ROS_INFO("(if)first_enter_door true");
+            else
+                    ROS_INFO("(if)first_enter_door false");
             if (zero_flag == true) 
             {
                 zero_flag = false; 
@@ -1304,9 +1317,11 @@ void KidsizeStrategy::strategymain()
 	
             Red_Door_flag = false;
             Blue_obs_flag = false;
+            ROS_INFO("Red_Door_flag false  Blue_obs_flag false");
             if (strategy_info->color_mask_subject_cnts[5] == 0)
             {
                 first_enter_door = true;
+                ROS_INFO("first_enter_door true ...");
                 m_state = P_MATRIX_CALCULATE;
                 ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
                 tool->Delay(100);
@@ -1325,23 +1340,44 @@ void KidsizeStrategy::strategymain()
             }
             //////////////////////////////stand at the center of door//////////////////////////////
 
+            ROS_INFO("SlopeCalculate1---------");
             SlopeCalculate();
+            if(first_enter_door == true)
+                    ROS_INFO("(if2)first_enter_door true");
+            else
+                    ROS_INFO("(if2)first_enter_door false");
+            ///++++++
             in_reddoor_flag = true;
+            ROS_INFO("in_reddoor_flag true");
             if (face_to_door == false)
             {
+                ROS_INFO("face_to_door false->true");
                 strategy_info->get_image_flag = true;
                 ros::spinOnce();
+                if(first_enter_door == true)
+                    ROS_INFO("(if3)first_enter_door true");
+                else
+                    ROS_INFO("(if3)first_enter_door false");
+
                 facetodoorfun();
+                if(first_enter_door == true)
+                    ROS_INFO("(if4)first_enter_door true");
+                else
+                    ROS_INFO("(if4)first_enter_door false");
+                m_state = P_DOOR;
                 break;
             }
             else
             {
+                ROS_INFO("face_to_door = true 1");
                 first_enter_door = false;
+                ROS_INFO("first_enter_door false");
                 for (int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
                 {
-                    printinfo();
+                    //printinfo();
                     First_flag = false;
                     Center_door = true;
+                    ROS_INFO("First_flag false  Center_door  true  1");
                     if (strategy_info->color_mask_subject[5][i].size > 300)
                     {
                         printf("-----------------------------------------------------");
@@ -1349,30 +1385,28 @@ void KidsizeStrategy::strategymain()
                         printf("-----------------------------------------------------");
 
                         Red_Door_flag = true;
-                        printinfo();
-
+                        //printinfo();
+                        ROS_INFO("Red_Door_flag = true 1 ");
                         if (strategy_info->color_mask_subject[5][i].XMin > 1)
                         {
                             SlopeCalculate();
-                            angle_offset = atan(slope_avg) * 180 / pi; //旋轉補償量
-                            m_state = P_WALKINGGAIT;
-                            walking_state = RMOVE_DOOR;
-                            p_door = true;
-                            break;
+                            ROS_INFO("red min >1");
                         }
                         else
                         {
                             if (strategy_info->color_mask_subject[5][i].XMax < 318)
                             {
+                                ROS_INFO("red max < 318");
                                 SlopeCalculate();
-                                angle_offset = atan(slope_avg) * 180 / pi;
-                                m_state = P_WALKINGGAIT;
+                                //angle_offset = atan(slope_avg) * 180 / pi;
+                                facetodoorfun();
                                 walking_state = LMOVE_DOOR;
+                                m_state = P_WALKINGGAIT;
                                 p_door = true;
                                 break;
                             }
                         }
-                        printinfo();
+                        //printinfo();
                         for (int j = 0; j < strategy_info->color_mask_subject_cnts[2]; j++)
                         {
                             strategy_info->get_image_flag = true;
@@ -1383,12 +1417,14 @@ void KidsizeStrategy::strategymain()
                                 if (DeepMatrixValue[i] < 20)
                                 {
                                     Center_door = false;
+                                    ROS_INFO("Center_door = false 1");
                                     break;
                                 }
                             }
                             if (Center_door)
                             {
                                 SlopeCalculate();
+                                ROS_INFO("Center_door = true 1");
                                 m_state = P_CRAWL;
                                 break;
                             }
@@ -1398,30 +1434,38 @@ void KidsizeStrategy::strategymain()
                                 printf("strategy_info->color_mask_subject[2][j].size = %d\n",strategy_info->color_mask_subject[2][j].size);
                                 printf("-----------------------------------------------------");
                                 Blue_obs_flag = true;
+                                ROS_INFO("Blue_obs_flag  true 1");
                                 if (First_flag)
                                 {
-
+                                    ROS_INFO(" First_flag  1");
                                     if (strategy_info->color_mask_subject[2][j].XMax > 160)
                                     {
+                                        ROS_INFO("blue max >160");
                                         if ((strategy_info->color_mask_subject[2][j].Width - First_width) > 20)
                                         {
+                                            ROS_INFO("blue - First_width > 20,First_width = %5lf",First_width);
+
                                             twentyflag = false;
                                             SlopeCalculate();
-                                            angle_offset = atan(slope_avg) * 180 / pi;
-                                            m_state = P_WALKINGGAIT;
+                                            //angle_offset = atan(slope_avg) * 180 / pi;
                                             walking_state = LMOVE_DOOR; 
+                                            m_state = P_WALKINGGAIT;
+                                            facetodoorfun();
                                             p_door = true;
                                         }
                                         else if ((strategy_info->color_mask_subject[2][j].Width - First_width) < -20)
                                         {
+                                            ROS_INFO("blue - First_width < -20,First_width = %5lf",First_width);
                                             SlopeCalculate();
-                                            angle_offset = atan(slope_avg) * 180 / pi;
-                                            m_state = P_WALKINGGAIT;
+                                            //angle_offset = atan(slope_avg) * 180 / pi;
                                             walking_state = RMOVE_DOOR; 
+                                            m_state = P_WALKINGGAIT;
+                                            facetodoorfun();
                                             p_door = true;
                                         }
                                         else
                                         {
+                                            ROS_INFO("twentyflag true 1");
                                             twentyflag = true;
                                             SlopeCalculate();
                                             m_state = P_CRAWL;
@@ -1430,25 +1474,31 @@ void KidsizeStrategy::strategymain()
                                     }
                                     else
                                     {
+                                        ROS_INFO("(else)blue max >160 ");
                                         if ((strategy_info->color_mask_subject[2][j].Width - First_width) > 20)
                                         {
+                                            ROS_INFO("blue - First_width > 20,First_width = %5lf",First_width);
                                             twentyflag = false;
                                             SlopeCalculate();
-                                            angle_offset = atan(slope_avg) * 180 / pi;
-                                            m_state = P_WALKINGGAIT;
+                                            //angle_offset = atan(slope_avg) * 180 / pi;
                                             walking_state = RMOVE_DOOR;
+                                            m_state = P_WALKINGGAIT;
+                                            facetodoorfun();
                                             p_door = true;
                                         }
                                         else if ((strategy_info->color_mask_subject[2][j].Width - First_width) < -20)
                                         {
+                                            ROS_INFO("blue - First_width < -20,First_width = %5lf",First_width);
                                             SlopeCalculate();
-                                            angle_offset = atan(slope_avg) * 180 / pi;
-                                            m_state = P_WALKINGGAIT;
+                                            //angle_offset = atan(slope_avg) * 180 / pi;
                                             walking_state = LMOVE_DOOR;
+                                            m_state = P_WALKINGGAIT;
+                                            facetodoorfun();
                                             p_door = true;
                                         }
                                         else
                                         {
+                                            ROS_INFO("twentyflag true 2");
                                             twentyflag = true;
                                             SlopeCalculate();
                                             m_state = P_CRAWL;
@@ -1459,22 +1509,25 @@ void KidsizeStrategy::strategymain()
                                 }
                                 else
                                 {
-                                    
+                                    ROS_INFO("(else) First_flag  1"); 
                                     if (strategy_info->color_mask_subject[2][j].X > 159)
                                     {
-                                        
+                                        ROS_INFO("blue max >159");                                        
                                         SlopeCalculate();
-                                        angle_offset = atan(slope_avg) * 180 / pi;
-                                        m_state = P_WALKINGGAIT;
+                                        //angle_offset = atan(slope_avg) * 180 / pi;
                                         walking_state = LMOVE_DOOR;
+                                        m_state = P_WALKINGGAIT;
+                                        facetodoorfun();
                                         p_door = true;
                                     }
                                     else
                                     {
+                                        ROS_INFO("blue max < 159");                                        
                                         SlopeCalculate();
-                                        angle_offset = atan(slope_avg) * 180 / pi;
-                                        m_state = P_WALKINGGAIT;
+                                        //angle_offset = atan(slope_avg) * 180 / pi;
                                         walking_state = RMOVE_DOOR;
+                                        m_state = P_WALKINGGAIT;
+                                        facetodoorfun();
                                         p_door = true;
                                     }
                                     First_width = strategy_info->color_mask_subject[2][j].Width;
@@ -1483,6 +1536,7 @@ void KidsizeStrategy::strategymain()
                             }
                             if (!Blue_obs_flag)
                             {
+                                ROS_INFO("!Blue_obs_flag 1");
                                 SlopeCalculate();
                                 IMUSlope();
                                 m_state = P_CRAWL;
@@ -1490,6 +1544,7 @@ void KidsizeStrategy::strategymain()
                             }
                             if (Center_door)
                             {
+                                ROS_INFO("Center_door 1");
                                 SlopeCalculate();
                                 m_state = P_CRAWL;
                                 break;
@@ -1497,6 +1552,7 @@ void KidsizeStrategy::strategymain()
                         }
                         if (!Center_door)
                         {
+                            ROS_INFO("!Center_door 1");
                             break;
                         }
                     }
@@ -1504,7 +1560,9 @@ void KidsizeStrategy::strategymain()
             }
             if (!Red_Door_flag)
             {
+                ROS_INFO("!Red_Door_flag");
                 first_enter_door = true;
+                ROS_INFO("first_enter_door = true  1");
                 m_state = P_MATRIX_CALCULATE;
                 ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 100);
                 tool->Delay(100);
@@ -1522,25 +1580,29 @@ void KidsizeStrategy::strategymain()
             }
             strategy_info->get_image_flag = true;
             ros::spinOnce();
-            printinfo();
+            //printinfo();
             break;
         case P_CRAWL: //爬行策略
             p_door = false;
             printinfo();
+            ROS_INFO("info9");
             m_state_string = "P_CRAWL";
             ROS_INFO("P_CRAWL___");
             if (face_to_door == false)
             {
+                ROS_INFO("(P_CRAWL) face_to_door false");
                 strategy_info->get_image_flag = true;
                 ros::spinOnce();
                 facetodoorfun();
                 break;
             }
-            else if (face_to_door == true && abs(slope_avg) <= 0.05) 
+            else if (face_to_door == true && abs(slope_avg) <= 0.1) 
             {
+                ROS_INFO("(crawl)face_to_door == true && abs(slope_avg) <= 0.1");
                 ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32], IMU_continuous);
                 tool->Delay(100);
                 printinfo();
+                ROS_INFO("info10");
                 tool->Delay(3000);
                 ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous);
                 tool->Delay(1000);
@@ -1551,16 +1613,17 @@ void KidsizeStrategy::strategymain()
                 ros_com->sendHeadMotor(HeadMotorID::VerticalID, 2500, 600);
                 Continuous_flag = false;
                 ros_com->sendBodySector(5);
-                tool->Delay(1000);
+                tool->Delay(1300);
                 ros_com->sendBodySector(6);
-                tool->Delay(3000);
+                tool->Delay(5500);
 
-                for (int multisingleSTEP = 0; multisingleSTEP <= 10; multisingleSTEP++)
+                for (int multisingleSTEP = 0; multisingleSTEP <= 3; multisingleSTEP++)
                 {
                     ROS_INFO("First crw");
                     ros_com->sendBodySector(7);
-                    tool->Delay(2200);
+                    tool->Delay(1000);
                 }
+
                 for (int multisingleSTEP = 0; multisingleSTEP <= 20; multisingleSTEP++)
                 {
                     ROS_INFO("Second crw");
@@ -1568,7 +1631,8 @@ void KidsizeStrategy::strategymain()
                     ros::spinOnce();
                     for (int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)
                     {
-                        if (strategy_info->color_mask_subject[2][i].size > 32000)
+                        ROS_INFO("blueobs size: %d ",strategy_info->color_mask_subject[2][i].size);
+                        if (strategy_info->color_mask_subject[2][i].size > 30000)
                         {
                             ROS_INFO("stand up1");
                             crw_up = true;
@@ -1579,6 +1643,7 @@ void KidsizeStrategy::strategymain()
                     ros::spinOnce();
                     for (int i = 0; i < strategy_info->color_mask_subject_cnts[1]; i++)
                     {
+                        ROS_INFO("yelobs size: %d ",strategy_info->color_mask_subject[1][i].size);
                         if (strategy_info->color_mask_subject[1][i].size > 35000)
                         {
                             ROS_INFO("stand up2");
@@ -1591,7 +1656,7 @@ void KidsizeStrategy::strategymain()
                         break;
                     }
                     ros_com->sendBodySector(7);
-                    tool->Delay(500);
+                    tool->Delay(1000);
 
                 }
                 tool->Delay(500);
@@ -1603,9 +1668,11 @@ void KidsizeStrategy::strategymain()
                 m_state = P_INIT;
             }
             printinfo();
+            ROS_INFO("info11");
             break;
         case P_WALKINGGAIT: //步態參數及補償量
             printinfo();
+            ROS_INFO("info12");
             m_state_string = "P_WALKINGGAIT";
             ROS_INFO("P_WALKINGGAIT_________");
 
@@ -1663,6 +1730,7 @@ void KidsizeStrategy::strategymain()
                 ROS_INFO("continous_angle_offest = %d _____",continous_angle_offest);
                 SlopeCalculate();
                 traverse();
+                facetodoorfun();
                 ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] + continous_angle_offest, IMU_continuous);
                 strategy_info->get_image_flag = true;
                 ros::spinOnce();
@@ -1675,7 +1743,8 @@ void KidsizeStrategy::strategymain()
                 ROS_INFO("continous_angle_offest = %d _____",continous_angle_offest);
                 SlopeCalculate();
                 traverse();
-                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] - continous_angle_offest, IMU_continuous);
+                facetodoorfun();
+                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] + continous_angle_offest, IMU_continuous);
                 strategy_info->get_image_flag = true;
                 ros::spinOnce();
                 continuousValue_x = 0;
@@ -1687,6 +1756,7 @@ void KidsizeStrategy::strategymain()
                 ROS_INFO("continous_angle_offest = %d _____",continous_angle_offest);
                 SlopeCalculate();
                 traverse();
+                facetodoorfun();
                 ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] + continous_angle_offest, IMU_continuous);
                 strategy_info->get_image_flag = true;
                 ros::spinOnce();
@@ -1699,7 +1769,8 @@ void KidsizeStrategy::strategymain()
                 ROS_INFO("continous_angle_offest = %d _____",continous_angle_offest);
                 SlopeCalculate();
                 traverse();
-                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] - continous_angle_offest, IMU_continuous);
+                facetodoorfun();
+                ros_com->sendContinuousValue(dirdata[30], dirdata[31], 0, dirdata[32] + continous_angle_offest, IMU_continuous);
                 strategy_info->get_image_flag = true;
                 ros::spinOnce();
                 continuousValue_x = 0;
@@ -1708,7 +1779,7 @@ void KidsizeStrategy::strategymain()
             case RMOVE_DOOR:
                 walking_state_string = "RMove_DOOR";
                 ROS_INFO("RMove_DOOR_____");
-                ROS_INFO("continous_angle_offest = %d _____",continous_angle_offest);
+                ROS_INFO("(RMOVE_DOOR)continous_angle_offest = %d _____",continous_angle_offest);
 
                 if (dirdata[34] > Ry_fastest)
                 {
@@ -1717,7 +1788,8 @@ void KidsizeStrategy::strategymain()
                 }
                 SlopeCalculate();
                 traverse();
-                give_angle();
+                //give_angle();
+                facetodoorfun();
                 ros_com->sendContinuousValue(dirdata[33], dirdata[34], 0, dirdata[35] + continous_angle_offest, IMU_continuous);
                 strategy_info->get_image_flag = true;
                 ros::spinOnce();
@@ -1727,7 +1799,7 @@ void KidsizeStrategy::strategymain()
             case LMOVE_DOOR:
                 walking_state_string = "LMove_DOOR";
                 ROS_INFO("LMove_DOOR_____");
-                ROS_INFO("continous_angle_offest = %d _____",continous_angle_offest);
+                ROS_INFO("(LMOVE_DOOR)continous_angle_offest = %d _____",continous_angle_offest);
 
                 if (dirdata[37] < Ly_fastest)
                 {
@@ -1736,7 +1808,8 @@ void KidsizeStrategy::strategymain()
                 }
                 SlopeCalculate();
                 traverse();
-                give_angle();
+                //give_angle();
+                facetodoorfun();
                 ros_com->sendContinuousValue(dirdata[36], dirdata[37], 0, dirdata[38] + continous_angle_offest, IMU_continuous);
                 strategy_info->get_image_flag = true;
                 ros::spinOnce();
@@ -1746,6 +1819,9 @@ void KidsizeStrategy::strategymain()
 
             default:
                 ROS_INFO("case default");
+                ROS_INFO("continous_angle_offest = %d",continous_angle_offest);
+                m_state = P_MATRIX_CALCULATE;
+                break;
             }
 
             if (pcrawl_flag == true)
@@ -1811,6 +1887,7 @@ void KidsizeStrategy::strategymain()
         m_state = P_INIT;
         readwalkinggait();
     }
+    ROS_INFO("elseelse");
 }
 
 void KidsizeStrategy::SlopeCalculate() //計算斜率之副函式
@@ -1831,25 +1908,28 @@ void KidsizeStrategy::SlopeCalculate() //計算斜率之副函式
     int slope_Y[4];
     float slope[3];
     slope_avg = 1000000.0;
-    slope_avg_blue = 1000000.0;
+    //slope_avg_blue = 1000000.0;
+    ROS_INFO("SlopeCalculate start");
     if (!in_reddoor_flag)
     {
-        ///ROS_INFO("not in_reddoor_flag!!");
+        ROS_INFO("not in_reddoor_flag!!");
         for (int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)
         {
+            ROS_INFO("SlopeCalculate blue ...");;
             ///ROS_INFO("Size_blue = %d",strategy_info->color_mask_subject[2][i].size);
             if (strategy_info->color_mask_subject[2][i].size > 8000)
             {
+                ROS_INFO("(SlopeCalculate)check_obs_flag true");
                 Check_obs_flag = true;
-                ///ROS_INFO("Size_blue = %d",strategy_info->color_mask_subject[2][i].size);
+                ROS_INFO("Size_blue = %d",strategy_info->color_mask_subject[2][i].size);
                 if (strategy_info->color_mask_subject[2][i].YMax > compareObs_ymax)
                 {
                     Slope_base_obs = i;
                     compareObs_ymax = strategy_info->color_mask_subject[2][i].YMax;
-                    ///ROS_INFO("Near the robot!!");
+                    ROS_INFO("Near the robot!!");
                     if (abs(160 - strategy_info->color_mask_subject[2][i].X) < compareObs_x)
                     {
-                        ///ROS_INFO("Near the 160!!");
+                        ROS_INFO("Near the 160!!");
                         Slope_base_obs = i;
                         compareObs_x = abs(160 - strategy_info->color_mask_subject[2][i].X);
                     }
@@ -1858,26 +1938,32 @@ void KidsizeStrategy::SlopeCalculate() //計算斜率之副函式
         }
         if (Check_obs_flag)
         {
-            ///ROS_INFO("Check_obs_flag true!!");
+            ROS_INFO("Check_obs_flag true!!");
             for (int j = 0; j < 4; j++)
             {
                 int repeat_cnt = 0;
+                ROS_INFO("repeat_cnt");
                 int range = (strategy_info->color_mask_subject[2][Slope_base_obs].XMax - 7) - (strategy_info->color_mask_subject[2][Slope_base_obs].XMin + 7);
                 slope_rand[j] = rand() % range + strategy_info->color_mask_subject[2][Slope_base_obs].XMin;
                 while (1)
                 {
+                    ROS_INFO("slope_rand");
                     if (repeat_cnt != j)
                     {
+                        ROS_INFO("slope_rand..");
                         if (slope_rand[j] == slope_rand[repeat_cnt])
                         {
+                            ROS_INFO("slope_rand..2");
                             repeat_cnt = 0;
                             slope_rand[j] = rand() % range + strategy_info->color_mask_subject[2][Slope_base_obs].XMin;
                         }
                     }
                     else
                     {
+                        ROS_INFO("else slope_rand..");
                         break;
                     }
+                    ROS_INFO("repeat_cnt++");
                     repeat_cnt++;
                 }
             }
@@ -1888,36 +1974,45 @@ void KidsizeStrategy::SlopeCalculate() //計算斜率之副函式
                 int Ymax = strategy_info->color_mask_subject[2][Slope_base_obs].YMax;
                 int cnt = 0;
                 int labelcnt;
+                ROS_INFO("flag");
                 while (flag)
                 {
                     labelcnt = 320 * (Ymax - cnt + 1) + slope_rand[k];
+                    ROS_INFO("labelcnt = %d",labelcnt);
                     if (strategy_info->label_model[labelcnt] == 0x04)
                     {
+                        ROS_INFO("3333");
                         for (int a = 1; a < 4; a++)
                         {
+                            ROS_INFO("a=");
                             if (strategy_info->label_model[labelcnt - 320 * a] != 0x04)
                             {
                                 Check_label_model_flag = false;
+                                ROS_INFO("Check_label_model_flag false");
                                 break;
                             }
                         }
                         if (Check_label_model_flag)
                         {
+                            ROS_INFO("(if)Check_label_model_flag true 1");
                             slope_Y[k] = Ymax - cnt;
                             flag = false;
                         }
                         else
                         {
+                            ROS_INFO("(else)Check_label_model_flag false");
                             Check_label_model_flag = true;
                         }
                     }
                     if ((cnt + 1) > Ymax)
                     {
+                        ROS_INFO("Ymax");
                         slope_Y[k] = strategy_info->color_mask_subject[2][Slope_base_obs].YMin;
                         flag = false;
                     }
                     else
                     {
+                        ROS_INFO("else..");
                         cnt++;
                     }
                 }
@@ -1925,36 +2020,47 @@ void KidsizeStrategy::SlopeCalculate() //計算斜率之副函式
             slope[0] = float(slope_Y[1] - slope_Y[0]) / float(slope_rand[1] - slope_rand[0]);
             slope[1] = float(slope_Y[2] - slope_Y[1]) / float(slope_rand[2] - slope_rand[1]);
             slope[2] = float(slope_Y[3] - slope_Y[2]) / float(slope_rand[3] - slope_rand[2]);
-            slope_avg_blue = (slope[0] + slope[1] + slope[2]) / 3;
+            //slope_avg_blue = (slope[0] + slope[1] + slope[2]) / 3;
+            ROS_INFO("slope[0][1][2]");
         }
         else
         {
             continous_angle_offest = 0;
+            ROS_INFO("continous_angle_offest 0");
         }
     }
     else
     {
+        ROS_INFO("else222");
         for (int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
         {
+            ROS_INFO("strategy_info11");
             if (strategy_info->color_mask_subject[5][i].size > 3000)
             {
+                ROS_INFO("red > 3000");
                 for (int j = 0; j < 4; j++)
                 {
+                    ROS_INFO("int j");
+                    facetodoorfun();
                     int repeat_cnt = 0;
                     int range = (strategy_info->color_mask_subject[5][i].XMax - 10) - (strategy_info->color_mask_subject[5][i].XMin + 10);
                     slope_rand[j] = rand() % range + strategy_info->color_mask_subject[5][i].XMin;
                     while (1)
                     {
+                        ROS_INFO("while1");
                         if (repeat_cnt != j)
                         {
+                            ROS_INFO("repeat_cnt!=j");
                             if (slope_rand[j] == slope_rand[repeat_cnt])
                             {
+                                ROS_INFO("slope_rand[j]");
                                 repeat_cnt = 0;
                                 slope_rand[j] = rand() % range + strategy_info->color_mask_subject[5][i].XMin;
                             }
                         }
                         else
                         {
+                            ROS_INFO("else break");
                             break;
                         }
                         repeat_cnt++;
@@ -1962,6 +2068,7 @@ void KidsizeStrategy::SlopeCalculate() //計算斜率之副函式
                 }
                 for (int k = 0; k < 4; k++)
                 {
+                    ROS_INFO("k");
                     bool flag = true;
                     int Xmax = strategy_info->color_mask_subject[5][i].XMax;
                     int Ymax = strategy_info->color_mask_subject[5][i].YMax;
@@ -1969,34 +2076,42 @@ void KidsizeStrategy::SlopeCalculate() //計算斜率之副函式
                     int labelcnt;
                     while (flag)
                     {
+                        //ROS_INFO("flag11111");
                         labelcnt = 320 * (Ymax - cnt + 1) + slope_rand[k];
                         if (strategy_info->label_model[labelcnt] == 0x20)
                         {
+                            ROS_INFO("0x20");
                             for (int a = 1; a < 4; a++)
                             {
+                                ROS_INFO("a444");
                                 if (strategy_info->label_model[labelcnt - 320 * a] != 0x20)
                                 {
+                                    ROS_INFO("Check_label_model_flag = false........");
                                     Check_label_model_flag = false;
                                     break;
                                 }
                             }
                             if (Check_label_model_flag)
                             {
+                                ROS_INFO("Check_label_model_flag33333333333");
                                 slope_Y[k] = Ymax - cnt;
                                 flag = false;
                             }
                             else
                             {
+                                ROS_INFO("Check_label_model_flag else true");
                                 Check_label_model_flag = true;
                             }
                         }
                         if ((cnt + 1) > Ymax)
                         {
+                            ROS_INFO("99999999");
                             slope_Y[k] = strategy_info->color_mask_subject[5][i].YMin;
                             flag = false;
                         }
                         else
                         {
+                            //ROS_INFO("8888888888");
                             cnt++;
                         }
                     }
@@ -2005,16 +2120,19 @@ void KidsizeStrategy::SlopeCalculate() //計算斜率之副函式
                 slope[1] = float(slope_Y[2] - slope_Y[1]) / float(slope_rand[2] - slope_rand[1]);
                 slope[2] = float(slope_Y[3] - slope_Y[2]) / float(slope_rand[3] - slope_rand[2]);
                 slope_avg = (slope[0] + slope[1] + slope[2]) / 3;
+                ROS_INFO("555555555");
                 break;
             }
         }
     }
     if (abs(slope_avg) <= 0.05)
     {
+        ROS_INFO("face_to_door true 111");
         face_to_door = true;
     }
     else
     {
+        ROS_INFO("face_to_door false 111");
         face_to_door = false;
     }
 }
@@ -2166,63 +2284,91 @@ void KidsizeStrategy::facetodoorfun() //正對紅門修正之副函式
         pcrawl_flag = true;
     else
         pcrawl_flag = false;
-
+    ROS_INFO("slope_avg :%lf",slope_avg);
+    ROS_INFO("continous_angle_offest : %d",continous_angle_offest);
     if (first_enter_door)
     {
-        if (slope_avg < 0.5 && slope_avg >= 0.25)
+        ROS_INFO("first_enter_door");
+        if (slope_avg < 0.5 && slope_avg >= 0.25)//need rt
         {
-            walking_state = continuousValue_Rt;
+            ROS_INFO("slope_avg < 0.5 && slope_avg >= 0.25");
+            continous_angle_offest = -3;
+
             m_state = P_WALKINGGAIT;
         }
-        else if (slope_avg > -0.5 && slope_avg <= -0.25)
+        else if (slope_avg > -0.5 && slope_avg <= -0.25)//need lt
         {
-            walking_state = continuousValue_Lt;
+            ROS_INFO("slope_avg > -0.5 && slope_avg <= -0.25");
+            continous_angle_offest = 3;
             m_state = P_WALKINGGAIT;
         }
 
-        else if (slope_avg > 0 && slope_avg < 0.25)
+        else if (slope_avg > 0 && slope_avg < 0.125)
         {
-            walking_state = continuousValue_Rt;
+            ROS_INFO("slope_avg > 0 && slope_avg < 0.125");
+            continous_angle_offest = -1;
             m_state = P_WALKINGGAIT;
             first_enter_door = false;
         }
-        else if (slope_avg < 0 && slope_avg > -0.25)
+        else if (slope_avg < 0 && slope_avg > -0.125)
         {
-            walking_state = continuousValue_Lt;
+            ROS_INFO("slope_avg < 0 && slope_avg > -0.125");
+            continous_angle_offest = 1;
+            m_state = P_WALKINGGAIT;
+            first_enter_door = false;
+        }
+        else if (slope_avg > 0.125 && slope_avg < 0.25)
+        {
+            ROS_INFO("slope_avg > 0.125 && slope_avg < 0.25");
+            continous_angle_offest = -2;
+            m_state = P_WALKINGGAIT;
+            first_enter_door = false;
+        }
+        else if (slope_avg < 0.125 && slope_avg > -0.25)
+        {
+            ROS_INFO("slope_avg < 0.125 && slope_avg > -0.25");
+            continous_angle_offest = 2;
             m_state = P_WALKINGGAIT;
             first_enter_door = false;
         }
         else if (slope_avg < 1 && slope_avg >= 0.5)
         {
-            walking_state = continuousValue_R2t;
+            ROS_INFO("slope_avg < 1 && slope_avg >= 0.5");
+            continous_angle_offest = -4;
             m_state = P_WALKINGGAIT;
         }
         else if (slope_avg > -1 && slope_avg <= -0.5)
         {
-            walking_state = continuousValue_L2t;
+            ROS_INFO("slope_avg > -1 && slope_avg <= -0.5");
+            continous_angle_offest = 4;
             m_state = P_WALKINGGAIT;
         }
     }
     else ////first_enter_door為false
     {
+        ROS_INFO("first_enter_door = false");
         if (slope_avg < 0.5 && slope_avg > 0)
         {
-            walking_state = continuousValue_Rt;
+            ROS_INFO("slope_avg < 0.5 && slope_avg > 0");
+            continous_angle_offest = -2;
             m_state = P_WALKINGGAIT;
         }
         else if (slope_avg > -0.5 && slope_avg < 0)
         {
-            walking_state = continuousValue_Lt;
+            ROS_INFO("slope_avg > -0.5 && slope_avg < 0");
+            continous_angle_offest = 2;
             m_state = P_WALKINGGAIT;
         }
         else if (slope_avg < 1 && slope_avg >= 0.5)
         {
-            walking_state = continuousValue_R2t;
+            ROS_INFO("slope_avg < 1 && slope_avg >= 0.5");
+            continous_angle_offest = -4;
             m_state = P_WALKINGGAIT;
         }
         else if (slope_avg > -1 && slope_avg <= -0.5)
         {
-            walking_state = continuousValue_L2t;
+            ROS_INFO("slope_avg > -1 && slope_avg <= -0.5");
+            continous_angle_offest = 4;
             m_state = P_WALKINGGAIT;
         }
     }
@@ -2394,6 +2540,7 @@ void KidsizeStrategy::sideline()
                 }
             }
             printinfo();
+            ROS_INFO("info13");
             //sidelineslope = (float)(TopYellowPoint - BottomYellowPoint) / (float)(cntBottomYellow_x - cntTopYellow_x);
             tool->Delay(1000);
 
@@ -2409,6 +2556,7 @@ void KidsizeStrategy::sideline()
             }
 
             printinfo();
+            ROS_INFO("info14");
             if (m_state != P_FM_TURNHEAD)
             {
                 if (sideline_zero_flag == false)
@@ -2436,10 +2584,11 @@ void KidsizeStrategy::sideline()
         }
     }
     printinfo();
+    ROS_INFO("info15");
 }
 void KidsizeStrategy::printinfo()
 {
-    ROS_INFO("\n\n\n\n\n");
+    ROS_INFO("\n\n\n");
     //ROS_INFO("%s", m_state_string.c_str());
     if (zero_flag)
     {
@@ -2450,7 +2599,6 @@ void KidsizeStrategy::printinfo()
         ROS_INFO("zero_flag = false");
 	
 	ROS_INFO("continous_angle_offest = %d",continous_angle_offest);
-	ROS_INFO("angle_offset = %d",angle_offset);
 
     ROS_INFO("%s",walking_state_string.c_str());
     ROS_INFO("continuousValue_x = %5d", continuousValue_x);
@@ -2466,10 +2614,10 @@ void KidsizeStrategy::printinfo()
         ROS_INFO("rightsidelinewarning = true");
     else
         ROS_INFO("rightsidelinewarning = false");*/
-    ROS_INFO("true_RMoveValue = %d", true_RMoveValue);
+    /*ROS_INFO("true_RMoveValue = %d", true_RMoveValue);
     ROS_INFO("true_LMoveValue = %d", true_LMoveValue);
     ROS_INFO("/////////////Red Door/////////////");
-    ROS_INFO("Red Door slope_avg = %f", slope_avg);
+    //ROS_INFO("Red Door slope_avg = %f", slope_avg);
     if (Center_door)
         ROS_INFO("center_door = true");
     else
@@ -2483,9 +2631,9 @@ void KidsizeStrategy::printinfo()
     else if (m_state == P_DOOR && twentyflag == false)
         ROS_INFO(">20");
     else
-        ROS_INFO(" ");
+        ROS_INFO(" ");*/
     ROS_INFO("IMU = %f", strategy_info->getIMUValue().Yaw);
-    if (first_move_flag)
+    /*if (first_move_flag)
         ROS_INFO("first_move_flag = true");
     else
         ROS_INFO("first_move_flag = false");
@@ -2493,7 +2641,7 @@ void KidsizeStrategy::printinfo()
         ROS_INFO("first_act_flag = true");
     else
         ROS_INFO("first_act_flag = false");
-    ROS_INFO("side line slope = %f", sidelineslope);
+    ROS_INFO("side line slope = %f", sidelineslope);*/
     //ROS_INFO("\n\n\n");
 }
 void KidsizeStrategy::turnslope()
