@@ -38,6 +38,8 @@ int main(int argc, char** argv)
     int dx = 0, dy = 0;
     strategy::DeepMatrix msg_distance;
 
+    cv::namedWindow("compress_image", cv::WINDOW_NORMAL);
+
 	while (nh.ok()) 
 	{
 
@@ -107,6 +109,18 @@ cv::Mat OBSImageAlgorithm::compress_image(cv::Mat ori_img)
             }
         }
     }
+
+    //For debug
+    cv::Mat chG;
+    cv::Mat chB;
+    cv::Mat chR = compress_img.clone();
+    cv::bitwise_and(chR, unFocus_area, chG);
+    cv::bitwise_and(chR, unFocus_area, chB);
+    cv::Mat newChannels[3] = { chB , chG , chR };
+    cv::Mat mergedImage;
+    cv::merge(newChannels, 3, mergedImage);
+    cv::imshow("compress_image", mergedImage);
+    cv::waitKey(1);
 
     return compress_img;
 }
