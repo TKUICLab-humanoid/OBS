@@ -1197,7 +1197,10 @@ void KidsizeStrategy::strategymain()
                                 walking_state_string = "j%100 continousValue_Ry";
                                 if (dirdata[34] >= Ry_fastest)
                                 {
+<<<<<<< HEAD
 
+=======
+>>>>>>> 65aab699198b3d61928bc005a0954980c58ea6bb
                                     dirdata[34] -= 500;
                                     tool->Delay(50); 
                                     strategy_info->get_image_flag = true;
