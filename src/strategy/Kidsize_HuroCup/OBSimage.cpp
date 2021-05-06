@@ -38,6 +38,8 @@ int main(int argc, char** argv)
     int dx = 0, dy = 0;
     strategy::DeepMatrix msg_distance;
 
+    cv::namedWindow("compress_image", cv::WINDOW_NORMAL);
+
 	while (nh.ok()) 
 	{
 
@@ -53,8 +55,7 @@ int main(int argc, char** argv)
             DeepMatrix_Publish.publish(msg_distance);
         }
         ros::spinOnce();
-		loop_rate.sleep();
-        
+		loop_rate.sleep();        
 	}
 	return 0;
 }
@@ -108,6 +109,18 @@ cv::Mat OBSImageAlgorithm::compress_image(cv::Mat ori_img)
             }
         }
     }
+
+    //For debug
+    cv::Mat chG;
+    cv::Mat chB;
+    cv::Mat chR = compress_img.clone();
+    cv::bitwise_and(chR, unFocus_area, chG);
+    cv::bitwise_and(chR, unFocus_area, chB);
+    cv::Mat newChannels[3] = { chB , chG , chR };
+    cv::Mat mergedImage;
+    cv::merge(newChannels, 3, mergedImage);
+    cv::imshow("compress_image", mergedImage);
+    cv::waitKey(1);
 
     return compress_img;
 }
@@ -191,6 +204,9 @@ std::tuple<int, int> OBSImageAlgorithm::calc_dx_dy(int wl, int wr, std::vector<i
         yb = 0;
 
     dy = yc - yb;
+
+    // ROS_INFO("WL: %d, WR: %d", wl, wr);
+    // ROS_INFO("dx: %d, dy: %d", dx, dy);
 
     return std::make_tuple(dx, dy);
 }
@@ -392,7 +408,7 @@ void OBSimage::strategymain()
 
         dy = yc - yb;
 
-        // ROS_INFO("yb: %d", yb);
+        // ROS_INFO("dx: %d, dy: %d", dx, dy);
 
         msg_distance.dx = dx;
         msg_distance.dy = dy;

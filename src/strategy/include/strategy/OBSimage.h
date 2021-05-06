@@ -40,15 +40,28 @@ class OBSImageAlgorithm
 public:
 	OBSImageAlgorithm()
 	{
-		value128 = cv::Mat(240, 320, CV_8UC1, cv::Scalar(128));
-    	value0 = cv::Mat(240, 320, CV_8UC1, cv::Scalar(0));
+            value128 = cv::Mat(240, 320, CV_8UC1, cv::Scalar(128));
+            value0 = cv::Mat(240, 320, CV_8UC1, cv::Scalar(0));
+            unFocus_area = cv::Mat(24, 32, CV_8UC1, cv::Scalar(0));
+            for(int c = 0; c < 32; c++)
+            {
+                for(int r = 0; r < 23 - Focus_area[c]; r++)
+                {
+                    *(unFocus_area.data + (r * 32 + c)) = 255;
+                }
+            }
 	};
 	~OBSImageAlgorithm(){};
 
 	int Focus_area[32] = {1, 2, 6, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 13, 14, 14, 13, 13, 13, 12, 12, 11, 11, 10, 10, 9, 9, 8, 6, 2, 1};
 
+
+        // For debug
+	cv::Mat unFocus_area;
+        // For debug
+        //
 	cv::Mat value128;
-    cv::Mat value0;
+        cv::Mat value0;
 
 	cv::Mat matB, matG, matR;
 
