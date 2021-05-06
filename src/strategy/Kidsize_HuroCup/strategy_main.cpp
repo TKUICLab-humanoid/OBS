@@ -55,12 +55,12 @@ void KidsizeStrategy::calc_Turn()
         y_limit = _turnParam.left_big;
         ROS_INFO("very left");
     }    
-    else if (dy <= -3)
+    else if (dy <= -1)
     {
         y_limit = _turnParam.left_small;
         ROS_INFO("normal left");
     }  
-    else if (dy <= 3)
+    else if (dy <= 1)
     {
         y_limit = _turnParam.no_turn;
         ROS_INFO("no turn");

@@ -205,8 +205,8 @@ std::tuple<int, int> OBSImageAlgorithm::calc_dx_dy(int wl, int wr, std::vector<i
 
     dy = yc - yb;
 
-    // ROS_INFO("WL: %d, WR: %d", wl, wr);
-    // ROS_INFO("dx: %d, dy: %d", dx, dy);
+    ROS_INFO("WL: %d, WR: %d", wl, wr);
+    ROS_INFO("dx: %d, dy: %d", dx, dy);
 
     return std::make_tuple(dx, dy);
 }
