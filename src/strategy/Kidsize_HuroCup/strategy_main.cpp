@@ -1197,10 +1197,6 @@ void KidsizeStrategy::strategymain()
                                 walking_state_string = "j%100 continousValue_Ry";
                                 if (dirdata[34] >= Ry_fastest)
                                 {
-<<<<<<< HEAD
-
-=======
->>>>>>> 65aab699198b3d61928bc005a0954980c58ea6bb
                                     dirdata[34] -= 500;
                                     tool->Delay(50); 
                                     strategy_info->get_image_flag = true;
@@ -1401,7 +1397,6 @@ void KidsizeStrategy::strategymain()
                             {
                                 ROS_INFO("red max < 318");
                                 SlopeCalculate();
-                                //angle_offset = atan(slope_avg) * 180 / pi;
                                 facetodoorfun();
                                 walking_state = LMOVE_DOOR;
                                 m_state = P_WALKINGGAIT;
@@ -1450,7 +1445,6 @@ void KidsizeStrategy::strategymain()
 
                                             twentyflag = false;
                                             SlopeCalculate();
-                                            //angle_offset = atan(slope_avg) * 180 / pi;
                                             walking_state = LMOVE_DOOR; 
                                             m_state = P_WALKINGGAIT;
                                             facetodoorfun();
@@ -1460,7 +1454,6 @@ void KidsizeStrategy::strategymain()
                                         {
                                             ROS_INFO("blue - First_width < -20,First_width = %5lf",First_width);
                                             SlopeCalculate();
-                                            //angle_offset = atan(slope_avg) * 180 / pi;
                                             walking_state = RMOVE_DOOR; 
                                             m_state = P_WALKINGGAIT;
                                             facetodoorfun();
@@ -1483,7 +1476,6 @@ void KidsizeStrategy::strategymain()
                                             ROS_INFO("blue - First_width > 20,First_width = %5lf",First_width);
                                             twentyflag = false;
                                             SlopeCalculate();
-                                            //angle_offset = atan(slope_avg) * 180 / pi;
                                             walking_state = RMOVE_DOOR;
                                             m_state = P_WALKINGGAIT;
                                             facetodoorfun();
@@ -1493,7 +1485,6 @@ void KidsizeStrategy::strategymain()
                                         {
                                             ROS_INFO("blue - First_width < -20,First_width = %5lf",First_width);
                                             SlopeCalculate();
-                                            //angle_offset = atan(slope_avg) * 180 / pi;
                                             walking_state = LMOVE_DOOR;
                                             m_state = P_WALKINGGAIT;
                                             facetodoorfun();
@@ -1517,7 +1508,6 @@ void KidsizeStrategy::strategymain()
                                     {
                                         ROS_INFO("blue max >159");                                        
                                         SlopeCalculate();
-                                        //angle_offset = atan(slope_avg) * 180 / pi;
                                         walking_state = LMOVE_DOOR;
                                         m_state = P_WALKINGGAIT;
                                         facetodoorfun();
@@ -1527,7 +1517,6 @@ void KidsizeStrategy::strategymain()
                                     {
                                         ROS_INFO("blue max < 159");                                        
                                         SlopeCalculate();
-                                        //angle_offset = atan(slope_avg) * 180 / pi;
                                         walking_state = RMOVE_DOOR;
                                         m_state = P_WALKINGGAIT;
                                         facetodoorfun();
@@ -1890,7 +1879,6 @@ void KidsizeStrategy::strategymain()
         m_state = P_INIT;
         readwalkinggait();
     }
-    ROS_INFO("elseelse");
 }
 
 void KidsizeStrategy::SlopeCalculate() //計算斜率之副函式
@@ -2438,37 +2426,6 @@ void KidsizeStrategy::readwalkinggait() //步態參數之讀檔
     try
     {
         fin.getline(temp, sizeof(temp));
-        dirdata[0] = tool->readvalue(fin, "RMOVE_FASTX", 0);
-        dirdata[1] = tool->readvalue(fin, "RMOVE_FASTY", 0);
-        dirdata[2] = tool->readvalue(fin, "RMOVE_FASTT", 0);
-        dirdata[3] = tool->readvalue(fin, "LMOVE_FASTX", 0);
-        dirdata[4] = tool->readvalue(fin, "LMOVE_FASTY", 0);
-        dirdata[5] = tool->readvalue(fin, "LMOVE_FASTT", 0);
-        dirdata[6] = tool->readvalue(fin, "RMOVE_SLOWX", 0);
-        dirdata[7] = tool->readvalue(fin, "RMOVE_SLOWY", 0);
-        dirdata[8] = tool->readvalue(fin, "RMOVE_SLOWT", 0);
-        dirdata[9] = tool->readvalue(fin, "LMOVE_SLOWX", 0);
-        dirdata[10] = tool->readvalue(fin, "LMOVE_SLOWY", 0);
-        dirdata[11] = tool->readvalue(fin, "LMOVE_SLOWT", 0);
-        dirdata[12] = tool->readvalue(fin, "WC_BIGLEFTX", 0);
-        dirdata[13] = tool->readvalue(fin, "WC_BIGLEFTY", 0);
-        dirdata[14] = tool->readvalue(fin, "WC_BIGLEFTT", 0);
-        dirdata[15] = tool->readvalue(fin, "WC_MIDLEFTX", 0);
-        dirdata[16] = tool->readvalue(fin, "WC_MIDLEFTY", 0);
-        dirdata[17] = tool->readvalue(fin, "WC_MIDLEFTT", 0);
-        dirdata[18] = tool->readvalue(fin, "WC_LEFTX", 0);
-        dirdata[19] = tool->readvalue(fin, "WC_LEFTY", 0);
-        dirdata[20] = tool->readvalue(fin, "WC_LEFTT", 0);
-        dirdata[21] = tool->readvalue(fin, "WC_BIGRIGHTX", 0);
-        dirdata[22] = tool->readvalue(fin, "WC_BIGRIGHTY", 0);
-        dirdata[23] = tool->readvalue(fin, "WC_BIGRIGHTT", 0);
-        dirdata[24] = tool->readvalue(fin, "WC_MIDRIGHTX", 0);
-        dirdata[25] = tool->readvalue(fin, "WC_MIDRIGHTY", 0);
-        dirdata[26] = tool->readvalue(fin, "WC_MIDRIGHTT", 0);
-        dirdata[27] = tool->readvalue(fin, "WC_RIGHTX", 0);
-        dirdata[28] = tool->readvalue(fin, "WC_RIGHTY", 0);
-        dirdata[29] = tool->readvalue(fin, "WC_RIGHTT", 0);
-        fin.getline(temp, sizeof(temp));
         dirdata[30] = tool->readvalue(fin, "continuous_x_offset", 0);
         dirdata[31] = tool->readvalue(fin, "continuous_y_offset", 0);
         dirdata[32] = tool->readvalue(fin, "continuous_theta_offset", 0);
@@ -2478,15 +2435,6 @@ void KidsizeStrategy::readwalkinggait() //步態參數之讀檔
         dirdata[36] = tool->readvalue(fin, "continuous_x_offset_LEFT", 0);
         dirdata[37] = tool->readvalue(fin, "continuous_y_offset_LEFT", 0);
         dirdata[38] = tool->readvalue(fin, "continuous_theta_offset_LEFT", 0);
-        fin.getline(temp, sizeof(temp));
-        dirdata[39] = tool->readvalue(fin, "_continuous", 0);
-        dirdata[40] = tool->readvalue(fin, "DIRmap_RIGHT_X", 0);
-        dirdata[41] = tool->readvalue(fin, "DIRmap_RIGHT_Y", 0);
-        dirdata[42] = tool->readvalue(fin, "DIRmap_RIGHT_T", 0);
-        dirdata[43] = tool->readvalue(fin, "DIRmap_LEFT_X", 0);
-        dirdata[44] = tool->readvalue(fin, "DIRmap_LEFT_Y", 0);
-        dirdata[45] = tool->readvalue(fin, "DIRmap_LEFT_T", 0);
-        dirdata[46] = tool->readvalue(fin, "IMU_single", 0);
         fin.close();
     }
     catch (exception e)
@@ -2646,222 +2594,4 @@ void KidsizeStrategy::printinfo()
         ROS_INFO("first_act_flag = false");
     ROS_INFO("side line slope = %f", sidelineslope);*/
     //ROS_INFO("\n\n\n");
-}
-void KidsizeStrategy::turnslope()
-{
-
-    ///ROS_INFO("111");
-    /*while(continuousValue_x != dirdata[30])
-    {
-        continuousValue_x -= 100;
-        ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32],IMU_continuous);
-        tool->Delay(100);
-    }*/
-    if (continuousValue_x > dirdata[30])
-    {
-        ///ROS_INFO("X > dirdata[30]");
-        while (continuousValue_x > dirdata[30])
-        {
-            continuousValue_x -= 50;
-            ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32], IMU_continuous);
-            tool->Delay(50);
-        }
-    }
-    else
-    {
-        ///ROS_INFO("X < dirdata[30]");
-        while (continuousValue_x < dirdata[30])
-        {
-            continuousValue_x += 50;
-            ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32], IMU_continuous);
-            tool->Delay(100);
-        }
-    }
-
-    tool->Delay(500);
-    ///ROS_INFO("222");
-
-    bool Check_label_model_flag = true;
-    rest_flag = false;
-    Continuous_flag = true;
-    int Check_Xmin = 160;
-    int Check_Xmax = 160;
-    int Check_Ymax = 0;
-    int Check_Ymax_another_side = 0;
-    slope = 1000000.0;
-    ///ROS_INFO("turnslope");
-    turnslope_flag = true;
-    while (turnslope_flag == true)
-    {
-        strategy_info->get_image_flag = true;
-        ros::spinOnce();
-        for (int i = 0; i <= strategy_info->color_mask_subject_cnts[2]; i++)
-        {
-            if (strategy_info->color_mask_subject[2][i].size > 6000)
-            {
-                if (m_obs_vector.size() > 1)
-                {
-                    ///ROS_INFO("1");
-                    for (int k = 0; k < m_obs_vector.size() - 1; k++)
-                    {
-                        int y_min = m_obs_vector[k + 1].y_min;
-                        int y_max = m_obs_vector[k].y_max;
-                        if (y_min > y_max)
-                        {
-                            m_obs_vector[k].y_max = m_obs_vector[k].y_min;
-                            m_finish_obs_vector.push_back(obs_data);
-                        }
-                    }
-                }
-                for (int h = strategy_info->color_mask_subject[2][i].YMax; h >= strategy_info->color_mask_subject[2][i].YMin; h--)
-                {
-                    for (int w = strategy_info->color_mask_subject[2][i].XMin; w <= strategy_info->color_mask_subject[2][i].XMax; w++)
-                    {
-                        if (strategy_info->label_model[320 * h + w] == 0x04)
-                        {
-                            for (int j = 1; j <= 3; j++)
-                            {
-                                if (strategy_info->label_model[320 * h + w + j] != 0x04)
-                                {
-                                    /////ROS_INFO("2");
-                                    Check_label_model_flag = false;
-                                    break;
-                                }
-                            }
-                            if (Check_label_model_flag == true)
-                            {
-                                /////ROS_INFO("6");
-                                if (h > Check_Ymax)
-                                {
-                                    if (w <= 160)
-                                    {
-                                        ///ROS_INFO("3");
-                                        red_obs_left_coordinates.x = w;
-                                        red_obs_left_coordinates.y = h;
-                                        turn_direction = Right;
-                                    }
-                                    else
-                                    {
-                                        ///ROS_INFO("4");
-                                        red_obs_right_coordinates.x = w;
-                                        red_obs_right_coordinates.y = h;
-                                        turn_direction = Left;
-                                    }
-                                    Check_Ymax = h;
-                                }
-                                switch (turn_direction)
-                                {
-                                case Right:
-                                    if (w >= Check_Xmax)
-                                    {
-                                        if (h >= Check_Ymax_another_side)
-                                        {
-                                            red_obs_right_coordinates.x = w;
-                                            red_obs_right_coordinates.y = h;
-                                            Check_Ymax_another_side = h;
-                                            Check_Xmax = w;
-                                        }
-                                    }
-                                    break;
-                                case Left:
-                                    if (w <= Check_Xmin)
-                                    {
-                                        if (h >= Check_Ymax_another_side)
-                                        {
-                                            red_obs_left_coordinates.x = w;
-                                            red_obs_left_coordinates.y = h;
-                                            Check_Xmin = w;
-                                            Check_Ymax_another_side = h;
-                                        }
-                                    }
-                                    break;
-                                }
-                            }
-                            Check_label_model_flag = true;
-                        }
-                    }
-                }
-            }
-        }
-        ///ROS_INFO("final_right_x = %f , final_right_y = %f",red_obs_right_coordinates.x,red_obs_right_coordinates.y);
-        ///ROS_INFO("final_left_x = %f , final_left_y = %f",red_obs_left_coordinates.x,red_obs_left_coordinates.y);
-        ///ROS_INFO("5");
-        slope = (red_obs_right_coordinates.y - red_obs_left_coordinates.y) / (red_obs_right_coordinates.x - red_obs_left_coordinates.x);
-        ///ROS_INFO("6");
-        if (slope < 0)
-        {
-            if (abs(slope) > 0.3)
-            { ///ROS_INFO("7");
-                if (Continuous_flag)
-                {
-                    /*///ROS_INFO("xxxxxxxxxx");
-              while(continuousValue_x != 0)
-                {
-                continuousValue_x -= 100;
-                tool->Delay(100);
-                ///ROS_INFO("ffffff");
-                ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32]);
-                }*/
-                    ///ROS_INFO("8");
-                    ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_single);
-                    Continuous_flag = false;
-                    ///ROS_INFO("9");
-                    tool->Delay(3000);
-                    ///ROS_INFO("10");
-                }
-                ///ROS_INFO("%f",slope);
-                ///ROS_INFO("WC_BIGLEFT");
-                ///ROS_INFO("11");
-                ros_com->sendBodyAuto(dirdata[12], dirdata[13], 0, dirdata[14], WalkingMode::Single_third, IMU_single);
-                tool->Delay(2000);
-                slope_flag = true;
-                ///ROS_INFO("12");
-                //ros_com->sendBodyAuto(0, 0, 0, 0,WalkingMode::ContinuousStep);
-
-                //Continuous_flag=true;
-            }
-        }
-        else
-        {
-            if (abs(slope) > 0.3)
-            {
-                if (Continuous_flag)
-                {
-                    /*while(continuousValue_x != 0)
-                {
-                continuousValue_x -= 100;
-                tool->Delay(100);
-                ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32]);
-                }*/
-                    ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_single);
-                    Continuous_flag = false;
-                    ///ROS_INFO("13");
-                    tool->Delay(3000);
-                    ///ROS_INFO("14");
-                }
-                ///ROS_INFO("%f",slope);
-                ///ROS_INFO("WC_BIGRIGHT");
-                ///ROS_INFO("15");
-                ros_com->sendBodyAuto(dirdata[21], dirdata[22], 0, dirdata[23], WalkingMode::Single_third, IMU_single);
-                tool->Delay(2000);
-                slope_flag = true;
-                ///ROS_INFO("16");
-                //ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep);
-
-                //Continuous_flag=true;
-            }
-        }
-        if (abs(slope) < 0.3)
-        {
-            ///ROS_INFO("abs(slope)<0.3");
-            turnslope_flag = false;
-            if (slope_flag == true)
-            {
-                ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_single);
-                slope_flag = false;
-            }
-            ///ROS_INFO("leave turnslope");
-            tool->Delay(1000);
-        }
-    }
 }
