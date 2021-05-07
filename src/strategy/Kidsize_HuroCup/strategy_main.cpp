@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 
 void KidsizeStrategy::strategymain()
 {
-    int FocusMatrix[32] = {4, 5, 5, 5, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 5, 5, 5, 4}; //攝影機內之焦點矩陣
+    int FocusMatrix[32] = {3, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 4, 4, 4, 3}; //攝影機內之焦點矩陣
     int FocusMatrix_R[32] = {4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1};
     int FocusMatrix_L[32] = {1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4};
     int LeftMove[32]  = { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  2,  3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 21};
@@ -37,7 +37,11 @@ void KidsizeStrategy::strategymain()
             m_state_string = "P_INIT";
             ROS_INFO("P_INIT______");
             readwalkinggait(); 
-            load_dirtxt();
+            load_dirtxt();\
+            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300); //頭部馬達刻度(上下)
+            tool->Delay(100);
+            ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);
+            tool->Delay(100);
 
             if (!Continuous_flag) //起步步態
             {
@@ -76,7 +80,7 @@ void KidsizeStrategy::strategymain()
             insideFMcnt = 0;                                            //有幾行為危險區(深度於焦點內)
             in_reddoor_flag = false;                                    //add
             sideline_zero_flag = true;                                  //add
-            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300); //頭部馬達刻度(上下)
+            /*ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300); //頭部馬達刻度(上下)
             tool->Delay(100);
             ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300);
             tool->Delay(100);
@@ -87,7 +91,7 @@ void KidsizeStrategy::strategymain()
             ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);
             tool->Delay(100);
             ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);
-            tool->Delay(200);
+            tool->Delay(200);*/
 
             stand_flag = true;                    //站起來
             strategy_info->get_image_flag = true; //擷取影像
@@ -96,42 +100,6 @@ void KidsizeStrategy::strategymain()
             Ly_fastest = dirdata[37];            
             m_obs_vector.clear();
             m_state = P_MATRIX_CALCULATE;
-            switch (dirdata[39]) //連續步態之IMU
-            {
-            case 1:
-                IMU_continuous = SensorMode::None; //全關
-                break;
-
-            case 2:
-                IMU_continuous = SensorMode::Roll; //只開y方向
-                break;
-
-            case 3:
-                IMU_continuous = SensorMode::Pitch; //只開x方向
-                break;
-
-            case 4:
-                IMU_continuous = SensorMode::RollPitch; //全開
-                break;
-            }
-            switch (dirdata[46]) //單步步態之IMU
-            {
-            case 1:
-                IMU_single = SensorMode::None;
-                break;
-
-            case 2:
-                IMU_single = SensorMode::Roll;
-                break;
-
-            case 3:
-                IMU_single = SensorMode::Pitch;
-                break;
-
-            case 4:
-                IMU_single = SensorMode::RollPitch;
-                break;
-            }
             printinfo();
             break;
 
@@ -1197,6 +1165,7 @@ void KidsizeStrategy::strategymain()
                                 walking_state_string = "j%100 continousValue_Ry";
                                 if (dirdata[34] >= Ry_fastest)
                                 {
+
                                     dirdata[34] -= 500;
                                     tool->Delay(50); 
                                     strategy_info->get_image_flag = true;
@@ -1397,6 +1366,7 @@ void KidsizeStrategy::strategymain()
                             {
                                 ROS_INFO("red max < 318");
                                 SlopeCalculate();
+                                
                                 facetodoorfun();
                                 walking_state = LMOVE_DOOR;
                                 m_state = P_WALKINGGAIT;
@@ -1624,7 +1594,7 @@ void KidsizeStrategy::strategymain()
                     for (int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)
                     {
                         ROS_INFO("blueobs size: %d ",strategy_info->color_mask_subject[2][i].size);
-                        if (strategy_info->color_mask_subject[2][i].size > 30000)
+                        if (strategy_info->color_mask_subject[2][i].size > 44000)
                         {
                             ROS_INFO("stand up1");
                             crw_up = true;
@@ -1636,7 +1606,7 @@ void KidsizeStrategy::strategymain()
                     for (int i = 0; i < strategy_info->color_mask_subject_cnts[1]; i++)
                     {
                         ROS_INFO("yelobs size: %d ",strategy_info->color_mask_subject[1][i].size);
-                        if (strategy_info->color_mask_subject[1][i].size > 35000)
+                        if (strategy_info->color_mask_subject[1][i].size > 50000)
                         {
                             ROS_INFO("stand up2");
                             crw_up = true;
@@ -1653,7 +1623,7 @@ void KidsizeStrategy::strategymain()
                 }
                 tool->Delay(500);
                 ros_com->sendBodySector(8);
-                tool->Delay(6000);
+                tool->Delay(11000);
                 ros_com->sendBodySector(29);
                 continuousValue_x = 0;
                 tool->Delay(3000);
@@ -1879,6 +1849,7 @@ void KidsizeStrategy::strategymain()
         m_state = P_INIT;
         readwalkinggait();
     }
+    //ROS_INFO("elseelse");
 }
 
 void KidsizeStrategy::SlopeCalculate() //計算斜率之副函式
@@ -2277,7 +2248,7 @@ void KidsizeStrategy::facetodoorfun() //正對紅門修正之副函式
         pcrawl_flag = false;
     ROS_INFO("slope_avg :%lf",slope_avg);
     ROS_INFO("continous_angle_offest : %d",continous_angle_offest);
-    if (first_enter_door)
+    if (!first_enter_door)
     {
         ROS_INFO("first_enter_door");
         if (slope_avg < 0.5 && slope_avg >= 0.25)//need rt
@@ -2595,3 +2566,4 @@ void KidsizeStrategy::printinfo()
     ROS_INFO("side line slope = %f", sidelineslope);*/
     //ROS_INFO("\n\n\n");
 }
+
