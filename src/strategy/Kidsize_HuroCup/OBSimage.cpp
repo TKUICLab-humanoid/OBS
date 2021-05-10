@@ -79,7 +79,17 @@ void OBSimage::strategymain()
 			cv::resize(compressimage, publish_image, cv::Size(320, 240),CV_INTER_LINEAR);
 			msg_compressimage = cv_bridge::CvImage(std_msgs::Header(), "bgr8", publish_image).toImageMsg();
             pub_colormodel.publish(msg_compressimage);*/
+
+
+
+
+
             cv::Mat image = strategy_info->cvimg->image;
+
+
+
+
+
             for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
             {
                 DeepMatrix_cnt[compress_width] = 0;
@@ -130,24 +140,35 @@ void OBSimage::strategymain()
 					}
                 }
             }
-			/*for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10 ; compress_width++)
-            {
-                for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10  ; compress_height++)
-                {
-                    bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-                    gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-                    rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
-					if(*rValue == 128 &&  *gValue == 0 && *bValue == 128)
-					{
-						printf("1  ");
-					}
-					else
-					{
-						printf("0  ");
-					}
-				}
-				printf("\n");
-			}*/
+
+
+
+
+
+                    /*for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10 ; compress_width++)
+                    {
+                        for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10  ; compress_height++)
+                        {
+                            bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
+                            gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
+                            rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
+                            if(*rValue == 128 &&  *gValue == 0 && *bValue == 128)
+                            {
+                                printf("1  ");
+                            }
+                            else
+                            {
+                                printf("0  ");
+                            }
+                        }
+                        printf("\n");
+                    }*/
+
+
+
+
+
+
 			for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10  ; compress_height++)
             {
                 for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10 ; compress_width++)
@@ -157,11 +178,11 @@ void OBSimage::strategymain()
                     rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
 					if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
 					{
-						printf("1  ");
+						printf("1 ");
 					}
 					else
 					{
-						printf("0  ");
+						printf("0 ");
 					}
 				}
 				printf("\n");
@@ -176,10 +197,17 @@ void OBSimage::strategymain()
                     totalL += DeepMatrix_cnt[i]*DeepMatrix_cnt[i];
                     totalR += DeepMatrix_cnt[i]*DeepMatrix_cnt[i];
             }
+            printf("\n");
             printf("totalL = %d\ntotalR = %d", totalL,totalR);
             DeepMatrix_Publish.publish(deepmatrix);
             deepmatrix.DeepMatrix.clear();
             printf("\n");
+
+
+
+
+
+
 ////////////////////////////////////opencv/////////////////////////////////////////////
             cv::resize(image, publish_image, cv::Size(320, 240),CV_INTER_LINEAR);
 			//cv::imshow("publish_image",publish_image);

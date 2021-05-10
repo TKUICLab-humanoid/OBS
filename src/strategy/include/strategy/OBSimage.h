@@ -56,7 +56,7 @@ public:
 	unsigned char *rValue, *gValue, *bValue;
 
 	sensor_msgs::ImagePtr msg_compressimage;
-    cv::Mat publish_image;
+    	cv::Mat publish_image;
 	image_transport::Publisher pub_colormodel;
 
 	RosCommunicationInstance *ros_com;
