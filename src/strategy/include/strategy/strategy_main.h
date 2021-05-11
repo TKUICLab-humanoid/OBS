@@ -136,6 +136,7 @@ public:
 
 	int DeepMatrixValue[32];
 	int FilterMatrix[32];
+	int FocusMatrix[32];
 	int RMoveValue = 0;
 	int LMoveValue = 0;
 	int true_RMoveValue=0;

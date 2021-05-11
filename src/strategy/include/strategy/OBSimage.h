@@ -31,6 +31,11 @@
 
 #define IMAGEHEIGHT 240
 #define IMAGEWIDTH 320
+#define DeepMatrixSize 32
+
+int DeepMatrix_cnt[32];
+int DeepMatrixValue[32];
+int FilterMatrix[32];
 
 using namespace std;
 
@@ -49,7 +54,6 @@ public:
 	~OBSimage(){};
 	void strategymain();
 
-	int DeepMatrix_cnt[32];
 	int color_cnt;
 	bool blue_flag = false;
 	float color_flag;
