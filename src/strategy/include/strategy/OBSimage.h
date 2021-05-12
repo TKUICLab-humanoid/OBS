@@ -29,8 +29,8 @@
 #include <fstream>
 #include <sstream>
 
-#define IMAGEHEIGHT 240
-#define IMAGEWIDTH 320
+#define IMAGEHEIGHT 24
+#define IMAGEWIDTH 32
 #define DeepMatrixSize 32
 
 int DeepMatrix_cnt[32];
