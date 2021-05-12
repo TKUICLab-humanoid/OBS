@@ -176,7 +176,7 @@ void OBSimage::strategymain()
                     totalL += DeepMatrix_cnt[i]*DeepMatrix_cnt[i];
                     totalR += DeepMatrix_cnt[i]*DeepMatrix_cnt[i];
             }
-            printf("totalL = %d\ntotalR = %d", totalL,totalR);
+            printf("\ntotalL = %d\ntotalR = %d", totalL,totalR);
             DeepMatrix_Publish.publish(deepmatrix);
             deepmatrix.DeepMatrix.clear();
             printf("\n");
