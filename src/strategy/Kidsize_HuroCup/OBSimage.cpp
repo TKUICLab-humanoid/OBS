@@ -74,7 +74,7 @@ void OBSimage::strategymain()
 			printf("\nDeep Matrix\n");
             for(int i = 0; i < 32 ;i++)
             {
-                deepmatrix.DeepMatrix.push_back(Deep_Matrix[i]);
+                deepmatrix_parameter.DeepMatrix.push_back(Deep_Matrix[i]);
                 printf("%2d,",Deep_Matrix[i]);
             }
 			printf("\nFocus Matrix\n");
@@ -127,7 +127,7 @@ void OBSimage::strategymain()
 				Dx = abs(Xc - Xb);
 				printf("\nObstacle in right\n");
 			}
-			else		//WR = WL
+			else if((WR == WL) && (WR > 0) && (WL > 0))		//WR = WL
 			{
 				for(int i = 0 ; i < 32 ; i++) 
 				{
@@ -142,9 +142,13 @@ void OBSimage::strategymain()
 				}
 
 				if(W_L > W_R)
+				{
 					WL += 10;
+				}
 				else
+				{
 					WR += 10;
+				}
 			}
 
 			printf("\n\nW_R = %d,W_L = %d\n",W_R,W_L);
@@ -152,12 +156,20 @@ void OBSimage::strategymain()
 			printf("Xc_count = %d, Xi_sum = %d, Xc = %.3lf\n",Xc_count,Xi_sum,Xc);
 			printf("Dy = %d, WR = %d, WL = %d\n",Dy,WR,WL);
 
-            //DeepMatrix_Publish.publish(deepmatrix);
-            deepmatrix.DeepMatrix.clear();
+			deepmatrix_parameter.WR = WR;
+			deepmatrix_parameter.WL = WL;
+			deepmatrix_parameter.Xc = Xc;
+			deepmatrix_parameter.Xb = Xb;
+			deepmatrix_parameter.Dy = Dy;
+			deepmatrix_parameter.Dx = Dx;
+
+			DeepMatrix_Publish.publish(deepmatrix_parameter);
+
+
+            deepmatrix_parameter.DeepMatrix.clear();
             printf("\n");
 ////////////////////////////////////opencv/////////////////////////////////////////////
             cv::resize(image, publish_image, cv::Size(320, 240),CV_INTER_LINEAR);
-			//cv::imshow("publish_image",publish_image);
 			cv::waitKey(1);
             msg_compressimage = cv_bridge::CvImage(std_msgs::Header(), "bgr8", publish_image).toImageMsg();
             pub_colormodel.publish(msg_compressimage);
