@@ -1,9 +1,5 @@
 #include "strategy/OBSimage.h"
 
-int totalL = 0;
-int totalR = 0;
-int Left[32]= {1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4};
-int Right[32]={4,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1};
 int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "OBSimage");
@@ -24,62 +20,10 @@ int main(int argc, char** argv)
 }
 
 void OBSimage::strategymain()
-{
-    
+{  
 	if(strategy_info->getStrategyStart())
 	{	
-            cv::Mat compressimage(24,32,CV_8UC3);
-            /*for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10 ; compress_height++)
-            {
-                for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10 ; compress_width++)
-                {
-                    bValue = (compressimage.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-                    gValue = (compressimage.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-                    rValue = (compressimage.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
-                    for(int lheight = 0 ; lheight < 10 ; lheight++)
-                    {
-                        for(int lwidth = 0 ; lwidth < 10 ; lwidth++)
-                        {
-						ROS_INFO("%d",strategyinfo->Label_Model[(lheight+compress_height*10)*IMAGEWIDTH+(lwidth+compress_width*10)]);
-                            if(strategyinfo->Label_Model[(lheight+compress_height*10)*IMAGEWIDTH+(lwidth+compress_width*10)] == BlueLabel)
-                            {
-                                color_cnt++;                            
-                            }
-                            else if(strategyinfo->Label_Model[(lheight+compress_height*10)*IMAGEWIDTH+(lwidth+compress_width*10)] == RedLabel)
-                            {
-                                color_cnt+=2;
-                            }
-                        }
-                    }
-					//ROS_INFO("%d",color_cnt);
-                    if(color_cnt < 50)
-                    {
-                        *bValue = 0;
-                        *gValue = 0;
-                        *rValue = 0;
-						//printf("0  ");
-                    }
-                    else if(color_cnt <= 150)
-                    {
-                        *bValue = 128;
-                        *gValue = 0;
-                        *rValue = 128;
-						//printf("1  ");
-                    }
-                    else
-                    {
-                        *bValue = 255;
-                        *gValue = 255;
-                        *rValue = 0;
-                    }
-                    color_cnt = 0;
-                }
-				//printf("\n");
-            }
-			cv::resize(compressimage, publish_image, cv::Size(320, 240),CV_INTER_LINEAR);
-			msg_compressimage = cv_bridge::CvImage(std_msgs::Header(), "bgr8", publish_image).toImageMsg();
-            pub_colormodel.publish(msg_compressimage);*/
-            cv::Mat image = strategy_info->cvimg->image;
+            cv::Mat image = strategy_info->cvimg->image;			
             for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
             {
                 DeepMatrix_cnt[compress_width] = 0;
@@ -130,24 +74,7 @@ void OBSimage::strategymain()
 					}
                 }
             }
-			/*for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10 ; compress_width++)
-            {
-                for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10  ; compress_height++)
-                {
-                    bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-                    gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-                    rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
-					if(*rValue == 128 &&  *gValue == 0 && *bValue == 128)
-					{
-						printf("1  ");
-					}
-					else
-					{
-						printf("0  ");
-					}
-				}
-				printf("\n");
-			}*/
+
 			for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10  ; compress_height++)
             {
                 for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10 ; compress_width++)
@@ -166,18 +93,67 @@ void OBSimage::strategymain()
 				}
 				printf("\n");
 			}
-            totalL = 0;
-            totalR = 0;
+
+			printf("\nDeep Matrix\n");
             for(int i = 0; i < 32 ;i++)
             {
                 deepmatrix.DeepMatrix.push_back(DeepMatrix_cnt[i]);
-                printf("%d,",DeepMatrix_cnt[i]);
-                //printf("%d,",deepmatrix.DeepMatrix[i]);
-                    totalL += DeepMatrix_cnt[i]*DeepMatrix_cnt[i];
-                    totalR += DeepMatrix_cnt[i]*DeepMatrix_cnt[i];
+                printf("%2d,",DeepMatrix_cnt[i]);
             }
-            printf("totalL = %d\ntotalR = %d", totalL,totalR);
-            DeepMatrix_Publish.publish(deepmatrix);
+			printf("\nFocus Matrix\n");
+			for(int i = 0; i < 32 ;i++)
+            {
+                printf("%2d,",Focus_matrix[i]);
+            }
+
+			printf("\nFilter Matrix\n");
+
+			for(int i = 0; i < 32 ;i++)
+			{
+				FilterMatrix[i] = Focus_matrix[i] - DeepMatrix_cnt[i]; 
+				if(FilterMatrix[i] < 0)
+				{
+					FilterMatrix[i] = 0;
+				}
+				else								//obstacle in focus matrix
+				{
+					Xc_count++;
+					Xi_sum += DeepMatrix_cnt[i];
+					Xc = Xi_sum / Xc_count;			//get x_avg when obstacle is in focus matrix 
+				}
+				printf("%2d,",FilterMatrix[i]);
+
+				Dy = DeepMatrix_cnt[0];
+				if(DeepMatrix_cnt[i] < Dy)			//get DeepMatrix min
+				{
+					Dy = DeepMatrix_cnt[i];
+				}
+			}
+			WR = 0;
+			WL = 0;
+			for(int i = 1; i < 33 ;i++)
+			{
+				WR += (33-i) * FilterMatrix[i-1];
+				WL += i * FilterMatrix[i-1];
+			}
+
+			if(WR > WL)
+			{
+				Xb = 0;
+				Dx = Xc - Xb;
+			}
+			else //WR<WL
+			{
+				Xb = 31;
+				Dx = Xc - Xb;
+			}
+
+			printf("Xb = %d, Dx = %lf\n",Xb,Dx);
+			printf("Xc_count = %d, Xi_sum = %lf, Xc = %lf\n",Xc_count,Xi_sum,Xc);
+			printf("Dy = %d\n",Dy);
+			printf("\nWR = %d,WL = %d\n",WR,WL);
+
+            //DeepMatrix_Publish.publish(deepmatrix);
             deepmatrix.DeepMatrix.clear();
             printf("\n");
 ////////////////////////////////////opencv/////////////////////////////////////////////
