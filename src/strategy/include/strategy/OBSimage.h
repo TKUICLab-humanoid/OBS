@@ -53,9 +53,17 @@ public:
 	int DeepMatrix_cnt[32];
 	int FilterMatrix[32];
 
-	int WR = 0;
-	int WL = 0;
+	int WR = 0;		//右權重值
+	int WL = 0;		//左權重值
 
+	float Xc = 0;	//在焦點矩陣內的x座標平均值
+	int Xb = 0;		//權重值比較後的邊界設定
+	int Xc_count = 0;
+	int Xi_sum	=	0;
+
+	int Dy = 0;
+	float Dx = 0;
+	
 	int color_cnt;
 	bool blue_flag = false;
 	float color_flag;
