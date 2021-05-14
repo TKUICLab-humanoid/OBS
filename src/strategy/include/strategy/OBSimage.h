@@ -53,24 +53,21 @@ public:
 	int Deep_Matrix[32];
 	int Filter_Matrix[32];
 
-	int WR = 0;		//右權重值
-	int WL = 0;		//左權重值
+	int WR = 0;		//
+	int WL = 0;		//
 
-	float Xc = 0;	//在焦點矩陣內的x座標平均值
-	int Xb = 0;		//權重值比較後的邊界設定
+	float Xc = 0;	//the center of obstacle in focus matrix
+	float Xb = 0;		//compare WR & WL,setting boundary 
 
-	int Dy = 0;
-	float Dx = 0;
+	int Dy = 0;		//min of deepmatrix
+	float Dx = 0;	//distance between Xc and Xb
 
-	int Xc_count = 0;
-	int Xi_sum	=	0;
+	int Xc_count = 0;	//calculate number of obstacle in focus matrix
+	int Xi_sum	=	0;	//sum of obstacle in focus matrix x-axis value
 
 	int W_R = 0;
 	int W_L = 0;
 
-	int color_cnt;
-	bool blue_flag = false;
-	float color_flag;
 	unsigned char *rValue, *gValue, *bValue;
 
 	sensor_msgs::ImagePtr msg_compressimage;

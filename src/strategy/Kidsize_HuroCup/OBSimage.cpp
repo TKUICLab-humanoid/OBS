@@ -28,7 +28,13 @@ void OBSimage::strategymain()
 			Xc = 0;
 			W_R = 0;
 			W_L = 0;
-            cv::Mat image = strategy_info->cvimg->image;			
+			WR = 0;
+			WL = 0;
+
+            cv::Mat image = strategy_info->cvimg->image;
+
+			printf("\nDeep Matrix\n");
+			
             for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
             {
                 Deep_Matrix[compress_width] = 0;
@@ -48,9 +54,11 @@ void OBSimage::strategymain()
 						Deep_Matrix[compress_width] = 24;
 					}
                 }
+
+				printf("%2d,",Deep_Matrix[compress_width]);
             }
 
-			for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10  ; compress_height++)
+			/*for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10  ; compress_height++)
             {
                 for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10 ; compress_width++)
                 {
@@ -67,16 +75,10 @@ void OBSimage::strategymain()
 					}
 				}
 				printf("\n");
-			}
+			}*/
 			
 			Dy = Deep_Matrix[0];
 
-			printf("\nDeep Matrix\n");
-            for(int i = 0; i < 32 ;i++)
-            {
-                deepmatrix_parameter.DeepMatrix.push_back(Deep_Matrix[i]);
-                printf("%2d,",Deep_Matrix[i]);
-            }
 			printf("\nFocus Matrix\n");
 			for(int i = 0; i < 32 ;i++)
             {
@@ -87,17 +89,18 @@ void OBSimage::strategymain()
 
 			for(int i = 0; i < 32 ;i++)
 			{
-				Filter_Matrix[i] = Focus_Matrix[i] - Deep_Matrix[i]; 
-				if(Filter_Matrix[i] < 0)
-				{
-					Filter_Matrix[i] = 0;
-				}
-				else												//obstacle in focus matrix
+				Filter_Matrix[i] = Focus_Matrix[i] - Deep_Matrix[i];
+
+				if(Filter_Matrix[i] > 0)	//obstacle in focus matrix
 				{
 					Xc_count++;
 					Xi_sum += i;
 					Xc = (float)Xi_sum /(float) Xc_count;			//get x_avg when obstacle is in focus matrix 
 					//printf("Xi_sum = %d,Xc_count = %d,Xc  = %.3lf \n",Xi_sum,Xc_count,Xc);
+				}
+				else												
+				{
+					Filter_Matrix[i] = 0;
 				}
 				//printf("%2d,",Filter_Matrix[i]);
 
@@ -105,27 +108,23 @@ void OBSimage::strategymain()
 				{
 					Dy = Deep_Matrix[i];
 				}
-			}
-			WR = 0;
-			WL = 0;
-			for(int i = 1; i < 33 ;i++)							//calculate WR WL
-			{
-				printf("%2d,",Filter_Matrix[i-1]);
-				WR += (33-i) * Filter_Matrix[i-1];
-				WL += i * Filter_Matrix[i-1];
+
+				printf("%2d,",Filter_Matrix[i]);
+				//calculate WR WL
+				WR += (32-i) * Filter_Matrix[i];
+				WL += (i+1) * Filter_Matrix[i];
+
 			}
 
 			if(WL < WR)											
 			{
 				Xb = 0;
-				Dx = abs(Xc - Xb);
-				printf("\nObstacle in left\n");
+				printf("\n\nObstacle in left\n");
 			}
 			else if(WR < WL)
 			{
 				Xb = 31;
-				Dx = abs(Xc - Xb);
-				printf("\nObstacle in right\n");
+				printf("\n\nObstacle in right\n");
 			}
 			else if((WR == WL) && (WR > 0) && (WL > 0))		//WR = WL
 			{
@@ -151,22 +150,18 @@ void OBSimage::strategymain()
 				}
 			}
 
+			Dx = Xc - Xb;
+
 			printf("\n\nW_R = %d,W_L = %d\n",W_R,W_L);
-			printf("Xb = %d, Dx = %lf\n",Xb,Dx);
+			printf("Xb = %.3lf, Dx = %.3lf\n",Xb,Dx);
 			printf("Xc_count = %d, Xi_sum = %d, Xc = %.3lf\n",Xc_count,Xi_sum,Xc);
 			printf("Dy = %d, WR = %d, WL = %d\n",Dy,WR,WL);
 
-			deepmatrix_parameter.WR = WR;
-			deepmatrix_parameter.WL = WL;
-			deepmatrix_parameter.Xc = Xc;
-			deepmatrix_parameter.Xb = Xb;
 			deepmatrix_parameter.Dy = Dy;
 			deepmatrix_parameter.Dx = Dx;
 
 			DeepMatrix_Publish.publish(deepmatrix_parameter);
 
-
-            deepmatrix_parameter.DeepMatrix.clear();
             printf("\n");
 ////////////////////////////////////opencv/////////////////////////////////////////////
             cv::resize(image, publish_image, cv::Size(320, 240),CV_INTER_LINEAR);
@@ -176,9 +171,4 @@ void OBSimage::strategymain()
             image.release();
 ////////////////////////////////////opencv////////////////////////////////////////////
         }
-    
-	else
-	{
-		
-	}
 }

@@ -44,14 +44,12 @@ public:
 
 	//////////////////////////////////////new strategy parameter ////////////////////////////////////////////
 	
-	int DeepMatrixValue[32];
-	int weight_right = 0;
-	int weight_left = 0;
+	//////////subscribe deepmatrix parameter/////////////////
 	int nearest_distance_y = 0;
-	int x_boundary = 0;
 
-	float obstacle_x_avg = 0;
 	float x_avg_to_boundary = 0;
+	//////////subscribe deepmatrix parameter/////////////////
+
 
 	string parameter_path = "N";
 
@@ -61,6 +59,4 @@ public:
 	void initparameterpath();
 
 };
-
-//bool isStart = false;
 
