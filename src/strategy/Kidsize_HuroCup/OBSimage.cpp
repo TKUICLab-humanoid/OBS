@@ -48,18 +48,11 @@ void OBSimage::strategymain()
         
 //////////////////////////////////////顯示24X32中有沒有障礙物/////////////////////////////////////////////
 
-        printf("\n"),printf("D = ");                                //計算D && Dy
+        printf("\n"),printf("D = ");                                //計算D && Dy                             
         for(int compress_width = 0 ; compress_width < IMAGEWIDTH  ; compress_width++)   
         {
             DeepMatrix[compress_width] = 0;
             Dy = DeepMatrix[0];
-            for(int i = 0;i < 32 ;i++)
-            {
-                if(DeepMatrix[i] < Dy)
-                {
-                    Dy = DeepMatrix[i];
-                }
-            }
             for(int compress_height = IMAGEHEIGHT - 1 ; compress_height > -1 ; compress_height--)
             {
                 bValue = (image.data + ((compress_height*IMAGEWIDTH + compress_width) * 3 + 0));
@@ -75,11 +68,16 @@ void OBSimage::strategymain()
                 {
                     DeepMatrix[compress_width] = 24;
                 }
+                // printf("%u %u %u,",*bValue, *gValue, *rValue);
+                //printf("%d %d %d,",(int)*bValue, (int)*gValue, (int)*rValue);
             }
         }
-        
         for(int i = 0; i < 32 ;i++)
         {
+            if(DeepMatrix[i] < Dy)
+            {
+                Dy = DeepMatrix[i];
+            }
             deepmatrix.DeepMatrix.push_back(DeepMatrix[i]);
             printf("%d,",DeepMatrix[i]);
         }
@@ -118,8 +116,10 @@ void OBSimage::strategymain()
 //////////////////////////////////////計算V && XC/////////////////////////////////////////////            
         WR = 0;
         WL = 0;
+        WL_sigma = 0;
+        WR_sigma = 0;
         Dx = 0;
-        for(int i = 1; i < 32; i++)
+        for(int i = 1; i <= 32; i++)
         {
             WR += (33-i) * FilterMatrix[i-1];
             WL += i * FilterMatrix[i-1];
@@ -131,21 +131,41 @@ void OBSimage::strategymain()
         if(WL < WR)
         {
             Xb = 0;
-            Dx = abs(Xc - Xb);
-            printf("go go go LLL");
+            printf("go go go RRRRRRRR");
         }
         else if(WR < WL)
         {
             Xb = 31;
-            Dx = abs(Xc - Xb);
-            printf("go go go RRR");
+            printf("go go go LLLLLLLL");
         }
-        else
+        else if((WL > 0) && (WR > 0) && (WR == WL))
         {
-            printf("go go go go go go go go ");
+            /*for(int i = 1;i <= 32;i++)
+            {
+                if(i <= 16)
+                {
+                    WL_sigma += DeepMatrix[i-1];
+                }
+                else
+                {
+                    WR_sigma += DeepMatrix[i-1];
+                }
+            }
+            if(WL_sigma > WR_sigma)
+            {
+                WL += 10;
+            }
+            else
+            {
+                WR += 10;
+            }*/
+            //printf("go go go go go go go go ");
+            //printf("WL_sigma = %d,WR_sigma = %d",WL_sigma,WR_sigma);
+            //printf("\n");
+            //printf("WR = %d,WL = %d",WR,WL);
+            printf("\n");
         }
-        printf("\n");
-        //Dx = abs(Xc - Xb);
+        Dx = Xc - Xb;                       //正負數可推算出障礙物位置
         printf("Dx = %d",Dx);
 
 //////////////////////////////////////計算WR , WL && DX && Xb/////////////////////////////////////////////

@@ -46,11 +46,11 @@ int FilterMatrix[32];
 int Dy = 0;     //D矩陣內最靠近機器人的值
 int WR = 0;	//右權重
 int WL = 0;	//左權重
-//float Dx = 0;	//焦點矩陣內x的平均值
-int Xb = 0;	//判斷後的邊界設定
-//float Xc = 0;	
+int WL_sigma = 0;	//左權重相加
+int WR_sigma = 0;	//右權重相加
+int Xb = 0;	//判斷後的邊界設定	
 int Xc_cnt = 0;	//計數
-int Xc_n = 0;		//總和相加
+int Xc_n = 0;	//總和相加
 int Xc = 0;
 int Dx = 0;	//焦點矩陣內x的平均值
 
@@ -76,7 +76,7 @@ public:
 	bool blue_flag = false;
 	float color_flag;
 	unsigned char *rValue, *gValue, *bValue;
-
+	int aa;
 	sensor_msgs::ImagePtr msg_compressimage;
     	cv::Mat publish_image;
 	image_transport::Publisher pub_colormodel;
