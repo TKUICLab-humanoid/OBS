@@ -65,13 +65,26 @@ void OBSimage::strategymain()
         printf("dy :");
         for(int l = 0; l < 32 ;l++)
         {
-            if(  DeepMatrix_cnt[l] <= 24 && DeepMatrix_cnt[l]<DeepMatrix_cnt[l-1])
-            {   
-                minY = DeepMatrix_cnt[l] ; 
+            if(l == 0)
+            {
+                if(DeepMatrix_cnt[l] <= minY)
+                {
+                    minY = DeepMatrix_cnt[l] ;
+                }
             }
+            else
+            {
+                if(  DeepMatrix_cnt[l] <= minY && DeepMatrix_cnt[l]<DeepMatrix_cnt[l-1])
+                {   
+                    minY = DeepMatrix_cnt[l] ; 
+                }
+            }
+            
             if(l ==31) 
             {
                 printf("%d",minY);
+                printf("\n");
+
             }
         }
        
@@ -110,15 +123,66 @@ void OBSimage::strategymain()
         {
             printf("%d ,",V[k]); 
         }
-
         printf("\n");
-        //printf("dy : %d",minY);
+        //printf("dx : %d");
+        for(int m = 0; m < 32;m++)
+        {   
+            WR += (33 - (m+1))*V[m];
+            WL += (m+1)*V[m];
+            if(m == 31)
+            {
+                printf("WR = %d ",WR);
+                printf("\n");
+                printf("WL = %d ",WL);
+                printf("\n");
+                printf("xb :");
+                if(WR >= WL)
+                {
+                    xb = 0;
+                    printf("%d",xb);
+                }
+                else
+                {
+                    xb = 319;
+                    printf("%d",xb);
+                }  
+                WR =0;
+                WL =0;
+                
+            }
+        }
+            
         printf("\n");
-        printf("dx : %d");
-        printf("\n");
-        printf("xc : %d");
-        printf("\n");
-        printf("xb : %d");
+        printf("xc :");
+        for(int n = 0;n < 32;n++)
+        {
+            if(V[n] > 0)
+            {
+                X  += Xi[n]; 
+                xin ++;
+            }
+            else
+            {
+            }
+            if (n == 31)
+            {
+                if(X == 0 || xin ==0)
+                {
+                    xc = 0;
+                    printf("0");
+                    X = 0;
+                    xin = 0;
+                }
+                else
+                {
+                    xc = ( X/xin );
+                    printf("%d",xc);
+                    X = 0;
+                    xin = 0;
+                }
+            }
+        }
+        
 
 DeepMatrix_Publish.publish(deepmatrix);
 deepmatrix.DeepMatrix.clear();
