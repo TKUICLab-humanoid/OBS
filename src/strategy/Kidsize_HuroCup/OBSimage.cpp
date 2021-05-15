@@ -19,6 +19,10 @@ void OBSimage::strategymain()
 {
 	if(strategy_info->getStrategyStart())
 	{	
+        printf("\n");
+        printf("\n");
+        printf("\n");
+        
         cv::Mat compressimage(24,32,CV_8UC3);
         cv::Mat image = strategy_info->cvimg->image;
 
@@ -62,32 +66,6 @@ void OBSimage::strategymain()
 	    	}
 	    	printf("\n");
 	    }
-        printf("dy :");
-        for(int l = 0; l < 32 ;l++)
-        {
-            if(l == 0)
-            {
-                if(DeepMatrix_cnt[l] <= minY)
-                {
-                    minY = DeepMatrix_cnt[l] ;
-                }
-            }
-            else
-            {
-                if(  DeepMatrix_cnt[l] <= minY && DeepMatrix_cnt[l]<DeepMatrix_cnt[l-1])
-                {   
-                    minY = DeepMatrix_cnt[l] ; 
-                }
-            }
-            
-            if(l ==31) 
-            {
-                printf("%d",minY);
-                printf("\n");
-
-            }
-        }
-       
         
         for(int i = 0; i < 32 ;i++)
         {
@@ -139,20 +117,57 @@ void OBSimage::strategymain()
                 if(WR >= WL)
                 {
                     xb = 0;
+                    dx = xc - xb;
                     printf("%d",xb);
+                    printf("\n");
+                    printf("dx :");
+                    printf("%d",dx);
+                    printf("\n");
+                    printf("GOGOGOGO Rright __case : walking trun right__");
+                    printf("\n");
                 }
                 else
                 {
                     xb = 319;
+                    dx = xb - xc;
                     printf("%d",xb);
+                    printf("\n");
+                    printf("dx :");
+                    printf("%d",dx);
+                    printf("\n");
+                    printf("GOGOGOGO Left   __case : walking trun left__");
+                    printf("\n");
                 }  
                 WR =0;
                 WL =0;
                 
             }
         }
+        printf("dy :");
+        for(int l = 0; l < 32 ;l++)
+        {
+            if(l == 0)
+            {
+                if(DeepMatrix_cnt[l] <= minY)
+                {
+                    minY = DeepMatrix_cnt[l] ;
+                }
+            }
+            else
+            {
+                if(  DeepMatrix_cnt[l] <= minY && DeepMatrix_cnt[l]<DeepMatrix_cnt[l-1])
+                {   
+                    minY = DeepMatrix_cnt[l] ; 
+                }
+            }
             
-        printf("\n");
+            if(l ==31) 
+            {
+                printf("%d",minY);
+                printf("\n");
+
+            }
+        }
         printf("xc :");
         for(int n = 0;n < 32;n++)
         {
@@ -182,7 +197,20 @@ void OBSimage::strategymain()
                 }
             }
         }
-        
+        printf("\n");
+        printf("\n");
+        printf("\n");
+        printf("\n");
+        printf("\n");
+        printf("\n");
+        printf("\n");
+        printf("\n");
+        printf("\n");
+        printf("\n");
+        printf("\n");
+        printf("\n");
+        //printf("\n");
+        //printf("\n");
 
 DeepMatrix_Publish.publish(deepmatrix);
 deepmatrix.DeepMatrix.clear();
