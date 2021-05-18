@@ -48,15 +48,24 @@ public:
 	int nearest_distance_y = 0;
 
 	float x_avg_to_boundary = 0;
-	//////////subscribe deepmatrix parameter/////////////////
-
 
 	string parameter_path = "N";
 
+
+	//////////subscribe deepmatrix parameter/////////////////
+
+	//////////////////walkinggaut parameter////////////////////////
+
+	int dirdata[100];
+
+	//////////////////walkinggaut parameter////////////////////////
+	
+	
 	////////////////////////////////////////function/////////////////////////////////////////////
 
 	void GetDeepMatrix(const strategy::DeepMatrix &msg);
 	void initparameterpath();
+	void readwalkinggait();
 
 };
 

@@ -27,6 +27,9 @@ void KidsizeStrategy::strategymain()
 
         ROS_INFO("nearest_distance_y = %d",nearest_distance_y);
         ROS_INFO("x_avg_to_boundary = %.3lf",x_avg_to_boundary);
+        ROS_INFO("dirdata[0] = %d,dirdata[1] = %d,dirdata[2] = %d",dirdata[0],dirdata[1],dirdata[2]);
+        ROS_INFO("dirdata[3] = %d,dirdata[4] = %d,dirdata[5] = %d",dirdata[3],dirdata[4],dirdata[5]);
+        ROS_INFO("dirdata[6] = %d,dirdata[7] = %d,dirdata[8] = %d",dirdata[6],dirdata[7],dirdata[8]);
         ROS_INFO("\n");
     }
     else
@@ -52,4 +55,33 @@ void KidsizeStrategy::GetDeepMatrix(const strategy::DeepMatrix &msg)
 
 	x_avg_to_boundary = msg.Dx;
 
+}
+
+void KidsizeStrategy::readwalkinggait() //步態參數之讀檔
+{
+    fstream fin;
+    string sTmp;
+    char line[100];
+    char path[200];
+    strcpy(path, parameter_path.c_str());
+    strcat(path, "/WalkingGait.ini");
+    fin.open(path, ios::in);
+    char temp[100];
+    try
+    {
+        fin.getline(temp, sizeof(temp));
+        dirdata[0] = tool->readvalue(fin, "continuous_x_offset", 0);
+        dirdata[1] = tool->readvalue(fin, "continuous_y_offset", 0);
+        dirdata[2] = tool->readvalue(fin, "continuous_theta_offset", 0);
+        dirdata[3] = tool->readvalue(fin, "continuous_x_offset_RIGHT", 0);
+        dirdata[4] = tool->readvalue(fin, "continuous_y_offset_RIGHT", 0);
+        dirdata[5] = tool->readvalue(fin, "continuous_theta_offset_RIGHT", 0);
+        dirdata[6] = tool->readvalue(fin, "continuous_x_offset_LEFT", 0);
+        dirdata[7] = tool->readvalue(fin, "continuous_y_offset_LEFT", 0);
+        dirdata[8] = tool->readvalue(fin, "continuous_theta_offset_LEFT", 0);
+        fin.close();
+    }
+    catch (exception e)
+    {
+    }
 }
