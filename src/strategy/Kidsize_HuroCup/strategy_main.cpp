@@ -24,12 +24,13 @@ void KidsizeStrategy::strategymain()
 
     if (strategy_info->getStrategyStart()) //strategy start
     {
+        readwalkinggait();
 
         ROS_INFO("nearest_distance_y = %d",nearest_distance_y);
         ROS_INFO("x_avg_to_boundary = %.3lf",x_avg_to_boundary);
-        ROS_INFO("dirdata[0] = %d,dirdata[1] = %d,dirdata[2] = %d",dirdata[0],dirdata[1],dirdata[2]);
-        ROS_INFO("dirdata[3] = %d,dirdata[4] = %d,dirdata[5] = %d",dirdata[3],dirdata[4],dirdata[5]);
-        ROS_INFO("dirdata[6] = %d,dirdata[7] = %d,dirdata[8] = %d",dirdata[6],dirdata[7],dirdata[8]);
+        ROS_INFO("[0] = %5d,[1] = %5d,[2] = %5d",dirdata[0],dirdata[1],dirdata[2]);
+        ROS_INFO("[3] = %5d,[4] = %5d,[5] = %5d",dirdata[3],dirdata[4],dirdata[5]);
+        ROS_INFO("[6] = %5d,[7] = %5d,[8] = %5d",dirdata[6],dirdata[7],dirdata[8]);
         ROS_INFO("\n");
     }
     else
