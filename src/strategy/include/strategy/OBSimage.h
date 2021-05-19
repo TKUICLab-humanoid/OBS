@@ -51,8 +51,8 @@ int WR_sigma = 0;	//右權重相加
 int Xb = 0;	//判斷後的邊界設定	
 int Xc_cnt = 0;	//計數
 int Xc_n = 0;	//總和相加
-int Xc = 0;
-int Dx = 0;	//焦點矩陣內x的平均值
+int Xc = 0;	//焦點矩陣內x的平均值
+float Dx = 0;	//OBS_avg到邊線的值
 
 
 using namespace std;
@@ -72,11 +72,7 @@ public:
 	~OBSimage(){};
 	void strategymain();
 
-	int color_cnt;
-	bool blue_flag = false;
-	float color_flag;
 	unsigned char *rValue, *gValue, *bValue;
-	int aa;
 	sensor_msgs::ImagePtr msg_compressimage;
     	cv::Mat publish_image;
 	image_transport::Publisher pub_colormodel;

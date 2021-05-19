@@ -23,7 +23,7 @@
 
 ros::Subscriber DeepMatrix_subscribe;
 
-enum strategy_state
+/*enum strategy_state
 {
     P_INIT,
     P_MATRIX_CALCULATE,
@@ -91,7 +91,7 @@ enum Head_direction
     RHD_Center,
     RHD_Right,
     RHD_Left
-};
+};*/
 
 using namespace std;
 
@@ -112,7 +112,7 @@ public:
 	ToolInstance *tool;
 	StrategyInfoInstance *strategy_info;
 
-	strategy_state m_state;
+	/*strategy_state m_state;
 	walking_command spec_RLmove_state;
 	walking_command walking_state;
 	walking_command pre_walking_state;
@@ -134,7 +134,6 @@ public:
 	SensorMode IMU_continuous;
 	SensorMode IMU_single;
 
-	int DeepMatrixValue[32];
 	int FilterMatrix[32];
 	int FocusMatrix[32];
 	int RMoveValue = 0;
@@ -167,7 +166,6 @@ public:
 	int Ry_fastest;
 	int Ly_fastest;
    	int dirmap[3];
-	int dirdata[47];
 	int cntTopYellow_x=0;
 	int cntBottomYellow_x=0;
 	int BottomYellowPoint=0;
@@ -181,7 +179,7 @@ public:
 	float sidelineslope;
 
 	bool in_reddoor_flag=false;	//add
-    bool slope_flag=false;
+    	bool slope_flag=false;
 	bool Blue_obs_flag = false;
 	bool Red_Door_flag = false;
 	bool first_enter_door = true;
@@ -217,26 +215,40 @@ public:
 	bool leftsidelinewarning=false;
 	bool sideline_zero_flag=false;
 	bool twentyflag=false;
-    int First_width = 0;
+    	int First_width = 0;
 	int angle_offset = 0;
 	int continous_angle_offest = 0;
-	string parameter_path = "N";
 	string m_state_string="a";
 	string walking_state_string="a";
-	void GetDeepMatrix(const strategy::DeepMatrix &msg);
-	void SlopeCalculate();
 	void facetodoorfun();
 	void FaceToObsFun();	//when face to blue obs
-	void initparameterpath();
 	void load_dirtxt();
-	void readwalkinggait();
-    void turnslope();
+    	void turnslope();
 	void give_angle();
-	void IMUSlope();
 	void FaceToFinialLineFun();
 	void traverse();
 	void sideline();
-	void printinfo();
+	void printinfo();*/
+
+
+	//void SlopeCalculate();
+	//void IMUSlope();
+	int dirdata[9];
+	int DeepMatrixValue[32];
+
+
+	string parameter_path = "N";
+	void initparameterpath();
+	void readwalkinggait();
+	void GetDeepMatrix(const strategy::DeepMatrix &msg);
+
+	float OBS_avg_to_SideLine = 0;	//Dx
+	int Deep_min_y = 0;	//Dy
+	int Deep_WR = 0;	//WR
+	int Deep_WL = 0;	//WL
+	int OBS_avg = 0;	//Xc
+	int SideLine = 0;	//Xb
+
 };
 
 //bool isStart = false;

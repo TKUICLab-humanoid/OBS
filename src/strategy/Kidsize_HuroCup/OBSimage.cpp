@@ -78,14 +78,11 @@ void OBSimage::strategymain()
             {
                 Dy = DeepMatrix[i];
             }
-            deepmatrix.DeepMatrix.push_back(DeepMatrix[i]);
             printf("%d,",DeepMatrix[i]);
+            deepmatrix.DeepMatrix.push_back(DeepMatrix[i]);
         }
         printf("\n");
         printf("Dy = %d",Dy);
-
-        DeepMatrix_Publish.publish(deepmatrix);
-        deepmatrix.DeepMatrix.clear();
         
 //////////////////////////////////////計算D && Dy/////////////////////////////////////////////
 
@@ -109,8 +106,8 @@ void OBSimage::strategymain()
             
         }
         printf("\n");
-        printf("Xc = %d",Xc);
-        printf("\n");
+        //printf("Xc = %d",Xc);
+        //printf("\n");
 
 
 //////////////////////////////////////計算V && XC/////////////////////////////////////////////            
@@ -163,12 +160,27 @@ void OBSimage::strategymain()
             //printf("WL_sigma = %d,WR_sigma = %d",WL_sigma,WR_sigma);
             //printf("\n");
             //printf("WR = %d,WL = %d",WR,WL);
-            printf("\n");
+            //printf("\n");
         }
+        printf("\n");
         Dx = Xc - Xb;                       //正負數可推算出障礙物位置
-        printf("Dx = %d",Dx);
+        printf("Dx = %f",Dx);
 
 //////////////////////////////////////計算WR , WL && DX && Xb/////////////////////////////////////////////
+
+deepmatrix.Dx = Dx;
+deepmatrix.Dy = Dy;
+deepmatrix.WR = WR;
+deepmatrix.WL = WL;
+deepmatrix.Xc = Xc;
+deepmatrix.Xb = Xb;
+
+
+DeepMatrix_Publish.publish(deepmatrix);
+deepmatrix.DeepMatrix.clear();
+
+
+
 
 ////////////////////////////////////opencv/////////////////////////////////////////////
         cv::resize(image, publish_image, cv::Size(320, 240),CV_INTER_LINEAR);
