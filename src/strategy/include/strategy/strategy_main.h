@@ -44,28 +44,40 @@ public:
 
 	//////////////////////////////////////new strategy parameter ////////////////////////////////////////////
 	
-	//////////subscribe deepmatrix parameter/////////////////
+	/***************subscribe deepmatrix parameter******************/
+
 	int nearest_distance_y = 0;
-
 	float x_avg_to_boundary = 0;
-
 	string parameter_path = "N";
 
+	/******************subscribe deepmatrix parameter******************/
 
-	//////////subscribe deepmatrix parameter/////////////////
 
-	//////////////////walkinggaut parameter////////////////////////
+	
+	/*********************stategy_main parameter ********************/
+	
+	int continous_angle_offest = 0;
+	
+	/*********************stategy_main parameter ********************/
+
+	/******************ini  parameter******************/
 
 	int dirdata[100];
-
-	//////////////////walkinggaut parameter////////////////////////
+	int maxspeed = 0;
+	int dangerous_distance = 0;
+	int continuousValue_x = 0;
+	int turn_angle = 0;
 	
+	/****************** ini parameter******************/
 	
 	////////////////////////////////////////function/////////////////////////////////////////////
 
 	void GetDeepMatrix(const strategy::DeepMatrix &msg);
 	void initparameterpath();
-	void readwalkinggait();
+	void readparameter();
+	int  def_turn_angle();
+	void printinfo();
+
 
 };
 

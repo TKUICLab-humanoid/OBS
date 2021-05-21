@@ -47,8 +47,12 @@ public:
 		ros_com = RosCommunicationInstance::getInstance();
 	};
 	~OBSimage(){};
-	void strategymain();
 
+	/****************************** function *************************************/
+	void strategymain();
+	void INIT_parameter();
+
+	/****************************** parameter *************************************/
 	int Focus_Matrix[32] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
 	int Deep_Matrix[32];
 	int Filter_Matrix[32];
@@ -77,8 +81,6 @@ public:
 	RosCommunicationInstance *ros_com;
 	ToolInstance *tool;
 	StrategyInfoInstance *strategy_info;
-
-	
 
 	ros::Publisher DeepMatrix_Publish;
 
