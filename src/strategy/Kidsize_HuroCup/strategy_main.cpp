@@ -6,7 +6,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     KidsizeStrategy KidsizeStrategy(nh);
 
-    ros::Rate loop_rate(30);
+    ros::Rate loop_rate(20);
 
     KidsizeStrategy.initparameterpath();
 
@@ -23,7 +23,60 @@ void KidsizeStrategy::strategymain()
 {
     if (strategy_info->getStrategyStart()) //策略指撥開啟
     {
+        //ROS_INFO("Speed_Max = %d",Speed_Max);
+
         readwalkinggait();
+        if (!Continuous_flag) //起步步態
+        {
+            ROS_INFO("senbdbodyauto");  
+            //ros_com->sendBodySector(4); //動作磁區
+            //tool->Delay(1000);
+            //ros_com->sendBodyAuto(continuous_stay_X, continuous_stay_Y, 0, continuous_stay_T, WalkingMode::ContinuousStep, IMU_continuous); //ros_com->sendBodyAuto(-450, 0, 0,-3, WalkingMode::ContinuousStep,IMU_continuous);
+            //tool->Delay(500);
+            Continuous_flag = true;
+        }
+        //ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300);
+        //tool->Delay(100);
+        //ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300); //頭部馬達刻度（左右）左正右負
+        //tool->Delay(100);
+
+
+
+        if(Dy < Dy_Max)
+        {
+            if(continuousX_Speed > continuous_stay_X)    //直走轉原地
+            {
+                ROS_INFO("continuous_forword_X > Speed_Max");
+                while(continuousX_Speed > continuous_stay_X)
+                {
+                    continuousX_Speed -= 50;
+                    ros_com->sendContinuousValue(continuousX_Speed, continuous_stay_T, 0, continuous_stay_T,IMU_continuous);
+                    tool->Delay(50);
+                    ROS_INFO(" %d",continuousX_Speed);
+                    strategy_info->get_image_flag = true;   
+                    ros::spinOnce();
+                }
+            }
+        }
+        else
+        {
+            if(continuousX_Speed < Speed_Max)           //原地轉直走
+            {
+                ROS_INFO("continuous_forword_X < Speed_Max");
+                while(continuousX_Speed < Speed_Max)
+                {
+                    continuousX_Speed += 50;
+                    ros_com->sendContinuousValue(continuousX_Speed, continuous_stay_T, 0, continuous_stay_T,IMU_continuous);
+                    tool->Delay(50);
+                    ROS_INFO(" %d",continuousX_Speed);
+                    strategy_info->get_image_flag = true;   
+                    ros::spinOnce();
+                }
+            }
+        }
+
+
+
         /*ROS_INFO("Dx = %f",OBS_avg_to_SideLine);
         ROS_INFO("Dy = %d",Deep_min_y);
         ROS_INFO("WR = %d",Deep_WR);
@@ -31,47 +84,26 @@ void KidsizeStrategy::strategymain()
         ROS_INFO("Xc = %d",OBS_avg);
         ROS_INFO("Xb = %d",SideLine);*/
 
-        ROS_INFO("X = %d,Y = %d,Z = %d",dirdata[0],dirdata[1],dirdata[2]);
+        //ROS_INFO("X = %d,Y = %d,Z = %d",dirdata[0],dirdata[1],dirdata[2]);
+    return;
 
-
-
-        /*if (!Continuous_flag) //起步步態
-            {
-                ros_com->sendBodySector(4); //動作磁區
-                tool->Delay(1000);
-                ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); //ros_com->sendBodyAuto(-450, 0, 0,-3, WalkingMode::ContinuousStep,IMU_continuous);
-                tool->Delay(500);
-                Continuous_flag = true;
-            }
-            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300);
-            tool->Delay(100);
-            ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300); //頭部馬達刻度（左右）左正右負
-            tool->Delay(100);*/
-        ROS_INFO("gogogo");
     }
         
     else //策略指撥關閉
     {
-        ROS_INFO("stopppppp");
-        /*if (stand_flag == true)
+        if (Continuous_flag)
         {
-            //ROS_INFO("handdown");
-            if (Continuous_flag)
-            {
-                ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); //關閉連續步態
-                Continuous_flag = false;
-                tool->Delay(1500);
-            }
-            stand_flag = false;
-            ros_com->sendBodySector(5);
-            tool->Delay(1000);
-            ros_com->sendBodySector(29);
-            tool->Delay(1000);
-            first_cnt = 0;
-            ROS_INFO("stop");
+            ROS_INFO("stopppppp");
+            //ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); //關閉連續步態
+            Continuous_flag = false;
+            //tool->Delay(1500);
         }
-        m_state = P_INIT;
-        readwalkinggait();*/
+        //ros_com->sendBodySector(5);
+        //tool->Delay(1000);
+        //ros_com->sendBodySector(29);
+        //tool->Delay(1000);
+        
+        readwalkinggait();
     }
 }
 
@@ -347,15 +379,20 @@ void KidsizeStrategy::readwalkinggait() //步態參數之讀檔
     try
     {
         fin.getline(temp, sizeof(temp));
-        dirdata[0] = tool->readvalue(fin, "continuous_forword_X", 0);
-        dirdata[1] = tool->readvalue(fin, "continuous_forword_Y", 0);
-        dirdata[2] = tool->readvalue(fin, "continuous_forword_T", 0);
-        dirdata[3] = tool->readvalue(fin, "continuous_TurnRight_X", 0);
-        dirdata[4] = tool->readvalue(fin, "continuous_TurnRight_Y", 0);
-        dirdata[5] = tool->readvalue(fin, "continuous_TurnRight_T", 0);
-        dirdata[6] = tool->readvalue(fin, "continuous_TurnLeft_X", 0);
-        dirdata[7] = tool->readvalue(fin, "continuous_TurnLeft_Y", 0);
-        dirdata[8] = tool->readvalue(fin, "continuous_TurnLeft_T", 0);
+        continuous_stay_X = tool->readvalue(fin, "continuous_stay_X", 0);
+        continuous_stay_Y = tool->readvalue(fin, "continuous_stay_Y", 0);
+        continuous_stay_T = tool->readvalue(fin, "continuous_stay_T", 0);
+        fin.getline(temp, sizeof(temp));
+        continuous_TurnRight_X = tool->readvalue(fin, "continuous_TurnRight_X", 0);
+        continuous_TurnRight_Y = tool->readvalue(fin, "continuous_TurnRight_Y", 0);
+        continuous_TurnRight_T = tool->readvalue(fin, "continuous_TurnRight_T", 0);
+        fin.getline(temp, sizeof(temp));
+        continuous_TurnLeft_X = tool->readvalue(fin, "continuous_TurnLeft_X", 0);
+        continuous_TurnLeft_Y = tool->readvalue(fin, "continuous_TurnLeft_Y", 0);
+        continuous_TurnLeft_T = tool->readvalue(fin, "continuous_TurnLeft_T", 0);
+        fin.getline(temp, sizeof(temp));
+        Dy_Max = tool->readvalue(fin, "Dy_Max", 0);
+        Speed_Max = tool->readvalue(fin, "Speed_Max", 0);
         fin.close();
     }
     catch (exception e)
@@ -367,12 +404,12 @@ void KidsizeStrategy::GetDeepMatrix(const strategy::DeepMatrix &msg) //深度矩
     for (int i = 0; i < 32; i++)
     {
         //DeepMatrixValue[i] = msg.DeepMatrix[i];
-        OBS_avg_to_SideLine = msg.Dx;
-        Deep_min_y = msg.Dy;
-        Deep_WL = msg.WL;
-        Deep_WR = msg.WR;
-        OBS_avg = msg.Xc;
-        SideLine = msg.Xb;
+        Dx = msg.Dx;
+        Dy = msg.Dy;
+        WL = msg.WL;
+        WR = msg.WR;
+        Xc = msg.Xc;
+        Xb = msg.Xb;
     }
 }
 

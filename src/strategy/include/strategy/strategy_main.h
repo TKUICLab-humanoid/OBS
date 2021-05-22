@@ -106,7 +106,6 @@ public:
 		ros_com = RosCommunicationInstance::getInstance();
 	};
 	~KidsizeStrategy(){};
-	void strategymain();
 
 	RosCommunicationInstance *ros_com;
 	ToolInstance *tool;
@@ -196,7 +195,6 @@ public:
 	bool red_modle_flag = false;
 	bool check_LRmove_flag = false;
 	bool special_obs_flag = false;
-	bool Continuous_flag = false;
 	bool first_continuous_flag = false;
 	bool Turnhead_flag = false;
 	bool turnhead_open_cnt = true;
@@ -233,21 +231,42 @@ public:
 
 	//void SlopeCalculate();
 	//void IMUSlope();
-	int dirdata[9];
-	int DeepMatrixValue[32];
+
+	SensorMode IMU_continuous;
+
+	//int DeepMatrixValue[32];
+
+	bool Continuous_flag = false;
+	int continuousX_Speed = 0;
+
+	float Dx = 0;	//Dx
+	int Dy = 0;	//Dy
+	int WR = 0;	//WR
+	int WL = 0;	//WL
+	int Xc = 0;	//Xc
+	int Xb = 0;	//Xb
+
+
+	int continuous_stay_X = 0;		//步態讀檔
+	int continuous_stay_Y = 0;
+	int continuous_stay_T = 0;
+	int continuous_TurnRight_X = 0;
+	int continuous_TurnRight_Y = 0;
+	int continuous_TurnRight_T = 0;
+	int continuous_TurnLeft_X = 0;
+	int continuous_TurnLeft_Y = 0;
+	int continuous_TurnLeft_T = 0;
+
+	int Dy_Max = 0;
+	int Speed_Max = 0;
+
 
 
 	string parameter_path = "N";
+	void strategymain();
 	void initparameterpath();
 	void readwalkinggait();
 	void GetDeepMatrix(const strategy::DeepMatrix &msg);
-
-	float OBS_avg_to_SideLine = 0;	//Dx
-	int Deep_min_y = 0;	//Dy
-	int Deep_WR = 0;	//WR
-	int Deep_WL = 0;	//WL
-	int OBS_avg = 0;	//Xc
-	int SideLine = 0;	//Xb
 
 };
 

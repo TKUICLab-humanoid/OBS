@@ -21,6 +21,13 @@ int main(int argc, char** argv)
 
 void OBSimage::strategymain()
 {   
+    Xc = 0;
+    Xb = 0;
+    WR = 0;
+    WL = 0;
+    WL_sigma = 0;
+    WR_sigma = 0;
+    Dx = 0;
 	if(strategy_info->getStrategyStart())
     {	
         //cv::Mat compressimage(24,32,CV_8UC3);
@@ -46,7 +53,9 @@ void OBSimage::strategymain()
             printf("\n");
         }
         
+
 //////////////////////////////////////顯示24X32中有沒有障礙物/////////////////////////////////////////////
+
 
         printf("\n"),printf("D = ");                                //計算D && Dy                             
         for(int compress_width = 0 ; compress_width < IMAGEWIDTH  ; compress_width++)   
@@ -68,8 +77,6 @@ void OBSimage::strategymain()
                 {
                     DeepMatrix[compress_width] = 24;
                 }
-                // printf("%u %u %u,",*bValue, *gValue, *rValue);
-                //printf("%d %d %d,",(int)*bValue, (int)*gValue, (int)*rValue);
             }
         }
         for(int i = 0; i < 32 ;i++)
@@ -84,9 +91,10 @@ void OBSimage::strategymain()
         printf("\n");
         printf("Dy = %d",Dy);
         
+
 //////////////////////////////////////計算D && Dy/////////////////////////////////////////////
 
-        Xc = 0;
+        
         printf("\n"),printf("V = ");    //計算V && XC
         for (int i = 0; i < DeepMatrixSize; i++)    
         {
@@ -106,16 +114,11 @@ void OBSimage::strategymain()
             
         }
         printf("\n");
-        //printf("Xc = %d",Xc);
-        //printf("\n");
 
 
 //////////////////////////////////////計算V && XC/////////////////////////////////////////////            
-        WR = 0;
-        WL = 0;
-        WL_sigma = 0;
-        WR_sigma = 0;
-        Dx = 0;
+        
+
         for(int i = 1; i <= 32; i++)
         {
             WR += (33-i) * FilterMatrix[i-1];
@@ -156,28 +159,28 @@ void OBSimage::strategymain()
             {
                 WR += 10;
             }*/
-            //printf("go go go go go go go go ");
+            printf("go go go go go go go go ");
             //printf("WL_sigma = %d,WR_sigma = %d",WL_sigma,WR_sigma);
             //printf("\n");
             //printf("WR = %d,WL = %d",WR,WL);
             //printf("\n");
         }
-        printf("\n");
         Dx = Xc - Xb;                       //正負數可推算出障礙物位置
         printf("Dx = %f",Dx);
 
+
 //////////////////////////////////////計算WR , WL && DX && Xb/////////////////////////////////////////////
 
-deepmatrix.Dx = Dx;
-deepmatrix.Dy = Dy;
-deepmatrix.WR = WR;
-deepmatrix.WL = WL;
-deepmatrix.Xc = Xc;
-deepmatrix.Xb = Xb;
+        deepmatrix.Dx = Dx;
+        deepmatrix.Dy = Dy;
+        deepmatrix.WR = WR;
+        deepmatrix.WL = WL;
+        deepmatrix.Xc = Xc;
+        deepmatrix.Xb = Xb;
 
 
-DeepMatrix_Publish.publish(deepmatrix);
-deepmatrix.DeepMatrix.clear();
+        DeepMatrix_Publish.publish(deepmatrix);
+        deepmatrix.DeepMatrix.clear();
 
 
 
