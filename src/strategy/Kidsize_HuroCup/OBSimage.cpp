@@ -214,6 +214,14 @@ void OBSimage::strategymain()
 
 DeepMatrix_Publish.publish(deepmatrix);
 deepmatrix.DeepMatrix.clear();
+/*deepmatrix.
+deepmatrix.
+deepmatrix.
+deepmatrix.
+deepmatrix.
+deepmatrix.
+deepmatrix.*/
+
 printf("\n");
 ////////  ////////////////////////opencv/////////////////////////////////////////////
 cv::resize(image, publish_image, cv::Size(320, 240),CV_INTER_LINEAR);
