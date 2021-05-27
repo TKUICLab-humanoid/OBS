@@ -134,7 +134,9 @@ public:
 	SensorMode IMU_continuous;
 	SensorMode IMU_single;
 
-	int DeepMatrixValue[32];
+	int dy = 0;
+	int dx = 0;
+	/*int DeepMatrixValue[32];
 	int FilterMatrix[32];
 	int RMoveValue = 0;
 	int LMoveValue = 0;
@@ -146,8 +148,8 @@ public:
 	int decideforward;
 	int decidemove;
 	int LRmove_cnt;
-	int fixed_LRmove_cnt;
-	int continuousValue_x;
+	int fixed_LRmove_cnt;*/
+	//int continuousValue_x;
 	int continuous_x_offset;
 	int continuous_y_offset;
 	int continuous_y_offset_RIGHT;
@@ -157,7 +159,8 @@ public:
 	int continuous_theta_offset_LEFT;
 	int continuous_x_offset_RIGHT;
 	int continuous_x_offset_LEFT;
-	int RHead_X;
+	int dirdata[47];
+	/*int RHead_X;
 	int LHead_X;
 	int insideFMcnt;
 	int first_cnt=0;
@@ -166,20 +169,19 @@ public:
 	int Ry_fastest;
 	int Ly_fastest;
    	int dirmap[3];
-	int dirdata[47];
 	int cntTopYellow_x=0;
 	int cntBottomYellow_x=0;
 	int BottomYellowPoint=0;
 	int MidYellowPoint=0;
-	int TopYellowPoint=0;
+	int TopYellowPoint=0;*/
         
-	float slope_avg;         //red door slope
+	/*float slope_avg;         //red door slope
 	float slope_avg_blue;    //blue obs slope
 	float slope;
 	float IMU_slope;
-	float sidelineslope;
+	float sidelineslope;*/
 
-	bool in_reddoor_flag=false;	//add
+	/*bool in_reddoor_flag=false;	//add
     bool slope_flag=false;
 	bool Blue_obs_flag = false;
 	bool Red_Door_flag = false;
@@ -218,7 +220,7 @@ public:
 	bool twentyflag=false;
     int First_width = 0;
 	int angle_offset = 0;
-	int continous_angle_offest = 0;
+	int continous_angle_offest = 0;*/
 	string parameter_path = "N";
 	string m_state_string="a";
 	string walking_state_string="a";

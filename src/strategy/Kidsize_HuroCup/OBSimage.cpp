@@ -1,5 +1,5 @@
 #include "strategy/OBSimage.h"
-//int minY = 24;
+
 int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "OBSimage");
@@ -31,14 +31,14 @@ void OBSimage::strategymain()
             DeepMatrix_cnt[compress_width] = 0;
             for(int compress_height = IMAGEHEIGHT/10 - 1 ; compress_height > -1 ; compress_height--)
             {
-                minY = 24;
+                dy = 24;
                 bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
                 gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
                 rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2)); 
                 if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
                 {
                     DeepMatrix_cnt[compress_width] = (IMAGEHEIGHT/10 - 1) - compress_height;
-                    //if(minY > DeepMatrix_cnt[compress_width] && DeepMatrix_cnt[compress_width])
+                    //if(dy > DeepMatrix_cnt[compress_width] && DeepMatrix_cnt[compress_width])
                     break;
                 }
 	    		if(compress_height == 0)
@@ -92,7 +92,7 @@ void OBSimage::strategymain()
         for(int i =0; i < 32 ; i++)
         {
             printf("%d ,",DeepMatrix_cnt[i]);
-            deepmatrix.DeepMatrix.push_back(DeepMatrix_cnt[i]);            
+            //deepmatrix.DeepMatrix.push_back(DeepMatrix_cnt[i]);            
         }
         printf("\n");
         printf(" VMartrix  :");
@@ -148,22 +148,22 @@ void OBSimage::strategymain()
         {
             if(l == 0)
             {
-                if(DeepMatrix_cnt[l] <= minY)
+                if(DeepMatrix_cnt[l] <= dy)
                 {
-                    minY = DeepMatrix_cnt[l] ;
+                    dy = DeepMatrix_cnt[l] ;
                 }
             }
             else
             {
-                if(  DeepMatrix_cnt[l] <= minY && DeepMatrix_cnt[l]<DeepMatrix_cnt[l-1])
+                if(  DeepMatrix_cnt[l] <= dy && DeepMatrix_cnt[l]<DeepMatrix_cnt[l-1])
                 {   
-                    minY = DeepMatrix_cnt[l] ; 
+                    dy = DeepMatrix_cnt[l] ; 
                 }
             }
             
             if(l ==31) 
             {
-                printf("%d",minY);
+                printf("%d",dy);
                 printf("\n");
 
             }
@@ -213,14 +213,9 @@ void OBSimage::strategymain()
         //printf("\n");
 
 DeepMatrix_Publish.publish(deepmatrix);
-deepmatrix.DeepMatrix.clear();
-/*deepmatrix.
-deepmatrix.
-deepmatrix.
-deepmatrix.
-deepmatrix.
-deepmatrix.
-deepmatrix.*/
+deepmatrix.dx = dx;
+deepmatrix.dy = dy;
+
 
 printf("\n");
 ////////  ////////////////////////opencv/////////////////////////////////////////////

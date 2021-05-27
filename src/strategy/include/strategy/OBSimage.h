@@ -50,18 +50,24 @@ public:
 	void strategymain();
 
 	int DeepMatrix_cnt[32];
-	int MaxY ;
-	int minY =24;
+	int Focus[32] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1};
+
+	int dx;
+	int dy =24;
+
 	int WL = 0;
 	int WR = 0;
-	int X;//Xi有值的位置加總
-	int xc;
 	int xb;
-	int dx;
+
+	int X;//Xi有值的位置加總
 	int xin = 0;//Xi有值的位置個數加總
 	int Xi[32] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32};//Xi位置
-	float average = 0;
-	int Focus[32] = { 1,  2,  3,  4,  5,  6,  7,  8,  9,  10,  11,  12,  13,  14,  15,  16,  16,  15,  14,  13,  12,  11,  10,  9,  8,  7,  6,  5,  4,  3,  2,  1};
+	int xc;
+	
+	
+	
+	//float average = 0;
+	
 	int V[32];
 	int color_cnt;
 	bool blue_flag = false;
