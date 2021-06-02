@@ -232,12 +232,13 @@ public:
 	//void SlopeCalculate();
 	//void IMUSlope();
 
-	SensorMode IMU_continuous;
-
 	//int DeepMatrixValue[32];
 
+	SensorMode IMU_continuous;
+
+
 	bool Continuous_flag = false;
-	int continuousX_Speed = 0;
+	int continuousX_Speed = 0;		//前進速度的浮動參數
 
 	float Dx = 0;	//Dx
 	int Dy = 0;	//Dy
@@ -259,6 +260,8 @@ public:
 
 	int Dy_Max = 0;
 	int Speed_Max = 0;
+	int BY_size = 0;
+	int R_size = 0;
 
 
 
@@ -267,6 +270,7 @@ public:
 	void initparameterpath();
 	void readwalkinggait();
 	void GetDeepMatrix(const strategy::DeepMatrix &msg);
+	void RedDoorCase();
 
 };
 

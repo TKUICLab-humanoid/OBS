@@ -50,13 +50,39 @@ void KidsizeStrategy::strategymain()
                 while(continuousX_Speed > continuous_stay_X)
                 {
                     continuousX_Speed -= 50;
-                    ros_com->sendContinuousValue(continuousX_Speed, continuous_stay_T, 0, continuous_stay_T,IMU_continuous);
+                    ros_com->sendContinuousValue(continuousX_Speed, continuous_stay_Y, 0, continuous_stay_T,IMU_continuous);
                     tool->Delay(50);
                     ROS_INFO(" %d",continuousX_Speed);
                     strategy_info->get_image_flag = true;   
                     ros::spinOnce();
                 }
             }
+
+            /*if (strategy_info->color_mask_subject_cnts[1] || strategy_info->color_mask_subject_cnts[2] != 0)    //BY障礙物
+            {
+                if(Dx > 0)
+                {
+                    while (Dx > 0)
+                    {
+                        
+                    }
+                    
+                }
+                else
+                {
+
+                }
+            }
+            else if(strategy_info->color_mask_subject_cnts[5] != 0)                                             //R障礙物
+            {
+                for(int i = 0;i < strategy_info->color_mask_subject_cnts[5]; i++)
+                {
+                    if(strategy_info->color_mask_subject[5][i].size > R_size)
+                    {
+                        RedDoorCase();
+                    }
+                }
+            }*/
         }
         else
         {
@@ -66,7 +92,7 @@ void KidsizeStrategy::strategymain()
                 while(continuousX_Speed < Speed_Max)
                 {
                     continuousX_Speed += 50;
-                    ros_com->sendContinuousValue(continuousX_Speed, continuous_stay_T, 0, continuous_stay_T,IMU_continuous);
+                    ros_com->sendContinuousValue(continuousX_Speed, continuous_stay_Y, 0, continuous_stay_T,IMU_continuous);
                     tool->Delay(50);
                     ROS_INFO(" %d",continuousX_Speed);
                     strategy_info->get_image_flag = true;   
@@ -74,19 +100,6 @@ void KidsizeStrategy::strategymain()
                 }
             }
         }
-
-
-
-        /*ROS_INFO("Dx = %f",OBS_avg_to_SideLine);
-        ROS_INFO("Dy = %d",Deep_min_y);
-        ROS_INFO("WR = %d",Deep_WR);
-        ROS_INFO("WL = %d",Deep_WL);
-        ROS_INFO("Xc = %d",OBS_avg);
-        ROS_INFO("Xb = %d",SideLine);*/
-
-        //ROS_INFO("X = %d,Y = %d,Z = %d",dirdata[0],dirdata[1],dirdata[2]);
-    return;
-
     }
         
     else //策略指撥關閉
@@ -366,6 +379,13 @@ void KidsizeStrategy::initparameterpath()
     {
     }
 }*/
+void KidsizeStrategy::RedDoorCase()
+{
+
+}
+
+
+
 void KidsizeStrategy::readwalkinggait() //步態參數之讀檔
 {
     fstream fin;
@@ -393,6 +413,8 @@ void KidsizeStrategy::readwalkinggait() //步態參數之讀檔
         fin.getline(temp, sizeof(temp));
         Dy_Max = tool->readvalue(fin, "Dy_Max", 0);
         Speed_Max = tool->readvalue(fin, "Speed_Max", 0);
+        BY_size = tool->readvalue(fin, "BY_size", 0);
+        R_size = tool->readvalue(fin, "R_size", 0);
         fin.close();
     }
     catch (exception e)
@@ -406,10 +428,6 @@ void KidsizeStrategy::GetDeepMatrix(const strategy::DeepMatrix &msg) //深度矩
         //DeepMatrixValue[i] = msg.DeepMatrix[i];
         Dx = msg.Dx;
         Dy = msg.Dy;
-        WL = msg.WL;
-        WR = msg.WR;
-        Xc = msg.Xc;
-        Xb = msg.Xb;
     }
 }
 

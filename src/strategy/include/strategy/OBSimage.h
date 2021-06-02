@@ -31,15 +31,10 @@
 
 #define IMAGEHEIGHT 24
 #define IMAGEWIDTH 32
-#define DeepMatrixSize 32
+
 
 
 int FocusMatrix[32] = {10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10}; //攝影機內之焦點矩陣
-//int LeftMove[32]  = { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  2,  3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 21};
-//int RightMove[32] = {21, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-//int Left[32]= {1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4};
-//int Right[32]={4,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1};
 
 int DeepMatrix[32];
 int FilterMatrix[32];
@@ -71,6 +66,7 @@ public:
 	};
 	~OBSimage(){};
 	void strategymain();
+	void INIT();
 
 	unsigned char *rValue, *gValue, *bValue;
 	sensor_msgs::ImagePtr msg_compressimage;
