@@ -57,6 +57,7 @@ public:
 	/*********************stategy_main parameter ********************/
 	
 	int continous_angle_offest = 0;
+	bool init_flag = true;
 	
 	/*********************stategy_main parameter ********************/
 

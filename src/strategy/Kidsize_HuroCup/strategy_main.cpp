@@ -25,12 +25,16 @@ void KidsizeStrategy::strategymain()
     if (strategy_info->getStrategyStart()) //strategy start
     {
         readparameter();
-
-        //ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
-        ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300);     //head_motion vertical
-        tool->Delay(100);
-        ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);   //head_motion horizontal
-        tool->Delay(100);
+        if(init_flag == true)
+        {
+            ROS_INFO("\n\n\n\n\n\n\ninit\n\n\n\n\n\n\n");
+            //ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
+            ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300);     //head_motion vertical
+            tool->Delay(100);
+            ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);   //head_motion horizontal
+            tool->Delay(100);
+            init_flag = false;
+        }
 
         if(nearest_distance_y <= dangerous_distance)
         {
@@ -115,30 +119,25 @@ int KidsizeStrategy::def_turn_angle()
     if(x_avg_to_boundary > 0)                       //Dx > 0 -> obstacle in left -> turn right
     {
         ROS_INFO("x_avg_to_boundary > 0");
-        if(abs(x_avg_to_boundary) < 16 && abs(x_avg_to_boundary) > 13)
+        if(abs(x_avg_to_boundary) < 16 && abs(x_avg_to_boundary) > 11)
         {
-            ROS_INFO("abs(x_avg_to_boundary) < 16 && abs(x_avg_to_boundary) > 13");
+            ROS_INFO("abs(x_avg_to_boundary) < 16 && abs(x_avg_to_boundary) > 11");
             continous_angle_offest = -10;
         }
-        else if(abs(x_avg_to_boundary) <= 13 && abs(x_avg_to_boundary) > 10)
+        else if(abs(x_avg_to_boundary) <= 11 && abs(x_avg_to_boundary) > 16)
         {
             ROS_INFO("abs(x_avg_to_boundary) < 13 && abs(x_avg_to_boundary) > 10");
             continous_angle_offest = -8;
         }
-        else if(abs(x_avg_to_boundary) <= 10 && abs(x_avg_to_boundary) > 7)
+        else if(abs(x_avg_to_boundary) <= 6 && abs(x_avg_to_boundary) > 3)
         {
             ROS_INFO("abs(x_avg_to_boundary) < 10 && abs(x_avg_to_boundary) > 7");
             continous_angle_offest = -6;
         }
-        else if(abs(x_avg_to_boundary) <= 7 && abs(x_avg_to_boundary) > 4)
+        else if(abs(x_avg_to_boundary) <= 3 && abs(x_avg_to_boundary) > 1)
         {
             ROS_INFO("abs(x_avg_to_boundary) < 7 && abs(x_avg_to_boundary) > 4");
             continous_angle_offest = -4;
-        }
-        else if(abs(x_avg_to_boundary) <= 4 && abs(x_avg_to_boundary) > 1)
-        {
-            ROS_INFO("abs(x_avg_to_boundary) < 4 && abs(x_avg_to_boundary) > 1");
-            continous_angle_offest = -2;
         }
         else
         {
@@ -150,25 +149,21 @@ int KidsizeStrategy::def_turn_angle()
     else if(x_avg_to_boundary < 0)              //Dx < 0 -> obstacle in right -> turn left
     {
         ROS_INFO("x_avg_to_boundary < 0");
-        if(abs(x_avg_to_boundary) < 16 && abs(x_avg_to_boundary) > 13)
+        if(abs(x_avg_to_boundary) < 16 && abs(x_avg_to_boundary) > 11)
         {
             continous_angle_offest = 10;
         }
-        else if(abs(x_avg_to_boundary) <= 13 && abs(x_avg_to_boundary) > 10)
+        else if(abs(x_avg_to_boundary) <= 11 && abs(x_avg_to_boundary) > 6)
         {
             continous_angle_offest = 8;
         }
-        else if(abs(x_avg_to_boundary) <= 10 && abs(x_avg_to_boundary) > 7)
+        else if(abs(x_avg_to_boundary) <= 6 && abs(x_avg_to_boundary) > 3)
         {
             continous_angle_offest = 6;
         }
-        else if(abs(x_avg_to_boundary) <= 7 && abs(x_avg_to_boundary) > 4)
+        else if(abs(x_avg_to_boundary) <= 3 && abs(x_avg_to_boundary) > 1)
         {
             continous_angle_offest = 4;
-        }
-        else if(abs(x_avg_to_boundary) <= 4 && abs(x_avg_to_boundary) > 1)
-        {
-            continous_angle_offest = 2;
         }
         else
         {
