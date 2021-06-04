@@ -135,7 +135,8 @@ public:
 	SensorMode IMU_single;
 
 	int dy = 0;
-	int dx = 0;
+	float dx = 0;
+	bool Continuous_flag = false;
 	/*int DeepMatrixValue[32];
 	int FilterMatrix[32];
 	int RMoveValue = 0;
@@ -199,7 +200,6 @@ public:
 	bool red_modle_flag = false;
 	bool check_LRmove_flag = false;
 	bool special_obs_flag = false;
-	bool Continuous_flag = false;
 	bool first_continuous_flag = false;
 	bool Turnhead_flag = false;
 	bool turnhead_open_cnt = true;

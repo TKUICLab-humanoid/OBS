@@ -19,9 +19,7 @@ void OBSimage::strategymain()
 {
 	if(strategy_info->getStrategyStart())
 	{	
-        printf("\n");
-        printf("\n");
-        printf("\n");
+        printf("\n\n\n");
         
         cv::Mat compressimage(24,32,CV_8UC3);
         cv::Mat image = strategy_info->cvimg->image;
@@ -79,8 +77,7 @@ void OBSimage::strategymain()
                 V[i] = 0;
             }
         }
-        printf("\n\n");
-        printf("FocusMatrix:");
+        printf("\n\nFocusMatrix:");
 
         for(int j =0; j < 32 ; j++)
         {
@@ -91,11 +88,9 @@ void OBSimage::strategymain()
         
         for(int i =0; i < 32 ; i++)
         {
-            printf("%d ,",DeepMatrix_cnt[i]);
-            //deepmatrix.DeepMatrix.push_back(DeepMatrix_cnt[i]);            
+            printf("%d ,",DeepMatrix_cnt[i]);            
         }
-        printf("\n");
-        printf(" VMartrix  :");
+        printf("\nVMartrix  :");
 
         for(int k =0; k < 32 ; k++)
         {
@@ -109,34 +104,18 @@ void OBSimage::strategymain()
             WL += (m+1)*V[m];
             if(m == 31)
             {
-                printf("WR = %d ",WR);
-                printf("\n");
-                printf("WL = %d ",WL);
-                printf("\n");
-                printf("xb :");
+                printf("WR = %d\nWL = %d\nxb :",WR,WL);
                 if(WR >= WL)
                 {
                     xb = 0;
-                    dx = xc - xb;
-                    printf("%d",xb);
-                    printf("\n");
-                    printf("dx :");
-                    printf("%d",dx);
-                    printf("\n");
-                    printf("GOGOGOGO Rright __case : walking trun right__");
-                    printf("\n");
+                    dx = (xc*10) - xb;
+                    printf("%d\ndx :%f\nGOGOGOGO Rright __case : walking trun right__\n",xb,dx);
                 }
                 else
                 {
                     xb = 319;
-                    dx = xb - xc;
-                    printf("%d",xb);
-                    printf("\n");
-                    printf("dx :");
-                    printf("%d",dx);
-                    printf("\n");
-                    printf("GOGOGOGO Left   __case : walking trun left__");
-                    printf("\n");
+                    dx = xb - (xc*10);
+                    printf("%d\ndx :%f\nGOGOGOGO Left   __case : walking trun left__\n",xb,dx);
                 }  
                 WR =0;
                 WL =0;
@@ -163,8 +142,7 @@ void OBSimage::strategymain()
             
             if(l ==31) 
             {
-                printf("%d",dy);
-                printf("\n");
+                printf("%d\n",dy);
 
             }
         }
@@ -191,33 +169,17 @@ void OBSimage::strategymain()
                 else
                 {
                     xc = ( X/xin );
-                    printf("%d",xc);
+                    printf("%f",xc);
                     X = 0;
                     xin = 0;
                 }
             }
         }
-        printf("\n");
-        printf("\n");
-        printf("\n");
-        printf("\n");
-        printf("\n");
-        printf("\n");
-        printf("\n");
-        printf("\n");
-        printf("\n");
-        printf("\n");
-        printf("\n");
-        printf("\n");
-        //printf("\n");
-        //printf("\n");
-
+        printf("\n\n\n\n\n\n\n\n\n");
 DeepMatrix_Publish.publish(deepmatrix);
 deepmatrix.dx = dx;
 deepmatrix.dy = dy;
 
-
-printf("\n");
 ////////  ////////////////////////opencv/////////////////////////////////////////////
 cv::resize(image, publish_image, cv::Size(320, 240),CV_INTER_LINEAR);
 cv::waitKey(1);

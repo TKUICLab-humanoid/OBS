@@ -31,6 +31,11 @@ void KidsizeStrategy::strategymain()
             m_state_string = "P_INIT";
             readwalkinggait(); 
             load_dirtxt();
+            ros_com->sendHeadMotor(HeadMotorID::VerticalID,1673, 300);
+            tool->Delay(100);
+            ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300); //頭部馬達刻度（左右）左正右負
+            tool->Delay(100);
+
 
             /*if (!Continuous_flag) //起步步態
             {
