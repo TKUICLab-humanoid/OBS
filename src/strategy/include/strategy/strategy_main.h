@@ -47,7 +47,7 @@ public:
 	/***************subscribe deepmatrix parameter******************/
 
 	int nearest_distance_y = 0;
-	float x_avg_to_boundary = 0;
+	float x_boundary = 0;
 	string parameter_path = "N";
 
 	/******************subscribe deepmatrix parameter******************/
@@ -56,15 +56,37 @@ public:
 	
 	/*********************stategy_main parameter ********************/
 	
+	enum strategy_state
+	{
+		P_INIT,
+		P_First_lawyer,
+		P_TurnHead
+	};
+
 	int continous_angle_offest = 0;
 	bool init_flag = true;
+	float IMU_Value = 0;
+
+	strategy_state _state;
 	
 	/*********************stategy_main parameter ********************/
 
 	/******************ini  parameter******************/
 
-	int dirdata[100];
+	struct walking_gait
+	{
+		int x;
+		int y;
+		int theta;
+	};
+
+	walking_gait stay;
+	walking_gait Rmove;
+	walking_gait Lmove;
+
 	int maxspeed = 0;
+	int minspeed = 0;
+	
 	int dangerous_distance = 0;
 	int continuousValue_x = 0;
 	int turn_angle = 0;

@@ -108,17 +108,8 @@ void OBSimage::strategymain()
 
 		}
 		printf("\n");
-		if(WL < WR)											
-		{
-			Xb = 0;
-			ROS_INFO("Obstacle in left");
-		}
-		else if(WR < WL)
-		{
-			Xb = 31;
-			ROS_INFO("Obstacle in right");
-		}
-		else if((WR == WL) && (WR > 0) && (WL > 0))		//WR = WL
+
+		if((WR == WL) && (WR > 0) && (WL > 0))		//WR = WL
 		{
 			for(int i = 0 ; i < 32 ; i++) 
 			{
@@ -142,6 +133,18 @@ void OBSimage::strategymain()
 			}
 		}
 
+		if(WL < WR)											
+		{
+			Xb = 0;
+			ROS_INFO("Obstacle in left");
+		}
+		else if(WR < WL)
+		{
+			Xb = 31;
+			ROS_INFO("Obstacle in right");
+		}
+		
+
 		Dx = Xc - Xb;
 
 		ROS_INFO("W_R = %d,W_L = %d",W_R,W_L);
@@ -155,13 +158,8 @@ void OBSimage::strategymain()
 		DeepMatrix_Publish.publish(deepmatrix_parameter);
 
         ROS_INFO("\n");
-////////////////////////////////////opencv/////////////////////////////////////////////
-         cv::resize(image, publish_image, cv::Size(320, 240),CV_INTER_LINEAR);
+		cv::imshow("image",image);
 		cv::waitKey(1);
-        msg_compressimage = cv_bridge::CvImage(std_msgs::Header(), "bgr8", publish_image).toImageMsg();
-        pub_colormodel.publish(msg_compressimage);
-        image.release();
-////////////////////////////////////opencv////////////////////////////////////////////
     }
 }
 
