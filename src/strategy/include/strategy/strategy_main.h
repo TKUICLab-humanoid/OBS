@@ -28,10 +28,11 @@ enum strategy_state
     P_INIT,
     P_MATRIX_CALCULATE,
     P_FIND_WALKINGSTATE,
-    P_FM_TURNHEAD,
+    //P_FM_TURNHEAD,
     P_WALKINGGAIT,
     P_DOOR,
-    P_CRAWL
+    P_CRAWL,
+	walking
 };
 
 struct obstacle_data

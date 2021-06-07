@@ -37,14 +37,18 @@ void KidsizeStrategy::strategymain()
             tool->Delay(100);
 
 
-            /*if (!Continuous_flag) //起步步態
+            if (!Continuous_flag) //起步步態
             {
                 ros_com->sendBodySector(4); //動作磁區
                 tool->Delay(1000);
                 ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); //ros_com->sendBodyAuto(-450, 0, 0,-3, WalkingMode::ContinuousStep,IMU_continuous);
                 tool->Delay(500);
                 Continuous_flag = true;
-            }*/
+            }
+
+        case walking://根據dx及dy值去做步態
+            printinfo();
+            m_state_string = "walking";
 
 
         case P_DOOR: //紅門策略
