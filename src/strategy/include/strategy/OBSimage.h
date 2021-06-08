@@ -47,12 +47,31 @@ public:
 		ros_com = RosCommunicationInstance::getInstance();
 	};
 	~OBSimage(){};
-	void strategymain();
 
-	int DeepMatrix_cnt[32];
-	int color_cnt;
-	bool blue_flag = false;
-	float color_flag;
+	/****************************** function *************************************/
+	void strategymain();
+	void INIT_parameter();
+
+	/****************************** parameter *************************************/
+	int Focus_Matrix[32] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+	int Deep_Matrix[32];
+	int Filter_Matrix[32];
+
+	int WR = 0;		//
+	int WL = 0;		//
+
+	float Xc = 0;	//the center of obstacle in focus matrix
+	float Xb = 0;		//compare WR & WL,setting boundary 
+
+	int Dy = 0;		//min of deepmatrix
+	float Dx = 0;	//distance between Xc and Xb
+
+	int Xc_count = 0;	//calculate number of obstacle in focus matrix
+	int Xi_sum	=	0;	//sum of obstacle in focus matrix x-axis value
+
+	int W_R = 0;
+	int W_L = 0;
+
 	unsigned char *rValue, *gValue, *bValue;
 
 	sensor_msgs::ImagePtr msg_compressimage;
@@ -63,10 +82,10 @@ public:
 	ToolInstance *tool;
 	StrategyInfoInstance *strategy_info;
 
-	
-
 	ros::Publisher DeepMatrix_Publish;
 
 
-	strategy::DeepMatrix deepmatrix;	
+	strategy::DeepMatrix deepmatrix_parameter;	
+
+
 };
