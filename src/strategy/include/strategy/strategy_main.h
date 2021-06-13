@@ -63,11 +63,19 @@ public:
 		P_TurnHead
 	};
 
+	enum first_obs
+	{
+		Go_to_first_lawyer,
+		In_first_lawyer,
+		Leave_First_lawyer
+	};
+
 	int continous_angle_offest = 0;
 	bool init_flag = true;
 	float IMU_Value = 0;
 
 	strategy_state _state;
+	first_obs      _first_obs_state;
 	
 	/*********************stategy_main parameter ********************/
 

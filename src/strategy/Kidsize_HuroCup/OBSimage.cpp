@@ -24,6 +24,8 @@ void OBSimage::strategymain()
 	if(strategy_info->getStrategyStart())
 	{	
 		cv::Mat image = strategy_info->cvimg->image;
+		cv::Mat deepmatrix_image = cv::Mat::zeros(cv::Size(32,24),CV_8UC1);
+		cv::Mat deepmatrix_image_10(320,240,CV_8UC1);
 
 		ROS_INFO("Deep Matrix");
 			
@@ -32,6 +34,8 @@ void OBSimage::strategymain()
             Deep_Matrix[compress_width] = 0;
             for(int compress_height = IMAGEHEIGHT/10 - 1 ; compress_height > -1 ; compress_height--)
             {
+				deepmatrix_image.at<uchar>(compress_height,compress_width) = 0;
+				
                 bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
                 gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
                 rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
@@ -39,6 +43,7 @@ void OBSimage::strategymain()
                 if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
                 {
 					Deep_Matrix[compress_width] = (IMAGEHEIGHT/10 - 1) - compress_height;
+					deepmatrix_image.at<uchar>(compress_height,compress_width) = 1;
 					break;
                 }
 				if(compress_height == 0)
@@ -158,7 +163,10 @@ void OBSimage::strategymain()
 		DeepMatrix_Publish.publish(deepmatrix_parameter);
 
         ROS_INFO("\n");
-		cv::imshow("image",image);
+		cv::resize(deepmatrix_image,deepmatrix_image_10,cv::Size(320,240),CV_INTER_LINEAR);
+
+		cv::imshow("deepmatrix_image_10",deepmatrix_image_10);
+		cv::imshow("deepmatrix_image",deepmatrix_image);
 		cv::waitKey(1);
     }
 }

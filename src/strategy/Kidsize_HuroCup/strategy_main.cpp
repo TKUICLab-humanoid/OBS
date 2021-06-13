@@ -51,10 +51,17 @@ void KidsizeStrategy::strategymain()
                 ROS_INFO("nearest_distance_y = %d",nearest_distance_y);
                 ROS_INFO("dangerous_distance = %d",dangerous_distance);
 
-                if(nearest_distance_y <= dangerous_distance)
+                if(nearest_distance_y <= dangerous_distance)        //obstacle in focus
                 {
                     ROS_INFO("(if)nearest_distance_y < %d",nearest_distance_y);
-                    if(continuousValue_x > minspeed)
+
+                    if(_first_obs_state == Go_to_first_lawyer)
+                    {
+                        _first_obs_state = In_first_lawyer;
+                        ROS_INFO("_first_obs_state = In_first_lawyer");
+                    }
+
+                    if(continuousValue_x > minspeed)                // speed down
                     {
                         ROS_INFO("nearest_distance_y < %d(if)",nearest_distance_y);
                         while(continuousValue_x > minspeed)
@@ -80,10 +87,17 @@ void KidsizeStrategy::strategymain()
                     }
 
                 }
-                else                    //nearest_distance_y > 10
+                else                                                //nearest_distance_y > 10 / obstacle not in foucus
                 {
                     ROS_INFO("nearest_distance_y > 10");
-                    if(continuousValue_x < maxspeed)
+                    
+                    if(_first_obs_state == In_first_lawyer)
+                    {
+                        _first_obs_state = Leave_First_lawyer;
+                        _state = P_TurnHead;
+                        break;
+                    }
+                    if(continuousValue_x < maxspeed)                //speed up
                     {
                         ROS_INFO("nearest_distance_y > 10(if)");
                         while(continuousValue_x < maxspeed)
@@ -114,23 +128,34 @@ void KidsizeStrategy::strategymain()
                     _state = P_TurnHead;
                 }*/
                     
-                //break;
+                break;
 
-            /*case P_TurnHead:
-            {
-                if(IMU_Value < 0 && x_boundary == 0)
+            case P_TurnHead:
+            
+                if(IMU_Value < 0 && x_boundary > 0 )            //robot turn right and have an obstacle in left
                 {
                     ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 1647, 100);     //turn head left
                     tool->Delay(100);
                     ROS_INFO("need to turn left");
+                    if(dangerous_distance > 10)
+                    {
+                        //turn left
+
+                    }
 
                 }
-                else if(IMU_Value > 0 && x_boundary == 31)
+                else if(IMU_Value > 0 && x_boundary > 0)    //robot turn left and have an obstacle in right
                 {
-
+                    ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2447, 100);     //turn head right
+                    tool->Delay(100);
+                    ROS_INFO("need to turn right");
+                    if(dangerous_distance > 10)
+                    {
+                        //turn right
+                    }
                 }
-            }
-*/
+            
+
             default:
                 ROS_INFO("case default\n\n");
                 _state = P_First_lawyer;
@@ -146,6 +171,7 @@ void KidsizeStrategy::strategymain()
     {
         //ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
         _state = P_INIT;
+        _first_obs_state = Go_to_first_lawyer;
     }
 
 }
