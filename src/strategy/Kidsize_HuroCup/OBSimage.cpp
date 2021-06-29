@@ -27,36 +27,40 @@ void OBSimage::strategymain()
 
 		ROS_INFO("Deep Matrix");
 			
-        for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
-        {
-            Deep_Matrix[compress_width] = 0;
-            for(int compress_height = IMAGEHEIGHT/10 - 1 ; compress_height > -1 ; compress_height--)
-            {
-                bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-                gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-                rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
+		for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
+		{
+		Deep_Matrix[compress_width] = 0;
+		for(int compress_height = IMAGEHEIGHT/10 - 1 ; compress_height > -1 ; compress_height--)
+		{
+			bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
+			gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
+			rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
 
-                if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
-                {
-					Deep_Matrix[compress_width] = (IMAGEHEIGHT/10 - 1) - compress_height;
-					break;
-                }
-				if(compress_height == 0)
-				{
-					Deep_Matrix[compress_width] = 24;
-				}
-            }
+			if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
+			{
+				Deep_Matrix[compress_width] = (IMAGEHEIGHT/10 - 1) - compress_height;
+				break;
+			}
+			if(compress_height == 0)
+			{
+				Deep_Matrix[compress_width] = 24;
+			}
+		}
 
-			printf("%2d,",Deep_Matrix[compress_width]);
-        }
+				printf("%2d,",Deep_Matrix[compress_width]);
+		}
 		printf("\n");
+
+
+
+
 		/*for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10  ; compress_height++)
-        {
-            for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10 ; compress_width++)
-            {
-                bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-                gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-                rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
+		{
+		for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10 ; compress_width++)
+		{
+			bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
+			gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
+			rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
 				if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
 				{
 					printf("1  ");
@@ -66,16 +70,22 @@ void OBSimage::strategymain()
 					printf("0  ");
 				}
 			}
-			printf("\n");
-		}*/
+				printf("\n");
+			}*/
+
+
+
+
 
 		INIT_parameter();
 
 		ROS_INFO("Focus Matrix");
 		for(int i = 0; i < 32 ;i++)
-        {
-           printf("%2d,",Focus_Matrix[i]);
-        }
+		{
+			printf("%2d,",Focus_Matrix[i]);
+		}
+
+		
 		printf("\n");
 		ROS_INFO("Filter Matrix");
 
