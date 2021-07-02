@@ -42,6 +42,15 @@ public:
 	ToolInstance *tool;
 	StrategyInfoInstance *strategy_info;
 
+	enum strategy_state
+	{
+		INIT,
+		AVOID,
+		TURNHEAD,
+		REDDOOR,
+		CRAWL
+	};
+
 	//////////////////////////////////////new strategy parameter ////////////////////////////////////////////
 	
 	/***************subscribe deepmatrix parameter******************/
@@ -56,7 +65,8 @@ public:
 	
 	/*********************stategy_main parameter ********************/
 
-
+	strategy_state strategy_state;
+	SensorMode IMU_continuous;
 	int continous_angle_offest = 0;
 
 	
@@ -65,6 +75,14 @@ public:
 	/******************ini  parameter******************/
 
 	int dirdata[100];
+	int continuous_angle_offset = 0;
+
+	//-------preturn----------
+	int preturn_enable = 0;
+	int preturn_dir = 0;
+	int preturn_time = 0;
+	int preturn_speed = 0; ;
+	int preturn_theta = 0;
 	
 	/****************** ini parameter******************/
 	
@@ -74,4 +92,6 @@ public:
 	void initparameterpath();
 	void readparameter();
 	void printinfo();
+	void load_preturn_txt();
+
 };

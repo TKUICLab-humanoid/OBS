@@ -12,6 +12,7 @@ int main(int argc, char **argv)
 
     while (nh.ok())
     {
+        
         KidsizeStrategy.strategymain();
         ros::spinOnce();
         loop_rate.sleep();
@@ -24,7 +25,48 @@ void KidsizeStrategy::strategymain()
 
     if (strategy_info->getStrategyStart()) //strategy start
     {
+        readparameter();
 
+        switch(strategy_state)
+        {
+            case INIT:
+                ROS_INFO("state = INIT");
+                //initial parameter//
+                continuous_angle_offset = 0;
+
+                //preturn
+                if(preturn_enable)
+                    if(preturn_dir = 1) // turn left
+                    {
+                        ROS_INFO("preturn left");
+                        ros_com->sendContinuousValue(preturn_speed, 0, 0,preturn_theta, IMU_continuous);
+                        tool->Delay(preturn_time);
+                    }
+                    else if(preturn_dir = 2) // turn right
+                    {
+                        ROS_INFO("preturn right");
+                        ros_com->sendContinuousValue(preturn_speed, 0, 0, -preturn_theta, IMU_continuous);
+                        tool->Delay(preturn_time);
+                    }
+                else
+                    ROS_INFO("No preturn");
+
+            strategy_state = AVOID;   
+            break;
+
+            case AVOID:
+            ROS_INFO("state = AVOID");
+
+            break;
+
+            default :
+                ROS_INFO("default");
+            break;
+        }
+    }
+    else
+    {
+        strategy_state = INIT;
     }
 
 }
@@ -56,6 +98,29 @@ void KidsizeStrategy::GetDeepMatrix(const strategy::DeepMatrix &msg)
 
 	x_boundary = msg.Dx;
 
+}
+
+void KidsizeStrategy::load_preturn_txt() //first_move讀檔之副函式
+{
+    fstream fin;
+    string sTmp;
+    char line[100];
+    char path[200];
+    strcpy(path, parameter_path.c_str());
+    strcat(path, "/preturn.ini");
+    fin.open(path, ios::in);
+    try
+    {
+        preturn_enable = tool->readvalue(fin, "preturn_enable", 1);
+        preturn_speed = tool->readvalue(fin, "preturn_speed", 1);
+        preturn_dir = tool->readvalue(fin, "preturn_dir", 1);
+        preturn_theta = tool->readvalue(fin, "preturn_theta", 1);
+        preturn_time = tool->readvalue(fin, "preturn_time", 1);
+        fin.close();
+    }
+    catch (exception e)
+    {
+    }
 }
 
 void KidsizeStrategy::readparameter() //步態參數之讀檔
