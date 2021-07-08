@@ -24,163 +24,219 @@ void KidsizeStrategy::strategymain()
 
     if (strategy_info->getStrategyStart()) //strategy start
     {
-        ROS_INFO("strategy start");
-        switch(_state)
+        readparameter();
+
+        switch(strategy_state)
         {
-            ROS_INFO("_state");
-            case P_INIT:
+            case INIT:
+                ROS_INFO("state = INIT");
+                //initial parameter//
+                continuous_angle_offset = 0;
+                turn_angle = 0;
 
-                ROS_INFO("P_INIT");
-                readparameter();
-
-                ROS_INFO("\n\n\n\n\n\n\ninit\n\n\n\n\n\n\n");
-                //ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300);     //head_motion vertical
+                //head motor angle set 
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300);
                 tool->Delay(100);
-                ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);   //head_motion horizontal
+                ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300); 
                 tool->Delay(100);
-                
-                IMU_Value = strategy_info->getIMUValue().Yaw;
 
-                _state = P_First_lawyer;
-                break;
-
-            case P_First_lawyer:
-
-                ROS_INFO("P_First_lawyer");
-                ROS_INFO("nearest_distance_y = %d",nearest_distance_y);
-                ROS_INFO("dangerous_distance = %d",dangerous_distance);
-
-                if(nearest_distance_y <= dangerous_distance)        //obstacle in focus
+                //preturn
+                if(preturn_enable)
                 {
-                    ROS_INFO("(if)nearest_distance_y < %d",nearest_distance_y);
-
-                    if(_first_obs_state == Go_to_first_lawyer)
+                    if(preturn_dir = 1) // turn left
                     {
-                        _first_obs_state = In_first_lawyer;
-                        ROS_INFO("_first_obs_state = In_first_lawyer");
+                        ROS_INFO("preturn left");
+                        ros_com->sendContinuousValue(preturn_speed, 0, 0,preturn_theta, IMU_continuous);
+                        tool->Delay(preturn_time);
                     }
-
-                    if(continuousValue_x > minspeed)                // speed down
+                    else if(preturn_dir = 2) // turn right
                     {
-                        ROS_INFO("nearest_distance_y < %d(if)",nearest_distance_y);
-                        while(continuousValue_x > minspeed)
-                        {
-                            ROS_INFO("speed down");
-                            continuousValue_x -= 100;
-                            turn_angle = def_turn_angle();
-                            //ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + turn_angle, IMU_continuous); //連續步態的值 
-                            tool->Delay(100);
-                            strategy_info->get_image_flag = true;                                                                                  
-                            ros::spinOnce();
-                            printinfo();
-                        }
+                        ROS_INFO("preturn right");
+                        ros_com->sendContinuousValue(preturn_speed, 0, 0, -preturn_theta, IMU_continuous);
+                        tool->Delay(preturn_time);
+                    }
+                }
+                else
+                    ROS_INFO("No preturn");
 
+            strategy_state = AVOID;   
+            break;
+
+            case AVOID:
+                ROS_INFO("state = AVOID");
+                if(Dy < dangerous_distance)         //dangerous_distance = 10
+                {
+                    //check reddoor or not
+                    if(RD != 0 && LD != 0)
+                    {
+                        strategy_state = REDDOOR;
+                        break;
                     }
                     else
                     {
-                        ROS_INFO("nearest_distance_y < 10(else)");
-                        turn_angle = def_turn_angle();
-                        strategy_info->get_image_flag = true;                                                                                  
-                        ros::spinOnce();
-                        printinfo();
-                    }
-
-                }
-                else                                                //nearest_distance_y > 10 / obstacle not in foucus
-                {
-                    ROS_INFO("nearest_distance_y > 10");
-                    
-                    if(_first_obs_state == In_first_lawyer)
-                    {
-                        _first_obs_state = Leave_First_lawyer;
-                        _state = P_TurnHead;
-                        break;
-                    }
-                    if(continuousValue_x < maxspeed)                //speed up
-                    {
-                        ROS_INFO("nearest_distance_y > 10(if)");
-                        while(continuousValue_x < maxspeed)
+                        //slow down and rotate
+                        if(Dx > 5)                  // speed-- & turn right
                         {
-                            ROS_INFO("speed up");
-                            continuousValue_x += 100;
-                            //ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + turn_angle, IMU_continuous); //連續步態的值 
-                            tool->Delay(100);
-                            strategy_info->get_image_flag = true;                                                                                  
-                            ros::spinOnce();
-                            turn_angle = 0;
-                            printinfo();
+                            if(continuousValue_x > minspeed) // current speed > minspeed
+                            //if(continuousValue_x > stay.x) // current speed > the speed of stepping 
+                            {
+                                while(continuousValue_x > minspeed)
+                                {
+                                    continuousValue_x -= 100;
+                                    turn_angle = def_turn_angle();
+                                    //ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + turn_angle, IMU_continuous); //連續步態的值 
+                                    tool->Delay(100);
+                                }
+
+                                if(Dy > 10)         //next obstacle's distance > 10, speed++
+                                {
+                                    if(continuousValue_x < maxspeed) // current speed > minspeed
+                                    //if(continuousValue_x > stay.x) // current speed > the speed of stepping 
+                                    {
+                                        while(continuousValue_x < maxspeed)
+                                        {
+                                            continuousValue_x += 100;
+                                            //ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + turn_angle, IMU_continuous); //連續步態的值 
+                                            tool->Delay(100);
+                                        }
+                                    }
+                                }
+
+                                else
+                                {
+                                    strategy_state = TURNHEAD;
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                turn_angle = def_turn_angle();
+                                //ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + turn_angle, IMU_continuous); 
+                                tool->Delay(100);
+                            }
+                        }
+
+                        else if(Dx < -5)        // speed-- & turn left
+                        {
+                            if(continuousValue_x > minspeed) // current speed > minspeed
+                            //if(continuousValue_x > stay.x) // current speed > the speed of stepping 
+                            {
+                                while(continuousValue_x > minspeed)
+                                {
+                                    continuousValue_x -= 100;
+                                    turn_angle = def_turn_angle();
+                                    //ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + turn_angle, IMU_continuous);  
+                                    tool->Delay(100);
+                                }
+
+                                if(Dy > 10)         //next obstacle's distance > 10, speed++
+                                {
+                                    if(continuousValue_x < maxspeed) // current speed > minspeed
+                                    //if(continuousValue_x > stay.x) // current speed > the speed of stepping 
+                                    {
+                                        while(continuousValue_x < maxspeed)
+                                        {
+                                            continuousValue_x += 100;
+                                            //ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + turn_angle, IMU_continuous);  
+                                            tool->Delay(100);
+                                        }
+                                    }
+                                }
+
+                                else
+                                {
+                                    strategy_state = TURNHEAD;
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                turn_angle = def_turn_angle();
+                                //ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + turn_angle, IMU_continuous);  
+                                tool->Delay(100);
+                            }   
                         }
                     }
-                    /*else
-                    {
-                        ROS_INFO("nearest_distance_y > 10(else)");
-
-                        strategy_info->get_image_flag = true;                                                                                  
-                        ros::spinOnce();
-                        printinfo();
-                    }*/
                 }
-                
-
-                /*if((IMU_Value < 0 && x_boundary == 0) ||(IMU_Value > 0 && x_boundary == 31))
+                else
                 {
-                    _state = P_TurnHead;
-                }*/
-                    
-                break;
-
-            case P_TurnHead:
-            
-                if(IMU_Value < 0 && x_boundary > 0 )            //robot turn right and have an obstacle in left
-                {
-                    ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 1647, 100);     //turn head left
-                    tool->Delay(100);
-                    ROS_INFO("need to turn left");
-                    if(dangerous_distance > 10)
+                    if(continuousValue_x < maxspeed) // current speed > minspeed
+                    //if(continuousValue_x > stay.x) // current speed > the speed of stepping 
                     {
-                        //turn left
-
-                    }
-
-                }
-                else if(IMU_Value > 0 && x_boundary > 0)    //robot turn left and have an obstacle in right
-                {
-                    ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2447, 100);     //turn head right
-                    tool->Delay(100);
-                    ROS_INFO("need to turn right");
-                    if(dangerous_distance > 10)
-                    {
-                        //turn right
+                        while(continuousValue_x < maxspeed)
+                        {
+                            continuousValue_x += 100;
+                            //ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + turn_angle, IMU_continuous);  
+                            tool->Delay(100);
+                        }
                     }
                 }
-            
 
-            default:
-                ROS_INFO("case default\n\n");
-                _state = P_First_lawyer;
-                break;
+            break;
 
+            case TURNHEAD:
+                ROS_INFO("TURNHEAD");
+                if(IMU_Value < 0 && Dx > 0)         //obstacle left,need to turn right
+                {
+                    ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 1447, 300);           //head turn left
+                    tool->Delay(100);
 
+                    if(Dy > 10)   //next obstacle's distance > 10
+                    {
+                        //ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + turn_angle, IMU_continuous);
+                        tool->Delay(500);
+
+                        strategy_state = AVOID;
+                        break;
+                    }
+                    else
+                    {
+                        //special case 1;
+                    }
+                }
+
+                else if(IMU_Value > 0 && Dx < 0)         //obstacle rigjt,need to turn left
+                {
+                    ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2647, 300);           //head turn right
+                    tool->Delay(100);
+
+                    if(Dy > 10)   //next obstacle's distance > 10
+                    {
+                        //ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + turn_angle, IMU_continuous);
+                        tool->Delay(500);
+
+                        strategy_state = AVOID;
+                        break;
+                    }
+                    else
+                    {
+                        //special case 1;
+                    }
+                }
+
+                else
+                {
+                    strategy_state = AVOID;
+                    break;
+                }
+            break;
+
+            default :
+                ROS_INFO("default");
+            break;
         }
-
-        
-
     }
     else
     {
-        //ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
-        _state = P_INIT;
-        _first_obs_state = Go_to_first_lawyer;
+        strategy_state = INIT;
     }
-
 }
 
 void KidsizeStrategy::printinfo()
 {
                     
-    ROS_INFO("nearest_distance_y = %d",nearest_distance_y);
-    ROS_INFO("x_boundary = %.3lf",x_boundary);
+    ROS_INFO("Dy = %d",Dy);
+    ROS_INFO("Dx = %.3lf",Dx);
     ROS_INFO("(stay ) x = %5d,y = %5d,theta = %5d",stay.x,stay.y,stay.theta);
     ROS_INFO("(Rmove) x = %5d,y = %5d,theta = %5d",Rmove.x,Rmove.y,Rmove.theta);
     ROS_INFO("(Lmove) x = %5d,y = %5d,theta = %5d",Lmove.x,Lmove.y,Lmove.theta);
@@ -192,62 +248,62 @@ void KidsizeStrategy::printinfo()
 
 int KidsizeStrategy::def_turn_angle()
 {
-    if(x_boundary > 0)                       //Dx > 0 -> obstacle in left -> turn right
+    if(Dx > 0)                       //Dx > 0 -> obstacle in left -> turn right
     {
-        ROS_INFO("x_boundary > 0   turn right");
-        if(abs(x_boundary) < 16 && abs(x_boundary) > 11)
+        ROS_INFO("Dx > 0   turn right");
+        if(abs(Dx) < 16 && abs(Dx) > 11)
         {
             //ROS_INFO("abs(x_boundary) < 16 && abs(x_boundary) > 11");
-            continous_angle_offest = -10;
+            continuous_angle_offset = -10;
         }
-        else if(abs(x_boundary) <= 11 && abs(x_boundary) > 16)
+        else if(abs(Dx) <= 11 && abs(Dx) > 16)
         {
            // ROS_INFO("abs(x_boundary) < 13 && abs(x_boundary) > 10");
-            continous_angle_offest = -8;
+            continuous_angle_offset = -8;
         }
-        else if(abs(x_boundary) <= 6 && abs(x_boundary) > 3)
+        else if(abs(Dx) <= 6 && abs(Dx) > 3)
         {
             //ROS_INFO("abs(x_boundary) < 10 && abs(x_boundary) > 7");
-            continous_angle_offest = -6;
+            continuous_angle_offset = -6;
         }
-        else if(abs(x_boundary) <= 3 && abs(x_boundary) > 1)
+        else if(abs(Dx) <= 3 && abs(Dx) > 1)
         {
-            //ROS_INFO("abs(x_boundary) < 7 && abs(x_boundary) > 4");
-            continous_angle_offest = -4;
+            //ROS_INFO("abs(Dx) < 7 && abs(Dx) > 4");
+            continuous_angle_offset = -4;
         }
         else
         {
-            //ROS_INFO("abs(x_boundary) < 1");
-            continous_angle_offest = 1;
+            //ROS_INFO("abs(Dx) < 1");
+            continuous_angle_offset = 1;
         }
     }
 
-    else if(x_boundary < 0)              //Dx < 0 -> obstacle in right -> turn left
+    else if(Dx < 0)              //Dx < 0 -> obstacle in right -> turn left
     {
-        ROS_INFO("x_boundary < 0  turn left");
-        if(abs(x_boundary) < 16 && abs(x_boundary) > 11)
+        ROS_INFO("Dx < 0  turn left");
+        if(abs(Dx) < 16 && abs(Dx) > 11)
         {
-            continous_angle_offest = 10;
+            continuous_angle_offset = 10;
         }
-        else if(abs(x_boundary) <= 11 && abs(x_boundary) > 6)
+        else if(abs(Dx) <= 11 && abs(Dx) > 6)
         {
-            continous_angle_offest = 8;
+            continuous_angle_offset = 8;
         }
-        else if(abs(x_boundary) <= 6 && abs(x_boundary) > 3)
+        else if(abs(Dx) <= 6 && abs(Dx) > 3)
         {
-            continous_angle_offest = 6;
+            continuous_angle_offset = 6;
         }
-        else if(abs(x_boundary) <= 3 && abs(x_boundary) > 1)
+        else if(abs(Dx) <= 3 && abs(Dx) > 1)
         {
-            continous_angle_offest = 4;
+            continuous_angle_offset = 4;
         }
         else
         {
-            continous_angle_offest = 1;
+            continuous_angle_offset = 1;
         }   
     }
 
-    return continous_angle_offest;
+    return continuous_angle_offset;
 }
 
 void KidsizeStrategy::initparameterpath()
@@ -261,9 +317,9 @@ void KidsizeStrategy::initparameterpath()
 
 void KidsizeStrategy::GetDeepMatrix(const strategy::DeepMatrix &msg)
 {
-	nearest_distance_y = msg.Dy;
+	Dy = msg.Dy;
 
-	x_boundary = msg.Dx;
+	Dx = msg.Dx;
 
 }
 
@@ -292,6 +348,32 @@ void KidsizeStrategy::readparameter() //步態參數之讀檔
         Lmove.x = tool->readvalue(fin, "continuous_x_offset_LEFT", 0);
         Lmove.y = tool->readvalue(fin, "continuous_y_offset_LEFT", 0);
         Lmove.theta = tool->readvalue(fin, "continuous_theta_offset_LEFT", 0);
+        fin.close();
+    }
+    catch (exception e)
+    {
+    }
+}
+
+
+void KidsizeStrategy::readpreturnparameter() //步態參數之讀檔
+{
+    fstream fin;
+    string sTmp;
+    char line[100];
+    char path[200];
+    strcpy(path, parameter_path.c_str());
+    strcat(path, "/preturn.ini");
+    fin.open(path, ios::in);
+    char temp[100];
+    try
+    {
+        fin.getline(temp, sizeof(temp));
+        preturn_enable   = tool->readvalue(fin, "preturn_enable",0);
+        preturn_speed   = tool->readvalue(fin, "preturn_speed",0);
+        preturn_dir   = tool->readvalue(fin, "preturn_dir",0);
+        preturn_theta = tool->readvalue(fin, "preturn_theta", 0);
+        preturn_time = tool->readvalue(fin, "preturn_time", 0);
         fin.close();
     }
     catch (exception e)

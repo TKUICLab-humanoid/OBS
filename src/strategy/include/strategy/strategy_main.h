@@ -46,9 +46,11 @@ public:
 	
 	/***************subscribe deepmatrix parameter******************/
 
-	int nearest_distance_y = 0;
-	float x_boundary = 0;
+	int Dy = 0;
+	float Dx = 0;
 	string parameter_path = "N";
+	float RD = 0;
+	float LD = 0;
 
 	/******************subscribe deepmatrix parameter******************/
 
@@ -58,24 +60,18 @@ public:
 	
 	enum strategy_state
 	{
-		P_INIT,
-		P_First_lawyer,
-		P_TurnHead
+		INIT,
+		AVOID,
+		TURNHEAD,
+		REDDOOR
 	};
 
-	enum first_obs
-	{
-		Go_to_first_lawyer,
-		In_first_lawyer,
-		Leave_First_lawyer
-	};
-
-	int continous_angle_offest = 0;
+	int continuous_angle_offset = 0;
 	bool init_flag = true;
 	float IMU_Value = 0;
 
-	strategy_state _state;
-	first_obs      _first_obs_state;
+	SensorMode IMU_continuous;
+	strategy_state strategy_state;
 	
 	/*********************stategy_main parameter ********************/
 
@@ -98,6 +94,12 @@ public:
 	int dangerous_distance = 0;
 	int continuousValue_x = 0;
 	int turn_angle = 0;
+	int preturn_enable = 0;
+	int preturn_speed = 0;
+	int preturn_dir = 0;
+	int preturn_theta = 0;
+	int preturn_time = 0;
+
 	
 	/****************** ini parameter******************/
 	
@@ -108,6 +110,7 @@ public:
 	void readparameter();
 	int  def_turn_angle();
 	void printinfo();
+	void readpreturnparameter();
 
 
 };
