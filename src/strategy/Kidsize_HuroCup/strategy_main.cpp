@@ -6,12 +6,13 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     KidsizeStrategy KidsizeStrategy(nh);
 
-    ros::Rate loop_rate(20);
+    ros::Rate loop_rate(30);
 
     KidsizeStrategy.initparameterpath();
 
     while (nh.ok())
     {
+        
         KidsizeStrategy.strategymain();
         ros::spinOnce();
         loop_rate.sleep();
@@ -21,132 +22,66 @@ int main(int argc, char **argv)
 
 void KidsizeStrategy::strategymain()
 {
-    if (strategy_info->getStrategyStart()) //策略指撥開啟
+
+    if (strategy_info->getStrategyStart()) //strategy start
     {
-        //ROS_INFO("Speed_Max = %d",Speed_Max);
+        readparameter();
 
-        Parameter();
-        if (!Continuous_flag) //起步步態
+        switch(strategy_state)
         {
-            //ROS_INFO("senbdbodyauto");  
-            //ros_com->sendBodySector(4); //動作磁區
-            //tool->Delay(1000);
-            //ros_com->sendBodyAuto(continuous_stay_X, continuous_stay_Y, 0, continuous_stay_T, WalkingMode::ContinuousStep, IMU_continuous); //ros_com->sendBodyAuto(-450, 0, 0,-3, WalkingMode::ContinuousStep,IMU_continuous);
-            //tool->Delay(500);
-            Continuous_flag = true;
-        }
-        //ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300);
-        //tool->Delay(100);
-        //ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300); //頭部馬達刻度（左右）左正右負
-        //tool->Delay(100);
+            case INIT:
+                ROS_INFO("state = INIT");
+                //initial parameter//
+                continuous_angle_offset = 0;
 
-        
-                
-
-        if(Dy < Dy_Max)
-        {
-            if(continuousX_Speed > continuous_stay_X)    //直走轉原地
-            {
-                //ROS_INFO("continuous_forword_X > Speed_Max");
-                while(continuousX_Speed > continuous_stay_X)
-                {
-                    continuousX_Speed -= 50;
-                    ros_com->sendContinuousValue(continuousX_Speed, continuous_stay_Y, 0, continuous_stay_T,IMU_continuous);
-                    tool->Delay(50);
-                    //ROS_INFO(" %d",continuousX_Speed);
-                    strategy_info->get_image_flag = true;   
-                    ros::spinOnce();
-                }
-            }
-
-            /*if (strategy_info->color_mask_subject_cnts[1] || strategy_info->color_mask_subject_cnts[2] != 0)    //BY障礙物
-            {
-                if(Dx > 0)
-                {
-                    while (Dx > 0)
+                //preturn
+                if(preturn_enable)
+                    if(preturn_dir = 1) // turn left
                     {
-                        
+                        ROS_INFO("preturn left");
+                        ros_com->sendContinuousValue(preturn_speed, 0, 0,preturn_theta, IMU_continuous);
+                        tool->Delay(preturn_time);
                     }
-                    
-                }
+                    else if(preturn_dir = 2) // turn right
+                    {
+                        ROS_INFO("preturn right");
+                        ros_com->sendContinuousValue(preturn_speed, 0, 0, -preturn_theta, IMU_continuous);
+                        tool->Delay(preturn_time);
+                    }
                 else
-                {
+                    ROS_INFO("No preturn");
 
-                }
-            }
-            else if(strategy_info->color_mask_subject_cnts[5] != 0)                                             //R障礙物
-            {
-                for(int i = 0;i < strategy_info->color_mask_subject_cnts[5]; i++)
-                {
-                    if(strategy_info->color_mask_subject[5][i].size > R_size)
-                    {
-                        RedDoorCase();
-                    }
-                }
-            }*/
-        }
-        else
-        {
-            if(continuousX_Speed < Speed_Max)           //原地轉直走
-            {
-                //ROS_INFO("continuous_forword_X < Speed_Max");
-                while(continuousX_Speed < Speed_Max)
-                {
-                    continuousX_Speed += 50;
-                    ros_com->sendContinuousValue(continuousX_Speed, continuous_stay_Y, 0, continuous_stay_T,IMU_continuous);
-                    tool->Delay(50);
-                    //ROS_INFO(" %d",continuousX_Speed);
-                    strategy_info->get_image_flag = true;   
-                    ros::spinOnce();
-                }
-            }
-        }
-    }
-        
-    else //策略指撥關閉
-    {
-        if (Continuous_flag)
-        {
-            ROS_INFO("stopppppp");
-            //ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); //關閉連續步態
-            Continuous_flag = false;
-            //tool->Delay(1500);
-        }
-        //ros_com->sendBodySector(5);
-        //tool->Delay(1000);
-        //ros_com->sendBodySector(29);
-        //tool->Delay(1000);
-        
-        Parameter();
-    }
-}
+            strategy_state = AVOID;   
+            break;
 
-/*
-void KidsizeStrategy::IMUSlope()
-{
-    if (Continuous_flag)
-    {
-        if (4 < strategy_info->getIMUValue().Yaw && strategy_info->getIMUValue().Yaw <= 180)
-        {
-            IMU_slope = strategy_info->getIMUValue().Yaw;
-        }
-        else if (-4 > strategy_info->getIMUValue().Yaw && strategy_info->getIMUValue().Yaw >= -179)
-        {
-            IMU_slope = strategy_info->getIMUValue().Yaw;
+            case AVOID:
+            ROS_INFO("state = AVOID");
+
+            break;
+
+            default :
+                ROS_INFO("default");
+            break;
         }
     }
     else
     {
-        if (20 < strategy_info->getIMUValue().Yaw && strategy_info->getIMUValue().Yaw <= 180)
-        {
-            IMU_slope = strategy_info->getIMUValue().Yaw;
-        }
-        else if (-20 > strategy_info->getIMUValue().Yaw && strategy_info->getIMUValue().Yaw >= -179)
-        {
-            IMU_slope = strategy_info->getIMUValue().Yaw;
-        }
+        strategy_state = INIT;
     }
-}*/
+
+}
+
+void KidsizeStrategy::printinfo()
+{
+                    
+    ROS_INFO("nearest_distance_y = %d",nearest_distance_y);
+    ROS_INFO("x_boundary = %.3lf",x_boundary);
+    ROS_INFO("[0] = %5d,[1] = %5d,[2] = %5d",dirdata[0],dirdata[1],dirdata[2]);
+    ROS_INFO("[3] = %5d,[4] = %5d,[5] = %5d",dirdata[3],dirdata[4],dirdata[5]);
+    ROS_INFO("[6] = %5d,[7] = %5d,[8] = %5d",dirdata[6],dirdata[7],dirdata[8]);
+
+    ROS_INFO("\n");
+}
 
 void KidsizeStrategy::initparameterpath()
 {
@@ -156,34 +91,42 @@ void KidsizeStrategy::initparameterpath()
     }
     printf("parameter_path is %s\n", parameter_path.c_str());
 }
-/*void KidsizeStrategy::load_dirtxt() //first_move讀檔之副函式
+
+void KidsizeStrategy::GetDeepMatrix(const strategy::DeepMatrix &msg)      //void KidsizeStrategy::GetParameter(const strategy::GetParameter &msg) 
+{
+	nearest_distance_y = msg.Dy;
+
+	x_boundary = msg.Dx;
+    //RD = msg.RD;
+    //LD = msg.LD;
+    //slope_avg = msg.slope_avg;
+
+}
+
+void KidsizeStrategy::load_preturn_txt() //first_move讀檔之副函式
 {
     fstream fin;
     string sTmp;
     char line[100];
     char path[200];
     strcpy(path, parameter_path.c_str());
-    strcat(path, "/firstmove.ini");
+    strcat(path, "/preturn.ini");
     fin.open(path, ios::in);
     try
     {
-        dirmap[0] = tool->readvalue(fin, "enable", 1);
-        dirmap[1] = tool->readvalue(fin, "dir", 1);
-        dirmap[2] = tool->readvalue(fin, "time", 1);
+        preturn_enable = tool->readvalue(fin, "preturn_enable", 1);
+        preturn_speed = tool->readvalue(fin, "preturn_speed", 1);
+        preturn_dir = tool->readvalue(fin, "preturn_dir", 1);
+        preturn_theta = tool->readvalue(fin, "preturn_theta", 1);
+        preturn_time = tool->readvalue(fin, "preturn_time", 1);
         fin.close();
     }
     catch (exception e)
     {
     }
-}*/
-void KidsizeStrategy::RedDoorCase()
-{
-
 }
 
-
-
-void KidsizeStrategy::Parameter() //步態參數之讀檔
+void KidsizeStrategy::readparameter() //步態參數之讀檔   void KidsizeStrategy::walkingparameter()
 {
     fstream fin;
     string sTmp;
@@ -196,35 +139,18 @@ void KidsizeStrategy::Parameter() //步態參數之讀檔
     try
     {
         fin.getline(temp, sizeof(temp));
-        continuous_stay_X = tool->readvalue(fin, "continuous_stay_X", 0);
-        continuous_stay_Y = tool->readvalue(fin, "continuous_stay_Y", 0);
-        continuous_stay_T = tool->readvalue(fin, "continuous_stay_T", 0);
-        fin.getline(temp, sizeof(temp));
-        continuous_TurnRight_X = tool->readvalue(fin, "continuous_TurnRight_X", 0);
-        continuous_TurnRight_Y = tool->readvalue(fin, "continuous_TurnRight_Y", 0);
-        continuous_TurnRight_T = tool->readvalue(fin, "continuous_TurnRight_T", 0);
-        fin.getline(temp, sizeof(temp));
-        continuous_TurnLeft_X = tool->readvalue(fin, "continuous_TurnLeft_X", 0);
-        continuous_TurnLeft_Y = tool->readvalue(fin, "continuous_TurnLeft_Y", 0);
-        continuous_TurnLeft_T = tool->readvalue(fin, "continuous_TurnLeft_T", 0);
-        fin.getline(temp, sizeof(temp));
-        Dy_Max = tool->readvalue(fin, "Dy_Max", 0);
-        Speed_Max = tool->readvalue(fin, "Speed_Max", 0);
-        BY_size = tool->readvalue(fin, "BY_size", 0);
-        R_size = tool->readvalue(fin, "R_size", 0);
+        dirdata[0] = tool->readvalue(fin, "continuous_x_offset", 0);
+        dirdata[1] = tool->readvalue(fin, "continuous_y_offset", 0);
+        dirdata[2] = tool->readvalue(fin, "continuous_theta_offset", 0);
+        dirdata[3] = tool->readvalue(fin, "continuous_x_offset_RIGHT", 0);
+        dirdata[4] = tool->readvalue(fin, "continuous_y_offset_RIGHT", 0);
+        dirdata[5] = tool->readvalue(fin, "continuous_theta_offset_RIGHT", 0);
+        dirdata[6] = tool->readvalue(fin, "continuous_x_offset_LEFT", 0);
+        dirdata[7] = tool->readvalue(fin, "continuous_y_offset_LEFT", 0);
+        dirdata[8] = tool->readvalue(fin, "continuous_theta_offset_LEFT", 0);
         fin.close();
     }
     catch (exception e)
     {
     }
 }
-void KidsizeStrategy::GetDeepMatrix(const strategy::DeepMatrix &msg) //深度矩陣之副函式   (GetParameter)
-{
-    for (int i = 0; i < 32; i++)
-    {
-        //DeepMatrixValue[i] = msg.DeepMatrix[i];
-        Dx = msg.Dx;
-        Dy = msg.Dy;
-    }
-}
-
