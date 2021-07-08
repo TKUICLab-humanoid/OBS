@@ -10,6 +10,7 @@
 
 #include <stdlib.h>
 #include "strategy/DeepMatrix.h"
+//#include "strategy/GetParameter.h"
 #include <sys/time.h>
 #include <std_msgs/Int16.h>
 #include <std_msgs/Bool.h>
@@ -34,6 +35,20 @@
 
 using namespace std;
 
+
+struct obstacle_data
+{
+    int x;
+    int y;
+    int x_min;
+    int x_max;
+    int y_min;
+    int y_max;
+    int size;
+};
+
+
+
 class OBSimage
 {
 public:
@@ -42,15 +57,20 @@ public:
 		image_transport::ImageTransport it(nh);
 		pub_colormodel = it.advertise("final_image", 1);
 		DeepMatrix_Publish = nh.advertise<strategy::DeepMatrix>("/strategy/DeepMatrix_Topic", 1000);
+		//GetParameter_Publish = nh.advertise<strategy::GetParameter>("/strategy/GetParameter_Topic", 1000);
 		strategy_info = StrategyInfoInstance::getInstance();
 		tool = ToolInstance::getInstance();
 		ros_com = RosCommunicationInstance::getInstance();
 	};
 	~OBSimage(){};
 
+
+
+
 	/****************************** function *************************************/
 	void strategymain();
 	void INIT_parameter();
+	void SlopeCalculate();
 
 	/****************************** parameter *************************************/
 	int Focus_Matrix[32] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
@@ -72,10 +92,15 @@ public:
 	int W_R = 0;
 	int W_L = 0;
 
+	int RD = 0;		//IN reddoor,Right Value
+	int LD = 0;		//IN reddoor,Left Value
+
+	float slope_avg;	//IN reddoor,slpoe for RED_DOOR
+
 	unsigned char *rValue, *gValue, *bValue;
 
 	sensor_msgs::ImagePtr msg_compressimage;
-    cv::Mat publish_image;
+    	cv::Mat publish_image;
 	image_transport::Publisher pub_colormodel;
 
 	RosCommunicationInstance *ros_com;
@@ -83,9 +108,17 @@ public:
 	StrategyInfoInstance *strategy_info;
 
 	ros::Publisher DeepMatrix_Publish;
+	//ros::Publisher GetParameter_Publish;
 
 
-	strategy::DeepMatrix deepmatrix_parameter;	
+
+	strategy::DeepMatrix deepmatrix_parameter;
+	//strategy::GetParameter getparameter_parameter;
+
+
+
+
+	
 
 
 };

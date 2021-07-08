@@ -28,6 +28,7 @@ set(ROSCOMMUNICATION_LIBRARIES ${CATKIN_DEVEL_PREFIX}/lib/libroscommunication.so
 add_message_files(DIRECTORY msg
 	FILES
 	DeepMatrix.msg
+	GetParameter.msg
 )
 ## Generate services in the 'srv' folder
 #add_service_files(DIRECTORY srv 

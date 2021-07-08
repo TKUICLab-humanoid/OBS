@@ -13,6 +13,7 @@
 
 #include <stdlib.h>
 #include "strategy/DeepMatrix.h"
+//#include "strategy/GetParameter.h"
 #include <sys/time.h>
 #include <std_msgs/Int16.h>
 #include <std_msgs/Bool.h>
@@ -22,6 +23,7 @@
 #define pi 3.14159
 
 ros::Subscriber DeepMatrix_subscribe;
+//ros::Subscriber GetParameter_subscribe;
 
 /*enum strategy_state
 {
@@ -93,6 +95,17 @@ enum Head_direction
     RHD_Left
 };*/
 
+struct obstacle_data
+{
+    int x;
+    int y;
+    int x_min;
+    int x_max;
+    int y_min;
+    int y_max;
+    int size;
+};
+
 using namespace std;
 
 class KidsizeStrategy 
@@ -101,6 +114,7 @@ public:
 	KidsizeStrategy(ros::NodeHandle &nh) 
 	{
 		DeepMatrix_subscribe = nh.subscribe("/strategy/DeepMatrix_Topic", 1, &KidsizeStrategy::GetDeepMatrix,this);
+		//GetParameter_subscribe = nh.subscribe("/strategy/GetParameter_Topic", 1, &KidsizeStrategy::GetDeepMatrix,this);
 		strategy_info = StrategyInfoInstance::getInstance();
 		tool = ToolInstance::getInstance();
 		ros_com = RosCommunicationInstance::getInstance();
@@ -120,12 +134,12 @@ public:
 	Head_direction head_direction;
 	Head_direction door_direction;
 	label_model_coordinates red_obs_left_coordinates;
-	label_model_coordinates red_obs_right_coordinates;
+	label_model_coordinates red_obs_right_coordinates;*/
 
-	vector<obstacle_data> m_obs_vector;
-	vector<obstacle_data> m_finish_obs_vector;
+	//vector<obstacle_data> m_obs_vector;
+	//vector<obstacle_data> m_finish_obs_vector;
 
-	ObjectData blue_obs;
+	/*ObjectData blue_obs;
 	ObjectData blue_obs_second;
 	ObjectData blue_obs_third;
 	ObjectData P_DOOR_blue;
