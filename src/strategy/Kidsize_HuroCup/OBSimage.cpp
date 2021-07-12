@@ -31,22 +31,22 @@ void OBSimage::strategymain()
 		for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
 		{
 			Deep_Matrix[compress_width] = 0;
-		for(int compress_height = IMAGEHEIGHT/10 - 1 ; compress_height > -1 ; compress_height--)
-		{
-			bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-			gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-			rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
+			for(int compress_height = IMAGEHEIGHT/10 - 1 ; compress_height > -1 ; compress_height--)
+			{
+				bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
+				gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
+				rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
 
-			if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
-			{
-				Deep_Matrix[compress_width] = (IMAGEHEIGHT/10 - 1) - compress_height;
-				break;
+				if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
+				{
+					Deep_Matrix[compress_width] = (IMAGEHEIGHT/10 - 1) - compress_height;
+					break;
+				}
+				if(compress_height == 0)
+				{
+					Deep_Matrix[compress_width] = 24;
+				}
 			}
-			if(compress_height == 0)
-			{
-				Deep_Matrix[compress_width] = 24;
-			}
-		}
 
 				//printf("%2d,",Deep_Matrix[compress_width]);
 		}
@@ -57,19 +57,19 @@ void OBSimage::strategymain()
 
 		/*for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10  ; compress_height++)
 		{
-		for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10 ; compress_width++)
-		{
-			bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-			gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-			rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
-				if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
-				{
-					printf("1  ");
-				}
-				else
-				{
-					printf("0  ");
-				}
+			for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10 ; compress_width++)
+			{
+				bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
+				gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
+				rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
+					if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
+					{
+						printf("1  ");
+					}
+					else
+					{
+						printf("0  ");
+					}
 			}
 				printf("\n");
 			}*/
@@ -79,7 +79,7 @@ void OBSimage::strategymain()
 
 
 		INIT_parameter();
-		printf("\n");
+		//printf("\n");
 
 		
 
@@ -93,18 +93,67 @@ void OBSimage::strategymain()
 
 			SlopeCalculate();
 			//再去策略端拿slope_avg做旋轉修正
+			//ROS_INFO("slope_avg = %3f",slope_avg);
 
 
 
-			if (abs(slope_avg) <= 0.05)
+			if (abs(slope_avg) <= 0.7)
 			{
 				for (int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
 				{
 					LD = 319 - strategy_info->color_mask_subject[5][i].XMin;
 					RD = strategy_info->color_mask_subject[5][i].XMax - 0;
+					//ROS_INFO("LD = %5d,RD = %5d",LD,RD);
 				}
 			}
-		}		
+			//printf("\n");
+			//ROS_INFO("Slope_avg = %f",slope_avg);
+			//ROS_INFO("LD = %5d,RD = %5d",LD,RD);
+			//printf("\n");
+
+			
+ 
+
+			
+			for(int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)
+			{
+				if(strategy_info->color_mask_subject[2][i].size > 5000 )
+				{
+					XMax_one = strategy_info->color_mask_subject[2][0].XMax;
+					XMin_one = strategy_info->color_mask_subject[2][0].XMin;
+					XMin_two = strategy_info->color_mask_subject[2][1].XMin;
+					XMax_two = strategy_info->color_mask_subject[2][1].XMax;
+					printf("\n");
+					//ROS_INFO("XMax_one = %3d",XMax_one);
+					//ROS_INFO("XMin_one = %3d",XMin_one);
+					//ROS_INFO("XMin_two = %3d",XMin_two);
+					//ROS_INFO("XMax_two = %3d",XMax_two);
+				}
+			}
+
+
+			if(XMin_one > XMin_two)						//比較所有xmax &&　xmin ,確保抓到的是正確的值
+			{
+				RightblueOBS_XMin = XMin_one;
+				ROS_INFO("RightblueOBS_XMin = %3d",RightblueOBS_XMin);
+			}
+			else if (XMin_one < XMin_two)
+			{
+				RightblueOBS_XMin = XMin_two;
+				ROS_INFO("RightblueOBS_XMin = %3d",RightblueOBS_XMin);
+			}
+			if(XMax_one > XMax_two)
+			{
+				LeftblueOBS_XMax = XMax_two;
+				ROS_INFO("LeftblueOBS_XMax = %3d",LeftblueOBS_XMax);
+			}
+			else if(XMax_one < XMax_two)
+			{
+				LeftblueOBS_XMax = XMax_one;
+				ROS_INFO("LeftblueOBS_XMax = %3d",LeftblueOBS_XMax);
+			}
+		}
+				
 		else
 		{
 			ROS_INFO("NOT_IN_RED");
@@ -119,7 +168,7 @@ void OBSimage::strategymain()
 			}
 
 
-			printf("\n");
+			//printf("\n");
 			//ROS_INFO("Filter Matrix");
 
 			for(int i = 0; i < 32 ;i++)
@@ -197,11 +246,18 @@ void OBSimage::strategymain()
 
 			deepmatrix_parameter.Dy = Dy;
 			deepmatrix_parameter.Dx = Dx;
+			deepmatrix_parameter.RD = RD;
+			deepmatrix_parameter.LD = LD;
+			deepmatrix_parameter.slope_avg = slope_avg;
+			deepmatrix_parameter.LeftblueOBS_XMax = LeftblueOBS_XMax;
+			deepmatrix_parameter.RightblueOBS_XMin = RightblueOBS_XMin;
 			//getparameter_parameter.Dy = Dy;
 			//getparameter_parameter.Dx = Dx;
 			//getparameter_parameter.RD = RD;
 			//getparameter_parameter.LD = LD;
 			//getparameter_parameter.slope_avg = slope_avg;
+			//getparameter_parameter.LeftblueOBS_XMax = LeftblueOBS_XMax;
+			//getparameter_parameter.RightblueOBS_XMin = RightblueOBS_XMin;
 
 			DeepMatrix_Publish.publish(deepmatrix_parameter);
 			//GetParameter_Publish.publish(getparameter_parameter);	
@@ -214,6 +270,7 @@ void OBSimage::strategymain()
 		}
 		strategy_info->get_image_flag = true;
                 ros::spinOnce();
+		tool->Delay(200);
     	}
 }
 
@@ -239,7 +296,7 @@ void OBSimage::SlopeCalculate()			//計算斜率之副函式
 
 	for (int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
         {
-		if (strategy_info->color_mask_subject[5][i].size > 15000)
+		if (strategy_info->color_mask_subject[5][i].size > 3000)
 		{
 			for (int j = 0; j < 4; j++)
 			{

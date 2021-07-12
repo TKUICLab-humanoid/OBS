@@ -60,6 +60,11 @@ public:
 
 	int nearest_distance_y = 0;
 	float x_boundary = 0;
+	int RD = 0;
+	int LD = 0;
+	float slope_avg = 0;
+	int LeftblueOBS_XMax = 0;
+	int RightblueOBS_XMin = 0;
 	string parameter_path = "N";
 
 	/******************subscribe deepmatrix parameter******************/

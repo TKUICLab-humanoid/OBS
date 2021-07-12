@@ -97,9 +97,11 @@ void KidsizeStrategy::GetDeepMatrix(const strategy::DeepMatrix &msg)      //void
 	nearest_distance_y = msg.Dy;
 
 	x_boundary = msg.Dx;
-    //RD = msg.RD;
-    //LD = msg.LD;
-    //slope_avg = msg.slope_avg;
+    RD = msg.RD;
+    LD = msg.LD;
+    slope_avg = msg.slope_avg;
+    LeftblueOBS_XMax = msg.LeftblueOBS_XMax;
+    RightblueOBS_XMin = msg.RightblueOBS_XMin;
 
 }
 

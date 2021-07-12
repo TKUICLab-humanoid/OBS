@@ -97,6 +97,14 @@ public:
 
 	float slope_avg;	//IN reddoor,slpoe for RED_DOOR
 
+	int LeftblueOBS_XMax = 0;		//IN reddoor,left side blue obs (XMax)
+	int RightblueOBS_XMin= 0;		//IN reddoor,right side blue obs (XMin)
+
+	int XMax_one = 0;			//IN reddoor,收齊所有xmax && xmin
+	int XMin_one = 0;
+	int XMin_two = 0;
+	int XMax_two = 0;
+
 	unsigned char *rValue, *gValue, *bValue;
 
 	sensor_msgs::ImagePtr msg_compressimage;

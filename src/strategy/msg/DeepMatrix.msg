@@ -2,3 +2,6 @@ int32 Dy
 float32 Dx
 int32 RD
 int32 LD
+float32 slope_avg
+int32 LeftblueOBS_XMax
+int32 RightblueOBS_XMin
