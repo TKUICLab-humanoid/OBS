@@ -71,91 +71,197 @@ void OBSimage::strategymain()
 
 		INIT_parameter();
 
-		ROS_INFO("Focus Matrix");
-		for(int i = 0; i < 32 ;i++)
-        {
-           printf("%2d,",Focus_Matrix[i]);
-        }
-		printf("\n");
-		ROS_INFO("Filter Matrix");
+		//0905++++
+////////////////////有進紅門，紅門case內影像判斷////////////////////
 
-		for(int i = 0; i < 32 ;i++)
+		if (strategy_info->color_mask_subject_cnts[5] != 0)				
 		{
-			Filter_Matrix[i] = Focus_Matrix[i] - Deep_Matrix[i];
-
-			if(Filter_Matrix[i] > 0)	//obstacle in focus matrix
+			for(int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
 			{
-				Xc_count++;
-				Xi_sum += i;
-				Xc = (float)Xi_sum /(float) Xc_count;			//get x_avg when obstacle is in focus matrix 
-				//printf("Xi_sum = %d,Xc_count = %d,Xc  = %.3lf \n",Xi_sum,Xc_count,Xc);
-			}
-			else												
-			{
-				Filter_Matrix[i] = 0;
-			}
-			//printf("%2d,",Filter_Matrix[i]);
-
-			if(Deep_Matrix[i] < Dy)							//get DeepMatrix min
-			{
-				Dy = Deep_Matrix[i];
-			}
-
-			printf("%2d,",Filter_Matrix[i]);
-			//calculate WR WL
-			WR += (32-i) * Filter_Matrix[i];
-			WL += (i+1) * Filter_Matrix[i];
-
-		}
-		printf("\n");
-
-		if((WR == WL) && (WR > 0) && (WL > 0))		//WR = WL
-		{
-			for(int i = 0 ; i < 32 ; i++) 
-			{
-				if(i < 16)
+				if(strategy_info->color_mask_subject[5][i].size > 3500)
 				{
-					W_L += Deep_Matrix[i];
+					ROS_INFO("IN_RED");
+					in_reddoor_flag = true;
+					//ROS_INFO("in_reddoor_flag = true");
+
+
+					SlopeCalculate();
+					//再去策略端拿slope_avg做旋轉修正
+
+
+					if (abs(slope_avg) <= 0.7)
+					{
+						for (int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
+						{
+							LD = 319 - strategy_info->color_mask_subject[5][i].XMin;
+							RD = strategy_info->color_mask_subject[5][i].XMax - 0;
+						}
+					}
+					
+					for(int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)	//單塊藍色判斷
+					{
+						L_XMAX = strategy_info->color_mask_subject[2][i].XMax - 0;
+						R_XMIN = 319 - strategy_info->color_mask_subject[2][i].XMin;
+					}
+
+
+					for(int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)   //兩塊藍色同時再螢幕內
+					{
+						if(strategy_info->color_mask_subject[2][i].size > 5000 )
+						{
+							XMax_one = strategy_info->color_mask_subject[2][0].XMax;
+							XMin_one = strategy_info->color_mask_subject[2][0].XMin;
+							XMin_two = strategy_info->color_mask_subject[2][1].XMin;
+							XMax_two = strategy_info->color_mask_subject[2][1].XMax;
+						}
+					}
+
+
+					if(XMin_one > XMin_two)						//比較所有xmax &&　xmin ,確保抓到的是正確的值
+					{
+						RightblueOBS_XMin = XMin_one;
+					}
+					else if (XMin_one < XMin_two)
+					{
+						RightblueOBS_XMin = XMin_two;
+					}
+					if(XMax_one > XMax_two)
+					{
+						LeftblueOBS_XMax = XMax_two;
+					}
+					else if(XMax_one < XMax_two)
+					{
+						LeftblueOBS_XMax = XMax_one;
+					}
+					//ROS_INFO("XMin_one = %d",XMin_one);
+					//ROS_INFO("XMin_two = %d",XMin_two);
+					//ROS_INFO("XMax_two = %d",XMax_two);
+					//ROS_INFO("XMax_one = %d",XMax_one);
 				}
-				else   //32 > i > 16 
+				else
 				{
-					W_R += Deep_Matrix[i];
+					in_reddoor_flag = true;
+					ROS_INFO("RED is not big enough");
+				}
+				
+			}
+		}
+		////////////////////未進紅門，其餘影像判斷////////////////////		
+		else
+		{
+			ROS_INFO("NOT_IN_RED");
+			in_reddoor_flag = false;
+			ROS_INFO("in_reddoor_flag = false");
+		//0905++++
+
+			ROS_INFO("Focus Matrix");
+			for(int i = 0; i < 32 ;i++)
+			{
+			printf("%2d,",Focus_Matrix[i]);
+			}
+			printf("\n");
+			ROS_INFO("Filter Matrix");
+
+			for(int i = 0; i < 32 ;i++)
+			{
+				Filter_Matrix[i] = Focus_Matrix[i] - Deep_Matrix[i];
+
+				if(Filter_Matrix[i] > 0)	//obstacle in focus matrix
+				{
+					Xc_count++;
+					Xi_sum += i;
+					Xc = (float)Xi_sum /(float) Xc_count;			//get x_avg when obstacle is in focus matrix 
+					//printf("Xi_sum = %d,Xc_count = %d,Xc  = %.3lf \n",Xi_sum,Xc_count,Xc);
+				}
+				else												
+				{
+					Filter_Matrix[i] = 0;
+				}
+				//printf("%2d,",Filter_Matrix[i]);
+
+				if(Deep_Matrix[i] < Dy)							//get DeepMatrix min
+				{
+					Dy = Deep_Matrix[i];
+				}
+
+				printf("%2d,",Filter_Matrix[i]);
+				//calculate WR WL
+				WR += (32-i) * Filter_Matrix[i];
+				WL += (i+1) * Filter_Matrix[i];
+
+			}
+			printf("\n");
+
+			if((WR == WL) && (WR > 0) && (WL > 0))		//WR = WL
+			{
+				for(int i = 0 ; i < 32 ; i++) 
+				{
+					if(i < 16)
+					{
+						W_L += Deep_Matrix[i];
+					}
+					else   //32 > i > 16 
+					{
+						W_R += Deep_Matrix[i];
+					}
+				}
+
+				if(W_L > W_R)
+				{
+					WL += 10;
+				}
+				else
+				{
+					WR += 10;
 				}
 			}
 
-			if(W_L > W_R)
+			if(WL < WR)											
 			{
-				WL += 10;
+				Xb = 0;
+				ROS_INFO("Obstacle in left");
 			}
-			else
+			else if(WR < WL)
 			{
-				WR += 10;
+				Xb = 31;
+				ROS_INFO("Obstacle in right");
 			}
+			
+
+			Dx = Xc - Xb;
 		}
 
-		if(WL < WR)											
-		{
-			Xb = 0;
-			ROS_INFO("Obstacle in left");
-		}
-		else if(WR < WL)
-		{
-			Xb = 31;
-			ROS_INFO("Obstacle in right");
-		}
-		
-
-		Dx = Xc - Xb;
+		//0905++++
+		strategy_info->get_image_flag = true;
+        ros::spinOnce();
+		tool->Delay(150);
+		//0905++++
 
 		ROS_INFO("W_R = %d,W_L = %d",W_R,W_L);
 		ROS_INFO("Xb = %.3lf, Dx = %.3lf",Xb,Dx);
 		ROS_INFO("Xc_count = %d, Xi_sum = %d, Xc = %.3lf",Xc_count,Xi_sum,Xc);
 		ROS_INFO("Dy = %d, WR = %d, WL = %d",Dy,WR,WL);
 
-		deepmatrix_parameter.Dy = Dy;
-		deepmatrix_parameter.Dx = Dx;
+		getparameter_parameter.Dy = Dy;
+		getparameter_parameter.Dx = Dx;
 
-		DeepMatrix_Publish.publish(deepmatrix_parameter);
+		//0905++++
+		ROS_INFO("L_XMAX = %3d",L_XMAX);
+		ROS_INFO("R_XMIN = %3d",R_XMIN);
+		printf("\n");
+		getparameter_parameter.RD = RD;
+		getparameter_parameter.LD = LD;
+		getparameter_parameter.slope_avg = slope_avg;
+		getparameter_parameter.LeftblueOBS_XMax = LeftblueOBS_XMax;
+		getparameter_parameter.RightblueOBS_XMin = RightblueOBS_XMin;
+		getparameter_parameter.in_reddoor_flag = in_reddoor_flag;
+		getparameter_parameter.L_XMAX = L_XMAX;
+		getparameter_parameter.R_XMIN = R_XMIN;
+		//0905++++
+
+
+
+		GetParameter_Publish.publish(getparameter_parameter);
 
         ROS_INFO("\n");
 		//cv::imshow("image",image);
@@ -173,4 +279,88 @@ void OBSimage::INIT_parameter()
 	WR = 0;
 	WL = 0;	
 	Dy = Deep_Matrix[0];
+}
+void OBSimage::SlopeCalculate()			//計算斜率之副函式
+{
+    bool Check_label_model_flag = true;
+    int slope_rand[4];
+    int slope_Y[4];
+    float slope[3];
+    slope_avg = 1000000.0;
+
+	for (int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
+        {
+		if (strategy_info->color_mask_subject[5][i].size > 3000)
+		{
+			for (int j = 0; j < 4; j++)
+			{
+				int repeat_cnt = 0;
+				int range = (strategy_info->color_mask_subject[5][i].XMax - 10) - (strategy_info->color_mask_subject[5][i].XMin + 10);
+				slope_rand[j] = rand() % range + strategy_info->color_mask_subject[5][i].XMin;
+				while (1)
+				{
+					if (repeat_cnt != j)
+					{
+						if (slope_rand[j] == slope_rand[repeat_cnt])
+						{
+							repeat_cnt = 0;
+							slope_rand[j] = rand() % range + strategy_info->color_mask_subject[5][i].XMin;
+						}
+					}
+					else
+					{
+						break;
+					}
+					repeat_cnt++;
+				}
+			}
+			for (int k = 0; k < 4; k++)
+			{
+				bool flag = true;
+				int Xmax = strategy_info->color_mask_subject[5][i].XMax;
+				int Ymax = strategy_info->color_mask_subject[5][i].YMax;
+				int cnt = 0;
+				int labelcnt;
+				while (flag)
+				{
+					labelcnt = 320 * (Ymax - cnt + 1) + slope_rand[k];
+					if (strategy_info->label_model[labelcnt] == 0x20)
+					{
+						for (int a = 1; a < 4; a++)
+						{
+							if (strategy_info->label_model[labelcnt - 320 * a] != 0x20)
+							{
+								Check_label_model_flag = false;
+								break;
+							}
+						}
+						if (Check_label_model_flag)
+						{
+							slope_Y[k] = Ymax - cnt;
+							flag = false;
+						}
+						else
+						{
+							Check_label_model_flag = true;
+						}
+					}
+					if ((cnt + 1) > Ymax)
+					{
+						slope_Y[k] = strategy_info->color_mask_subject[5][i].YMin;
+						flag = false;
+					}
+					else
+					{
+						cnt++;
+					}
+				}
+			}
+			slope[0] = float(slope_Y[1] - slope_Y[0]) / float(slope_rand[1] - slope_rand[0]);
+			slope[1] = float(slope_Y[2] - slope_Y[1]) / float(slope_rand[2] - slope_rand[1]);
+			slope[2] = float(slope_Y[3] - slope_Y[2]) / float(slope_rand[3] - slope_rand[2]);
+			slope_avg = (slope[0] + slope[1] + slope[2]) / 3;
+			break;
+		}
+            
+        }
 }

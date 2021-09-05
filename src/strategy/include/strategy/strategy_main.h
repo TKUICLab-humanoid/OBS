@@ -12,7 +12,7 @@
 //////////////////////////////////////////////////////////
 
 #include <stdlib.h>
-#include "strategy/DeepMatrix.h"
+#include "strategy/GetParameter.h"
 #include <sys/time.h>
 #include <std_msgs/Int16.h>
 #include <std_msgs/Bool.h>
@@ -30,7 +30,7 @@ class KidsizeStrategy
 public:
 	KidsizeStrategy(ros::NodeHandle &nh) 
 	{
-		DeepMatrix_subscribe = nh.subscribe("/strategy/DeepMatrix_Topic", 1, &KidsizeStrategy::GetDeepMatrix,this);
+		DeepMatrix_subscribe = nh.subscribe("/strategy/GetParameter_Topic", 1, &KidsizeStrategy::GetParameter,this);
 		strategy_info = StrategyInfoInstance::getInstance();
 		tool = ToolInstance::getInstance();
 		ros_com = RosCommunicationInstance::getInstance();
@@ -43,17 +43,6 @@ public:
 	StrategyInfoInstance *strategy_info;
 
 	//////////////////////////////////////new strategy parameter ////////////////////////////////////////////
-	
-	/***************subscribe deepmatrix parameter******************/
-
-	int Dy = 0;
-	float Dx = 0;
-	string parameter_path = "N";
-	float RD = 0;
-	float LD = 0;
-
-	/******************subscribe deepmatrix parameter******************/
-
 
 	
 	/*********************stategy_main parameter ********************/
@@ -63,17 +52,37 @@ public:
 		INIT,
 		AVOID,
 		TURNHEAD,
-		REDDOOR
+		REDDOOR,
+		CRAWL
 	};
+
+	/***************subscribe deepmatrix parameter******************/
+	//0905++++
+	int Dy = 0;
+	int RD = 0;
+	int LD = 0;
+	int LeftblueOBS_XMax = 0;
+	int RightblueOBS_XMin = 0;
+	int L_XMAX = 0;
+	int R_XMIN = 0;
+	float slope_avg;
+	float Dx = 0;
+	bool in_reddoor_flag;
+	
+
+	string parameter_path = "N";
+	//0905++++
+	/******************subscribe deepmatrix parameter******************/
 
 	int continuous_angle_offset = 0;
 	bool init_flag = true;
 	float IMU_Value = 0;
-
-	SensorMode IMU_continuous;
-	strategy_state strategy_state;
 	
 	/*********************stategy_main parameter ********************/
+	strategy_state strategy_state;
+	//walking_command walking_state;
+	SensorMode IMU_continuous;
+	int angle_offest = 0;
 
 	/******************ini  parameter******************/
 
@@ -88,12 +97,29 @@ public:
 	walking_gait Rmove;
 	walking_gait Lmove;
 
+	//0905++++
+	int LeftMove_X;
+	int LeftMove_Y;
+	int LeftMove_T;
+	int RightMove_X;
+	int RightMove_Y;
+	int RightMove_T;
+	int LeftSlope_X;
+	int LeftSlope_Y;
+	int LeftSlope_T;
+	int RightSlope_X;
+	int RightSlope_Y;
+	int RightSlope_T;
+	//0905++++
+
 	int maxspeed = 0;
 	int minspeed = 0;
 	
 	int dangerous_distance = 0;
 	int continuousValue_x = 0;
 	int turn_angle = 0;
+
+	//-------preturn----------
 	int preturn_enable = 0;
 	int preturn_speed = 0;
 	int preturn_dir = 0;
@@ -105,13 +131,13 @@ public:
 	
 	////////////////////////////////////////function/////////////////////////////////////////////
 
-	void GetDeepMatrix(const strategy::DeepMatrix &msg);
+	void GetParameter(const strategy::GetParameter &msg);
 	void initparameterpath();
 	void readparameter();
 	int  def_turn_angle();
 	void printinfo();
 	void readpreturnparameter();
-
+	void slope();
 
 };
 
