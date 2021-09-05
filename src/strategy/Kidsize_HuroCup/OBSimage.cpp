@@ -158,7 +158,7 @@ void OBSimage::strategymain()
 		DeepMatrix_Publish.publish(deepmatrix_parameter);
 
         ROS_INFO("\n");
-		cv::imshow("image",image);
+		//cv::imshow("image",image);
 		cv::waitKey(1);
     }
 }
