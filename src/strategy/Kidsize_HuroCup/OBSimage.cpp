@@ -249,6 +249,7 @@ void OBSimage::strategymain()
 		ROS_INFO("L_XMAX = %3d",L_XMAX);
 		ROS_INFO("R_XMIN = %3d",R_XMIN);
 		printf("\n");
+		//getparameter_parameter.Xc = Xc;
 		getparameter_parameter.RD = RD;
 		getparameter_parameter.LD = LD;
 		getparameter_parameter.slope_avg = slope_avg;

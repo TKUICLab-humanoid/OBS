@@ -119,6 +119,8 @@ public:
 	int dangerous_distance = 0;
 	int continuousValue_x = 0;
 	int turn_angle = 0;
+	int IMU_angle_offest = 0;
+	int IMU_theta = 0;
 
 	//-------preturn----------
 	int preturn_enable = 0;
@@ -137,6 +139,7 @@ public:
 	void readparameter();
 	int  def_turn_angle();
 	void printinfo();
+	int IMU_Modify();
 	void readpreturnparameter();
 	void slope();
 
