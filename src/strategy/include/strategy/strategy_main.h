@@ -83,6 +83,7 @@ public:
 	//walking_command walking_state;
 	SensorMode IMU_continuous;
 	int angle_offest = 0;
+	bool Continuous_flag = false;
 
 	/******************ini  parameter******************/
 

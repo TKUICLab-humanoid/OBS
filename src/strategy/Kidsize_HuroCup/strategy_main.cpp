@@ -25,7 +25,7 @@ void KidsizeStrategy::strategymain()
     if (strategy_info->getStrategyStart()) //strategy start
     {
         readparameter();
-
+        ROS_INFO("readparameter");
         switch(strategy_state)
         {
             case INIT:
@@ -33,8 +33,17 @@ void KidsizeStrategy::strategymain()
                 //initial parameter//
                 continuous_angle_offset = 0;
                 turn_angle = 0;
+                if(!Continuous_flag)
+                {
+                    ROS_INFO("before start ");
+                    ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
+                    ROS_INFO("after start ");
+                    tool->Delay(1500);
+                    Continuous_flag = true;
+                }
+                
                 //head motor angle set 
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1603, 300);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1500, 300);
                 tool->Delay(100);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300); 
                 tool->Delay(100);
@@ -44,21 +53,30 @@ void KidsizeStrategy::strategymain()
                 if(preturn_enable)
                 {
                     ROS_INFO("preturn_dir = %d",preturn_dir);
-                    if(preturn_dir = 1) // turn left
+                    if(preturn_dir == 1) // turn left
                     {
                         ROS_INFO("preturn left");
                         ROS_INFO("preturn_theta = %d,time = %d",preturn_theta,preturn_time);
                         ros_com->sendContinuousValue(preturn_speed, 0, 0,preturn_theta, IMU_continuous);
                         tool->Delay(preturn_time);
                     }
-                    else if(preturn_dir = 2) // turn right
+                    else if(preturn_dir == 2) // turn right
                     {
                         ROS_INFO("preturn right");
                         ROS_INFO("preturn_theta = %d,time = %d",preturn_theta,preturn_time);
-                        ros_com->sendContinuousValue(preturn_speed, 0, 0, -preturn_theta, IMU_continuous);
+                        ros_com->sendContinuousValue(preturn_speed, 0, 0, preturn_theta, IMU_continuous);
                         tool->Delay(preturn_time);
                     }
                 }
+
+                else
+                {
+                    ros_com->sendContinuousValue(stay.x, stay.y, 0, stay.theta, IMU_continuous);
+                    tool->Delay(500);
+                    ROS_INFO("No preturn");
+                }
+
+
                 //0905++++++++++
                 if(in_reddoor_flag == true)
                 {
@@ -67,8 +85,7 @@ void KidsizeStrategy::strategymain()
                 }
                 //0905++++++++++
 
-                else
-                    ROS_INFO("No preturn");
+
 
                 strategy_state = AVOID;  
                 /*
@@ -81,7 +98,9 @@ void KidsizeStrategy::strategymain()
                 break;
 
             case AVOID:
+                printinfo();
                 ROS_INFO("state = AVOID");
+                ROS_INFO("()continuousValue_x = %d",continuousValue_x);
                 if(Dy < dangerous_distance)         //dangerous_distance = 10
                 {
                     //check reddoor or not
@@ -104,7 +123,7 @@ void KidsizeStrategy::strategymain()
                                 {
                                     continuousValue_x -= 100;
                                     turn_angle = def_turn_angle();
-                                    //ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + turn_angle, IMU_continuous); //連續步態的值 
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); //連續步態的值 
                                     ROS_INFO("continuousValue_x = %d,turn_angle = %d",continuousValue_x,turn_angle);
                                     tool->Delay(100);
                                 }
@@ -118,25 +137,25 @@ void KidsizeStrategy::strategymain()
                                         while(continuousValue_x < maxspeed)
                                         {
                                             continuousValue_x += 100;
-                                            //ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + turn_angle, IMU_continuous); //連續步態的值 
+                                            ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); //連續步態的值 
                                             ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                             tool->Delay(100);
                                         }
                                     }
                                 }
 
-                                else
+                                /*else
                                 {
                                     strategy_state = TURNHEAD;
                                     ROS_INFO("AVOID->TURNHEAD");
                                     break;
-                                }
+                                }*/
                             }
                             else
                             {
                                 ROS_INFO("Dx<5,turnangle");
                                 turn_angle = def_turn_angle();
-                                //ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + turn_angle, IMU_continuous); 
+                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
                                 tool->Delay(100);
                             }
                         }
@@ -152,7 +171,7 @@ void KidsizeStrategy::strategymain()
                                     continuousValue_x -= 100;
                                     turn_angle = def_turn_angle();
                                     ROS_INFO("continuousValue_x = %d,turn_angle = %d",continuousValue_x,turn_angle);
-                                    //ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + turn_angle, IMU_continuous);  
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);  
                                     tool->Delay(100);
                                 }
 
@@ -166,38 +185,40 @@ void KidsizeStrategy::strategymain()
                                         {
                                             continuousValue_x += 100;
                                             ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                            //ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + turn_angle, IMU_continuous);  
+                                            ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);  
                                             tool->Delay(100);
                                         }
                                     }
                                 }
 
-                                else
+                                /*else
                                 {
                                     ROS_INFO("AVOID->TURNHEAD");
                                     strategy_state = TURNHEAD;
                                     break;
-                                }
+                                }*/
                             }
                             else
                             {
                                 ROS_INFO("Dx>5,turnangle");
                                 turn_angle = def_turn_angle();
-                                //ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + turn_angle, IMU_continuous);  
+                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);  
                                 tool->Delay(100);
                             }   
                         }
+                
                     }
                 }
                 else
                 {
+                    ROS_INFO("Dy > 10");
                     if(continuousValue_x < maxspeed) // current speed > minspeed
                     //if(continuousValue_x > stay.x) // current speed > the speed of stepping 
                     {
                         while(continuousValue_x < maxspeed)
                         {
                             continuousValue_x += 100;
-                            //ros_com->sendContinuousValue(continuousValue_x, dirdata[31], 0, dirdata[32] + turn_angle, IMU_continuous);  
+                            ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta, IMU_continuous);  
                             tool->Delay(100);
                         }
                     }
@@ -205,7 +226,7 @@ void KidsizeStrategy::strategymain()
 
             break;
 
-            case TURNHEAD:
+            /*case TURNHEAD:
                 ROS_INFO("TURNHEAD");
                 if(IMU_Value < 0 && Dx > 0)         //obstacle left,need to turn right
                 {
@@ -356,7 +377,7 @@ void KidsizeStrategy::strategymain()
 
                 strategy_state = INIT;              //INIT or AVOID???
             break;
-            //0905++++++++++++++++
+            //0905++++++++++++++++*/
 
             default :
                 ROS_INFO("default");
@@ -365,6 +386,15 @@ void KidsizeStrategy::strategymain()
     }
     else
     {
+        if(Continuous_flag)
+        {
+            ROS_INFO("before end ");
+            ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
+            ROS_INFO("after end");
+            tool->Delay(500);
+            Continuous_flag = false;
+        }
+
         strategy_state = INIT;
     }
 }
@@ -393,22 +423,22 @@ int KidsizeStrategy::def_turn_angle()
         if(abs(Dx) < 16 && abs(Dx) > 11)
         {
             //ROS_INFO("abs(x_boundary) < 16 && abs(x_boundary) > 11");
-            continuous_angle_offset = -10;
+            continuous_angle_offset = -13;
         }
         else if(abs(Dx) <= 11 && abs(Dx) > 16)
         {
            // ROS_INFO("abs(x_boundary) < 13 && abs(x_boundary) > 10");
-            continuous_angle_offset = -8;
+            continuous_angle_offset = -10;
         }
         else if(abs(Dx) <= 6 && abs(Dx) > 3)
         {
             //ROS_INFO("abs(x_boundary) < 10 && abs(x_boundary) > 7");
-            continuous_angle_offset = -6;
+            continuous_angle_offset = -7;
         }
         else if(abs(Dx) <= 3 && abs(Dx) > 1)
         {
             //ROS_INFO("abs(Dx) < 7 && abs(Dx) > 4");
-            continuous_angle_offset = -4;
+            continuous_angle_offset = -3;
         }
         else
         {
@@ -422,19 +452,19 @@ int KidsizeStrategy::def_turn_angle()
         ROS_INFO("Dx < 0  turn left");
         if(abs(Dx) < 16 && abs(Dx) > 11)
         {
-            continuous_angle_offset = 10;
+            continuous_angle_offset = 13;
         }
         else if(abs(Dx) <= 11 && abs(Dx) > 6)
         {
-            continuous_angle_offset = 8;
+            continuous_angle_offset = 10;
         }
         else if(abs(Dx) <= 6 && abs(Dx) > 3)
         {
-            continuous_angle_offset = 6;
+            continuous_angle_offset = 7;
         }
         else if(abs(Dx) <= 3 && abs(Dx) > 1)
         {
-            continuous_angle_offset = 4;
+            continuous_angle_offset = 3;
         }
         else
         {
