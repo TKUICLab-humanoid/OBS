@@ -114,6 +114,7 @@ public:
 	//0905++++
 
 	int maxspeed = 0;
+	int midspeed = 0;
 	int minspeed = 0;
 	
 	int dangerous_distance = 0;
@@ -121,6 +122,7 @@ public:
 	int turn_angle = 0;
 	int IMU_angle_offest = 0;
 	int IMU_theta = 0;
+	bool turnhead_flag = false;
 
 	//-------preturn----------
 	int preturn_enable = 0;
@@ -142,6 +144,7 @@ public:
 	int IMU_Modify();
 	void readpreturnparameter();
 	void slope();
+	int get_IMU();
 
 };
 
