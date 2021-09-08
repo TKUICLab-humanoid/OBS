@@ -33,6 +33,7 @@ void KidsizeStrategy::strategymain()
                 //initial parameter//
                 continuous_angle_offset = 0;
                 turn_angle = 0;
+                check_anotherside_obs = false;
                 if(!Continuous_flag)
                 {
                     ROS_INFO("before start ");
@@ -98,9 +99,9 @@ void KidsizeStrategy::strategymain()
                 break;
 
             case AVOID:
-                printinfo();
+                //printinfo();
                 ROS_INFO("state = AVOID");
-                ROS_INFO("()continuousValue_x = %d",continuousValue_x);
+                ROS_INFO("(AVOID)continuousValue_x = %d",continuousValue_x);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //head turn mid
                 tool->Delay(50);                            
                if(Dy < dangerous_distance)         //dangerous_distance = 10
@@ -115,9 +116,9 @@ void KidsizeStrategy::strategymain()
                     else
                     {
                         //slow down and rotate
-                        if(Dx > 1)                  // speed-- & turn right
+                        if(17 >= Dx && Dx >= 2)                  // speed-- & turn right
                         {
-                            ROS_INFO("Dx > 3,speed--,turn right");
+                            ROS_INFO("Dx > 1,speed--,turn right");
                             if(continuousValue_x >= midspeed) // current speed > minspeed
                             //if(continuousValue_x > stay.x) // current speed > the speed of stepping 
                             {
@@ -150,16 +151,21 @@ void KidsizeStrategy::strategymain()
                             }
                             else
                             {
-                                ROS_INFO("Dx < 3,turnangle");
+                               /* ROS_INFO("Dx < 1,turnangle");
                                 turn_angle = def_turn_angle();
                                 ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
-                                tool->Delay(100);
+                                tool->Delay(100);*/
+                                ROS_INFO("AVOID->TURNHEAD");
+                                turnhead_flag = true;
+                                strategy_state = TURNHEAD;
+                                break;
+
                             }
 
                                
                         }
 
-                        else if(Dx < -1)        // speed-- & turn left
+                        else if(-17 <= Dx && Dx <= -2)        // speed-- & turn left
                         {
                              ROS_INFO("Dx < -5,speed--,turn left");
                             if(continuousValue_x >= midspeed) // current speed > minspeed
@@ -225,12 +231,31 @@ void KidsizeStrategy::strategymain()
                                 tool->Delay(100);
                             }   
                         }
+                        /*else if(14 < abs(Dx) < 17)
+                        {
+                            ROS_INFO("2 > Dx > -2 || Dx == 0 || Dx == -31");
+                        }
+                        )*/
                         else
                         {
-                            ROS_INFO("1 > Dx > -1");
-                            ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, 0, IMU_continuous);  
-                            ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                            tool->Delay(100);
+                            ROS_INFO("2 > Dx > -2 || Dx == 0 || Dx == -31");
+                            if(continuousValue_x < maxspeed) // current speed > minspeed
+                            {
+                                while(continuousValue_x < maxspeed)
+                                {
+                                    
+                                    continuousValue_x += 50;
+                                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, 0, IMU_continuous);  
+                                    tool->Delay(50);
+                                }
+
+                            }
+                            else 
+                            {
+                                strategy_state = AVOID;
+                                break;
+                            }
                         }
                 
                     }
@@ -247,10 +272,11 @@ void KidsizeStrategy::strategymain()
                             continuousValue_x += 50;
                             IMU_Value = get_IMU();
                             IMU_theta = IMU_Modify();
-                            //ROS_INFO("IMU_theta = %d",IMU_theta);
+                            ROS_INFO("IMU_Value = %lf",IMU_Value);
                             ROS_INFO("continuousValue_x = %d",continuousValue_x);
                             ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, 0, IMU_continuous);  
                             tool->Delay(50);
+                            ros::spinOnce();
 
                             
                         }
@@ -259,13 +285,73 @@ void KidsizeStrategy::strategymain()
 
                     else if(continuousValue_x == maxspeed)
                     {
-                        ROS_INFO("2");
-                        IMU_Value = get_IMU();
-                        IMU_theta = IMU_Modify();
-                        ROS_INFO("IMU_theta = %d",IMU_theta);
-                        ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                        ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, IMU_theta, IMU_continuous);  
-                         tool->Delay(50);
+                        if(check_anotherside_obs == true)
+                        {
+                            ROS_INFO("check_anotherside_obs == true");
+                            if(IMU_Value > 10)      // body turn left,head need to turn right
+                            {
+                                ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 1647, 300);           //head turn right
+                                tool->Delay(100);
+                                if(Dx >= -4)
+                                {
+                                    ROS_INFO("Dx > -3 ");
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, 0, IMU_continuous);  
+                                    tool->Delay(50);
+                                }
+                                else
+                                {
+                                    ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //head turn mid
+                                    tool->Delay(100);
+                                    check_anotherside_obs = false;
+                                    IMU_Value = get_IMU();
+                                    IMU_theta = IMU_Modify();
+                                    ROS_INFO("IMU_Value = %lf",IMU_Value);
+                                    ROS_INFO("IMU_theta = %d",IMU_theta);
+                                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, IMU_theta, IMU_continuous);  
+                                    tool->Delay(50);
+                                    ros::spinOnce();
+                                }
+                            }
+                            else if(IMU_Value < -10)      // body turn left,head need to turn left
+                            {
+                                ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2447, 300);           //head turn left
+                                tool->Delay(100);
+                                if(Dx <= 4)
+                                {
+                                    ROS_INFO("Dx < 3 ");
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, 0, IMU_continuous);  
+                                    tool->Delay(50);
+                                }
+                                else
+                                {
+                                    ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //head turn mid
+                                    tool->Delay(100);
+                                    check_anotherside_obs = false;
+                                    IMU_Value = get_IMU();
+                                    IMU_theta = IMU_Modify();
+                                    ROS_INFO("IMU_Value = %lf",IMU_Value);
+                                    ROS_INFO("IMU_theta = %d",IMU_theta);
+                                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, IMU_theta, IMU_continuous);  
+                                    tool->Delay(50);
+                                    ros::spinOnce();
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            ROS_INFO("2");
+                            IMU_Value = get_IMU();
+                            IMU_theta = IMU_Modify();
+                            ROS_INFO("IMU_Value = %lf",IMU_Value);
+                            ROS_INFO("IMU_theta = %d",IMU_theta);
+                            ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                            ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, IMU_theta, IMU_continuous);  
+                            tool->Delay(50);
+                            ros::spinOnce();
+                        }
                     }
 
                     ROS_INFO("Dx = %lf,",Dx);
@@ -277,98 +363,109 @@ void KidsizeStrategy::strategymain()
             case TURNHEAD:
                 ROS_INFO("TURNHEAD");
 
-                if(Dy <= 13)
+                if(Dy <= 11)
                 {
-                    if(IMU_Value < -8)         //obstacle left,need to turn right
+                    ROS_INFO("Dy <= 10");
+
+                    //if(IMU_Value < -15)         //obstacle left,need to turn right
+                    if(Dx > 13)         //obstacle left,need to turn right
                     {
                         ROS_INFO("IMU_Value < 0 right");
+                        ROS_INFO("Head Turn left");
                         ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2447, 300);           //head turn left
                         tool->Delay(100);
-                        //2647/90 = 
-                        //if((Dx > -16 && Dx >= 0) || Dx == 0 || Dx == -31)   //next obstacle's distance > 10
                         if(turnhead_flag == true)
                         {
-                             if(turnhead_flag == true)  
-                                ROS_INFO("if(turnhead_flag == true)");
+                            if(turnhead_flag == true)  
+                                ROS_INFO("turnhead_flag == true");
                             else
-                                ROS_INFO("if(turnhead_flag == falsre)");
-                            ROS_INFO("Dy > 10");
+                                ROS_INFO("turnhead_flag == falsre");
+                            
+
                             if(continuousValue_x > minspeed)
                             {
+                                ROS_INFO("continuousValue_x > minspeed");
                                 while(continuousValue_x > minspeed)
                                 {
-                                    continuousValue_x -= 100;
+                                    continuousValue_x -= 50;
                                     ROS_INFO("continuousValue_x > minspeed");
                                     ROS_INFO("speed --");
                                     ROS_INFO("stay.theta = %d",stay.theta);
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta - turn_angle = %d",stay.theta - turn_angle);
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, (stay.theta - turn_angle), IMU_continuous);
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, (stay.theta - turn_angle)+2, IMU_continuous);
                                     //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, 10, IMU_continuous);
-                                    tool->Delay(100);
+                                    tool->Delay(50);
                                 }
                             }
                             else if(continuousValue_x <= minspeed)
                             {
-                                //ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //head turn mid
-                                //tool->Delay(50);                            
-                                ROS_INFO("continuousValue_x = minspeed");
-                                ROS_INFO("stay.theta = %d",stay.theta);
-                                ROS_INFO("turn_angle = %d",turn_angle);
-                                ROS_INFO("stay.theta - turn_angle = %d",stay.theta - turn_angle);
-                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta - turn_angle, IMU_continuous);
-                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, 12, IMU_continuous);
-                                tool->Delay(100);                            
+                                ROS_INFO("continuousValue_x <= minspeed");
+                                while(continuousValue_x <= minspeed)
+                                {
+                                    ROS_INFO("continuousValue_x = minspeed");
+                                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, 15, IMU_continuous);
+                                    tool->Delay(50);                            
+                                    IMU_Value = get_IMU();
+                                    ros::spinOnce();
+                                    ROS_INFO("turn head IMU_Value = %lf",IMU_Value);
+                                    if(IMU_Value > 35 || Dx == -31 || Dx == 0)
+                                    {
+                                        ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //head turn left
+                                        tool->Delay(100);
+                                        check_anotherside_obs = true;
+                                        ROS_INFO("IMU_Value > 35");
+                                        turnhead_flag = false;
+                                        strategy_state = AVOID;
+                                        break;
+                                    }
+
+                                    if(turnhead_flag == false)
+                                    {
+                                        strategy_state = AVOID;
+                                        break;
+                                    }
+                                }
                             }
 
-                            IMU_Value = get_IMU();
-                            ROS_INFO("turn head IMU_Value = %lf",IMU_Value);
-                            if(IMU_Value > 30)
-                            {
-                                ROS_INFO("IMU_Value > 30");
-                                turnhead_flag = false;
-                                strategy_state = AVOID;
-                                break;
-                            }
                             else
                             {
                                 ROS_INFO("continuousValue_x = minspeed");
-                                ROS_INFO("stay.theta = %d",stay.theta);
-                                ROS_INFO("turn_angle = %d",turn_angle);
-                                ROS_INFO("stay.theta - turn_angle = %d",stay.theta - turn_angle);
-                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta - turn_angle, IMU_continuous);
-                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, 12, IMU_continuous);
-                                tool->Delay(1000);                            
                             } 
                             
                         }
                         else
                         {
-                            ROS_INFO("Dy > 10 else");
+                            if(turnhead_flag == true)  
+                                ROS_INFO("turnhead_flag == true");
+                            else
+                                ROS_INFO("turnhead_flag == falsre");
                         }
                         
                         
                     }
 
-                    else if(IMU_Value > 8)         //obstacle rigjt,need to turn left
+                    //else if(IMU_Value > 15)         //obstacle rigjt,need to turn left
+                    else if(Dx < -13)         //obstacle rigjt,need to turn left
                     {
-                        ROS_INFO("IMU_Value > 0");
+                        ROS_INFO("IMU_Value > 8");
+                        ROS_INFO("Head Turn right");
                         ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 1647, 300);           //head turn right
                         tool->Delay(100);
 
-                        //if((Dx < 16 && Dx >= 0) || Dx == 0 || Dx == -31)   //next obstacle's distance > 10
                         if(turnhead_flag == true)
                         {
                             if(turnhead_flag == true)  
-                                ROS_INFO("if(turnhead_flag == true)");
+                                ROS_INFO("turnhead_flag == true");
                             else
-                                ROS_INFO("if(turnhead_flag == falsre)");
+                                ROS_INFO("turnhead_flag == falsre");
 
+                            //if()
                             if(continuousValue_x > minspeed)
                             {
+                                ROS_INFO("continuousValue_x > minspeed");
                                 while(continuousValue_x > minspeed)
                                 {
                                     ROS_INFO("continuousValue_x > minspeed");
@@ -378,59 +475,65 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta - turn_angle = %d",stay.theta - turn_angle);
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta - turn_angle, IMU_continuous);
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, (stay.theta - turn_angle)-2, IMU_continuous);
                                     tool->Delay(100);
                                 }
                             }
                             else if(continuousValue_x <= minspeed)
                             {
-                                //ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //head turn mid
-                                //tool->Delay(50);                            
-                                ROS_INFO("continuousValue_x = minspeed");
-                                ROS_INFO("stay.theta = %d",stay.theta);
-                                ROS_INFO("turn_angle = %d",turn_angle);
-                                ROS_INFO("stay.theta - turn_angle = %d",stay.theta - turn_angle);
-                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta - turn_angle, IMU_continuous);
-                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, -12, IMU_continuous);
-                                tool->Delay(100);
+                                ROS_INFO("continuousValue_x <= minspeed");
+                                while(continuousValue_x <= minspeed)
+                                {
+                                    ROS_INFO("continuousValue_x = minspeed");
+                                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, -15, IMU_continuous);
+                                    tool->Delay(100);
 
+                                    IMU_Value = get_IMU();
+                                    ros::spinOnce();
+                                    ROS_INFO("turn head IMU_Value = %lf",IMU_Value);
+                                    if( IMU_Value <= -35 || Dx == -31 || Dx == 0)
+                                    {
+                                        ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //head turn mid
+                                        tool->Delay(50);                            
+                                        ROS_INFO("IMU_Value < -35");
+                                        turnhead_flag = false;
+                                        strategy_state = AVOID;
+                                        check_anotherside_obs = true;
+                                        break;
+                                    } 
+
+                                }
+                                if(turnhead_flag == false)
+                                {
+                                    strategy_state = AVOID;
+                                    break;
+                                }
                             }
 
-                            IMU_Value = get_IMU();
-                            ROS_INFO("turn head IMU_Value = %lf",IMU_Value);
-                            if( IMU_Value <= -30)
-                            {
-                                ROS_INFO("IMU_Value < -10");
-                                turnhead_flag = false;
-                                strategy_state = AVOID;
-                                break;
-                            } 
+                           
                             else
                             {
                                 ROS_INFO("continuousValue_x = minspeed");
-                                ROS_INFO("stay.theta = %d",stay.theta);
-                                ROS_INFO("turn_angle = %d",turn_angle);
-                                ROS_INFO("stay.theta - turn_angle = %d",stay.theta - turn_angle);
-                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta - turn_angle, IMU_continuous);
-                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, -12, IMU_continuous);
-                                tool->Delay(1000);
 
                             }                           
                             
                         }
                         else
                         {
-                            ROS_INFO("IMU_Value > 1 else");
+                            if(turnhead_flag == true)  
+                                ROS_INFO("turnhead_flag == true");
+                            else
+                                ROS_INFO("turnhead_flag == falsre");
                         }
                     }
 
-                    /*else
+                    else
                     {
+                        ROS_INFO("-15 < IMU < 15 ");
                         strategy_state = AVOID;
                         break;
-                    }*/
+                    }
                 }
                 else
                 {
@@ -443,6 +546,7 @@ void KidsizeStrategy::strategymain()
                     ROS_INFO("IMU_theta = %d",IMU_theta);
                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
                     tool->Delay(100);  
+                    ros::spinOnce();
                     /*if(IMU_Value < 5 && IMU_Value > -5)
                     {
                         strategy_state = AVOID;
@@ -578,22 +682,22 @@ void KidsizeStrategy::strategymain()
     }
 }
 
-int KidsizeStrategy::get_IMU()
+float KidsizeStrategy::get_IMU()
 {
     if (0 < strategy_info->getIMUValue().Yaw && strategy_info->getIMUValue().Yaw <= 180)
     {
-        IMU_Value = strategy_info->getIMUValue().Yaw;
+        IMU_getValue = strategy_info->getIMUValue().Yaw;
     }
     else if (0 > strategy_info->getIMUValue().Yaw && strategy_info->getIMUValue().Yaw >= -179)
     {
-        IMU_Value = strategy_info->getIMUValue().Yaw;
+        IMU_getValue = strategy_info->getIMUValue().Yaw;
     }
-    return IMU_Value;
+    return IMU_getValue;
 }
 
 int KidsizeStrategy::IMU_Modify()
 {
-        ROS_INFO("IMU_Value = %lf",IMU_Value);
+    ROS_INFO("(IMU_Modify)IMU_Value = %lf",IMU_Value);
 
     if (IMU_Value < 0)
     {
@@ -603,15 +707,15 @@ int KidsizeStrategy::IMU_Modify()
         }
         else if (abs(IMU_Value) >= 30 && abs(IMU_Value) < 45)
         {
-            IMU_angle_offest = 6;
+            IMU_angle_offest = 8;
         }
         else if (abs(IMU_Value) >= 15 && abs(IMU_Value) < 30)
         {
-            IMU_angle_offest = 4;
+            IMU_angle_offest = 6;
         }
         else if (abs(IMU_Value) >= 8 && abs(IMU_Value) < 15)
         {
-            IMU_angle_offest = 3;
+            IMU_angle_offest = 4;
         }
         else if (abs(IMU_Value) >= 5 && abs(IMU_Value) < 8)
         {
@@ -685,22 +789,22 @@ int KidsizeStrategy::def_turn_angle()
         if(abs(Dx) <= 16 && abs(Dx) > 13)
         {
             //ROS_INFO("abs(x_boundary) < 16 && abs(x_boundary) > 11");
-            continuous_angle_offset = -11;
+            continuous_angle_offset = -10;
         }
         else if(abs(Dx) <= 13 && abs(Dx) > 10)
         {
            // ROS_INFO("abs(x_boundary) < 13 && abs(x_boundary) > 10");
-            continuous_angle_offset = -9;
+            continuous_angle_offset = -8;
         }
         else if(abs(Dx) <= 10 && abs(Dx) > 7)
         {
            // ROS_INFO("abs(x_boundary) < 13 && abs(x_boundary) > 10");
-            continuous_angle_offset = -7;
+            continuous_angle_offset = -6;
         }
         else if(abs(Dx) <= 7 && abs(Dx) > 3)
         {
             //ROS_INFO("abs(x_boundary) < 10 && abs(x_boundary) > 7");
-            continuous_angle_offset = -5;
+            continuous_angle_offset = -4;
         }
         else if(abs(Dx) <= 3 && abs(Dx) > 1)
         {

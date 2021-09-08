@@ -77,6 +77,7 @@ public:
 	int continuous_angle_offset = 0;
 	bool init_flag = true;
 	float IMU_Value = 0;
+	float IMU_getValue = 0;
 	
 	/*********************stategy_main parameter ********************/
 	strategy_state strategy_state;
@@ -123,6 +124,7 @@ public:
 	int IMU_angle_offest = 0;
 	int IMU_theta = 0;
 	bool turnhead_flag = false;
+	bool check_anotherside_obs = false;
 
 	//-------preturn----------
 	int preturn_enable = 0;
@@ -144,7 +146,7 @@ public:
 	int IMU_Modify();
 	void readpreturnparameter();
 	void slope();
-	int get_IMU();
+	float get_IMU();
 
 };
 
