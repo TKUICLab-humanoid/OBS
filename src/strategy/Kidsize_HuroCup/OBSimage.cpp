@@ -216,12 +216,12 @@ void OBSimage::strategymain()
 				}
 			}
 
-			else if(WL < WR)											
+			if((WR - WL) > 5)											
 			{
 				Xb = 0;
 				ROS_INFO("Obstacle in left");
 			}
-			else if(WR < WL)
+			else if((WL - WR) > 5)
 			{
 				Xb = 31;
 				ROS_INFO("Obstacle in right");
