@@ -68,6 +68,7 @@ public:
 	float slope_avg;
 	float Dx = 0;
 	bool in_reddoor_flag;
+	int check_no_obs_cnt = 0;
 	
 
 	string parameter_path = "N";

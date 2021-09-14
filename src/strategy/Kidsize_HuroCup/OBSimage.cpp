@@ -208,15 +208,15 @@ void OBSimage::strategymain()
 
 				if(W_L > W_R)
 				{
-					WL += 10;
+					WL += 100;
 				}
 				else
 				{
-					WR += 10;
+					WR += 100;
 				}
 			}
 
-			if(WL < WR)											
+			else if(WL < WR)											
 			{
 				Xb = 0;
 				ROS_INFO("Obstacle in left");
