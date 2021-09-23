@@ -644,19 +644,19 @@ int KidsizeStrategy::IMU_Modify()
     {
         if (abs(IMU_Value) >= 45)
         {
-            IMU_angle_offest = 5;
+            IMU_angle_offest = 6;
         }
         else if (abs(IMU_Value) >= 30 && abs(IMU_Value) < 45)
         {
-            IMU_angle_offest = 3;
+            IMU_angle_offest = 5;
         }
         else if (abs(IMU_Value) >= 15 && abs(IMU_Value) < 30)
         {
-            IMU_angle_offest = 3;
+            IMU_angle_offest = 4;
         }
         else if (abs(IMU_Value) >= 8 && abs(IMU_Value) < 15)
         {
-            IMU_angle_offest = 2;
+            IMU_angle_offest = 4;
         }
         else if (abs(IMU_Value) >= 5 && abs(IMU_Value) < 8)
         {
@@ -675,19 +675,19 @@ int KidsizeStrategy::IMU_Modify()
     {
         if (abs(IMU_Value) >= 45)
         {
-            IMU_angle_offest = -5;
+            IMU_angle_offest = -6;
         }
         else if (abs(IMU_Value) >= 30 && abs(IMU_Value) < 45)
         {
-            IMU_angle_offest = -3;
+            IMU_angle_offest = -5;
         }
         else if (abs(IMU_Value) >= 15 && abs(IMU_Value) < 30)
         {
-            IMU_angle_offest = -3;
+            IMU_angle_offest = -4;
         }
         else if (abs(IMU_Value) >= 8 && abs(IMU_Value) < 15)
         {
-            IMU_angle_offest = -2;
+            IMU_angle_offest = -4;
         }
         else if (abs(IMU_Value) >= 5 && abs(IMU_Value) < 8)
         {
@@ -776,15 +776,15 @@ int KidsizeStrategy::def_turn_angle()
         }
         else if(abs(Dx) <= 7 && abs(Dx) > 3)
         {
-            continuous_angle_offset = 7;
+            continuous_angle_offset = 5;
         }
         else if(abs(Dx) <= 3 && abs(Dx) > 1)
         {
-            continuous_angle_offset = 5 ;
+            continuous_angle_offset = 3 ;
         }
         else
         {
-            continuous_angle_offset = 3;
+            continuous_angle_offset = 2;
         }   
     }
 

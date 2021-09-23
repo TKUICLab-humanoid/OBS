@@ -192,7 +192,7 @@ void OBSimage::strategymain()
 			}
 			printf("\n");
 
-			if((WR == WL) && (WR > 0) && (WL > 0))		//WR = WL
+			if(abs(WR-WL) < 5 && (WR > 0) && (WL > 0))		//WR = WL
 			{
 				for(int i = 0 ; i < 32 ; i++) 
 				{
