@@ -114,6 +114,7 @@ void KidsizeStrategy::strategymain()
                     }
                     else
                     {
+                        
                         //slow down and rotate
                         if(17 >= Dx && Dx >= 2)                  // speed-- & turn right
                         {

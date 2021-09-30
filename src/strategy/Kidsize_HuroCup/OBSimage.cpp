@@ -186,13 +186,16 @@ void OBSimage::strategymain()
 
 				printf("%2d,",Filter_Matrix[i]);
 				//calculate WR WL
-				WR += (32-i) * Filter_Matrix[i];
-				WL += (i+1) * Filter_Matrix[i];
+				//WR += (32-i) * Filter_Matrix[i];
+				//WL += (i+1) * Filter_Matrix[i];
+				WR += (32-i) * (24-Deep_Matrix[i]);
+				WL += (i+1) * (24-Deep_Matrix[i]);
+
 
 			}
 			printf("\n");
 
-			if(abs(WR-WL) < 5 && (WR > 0) && (WL > 0))		//WR = WL
+			/*if(abs(WR-WL) < 5 && (WR > 0) && (WL > 0))		//WR = WL
 			{
 				for(int i = 0 ; i < 32 ; i++) 
 				{
@@ -214,7 +217,7 @@ void OBSimage::strategymain()
 				{
 					WR += 100;
 				}
-			}
+			}*/
 
 			if((WR - WL) > 5)											
 			{
