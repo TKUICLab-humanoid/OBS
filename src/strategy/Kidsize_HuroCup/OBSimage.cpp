@@ -1,9 +1,5 @@
 #include "strategy/OBSimage.h"
 
-int totalL = 0;
-int totalR = 0;
-int Left[32]= {1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4};
-int Right[32]={4,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1};
 int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "OBSimage");
@@ -24,174 +20,348 @@ int main(int argc, char** argv)
 }
 
 void OBSimage::strategymain()
-{
-    
+{  
 	if(strategy_info->getStrategyStart())
 	{	
-            cv::Mat compressimage(24,32,CV_8UC3);
-            /*for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10 ; compress_height++)
-            {
-                for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10 ; compress_width++)
-                {
-                    bValue = (compressimage.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-                    gValue = (compressimage.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-                    rValue = (compressimage.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
-                    for(int lheight = 0 ; lheight < 10 ; lheight++)
-                    {
-                        for(int lwidth = 0 ; lwidth < 10 ; lwidth++)
-                        {
-						ROS_INFO("%d",strategyinfo->Label_Model[(lheight+compress_height*10)*IMAGEWIDTH+(lwidth+compress_width*10)]);
-                            if(strategyinfo->Label_Model[(lheight+compress_height*10)*IMAGEWIDTH+(lwidth+compress_width*10)] == BlueLabel)
-                            {
-                                color_cnt++;                            
-                            }
-                            else if(strategyinfo->Label_Model[(lheight+compress_height*10)*IMAGEWIDTH+(lwidth+compress_width*10)] == RedLabel)
-                            {
-                                color_cnt+=2;
-                            }
-                        }
-                    }
-					//ROS_INFO("%d",color_cnt);
-                    if(color_cnt < 50)
-                    {
-                        *bValue = 0;
-                        *gValue = 0;
-                        *rValue = 0;
-						//printf("0  ");
-                    }
-                    else if(color_cnt <= 150)
-                    {
-                        *bValue = 128;
-                        *gValue = 0;
-                        *rValue = 128;
-						//printf("1  ");
-                    }
-                    else
-                    {
-                        *bValue = 255;
-                        *gValue = 255;
-                        *rValue = 0;
-                    }
-                    color_cnt = 0;
-                }
-				//printf("\n");
-            }
-			cv::resize(compressimage, publish_image, cv::Size(320, 240),CV_INTER_LINEAR);
-			msg_compressimage = cv_bridge::CvImage(std_msgs::Header(), "bgr8", publish_image).toImageMsg();
-            pub_colormodel.publish(msg_compressimage);*/
-            cv::Mat image = strategy_info->cvimg->image;
-            for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
-            {
-                DeepMatrix_cnt[compress_width] = 0;
-                for(int compress_height = IMAGEHEIGHT/10 - 1 ; compress_height > -1 ; compress_height--)
-                {
-                    bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-                    gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-                    rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
+		cv::Mat image = strategy_info->cvimg->image;
 
-                    if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
-                    {
-                        //DeepMatrix_cnt[compress_width]++;
-						if((compress_height - 1) > -1)
+		ROS_INFO("Deep Matrix");
+			
+        for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
+        {
+            Deep_Matrix[compress_width] = 0;
+            for(int compress_height = IMAGEHEIGHT/10 - 1 ; compress_height > -1 ; compress_height--)
+            {
+                bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
+                gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
+                rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
+
+                if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
+                {
+					Deep_Matrix[compress_width] = (IMAGEHEIGHT/10 - 1) - compress_height;
+					break;
+                }
+				if(compress_height == 0)
+				{
+					Deep_Matrix[compress_width] = 24;
+				}
+            }
+
+			printf("%2d,",Deep_Matrix[compress_width]);
+        }
+		printf("\n");
+		/*for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10  ; compress_height++)
+        {
+            for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10 ; compress_width++)
+            {
+                bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
+                gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
+                rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
+				if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
+				{
+					printf("1  ");
+				}
+				else
+				{
+					printf("0  ");
+				}
+			}
+			printf("\n");
+		}*/
+
+		INIT_parameter();
+
+		//0905++++
+////////////////////有進紅門，紅門case內影像判斷////////////////////
+
+		if (strategy_info->color_mask_subject_cnts[5] != 0)				
+		{
+			for(int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
+			{
+				if(strategy_info->color_mask_subject[5][i].size > 3500)
+				{
+					ROS_INFO("IN_RED");
+					in_reddoor_flag = true;
+					//ROS_INFO("in_reddoor_flag = true");
+
+
+					SlopeCalculate();
+					//再去策略端拿slope_avg做旋轉修正
+
+
+					if (abs(slope_avg) <= 0.7)
+					{
+						for (int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
 						{
-							bValue = (image.data + (((compress_height - 1)*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-                        	gValue = (image.data + (((compress_height - 1)*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-                        	rValue = (image.data + (((compress_height - 1)*IMAGEWIDTH/10 + compress_width) * 3 + 2));
-                        	if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
-                        	{
-                            //DeepMatrix_cnt[compress_width]++;
-								if((compress_height - 2) > -1)
-								{
-									bValue = (image.data + (((compress_height - 2)*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-                        			gValue = (image.data + (((compress_height - 2)*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-                       				rValue = (image.data + (((compress_height - 2)*IMAGEWIDTH/10 + compress_width) * 3 + 2));
-                        			if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
-                        			{
-                            			DeepMatrix_cnt[compress_width] = (IMAGEHEIGHT/10 - 1) - compress_height;
-										break;
-                        			}
-								}
-								else
-								{
-									DeepMatrix_cnt[compress_width] = 22;
-									break;
-								}
-                        	}
+							LD = 319 - strategy_info->color_mask_subject[5][i].XMin;
+							RD = strategy_info->color_mask_subject[5][i].XMax - 0;
+						}
+					}
+					
+					for(int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)	//單塊藍色判斷
+					{
+						L_XMAX = strategy_info->color_mask_subject[2][i].XMax - 0;
+						R_XMIN = 319 - strategy_info->color_mask_subject[2][i].XMin;
+					}
+
+
+					for(int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)   //兩塊藍色同時再螢幕內
+					{
+						if(strategy_info->color_mask_subject[2][i].size > 5000 )
+						{
+							XMax_one = strategy_info->color_mask_subject[2][0].XMax;
+							XMin_one = strategy_info->color_mask_subject[2][0].XMin;
+							XMin_two = strategy_info->color_mask_subject[2][1].XMin;
+							XMax_two = strategy_info->color_mask_subject[2][1].XMax;
+						}
+					}
+
+
+					if(XMin_one > XMin_two)						//比較所有xmax &&　xmin ,確保抓到的是正確的值
+					{
+						RightblueOBS_XMin = XMin_one;
+					}
+					else if (XMin_one < XMin_two)
+					{
+						RightblueOBS_XMin = XMin_two;
+					}
+					if(XMax_one > XMax_two)
+					{
+						LeftblueOBS_XMax = XMax_two;
+					}
+					else if(XMax_one < XMax_two)
+					{
+						LeftblueOBS_XMax = XMax_one;
+					}
+					//ROS_INFO("XMin_one = %d",XMin_one);
+					//ROS_INFO("XMin_two = %d",XMin_two);
+					//ROS_INFO("XMax_two = %d",XMax_two);
+					//ROS_INFO("XMax_one = %d",XMax_one);
+				}
+				else
+				{
+					in_reddoor_flag = true;
+					ROS_INFO("RED is not big enough");
+				}
+				
+			}
+		}
+		////////////////////未進紅門，其餘影像判斷////////////////////		
+		else
+		{
+			ROS_INFO("NOT_IN_RED");
+			in_reddoor_flag = false;
+			ROS_INFO("in_reddoor_flag = false");
+		//0905++++
+
+			ROS_INFO("Focus Matrix");
+			for(int i = 0; i < 32 ;i++)
+			{
+			printf("%2d,",Focus_Matrix[i]);
+			}
+			printf("\n");
+			ROS_INFO("Filter Matrix");
+
+			for(int i = 0; i < 32 ;i++)
+			{
+				Filter_Matrix[i] = Focus_Matrix[i] - Deep_Matrix[i];
+
+				if(Filter_Matrix[i] > 0)	//obstacle in focus matrix
+				{
+					Xc_count++;
+					Xi_sum += i;
+					Xc = (float)Xi_sum /(float) Xc_count;			//get x_avg when obstacle is in focus matrix 
+					//printf("Xi_sum = %d,Xc_count = %d,Xc  = %.3lf \n",Xi_sum,Xc_count,Xc);
+				}
+				else												
+				{
+					Filter_Matrix[i] = 0;
+				}
+				//printf("%2d,",Filter_Matrix[i]);
+
+				if(Deep_Matrix[i] < Dy)							//get DeepMatrix min
+				{
+					Dy = Deep_Matrix[i];
+				}
+
+				printf("%2d,",Filter_Matrix[i]);
+				//calculate WR WL
+				WR += (32-i) * Filter_Matrix[i];
+				WL += (i+1) * Filter_Matrix[i];
+
+			}
+			printf("\n");
+
+			if(abs(WR-WL) < 5 && (WR > 0) && (WL > 0))		//WR = WL
+			{
+				for(int i = 0 ; i < 32 ; i++) 
+				{
+					if(i < 16)
+					{
+						W_L += Deep_Matrix[i];
+					}
+					else   //32 > i > 16 
+					{
+						W_R += Deep_Matrix[i];
+					}
+				}
+
+				if(W_L > W_R)
+				{
+					WL += 100;
+				}
+				else
+				{
+					WR += 100;
+				}
+			}
+
+			if((WR - WL) > 5)											
+			{
+				Xb = 0;
+				ROS_INFO("Obstacle in left");
+			}
+			else if((WL - WR) > 5)
+			{
+				Xb = 31;
+				ROS_INFO("Obstacle in right");
+			}
+			
+
+			Dx = Xc - Xb;
+		}
+
+		//0905++++
+		strategy_info->get_image_flag = true;
+        ros::spinOnce();
+		tool->Delay(150);
+		//0905++++
+
+		ROS_INFO("W_R = %d,W_L = %d",W_R,W_L);
+		ROS_INFO("Xb = %.3lf, Dx = %.3lf",Xb,Dx);
+		ROS_INFO("Xc_count = %d, Xi_sum = %d, Xc = %.3lf",Xc_count,Xi_sum,Xc);
+		ROS_INFO("Dy = %d, WR = %d, WL = %d",Dy,WR,WL);
+
+		getparameter_parameter.Dy = Dy;
+		getparameter_parameter.Dx = Dx;
+
+		//0905++++
+		ROS_INFO("L_XMAX = %3d",L_XMAX);
+		ROS_INFO("R_XMIN = %3d",R_XMIN);
+		printf("\n");
+		//getparameter_parameter.Xc = Xc;
+		getparameter_parameter.RD = RD;
+		getparameter_parameter.LD = LD;
+		getparameter_parameter.slope_avg = slope_avg;
+		getparameter_parameter.LeftblueOBS_XMax = LeftblueOBS_XMax;
+		getparameter_parameter.RightblueOBS_XMin = RightblueOBS_XMin;
+		getparameter_parameter.in_reddoor_flag = in_reddoor_flag;
+		getparameter_parameter.L_XMAX = L_XMAX;
+		getparameter_parameter.R_XMIN = R_XMIN;
+		//0905++++
+
+
+
+		GetParameter_Publish.publish(getparameter_parameter);
+
+        ROS_INFO("\n");
+		//cv::imshow("image",image);
+		cv::waitKey(1);
+    }
+}
+
+void OBSimage::INIT_parameter()
+{
+	Xc_count = 0;
+	Xi_sum = 0;
+	Xc = 0;
+	W_R = 0;
+	W_L = 0;
+	WR = 0;
+	WL = 0;	
+	Dy = Deep_Matrix[0];
+}
+void OBSimage::SlopeCalculate()			//計算斜率之副函式
+{
+    bool Check_label_model_flag = true;
+    int slope_rand[4];
+    int slope_Y[4];
+    float slope[3];
+    slope_avg = 1000000.0;
+
+	for (int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
+        {
+		if (strategy_info->color_mask_subject[5][i].size > 3000)
+		{
+			for (int j = 0; j < 4; j++)
+			{
+				int repeat_cnt = 0;
+				int range = (strategy_info->color_mask_subject[5][i].XMax - 10) - (strategy_info->color_mask_subject[5][i].XMin + 10);
+				slope_rand[j] = rand() % range + strategy_info->color_mask_subject[5][i].XMin;
+				while (1)
+				{
+					if (repeat_cnt != j)
+					{
+						if (slope_rand[j] == slope_rand[repeat_cnt])
+						{
+							repeat_cnt = 0;
+							slope_rand[j] = rand() % range + strategy_info->color_mask_subject[5][i].XMin;
+						}
+					}
+					else
+					{
+						break;
+					}
+					repeat_cnt++;
+				}
+			}
+			for (int k = 0; k < 4; k++)
+			{
+				bool flag = true;
+				int Xmax = strategy_info->color_mask_subject[5][i].XMax;
+				int Ymax = strategy_info->color_mask_subject[5][i].YMax;
+				int cnt = 0;
+				int labelcnt;
+				while (flag)
+				{
+					labelcnt = 320 * (Ymax - cnt + 1) + slope_rand[k];
+					if (strategy_info->label_model[labelcnt] == 0x20)
+					{
+						for (int a = 1; a < 4; a++)
+						{
+							if (strategy_info->label_model[labelcnt - 320 * a] != 0x20)
+							{
+								Check_label_model_flag = false;
+								break;
+							}
+						}
+						if (Check_label_model_flag)
+						{
+							slope_Y[k] = Ymax - cnt;
+							flag = false;
 						}
 						else
 						{
-							DeepMatrix_cnt[compress_width] = 23;
-							break;
+							Check_label_model_flag = true;
 						}
-                    }
-					if(compress_height == 0)
-					{
-						DeepMatrix_cnt[compress_width] = 24;
 					}
-                }
-            }
-			/*for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10 ; compress_width++)
-            {
-                for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10  ; compress_height++)
-                {
-                    bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-                    gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-                    rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
-					if(*rValue == 128 &&  *gValue == 0 && *bValue == 128)
+					if ((cnt + 1) > Ymax)
 					{
-						printf("1  ");
+						slope_Y[k] = strategy_info->color_mask_subject[5][i].YMin;
+						flag = false;
 					}
 					else
 					{
-						printf("0  ");
+						cnt++;
 					}
 				}
-				printf("\n");
-			}*/
-			for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10  ; compress_height++)
-            {
-                for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10 ; compress_width++)
-                {
-                    bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-                    gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-                    rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
-					if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
-					{
-						printf("1  ");
-					}
-					else
-					{
-						printf("0  ");
-					}
-				}
-				printf("\n");
 			}
-            totalL = 0;
-            totalR = 0;
-            for(int i = 0; i < 32 ;i++)
-            {
-                deepmatrix.DeepMatrix.push_back(DeepMatrix_cnt[i]);
-                printf("%d,",DeepMatrix_cnt[i]);
-                //printf("%d,",deepmatrix.DeepMatrix[i]);
-                    totalL += DeepMatrix_cnt[i]*DeepMatrix_cnt[i];
-                    totalR += DeepMatrix_cnt[i]*DeepMatrix_cnt[i];
-            }
-            printf("totalL = %d\ntotalR = %d", totalL,totalR);
-            DeepMatrix_Publish.publish(deepmatrix);
-            deepmatrix.DeepMatrix.clear();
-            printf("\n");
-////////////////////////////////////opencv/////////////////////////////////////////////
-            cv::resize(image, publish_image, cv::Size(320, 240),CV_INTER_LINEAR);
-			//cv::imshow("publish_image",publish_image);
-			cv::waitKey(1);
-            msg_compressimage = cv_bridge::CvImage(std_msgs::Header(), "bgr8", publish_image).toImageMsg();
-            pub_colormodel.publish(msg_compressimage);
-            image.release();
-////////////////////////////////////opencv////////////////////////////////////////////
+			slope[0] = float(slope_Y[1] - slope_Y[0]) / float(slope_rand[1] - slope_rand[0]);
+			slope[1] = float(slope_Y[2] - slope_Y[1]) / float(slope_rand[2] - slope_rand[1]);
+			slope[2] = float(slope_Y[3] - slope_Y[2]) / float(slope_rand[3] - slope_rand[2]);
+			slope_avg = (slope[0] + slope[1] + slope[2]) / 3;
+			break;
+		}
+            
         }
-    
-	else
-	{
-		
-	}
 }
