@@ -130,7 +130,11 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("continuousValue_x = %d,turn_angle = %d",continuousValue_x,turn_angle);
                                     tool->Delay(60);
                                     //if(continuousValue_x == 2800)
-                                    if(Dx >=  10)
+                                    if(continuousValue_x % 300 == 0)
+                                    {
+                                        ros::spinOnce();
+                                    }
+                                    /*if(Dx >=  10)
                                     {
                                         if(abs(IMU_Value) > 8 && abs(IMU_Value) < 55)
                                         {
@@ -143,7 +147,7 @@ void KidsizeStrategy::strategymain()
                                             
 
                                         }
-                                    }
+                                    }*/
                                 }
 
 
@@ -155,9 +159,9 @@ void KidsizeStrategy::strategymain()
                                 turn_angle = def_turn_angle();
                                 ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
                                 tool->Delay(100);*/
-                                ROS_INFO("AVOID->TURNHEAD");
-                                turnhead_flag = true;
-                                strategy_state = TURNHEAD;
+                                ROS_INFO("dangerous_distance_else");
+                                /*turnhead_flag = true;
+                                strategy_state = TURNHEAD;*/
                                 break;
 
                             }
@@ -178,7 +182,11 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("continuousValue_x = %d,turn_angle = %d",continuousValue_x,turn_angle);
                                     ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);  
                                     tool->Delay(60);
-                                    if(Dx <=  -10)
+                                    if(continuousValue_x % 300 == 0)
+                                    {
+                                        ros::spinOnce();
+                                    }
+                                    /*if(Dx <=  -10)
                                     {
                                         if(abs(IMU_Value) > 8)
                                         {
@@ -199,7 +207,7 @@ void KidsizeStrategy::strategymain()
                                                 }
 
                                                 else
-                                                {*/
+                                                {
                                                     ROS_INFO("AVOID->TURNHEAD");
                                                     turnhead_flag = true;
                                                     strategy_state = TURNHEAD;
@@ -208,7 +216,7 @@ void KidsizeStrategy::strategymain()
                                             //}
 
                                         }
-                                    }
+                                    }*/
                                 }
                                 
                                 /*if(continuousValue_x == midspeed)
@@ -243,11 +251,13 @@ void KidsizeStrategy::strategymain()
                             {
                                 while(continuousValue_x < maxspeed)
                                 {
-                                    
+                                    ROS_INFO("NO TURNHEAD");
                                     continuousValue_x += 50;
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                     ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, 0, IMU_continuous);  
                                     tool->Delay(70);
+                                    layer_flag = true;
+                                    ROS_INFO("layer_flag == true");
                                 }
 
                             }
@@ -277,7 +287,8 @@ void KidsizeStrategy::strategymain()
                             ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, 0, IMU_continuous);  
                             tool->Delay(70);
                             ros::spinOnce();
-
+                            layer_flag = true;
+                            ROS_INFO("layer_flag == true");
                             
                         }
 
@@ -295,9 +306,38 @@ void KidsizeStrategy::strategymain()
                             ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, IMU_theta, IMU_continuous);  
                             tool->Delay(60);
                             ros::spinOnce();
+                            
+                            if(layer_flag == true)
+                            { 
+                                ROS_INFO("layer_flag == true");
+                                layer_sum += 1;
+                                layer_flag = false;
+                                ROS_INFO("lawyer = %d",layer_sum);
+                                ROS_INFO("layer_flag ==  false");
+                            }
+                            
+                            
                         
                     }
-
+                    if( (layer_sum - 1) > 0)
+                    {
+                        ROS_INFO("AVOID->TURNHEAD");
+                        turnhead_flag = true;
+                        IMU_Value = get_IMU();
+                        ros::spinOnce();
+                        if(IMU_Value < 0)
+                        {
+                            LeftHead_flag = true;
+                            RightHead_flag = false;
+                        }
+                        else if(IMU_Value > 0)
+                        {
+                            RightHead_flag = true;
+                            LeftHead_flag = false;
+                        }
+                        strategy_state = TURNHEAD;
+                        break;
+                    }
                     ROS_INFO("Dx = %lf,",Dx);
                              
                 }
@@ -306,14 +346,16 @@ void KidsizeStrategy::strategymain()
 
             case TURNHEAD:
                 ROS_INFO("TURNHEAD");
-
+                
                 if(Dy <= 11)
                 {
                     ROS_INFO("Dy <= 10");
 
                     //if(IMU_Value < -15)         //obstacle left,need to turn right
-                    if(Dx > 13)         //obstacle left,need to turn right
+                    
+                    if(LeftHead_flag == true)         //obstacle left,need to turn right
                     {
+                        
                         ROS_INFO("IMU_Value < 0 right");
                         ROS_INFO("Head Turn left");
                         ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2447, 300);           //head turn left
@@ -325,7 +367,7 @@ void KidsizeStrategy::strategymain()
                             else
                                 ROS_INFO("turnhead_flag == falsre");
                             
-
+                            //IF LEFTFLAG = TRUE
                             if(continuousValue_x > minspeed)
                             {
                                 ROS_INFO("continuousValue_x > minspeed");
@@ -361,12 +403,16 @@ void KidsizeStrategy::strategymain()
                                         tool->Delay(100);
                                         ROS_INFO("IMU_Value > 35");
                                         turnhead_flag = false;
+                                        LeftHead_flag = false;
+                                        RightHead_flag = false;
                                         strategy_state = AVOID;
                                         break;
                                     }
 
                                     if(turnhead_flag == false)
                                     {
+                                        LeftHead_flag = false;
+                                        RightHead_flag = false;
                                         strategy_state = AVOID;
                                         break;
                                     }
@@ -391,7 +437,7 @@ void KidsizeStrategy::strategymain()
                     }
 
                     //else if(IMU_Value > 15)         //obstacle rigjt,need to turn left
-                    else if(Dx < -13)         //obstacle rigjt,need to turn left
+                    else if(RightHead_flag == true)         //obstacle rigjt,need to turn left
                     {
                         ROS_INFO("IMU_Value > 8");
                         ROS_INFO("Head Turn right");
@@ -441,6 +487,8 @@ void KidsizeStrategy::strategymain()
                                         tool->Delay(50);                            
                                         ROS_INFO("IMU_Value < -35");
                                         turnhead_flag = false;
+                                        LeftHead_flag = false;
+                                        RightHead_flag = false;
                                         strategy_state = AVOID;
                                         break;
                                     } 
@@ -448,6 +496,8 @@ void KidsizeStrategy::strategymain()
                                 }
                                 if(turnhead_flag == false)
                                 {
+                                    LeftHead_flag = false;
+                                    RightHead_flag = false;
                                     strategy_state = AVOID;
                                     break;
                                 }
@@ -497,9 +547,9 @@ void KidsizeStrategy::strategymain()
                 }
 
             break;
-/*
+
             //0905++++++++++++++++
-            case REDDOOR:
+            /*case REDDOOR:
                 ROS_INFO("state = REDDOOR");
 
                 //*******

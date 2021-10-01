@@ -69,7 +69,11 @@ public:
 	float Dx = 0;
 	bool in_reddoor_flag;
 	int check_no_obs_cnt = 0;
-	
+	int layer_sum = 0;
+	bool layer_flag = false;
+	bool LeftHead_flag = false;
+    bool RightHead_flag = false;
+
 
 	string parameter_path = "N";
 	//0905++++
