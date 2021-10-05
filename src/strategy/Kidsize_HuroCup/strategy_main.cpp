@@ -119,10 +119,11 @@ void KidsizeStrategy::strategymain()
                         if(17 >= Dx && Dx >= 2)                  // speed-- & turn right
                         {
                             ROS_INFO("Dx > 1,speed--,turn right");
+                            ROS_INFO("turn r continuousValue_x = %d",continuousValue_x);
                             if(continuousValue_x >= midspeed) // current speed > minspeed
                             //if(continuousValue_x > stay.x) // current speed > the speed of stepping 
                             {
-                                while(continuousValue_x > midspeed)
+                                while(continuousValue_x >= midspeed)
                                 {
                                     continuousValue_x -= 50;
                                     turn_angle = def_turn_angle();
@@ -168,14 +169,15 @@ void KidsizeStrategy::strategymain()
 
                                
                         }
-
+                        
                         else if(-17 <= Dx && Dx <= -2)        // speed-- & turn left
                         {
-                             ROS_INFO("Dx < -5,speed--,turn left");
+                            ROS_INFO("Dx < -5,speed--,turn left");
+                            ROS_INFO("turn l continuousValue_x = %d",continuousValue_x);
                             if(continuousValue_x >= midspeed) // current speed > minspeed
                             //if(continuousValue_x > stay.x) // current speed > the speed of stepping 
                             {
-                                while(continuousValue_x > midspeed)
+                                while(continuousValue_x >= midspeed)
                                 {
                                     continuousValue_x -= 50;
                                     turn_angle = def_turn_angle();
@@ -247,17 +249,22 @@ void KidsizeStrategy::strategymain()
                         else
                         {
                             ROS_INFO("2 > Dx > -2 || Dx == 0 || Dx == -31");
-                            if(continuousValue_x < maxspeed) // current speed > minspeed
+                            ROS_INFO("Dx = %5f",Dx);
+                            if(continuousValue_x < maxspeed && (2 > Dx > -2 || Dx == 0 || Dx == -31) ) // current speed > minspeed
                             {
+                                ROS_INFO("bbbbbbbbb");
                                 while(continuousValue_x < maxspeed)
                                 {
-                                    ROS_INFO("NO TURNHEAD");
-                                    continuousValue_x += 50;
-                                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                    ROS_INFO("ccccccccc");
+                                    //ROS_INFO("NO TURNHEAD");
+                                    continuousValue_x += 100;
+                                    ROS_INFO("aaaaaaaacontinuousValue_x = %d",continuousValue_x);
                                     ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, 0, IMU_continuous);  
                                     tool->Delay(70);
+                                    ros::spinOnce();
                                     layer_flag = true;
-                                    ROS_INFO("layer_flag == true");
+                                    //ROS_INFO("layer_flag == true");
+                                    break;
                                 }
 
                             }
@@ -347,7 +354,7 @@ void KidsizeStrategy::strategymain()
             case TURNHEAD:
                 ROS_INFO("TURNHEAD");
                 
-                if(Dy <= 11)
+                if(Dy <= 12)
                 {
                     ROS_INFO("Dy <= 10");
 
@@ -781,27 +788,27 @@ int KidsizeStrategy::def_turn_angle()
         if(abs(Dx) <= 16 && abs(Dx) > 13)
         {
             //ROS_INFO("abs(x_boundary) < 16 && abs(x_boundary) > 11");
-            continuous_angle_offset = -11;
+            continuous_angle_offset = -12;
         }
         else if(abs(Dx) <= 13 && abs(Dx) > 10)
         {
            // ROS_INFO("abs(x_boundary) < 13 && abs(x_boundary) > 10");
-            continuous_angle_offset = -9;
+            continuous_angle_offset = -10;
         }
         else if(abs(Dx) <= 10 && abs(Dx) > 7)
         {
            // ROS_INFO("abs(x_boundary) < 13 && abs(x_boundary) > 10");
-            continuous_angle_offset = -7;
+            continuous_angle_offset = -8;
         }
         else if(abs(Dx) <= 7 && abs(Dx) > 3)
         {
             //ROS_INFO("abs(x_boundary) < 10 && abs(x_boundary) > 7");
-            continuous_angle_offset = -5;
+            continuous_angle_offset = -6;
         }
         else if(abs(Dx) <= 3 && abs(Dx) > 1)
         {
             //ROS_INFO("abs(Dx) < 7 && abs(Dx) > 4");
-            continuous_angle_offset = -3;
+            continuous_angle_offset = -4;
         }
         else
         {
@@ -815,27 +822,27 @@ int KidsizeStrategy::def_turn_angle()
         ROS_INFO("Dx < 0  turn left");
         if(abs(Dx) <= 16 && abs(Dx) > 13)
         {
-            continuous_angle_offset = 11;
+            continuous_angle_offset = 10;
         }
         else if(abs(Dx) <= 13 && abs(Dx) > 10)
         {
-            continuous_angle_offset = 9;
+            continuous_angle_offset = 8;
         }
         else if(abs(Dx) <= 10 && abs(Dx) > 7)
         {
-            continuous_angle_offset = 7;
+            continuous_angle_offset = 6;
         }
         else if(abs(Dx) <= 7 && abs(Dx) > 3)
         {
-            continuous_angle_offset = 5;
+            continuous_angle_offset = 4;
         }
         else if(abs(Dx) <= 3 && abs(Dx) > 1)
         {
-            continuous_angle_offset = 3 ;
+            continuous_angle_offset = 2 ;
         }
         else
         {
-            continuous_angle_offset = 2;
+            continuous_angle_offset = 1;
         }   
     }
 
