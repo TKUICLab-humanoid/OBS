@@ -125,7 +125,7 @@ void KidsizeStrategy::strategymain()
                             {
                                 while(continuousValue_x >= midspeed)
                                 {
-                                    continuousValue_x -= 50;
+                                    continuousValue_x -= 100;
                                     turn_angle = def_turn_angle();
                                     ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); //連續步態的值 
                                     ROS_INFO("continuousValue_x = %d,turn_angle = %d",continuousValue_x,turn_angle);
@@ -179,7 +179,7 @@ void KidsizeStrategy::strategymain()
                             {
                                 while(continuousValue_x >= midspeed)
                                 {
-                                    continuousValue_x -= 50;
+                                    continuousValue_x -= 100;
                                     turn_angle = def_turn_angle();
                                     ROS_INFO("continuousValue_x = %d,turn_angle = %d",continuousValue_x,turn_angle);
                                     ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);  
@@ -286,7 +286,7 @@ void KidsizeStrategy::strategymain()
                         while(continuousValue_x < maxspeed)
                         {
                             
-                            continuousValue_x += 50;
+                            continuousValue_x += 100;
                             IMU_Value = get_IMU();
                             IMU_theta = IMU_Modify();
                             ROS_INFO("IMU_Value = %lf",IMU_Value);
@@ -296,6 +296,8 @@ void KidsizeStrategy::strategymain()
                             ros::spinOnce();
                             layer_flag = true;
                             ROS_INFO("layer_flag == true");
+                            ROS_INFO("Dy = %d",Dy);
+
                             
                         }
 
@@ -304,24 +306,24 @@ void KidsizeStrategy::strategymain()
                     else if(continuousValue_x == maxspeed)
                     {
 
-                            ROS_INFO("2");
-                            IMU_Value = get_IMU();
-                            IMU_theta = IMU_Modify();
-                            ROS_INFO("IMU_Value = %lf",IMU_Value);
-                            ROS_INFO("IMU_theta = %d",IMU_theta);
-                            ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                            ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, IMU_theta, IMU_continuous);  
-                            tool->Delay(60);
-                            ros::spinOnce();
-                            
-                            if(layer_flag == true)
-                            { 
-                                ROS_INFO("layer_flag == true");
-                                layer_sum += 1;
-                                layer_flag = false;
-                                ROS_INFO("lawyer = %d",layer_sum);
-                                ROS_INFO("layer_flag ==  false");
-                            }
+                        ROS_INFO("2");
+                        IMU_Value = get_IMU();
+                        IMU_theta = IMU_Modify();
+                        ROS_INFO("IMU_Value = %lf",IMU_Value);
+                        ROS_INFO("IMU_theta = %d",IMU_theta);
+                        ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                        ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, IMU_theta, IMU_continuous);  
+                        tool->Delay(60);
+                        ros::spinOnce();
+                        
+                        if(layer_flag == true)
+                        { 
+                            ROS_INFO("layer_flag == true");
+                            layer_sum += 1;
+                            layer_flag = false;
+                            ROS_INFO("lawyer = %d",layer_sum);
+                            ROS_INFO("layer_flag ==  false");
+                        }
                             
                             
                         
@@ -379,15 +381,16 @@ void KidsizeStrategy::strategymain()
                             {
                                 ROS_INFO("continuousValue_x > minspeed");
                                 while(continuousValue_x > minspeed)
-                                {
-                                    continuousValue_x -= 50;
+                                {   
+                                    //ros::spinOnce();
+                                    continuousValue_x -= 100;
                                     ROS_INFO("continuousValue_x > minspeed");
                                     ROS_INFO("speed --");
                                     ROS_INFO("stay.theta = %d",stay.theta);
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta - turn_angle = %d",stay.theta - turn_angle);
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, (stay.theta - turn_angle)+2, IMU_continuous);
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);
                                     //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, 10, IMU_continuous);
                                     tool->Delay(50);
                                 }
@@ -399,7 +402,7 @@ void KidsizeStrategy::strategymain()
                                 {
                                     ROS_INFO("continuousValue_x = minspeed");
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, 15, IMU_continuous);
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, 15, IMU_continuous);//15
                                     tool->Delay(50);                            
                                     IMU_Value = get_IMU();
                                     ros::spinOnce();
@@ -464,14 +467,15 @@ void KidsizeStrategy::strategymain()
                                 ROS_INFO("continuousValue_x > minspeed");
                                 while(continuousValue_x > minspeed)
                                 {
+                                    //ros::spinOnce();
                                     ROS_INFO("continuousValue_x > minspeed");
-                                    continuousValue_x -= 50;
+                                    continuousValue_x -= 100;
                                     ROS_INFO("speed --");
                                     ROS_INFO("stay.theta = %d",stay.theta);
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta - turn_angle = %d",stay.theta - turn_angle);
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, (stay.theta - turn_angle)-2, IMU_continuous);
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);
                                     tool->Delay(50);
                                 }
                             }
@@ -482,7 +486,7 @@ void KidsizeStrategy::strategymain()
                                 {
                                     ROS_INFO("continuousValue_x = minspeed");
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, -15, IMU_continuous);
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, -15, IMU_continuous);//-15
                                     tool->Delay(50);
 
                                     IMU_Value = get_IMU();
@@ -700,7 +704,11 @@ int KidsizeStrategy::IMU_Modify()
 
     if (IMU_Value < 0)
     {
-        if (abs(IMU_Value) >= 45)
+        if (abs(IMU_Value) >= 90)
+        {
+            IMU_angle_offest = 10;
+        }
+        else if (abs(IMU_Value) >= 45 && abs(IMU_Value) < 90)
         {
             IMU_angle_offest = 6;
         }
@@ -731,7 +739,11 @@ int KidsizeStrategy::IMU_Modify()
     }
     else
     {
-        if (abs(IMU_Value) >= 45)
+        if (abs(IMU_Value) >= 90)
+        {
+            IMU_angle_offest = -10;
+        }
+        else if (abs(IMU_Value) >= 45 && abs(IMU_Value) < 90)
         {
             IMU_angle_offest = -6;
         }
@@ -844,6 +856,10 @@ int KidsizeStrategy::def_turn_angle()
         {
             continuous_angle_offset = 1;
         }   
+    }
+    else
+    {
+        
     }
 
     return continuous_angle_offset;
