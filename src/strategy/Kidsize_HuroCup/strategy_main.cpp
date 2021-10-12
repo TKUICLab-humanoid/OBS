@@ -115,7 +115,7 @@ void KidsizeStrategy::strategymain()
                     {
                         
                         //slow down and rotate
-                        if(17 >= Dx && Dx >= 2)                  // speed-- 
+                        if(17 >= Dx && Dx >= 3)                  // speed-- 
                         {
                             //ROS_INFO("Dx > 1,speed--,turn right");
                             //ROS_INFO("turn r continuousValue_x = %d",continuousValue_x);
@@ -132,10 +132,10 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
                                     ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); //連續步態的值 
                                     tool->Delay(60);
-                                    if(continuousValue_x % 300 == 0)
+                                    /*if(continuousValue_x % 300 == 0)
                                     {
                                         ros::spinOnce();
-                                    }
+                                    }*/
                                     /*if(Dx >=  10)
                                     {
                                         if(abs(IMU_Value) > 8 && abs(IMU_Value) < 55)
@@ -155,7 +155,7 @@ void KidsizeStrategy::strategymain()
 
                                 
                             }
-                            else if( Dx >= 6 &&  abs(IMU_Value) > 2 ) 
+                            else if( Dx >= 6 &&  abs(IMU_Value) > 20 ) 
                             {
                                 ROS_INFO("imu befor turn right");
                                 IMU_Value = get_IMU();
@@ -194,7 +194,7 @@ void KidsizeStrategy::strategymain()
                             }
                         }
                         
-                        else if(-17 <= Dx && Dx <= -2)        // speed-- 
+                        else if(-17 <= Dx && Dx <= -3)        // speed-- 
                         {
                             //ROS_INFO("Dx < -1,speed--,turn left");
                             //ROS_INFO("turn l continuousValue_x = %d",continuousValue_x);
@@ -211,10 +211,10 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
                                     ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);  
                                     tool->Delay(60);
-                                    if(continuousValue_x % 300 == 0)
+                                    /*if(continuousValue_x % 300 == 0)
                                     {
                                         ros::spinOnce();
-                                    }
+                                    }*/
                                     /*if(Dx <=  -10)
                                     {
                                         if(abs(IMU_Value) > 8)
@@ -260,7 +260,7 @@ void KidsizeStrategy::strategymain()
                                     }                               
                                 }*/
                             }
-                            else if( Dx <= -6 &&  abs(IMU_Value) > 2 ) 
+                            else if( Dx <= -6 &&  abs(IMU_Value) > 20 ) 
                             {
                                 ROS_INFO("imu befor turn left");
                                 IMU_Value = get_IMU();

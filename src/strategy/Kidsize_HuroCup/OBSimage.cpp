@@ -72,7 +72,7 @@ void OBSimage::strategymain()
 		INIT_parameter();
 
 		//0905++++
-////////////////////有進紅門，紅門case內影像判斷////////////////////
+	////////////////////有進紅門，紅門case內影像判斷////////////////////
 
 		if (strategy_info->color_mask_subject_cnts[5] != 0)				
 		{
@@ -157,22 +157,56 @@ void OBSimage::strategymain()
 			ROS_INFO("NOT_IN_RED");
 			in_reddoor_flag = false;
 			ROS_INFO("in_reddoor_flag = false");
-			if (strategy_info->color_mask_subject_cnts[2] != 0 || strategy_info->color_mask_subject_cnts[1] != 0)
+			if ((strategy_info->color_mask_subject_cnts[2] != 0) && (strategy_info->color_mask_subject_cnts[1] != 0))
+			{
+				ROS_INFO("obs are b & y");
+				b_obs_flag = true;
+				y_obs_flag = true;
+				ROS_INFO("b_obs_flag = true y_obs_flag = true");
+			}
+			else if (strategy_info->color_mask_subject_cnts[2] != 0)
+			{
+				ROS_INFO("obs is b");
+				b_obs_flag = true;
+				y_obs_flag = false;
+				ROS_INFO("b_obs_flag = true y_obs_flag = false");
+			}
+			else if (strategy_info->color_mask_subject_cnts[1] != 0)
+			{
+				ROS_INFO("obs is y");
+				b_obs_flag = false;
+				y_obs_flag = true;	
+				ROS_INFO("b_obs_flag = false y_obs_flag = true");
+			}
+			else 
+			{
+				ROS_INFO("no obs");
+				b_obs_flag = false;
+				y_obs_flag = false;
+				ROS_INFO("b_obs_flag = false y_obs_flag = false");
+			}
+			/*if ((strategy_info->color_mask_subject_cnts[2] != 0) || (strategy_info->color_mask_subject_cnts[1] != 0))
 			{
 				ROS_INFO("obs have b or y");
-				for(int i = 0; i < strategy_info->color_mask_subject_cnts[2] + strategy_info->color_mask_subject_cnts[1]; i++)
+				for(int i = 0 ; i < (strategy_info->color_mask_subject_cnts[2] + strategy_info->color_mask_subject_cnts[1]); i++ )
 				{
+					ROS_INFO("zzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
+					//int i = 0 , j = 0; i < strategy_info->color_mask_subject_cnts[2] , j < strategy_info->color_mask_subject_cnts[1]; i++ , j++
 					//for(int j = 0; j < strategy_info->color_mask_subject_cnts[1]; j++)
 					//{
-						if(strategy_info->color_mask_subject[2][i].size > 5000 && strategy_info->color_mask_subject[1][i].size > 5000)//obs have b & y
+						
+						if((strategy_info->color_mask_subject[2][i].size > 5000) && (strategy_info->color_mask_subject[1][i].size > 5000))//obs have b & y
 						{
-							ROS_INFO("y_obs or b_obs is  big enough");
+							ROS_INFO("blue area = %d ",strategy_info->color_mask_subject[2][i].size);
+							ROS_INFO("yellow area = %d ",strategy_info->color_mask_subject[1][i].size);
+							// ROS_INFO("y_obs or b_obs is  big enough");
 							b_obs_flag = true;
 							y_obs_flag = true;
 							ROS_INFO("b_obs_flag = true y_obs_flag = true");
 						}
 						else if(strategy_info->color_mask_subject[2][i].size > 5000)//obs is only b
 						{
+							ROS_INFO("blue area = %d ",strategy_info->color_mask_subject[2][i].size);
 							ROS_INFO("b_obs is  big enough");
 							b_obs_flag = true;
 							y_obs_flag = false;
@@ -180,6 +214,7 @@ void OBSimage::strategymain()
 						}
 						else if(strategy_info->color_mask_subject[1][i].size > 5000)//obs is only y
 						{
+							ROS_INFO("yellow area = %d ",strategy_info->color_mask_subject[1][i].size);
 							ROS_INFO("y_obs is  big enough");
 							b_obs_flag = false;
 							y_obs_flag = true;	
@@ -187,10 +222,10 @@ void OBSimage::strategymain()
 						}
 						else
 						{
-							ROS_INFO("y_obs or b_obs is not big enough");
-							b_obs_flag = false;
+							ROS_INFO("blue area = %d ",strategy_info->color_mask_subject[2][i].size);
+							ROS_INFO("yellow area = %d ",strategy_inft_cnts[2] 
 							y_obs_flag = false;
-							ROS_INFO("b_obs_flag = true y_obs_flag = true");
+							ROS_INFO("b_obs_flag = false y_obs_flag = false");
 						}
 					//}
 				}
@@ -201,7 +236,7 @@ void OBSimage::strategymain()
 				b_obs_flag = false;
 				y_obs_flag = false;
 				ROS_INFO("b_obs_flag = false y_obs_flag = false");
-			}
+			}*/
 
 			
 		//0905++++
