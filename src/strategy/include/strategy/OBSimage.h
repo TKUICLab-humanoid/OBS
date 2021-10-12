@@ -94,6 +94,8 @@ public:
 	float slope_avg;	//IN reddoor,slpoe for RED_DOOR
 
 	bool in_reddoor_flag;
+	bool b_obs_flag;
+	bool y_obs_flag;
 	//0905++++
 
 	unsigned char *rValue, *gValue, *bValue;

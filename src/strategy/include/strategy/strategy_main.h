@@ -68,6 +68,8 @@ public:
 	float slope_avg;
 	float Dx = 0;
 	bool in_reddoor_flag;
+	bool b_obs_flag;
+	bool y_obs_flag;
 	int check_no_obs_cnt = 0;
 	int layer_sum = 0;
 	bool layer_flag = false;
@@ -123,7 +125,8 @@ public:
 	int midspeed = 0;
 	int minspeed = 0;
 	
-	int dangerous_distance = 0;
+	int b_dangerous_distance = 0;
+	int y_dangerous_distance = 0;
 	int continuousValue_x = 0;
 	int turn_angle = 0;
 	int IMU_angle_offest = 0;

@@ -103,9 +103,8 @@ void KidsizeStrategy::strategymain()
                 ROS_INFO("(AVOID)continuousValue_x = %d",continuousValue_x);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //head turn mid
                 tool->Delay(50);                            
-               if(Dy < dangerous_distance)         
+                if((Dy < b_dangerous_distance && b_obs_flag == true) || (Dy < y_dangerous_distance && y_obs_flag == true))         
                 {
-                    //check reddoor or not
                     if(RD != 0 && LD != 0)
                     {
                         ROS_INFO("AVOID -> Reddoor");
@@ -335,7 +334,7 @@ void KidsizeStrategy::strategymain()
                 }
                 else
                 {
-                    ROS_INFO("Dy > %d",dangerous_distance);
+                    ROS_INFO("Dy > %d or %d",b_dangerous_distance,y_dangerous_distance);
                     
                     
                     
@@ -1034,6 +1033,8 @@ void KidsizeStrategy::GetParameter(const strategy::GetParameter &msg)
     LeftblueOBS_XMax = msg.LeftblueOBS_XMax;
     RightblueOBS_XMin = msg.RightblueOBS_XMin;
     in_reddoor_flag = msg.in_reddoor_flag;
+    b_obs_flag = msg.b_obs_flag;
+    y_obs_flag = msg.y_obs_flag;
     L_XMAX = msg.L_XMAX;
     R_XMIN = msg.R_XMIN;
 
@@ -1055,7 +1056,8 @@ void KidsizeStrategy::readparameter() //步態參數之讀檔
         maxspeed = tool->readvalue(fin, "max_speed",0);
         midspeed = tool->readvalue(fin, "mid_speed",0);
         minspeed = tool->readvalue(fin, "min_speed",0);
-        dangerous_distance   = tool->readvalue(fin, "dangerous_distance",0);
+        b_dangerous_distance   = tool->readvalue(fin, "b_dangerous_distance",0);
+        y_dangerous_distance   = tool->readvalue(fin, "y_dangerous_distance",0);
         stay.x = tool->readvalue(fin, "continuous_x_offset", 0);
         stay.y = tool->readvalue(fin, "continuous_y_offset", 0);
         stay.theta = tool->readvalue(fin, "continuous_theta_offset", 0);
