@@ -140,6 +140,8 @@ void OBSimage::strategymain()
 					//ROS_INFO("XMin_two = %d",XMin_two);
 					//ROS_INFO("XMax_two = %d",XMax_two);
 					//ROS_INFO("XMax_one = %d",XMax_one);
+					ros::spinOnce();
+                    tool->Delay(50);
 				}
 				else
 				{
@@ -147,6 +149,8 @@ void OBSimage::strategymain()
 					b_obs_flag = false;
 					y_obs_flag = false;
 					ROS_INFO("RED is not big enough");
+					ros::spinOnce();
+                    tool->Delay(50);
 				}
 				
 			}
@@ -160,7 +164,7 @@ void OBSimage::strategymain()
 			if ((strategy_info->color_mask_subject_cnts[2] != 0) && (strategy_info->color_mask_subject_cnts[1] != 0))
 			{
 				ROS_INFO("obs are b & y");
-				b_obs_flag = true;
+				b_obs_flag = false;
 				y_obs_flag = true;
 				ROS_INFO("b_obs_flag = true y_obs_flag = true");
 			}
@@ -185,6 +189,8 @@ void OBSimage::strategymain()
 				y_obs_flag = false;
 				ROS_INFO("b_obs_flag = false y_obs_flag = false");
 			}
+			ros::spinOnce();
+            tool->Delay(50);
 			/*if ((strategy_info->color_mask_subject_cnts[2] != 0) || (strategy_info->color_mask_subject_cnts[1] != 0))
 			{
 				ROS_INFO("obs have b or y");
@@ -251,6 +257,8 @@ void OBSimage::strategymain()
 			}
 			printf("\n");
 			ROS_INFO("Filter Matrix");
+			ros::spinOnce();
+            tool->Delay(50);
 
 			for(int i = 0; i < 32 ;i++)
 			{
@@ -283,6 +291,8 @@ void OBSimage::strategymain()
 
 
 			}
+			ros::spinOnce();
+            tool->Delay(50);
 			printf("\n");
 
 			/*if(abs(WR-WL) < 5 && (WR > 0) && (WL > 0))		//WR = WL
@@ -319,7 +329,8 @@ void OBSimage::strategymain()
 				Xb = 31;
 				ROS_INFO("Obstacle in right");
 			}
-			
+			ros::spinOnce();
+            tool->Delay(50);
 
 			Dx = Xc - Xb;
 		}

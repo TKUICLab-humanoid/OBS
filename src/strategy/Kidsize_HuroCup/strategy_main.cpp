@@ -102,7 +102,7 @@ void KidsizeStrategy::strategymain()
                 ROS_INFO("state = AVOID");
                 ROS_INFO("(AVOID)continuousValue_x = %d",continuousValue_x);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //head turn mid
-                tool->Delay(50);                            
+                tool->Delay(50);                           
                 if((Dy < b_dangerous_distance && b_obs_flag == true) || (Dy < y_dangerous_distance && y_obs_flag == true))         
                 {
                     if(RD != 0 && LD != 0)
@@ -131,11 +131,12 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
                                     ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); //連續步態的值 
-                                    tool->Delay(60);
-                                    /*if(continuousValue_x % 300 == 0)
+                                    if(continuousValue_x % 300 == 0)
                                     {
                                         ros::spinOnce();
-                                    }*/
+                                        tool->Delay(60);
+                                    }
+                                    
                                     /*if(Dx >=  10)
                                     {
                                         if(abs(IMU_Value) > 8 && abs(IMU_Value) < 55)
@@ -163,8 +164,8 @@ void KidsizeStrategy::strategymain()
                                 ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                 ROS_INFO("IMU_Value = %lf",IMU_Value);
                                 ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous); 
-                                tool->Delay(70);
                                 ros::spinOnce();
+                                tool->Delay(70);
                             }
                             else  //turn right
                             {
@@ -173,7 +174,7 @@ void KidsizeStrategy::strategymain()
                                 ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                 ROS_INFO("turn_angle = %d",turn_angle);
                                 ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                                if(abs(IMU_Value) > 90)
+                                if(abs(IMU_Value) > 80)
                                 {
                                     ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta - turn_angle, IMU_continuous);
                                 }
@@ -181,7 +182,8 @@ void KidsizeStrategy::strategymain()
                                 {
                                     ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
                                 } 
-                                //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                                //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);
+                                ros::spinOnce();
                                 tool->Delay(50);
                                /* ROS_INFO("Dx < 1,turnangle");
                                 turn_angle = def_turn_angle();
@@ -211,10 +213,11 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
                                     ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);  
                                     tool->Delay(60);
-                                    /*if(continuousValue_x % 300 == 0)
+                                    if(continuousValue_x % 300 == 0)
                                     {
                                         ros::spinOnce();
-                                    }*/
+                                        tool->Delay(50);
+                                    }
                                     /*if(Dx <=  -10)
                                     {
                                         if(abs(IMU_Value) > 8)
@@ -268,8 +271,9 @@ void KidsizeStrategy::strategymain()
                                 ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                 ROS_INFO("IMU_Value = %lf",IMU_Value);
                                 ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous); 
-                                tool->Delay(70);
                                 ros::spinOnce();
+                                tool->Delay(70);
+                                
                             } 
                             else  // turn left
                             {
@@ -278,7 +282,7 @@ void KidsizeStrategy::strategymain()
                                 ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                 ROS_INFO("turn_angle = %d",turn_angle);
                                 ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                                if(abs(IMU_Value) > 90)
+                                if(abs(IMU_Value) > 80)
                                 {
                                     ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta - turn_angle, IMU_continuous);
                                 }
@@ -286,6 +290,7 @@ void KidsizeStrategy::strategymain()
                                 {
                                     ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
                                 } 
+                                ros::spinOnce();
                                 //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);  
                                 tool->Delay(50);
                             }  
@@ -310,8 +315,9 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
                                     ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
-                                    tool->Delay(70);
                                     ros::spinOnce();
+                                    tool->Delay(70);
+                                    
                                     layer_flag = true;
                                     //ROS_INFO("layer_flag == true");
                                     break;
@@ -325,8 +331,9 @@ void KidsizeStrategy::strategymain()
                                 ROS_INFO("turn_angle = %d",turn_angle);
                                 ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
                                 ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
-                                tool->Delay(70);
                                 ros::spinOnce();
+                                tool->Delay(70);
+                                
                             }
                         }
                 
@@ -353,8 +360,9 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                     ROS_INFO("IMU_Value = %lf",IMU_Value);
                                     ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous);  
-                                    tool->Delay(70);
                                     ros::spinOnce();
+                                    tool->Delay(70);
+
                                     ROS_INFO("Dy = %d",Dy);
                                 }
                                 else 
@@ -368,8 +376,9 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
                                     ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous); 
-                                    tool->Delay(70);
                                     ros::spinOnce();
+                                    tool->Delay(70);
+
                                     //layer_flag = true;
                                     //ROS_INFO("layer_flag == true");
                                     ROS_INFO("Dy = %d",Dy);
@@ -388,9 +397,9 @@ void KidsizeStrategy::strategymain()
                                     IMU_theta = IMU_Modify();
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                     ROS_INFO("IMU_Value = %lf",IMU_Value);
-                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous);  
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous); 
+                                    ros::spinOnce(); 
                                     tool->Delay(70);
-                                    ros::spinOnce();
                                     ROS_INFO("Dy = %d",Dy);
                                 }
                                 else 
@@ -404,8 +413,9 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
                                     ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
-                                    tool->Delay(70);
                                     ros::spinOnce();
+                                    tool->Delay(70);
+
                                     //layer_flag = true;
                                     //ROS_INFO("layer_flag == true");
                                     ROS_INFO("Dy = %d",Dy);
@@ -855,7 +865,7 @@ int KidsizeStrategy::IMU_Modify()
     {
         if (abs(IMU_Value) >= 90)
         {
-            IMU_angle_offest = 5;
+            IMU_angle_offest = 8;
         }
         else if (abs(IMU_Value) >= 45 && abs(IMU_Value) < 90)
         {
@@ -890,7 +900,7 @@ int KidsizeStrategy::IMU_Modify()
     {
         if (abs(IMU_Value) >= 90)
         {
-            IMU_angle_offest = -5;
+            IMU_angle_offest = -8;
         }
         else if (abs(IMU_Value) >= 45 && abs(IMU_Value) < 90)
         {
@@ -959,22 +969,22 @@ int KidsizeStrategy::def_turn_angle()
         else if(abs(Dx) <= 10 && abs(Dx) > 7)
         {
            // ROS_INFO("abs(x_boundary) < 13 && abs(x_boundary) > 10");
-            continuous_angle_offset = -7;
+            continuous_angle_offset = -6;
         }
         else if(abs(Dx) <= 7 && abs(Dx) > 3)
         {
             //ROS_INFO("abs(x_boundary) < 10 && abs(x_boundary) > 7");
-            continuous_angle_offset = -6;
+            continuous_angle_offset = -4;
         }
-        else if(abs(Dx) <= 3 && abs(Dx) > 1)
+        else if(abs(Dx) <= 3 && abs(Dx) >                     1)
         {
             //ROS_INFO("abs(Dx) < 7 && abs(Dx) > 4");
-            continuous_angle_offset = -3;
+            continuous_angle_offset = -2;
         }
         else
         {
             //ROS_INFO("abs(Dx) < 1");
-            continuous_angle_offset = -2;
+            continuous_angle_offset = -1;
         }
     }
 
@@ -991,19 +1001,19 @@ int KidsizeStrategy::def_turn_angle()
         }
         else if(abs(Dx) <= 10 && abs(Dx) > 7)
         {
-            continuous_angle_offset = 8;
+            continuous_angle_offset = 6;
         }
         else if(abs(Dx) <= 7 && abs(Dx) > 3)
         {
-            continuous_angle_offset = 7;
+            continuous_angle_offset = 4;
         }
         else if(abs(Dx) <= 3 && abs(Dx) > 1)
         {
-            continuous_angle_offset = 3 ;
+            continuous_angle_offset = 2 ;
         }
         else
         {
-            continuous_angle_offset = 2;
+            continuous_angle_offset = 1;
         }   
     }
     else
