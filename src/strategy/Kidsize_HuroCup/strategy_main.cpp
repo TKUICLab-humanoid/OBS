@@ -113,7 +113,6 @@ void KidsizeStrategy::strategymain()
                     }
                     else
                     {
-                        
                         //slow down and rotate
                         if(17 >= Dx && Dx >= 3)                  // speed-- 
                         {
@@ -151,10 +150,7 @@ void KidsizeStrategy::strategymain()
 
                                         }
                                     }*/
-                                }
-
-
-                                
+                                }   
                             }
                             else if( Dx >= 6 &&  abs(IMU_Value) > 20 ) 
                             {
@@ -342,145 +338,80 @@ void KidsizeStrategy::strategymain()
                 else
                 {
                     ROS_INFO("Dy > %d or %d",b_dangerous_distance,y_dangerous_distance);
-                    
-                    
-                    
-                        if(continuousValue_x < maxspeed) // speed up
-                        //if(continuousValue_x > stay.x) // current speed > the speed of stepping 
-                        {
-                            while(continuousValue_x < maxspeed)
-                            {
-                                
-                                continuousValue_x += 100;
-                                if(abs(IMU_Value) < 20)
-                                {
-                                    ROS_INFO("no_obs speed up & use imu");
-                                    IMU_Value = get_IMU();
-                                    IMU_theta = IMU_Modify();
-                                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                    ROS_INFO("IMU_Value = %lf",IMU_Value);
-                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous);  
-                                    ros::spinOnce();
-                                    tool->Delay(70);
-
-                                    ROS_INFO("Dy = %d",Dy);
-                                }
-                                else 
-                                {
-                                    ROS_INFO("no_obs speed up & use angle");
-                                    //continuousValue_x += 100;
-                                    //IMU_Value = get_IMU();
-                                    //IMU_theta = IMU_Modify();
-                                    //ROS_INFO("IMU_Value = %lf",IMU_Value);
-                                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                    ROS_INFO("turn_angle = %d",turn_angle);
-                                    ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous); 
-                                    ros::spinOnce();
-                                    tool->Delay(70);
-
-                                    //layer_flag = true;
-                                    //ROS_INFO("layer_flag == true");
-                                    ROS_INFO("Dy = %d",Dy);
-                                }
-
-                            }
-
-                        }
-
-                        else if(continuousValue_x == maxspeed)
-                        {
-                                if(abs(IMU_Value) < 20)
-                                {
-                                    ROS_INFO("no_obs high speed & use imu");
-                                    IMU_Value = get_IMU();
-                                    IMU_theta = IMU_Modify();
-                                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                    ROS_INFO("IMU_Value = %lf",IMU_Value);
-                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous); 
-                                    ros::spinOnce(); 
-                                    tool->Delay(70);
-                                    ROS_INFO("Dy = %d",Dy);
-                                }
-                                else 
-                                {
-                                    ROS_INFO("no_obs high speed & use angle");
-                                    //continuousValue_x += 100;
-                                    //IMU_Value = get_IMU();
-                                    //IMU_theta = IMU_Modify();
-                                    //ROS_INFO("IMU_Value = %lf",IMU_Value);
-                                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                    ROS_INFO("turn_angle = %d",turn_angle);
-                                    ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
-                                    ros::spinOnce();
-                                    tool->Delay(70);
-
-                                    //layer_flag = true;
-                                    //ROS_INFO("layer_flag == true");
-                                    ROS_INFO("Dy = %d",Dy);
-                                }
-                            
-                            
-                        
-                        }
-                    
-                    /*else //don't use imu
+                    if(continuousValue_x < maxspeed) // speed up
+                    //if(continuousValue_x > stay.x) // current speed > the speed of stepping 
                     {
-                        if(continuousValue_x < maxspeed) // speed up
-                        //if(continuousValue_x > stay.x) // current speed > the speed of stepping 
-                        {
-                            while(continuousValue_x < maxspeed)
+                        while(continuousValue_x < maxspeed)
+                        { 
+                            continuousValue_x += 100;
+                            if(abs(IMU_Value) < 20)
+                            {
+                                ROS_INFO("no_obs speed up & use imu");
+                                IMU_Value = get_IMU();
+                                IMU_theta = IMU_Modify();
+                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                ROS_INFO("IMU_Value = %lf",IMU_Value);
+                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous);  
+                                ros::spinOnce();
+                                tool->Delay(70);
+                                ROS_INFO("Dy = %d",Dy);
+                            }
+                            else 
                             {
                                 ROS_INFO("no_obs speed up & use angle");
-                                continuousValue_x += 100;
+                                //continuousValue_x += 100;
                                 //IMU_Value = get_IMU();
                                 //IMU_theta = IMU_Modify();
                                 //ROS_INFO("IMU_Value = %lf",IMU_Value);
                                 ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                 ROS_INFO("turn_angle = %d",turn_angle);
                                 ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
-                                tool->Delay(70);
+                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous); 
                                 ros::spinOnce();
+                                tool->Delay(70);
                                 //layer_flag = true;
                                 //ROS_INFO("layer_flag == true");
                                 ROS_INFO("Dy = %d",Dy);
-
-                            
                             }
 
                         }
 
-                        else if(continuousValue_x == maxspeed)
+                    }
+                    else if(continuousValue_x == maxspeed)
+                    {
+                        if(abs(IMU_Value) < 20)
                         {
-                            ROS_INFO("no_obs speed up & use angle finish");
-                            //ROS_INFO("2");
+                            ROS_INFO("no_obs high speed & use imu");
+                            IMU_Value = get_IMU();
+                            IMU_theta = IMU_Modify();
+                            ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                            ROS_INFO("IMU_Value = %lf",IMU_Value);
+                            ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous); 
+                            ros::spinOnce(); 
+                            tool->Delay(70);
+                            ROS_INFO("Dy = %d",Dy);
+                        }
+                        else 
+                        {
+                            ROS_INFO("no_obs high speed & use angle");
+                            //continuousValue_x += 100;
                             //IMU_Value = get_IMU();
                             //IMU_theta = IMU_Modify();
                             //ROS_INFO("IMU_Value = %lf",IMU_Value);
-                            //ROS_INFO("IMU_theta = %d",IMU_theta);
                             ROS_INFO("continuousValue_x = %d",continuousValue_x);
                             ROS_INFO("turn_angle = %d",turn_angle);
                             ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
                             ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
-                            tool->Delay(60);
                             ros::spinOnce();
+                            tool->Delay(70);
+                            //layer_flag = true;
+                            //ROS_INFO("layer_flag == true");
                             ROS_INFO("Dy = %d",Dy);
-                            /*if(layer_flag == true)
-                            { 
-                                ROS_INFO("layer_flag == true");
-                                layer_sum += 1;
-                                layer_flag = false;
-                                ROS_INFO("lawyer = %d",layer_sum);
-                                ROS_INFO("layer_flag ==  false");
-                            }
+                        }
                             
                             
                         
-                        }
-                    }*/
-                    
+                    }
                     /*if( (layer_sum - 1) > 0)
                     {
                         ROS_INFO("AVOID->TURNHEAD");
@@ -722,14 +653,43 @@ void KidsizeStrategy::strategymain()
             /*case REDDOOR:
                 ROS_INFO("state = REDDOOR");
 
-                //*******
-                //減速到原地踏步
-                //*******
                 
-                if(abs(slope_avg) > 0.3)
+                //減速到原地踏步
+                if(continuousValue_x > stay.x) // current speed > the speed of stepping 
                 {
-                    slope();
+                    while(continuousValue_x > stay.x)
+                    {
+                        ROS_INFO("speed-- in REDDOOR");
+                        continuousValue_x -= 100;
+                        //turn_angle = def_turn_angle();
+                        ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                        ROS_INFO("turn_angle = %d",turn_angle);
+                        ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                        if(abs(IMU_Value) > 3)
+                        ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);  
+                        tool->Delay(60);
+                    }
                 }
+                else if(continuousValue_x == stay.x)
+                {
+                    if( abs(IMU_Value) > 1 ) 
+                    {
+                    ROS_INFO("imu fix in REDDOOR");
+                    IMU_Value = get_IMU();
+                    IMU_theta = IMU_Modify();
+                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                    ROS_INFO("IMU_Value = %lf",IMU_Value);
+                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous); 
+                    ros::spinOnce();
+                    tool->Delay(70);
+                    }
+                    else
+                    {
+
+                    }
+                }
+                
+
                 else
                 {
                     if(RD < LD)             //對紅門做位移
@@ -773,9 +733,16 @@ void KidsizeStrategy::strategymain()
             case CRAWL:
                 ROS_INFO("state = CRAWL");
 
-                if(abs(slope_avg) > 0.3)    //確認斜率
+                if( abs(IMU_Value) > 1 ) 
                 {
-                    slope();
+                    ROS_INFO("imu fix in CRAWL");
+                    IMU_Value = get_IMU();
+                    IMU_theta = IMU_Modify();
+                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                    ROS_INFO("IMU_Value = %lf",IMU_Value);
+                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous); 
+                    ros::spinOnce();
+                    tool->Delay(70);
                 }
                 else                        //爬行
                 {

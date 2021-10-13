@@ -164,7 +164,7 @@ void OBSimage::strategymain()
 			if ((strategy_info->color_mask_subject_cnts[2] != 0) && (strategy_info->color_mask_subject_cnts[1] != 0))
 			{
 				ROS_INFO("obs are b & y");
-				b_obs_flag = false;
+				b_obs_flag = true;
 				y_obs_flag = true;
 				ROS_INFO("b_obs_flag = true y_obs_flag = true");
 			}
@@ -191,69 +191,13 @@ void OBSimage::strategymain()
 			}
 			ros::spinOnce();
             tool->Delay(50);
-			/*if ((strategy_info->color_mask_subject_cnts[2] != 0) || (strategy_info->color_mask_subject_cnts[1] != 0))
-			{
-				ROS_INFO("obs have b or y");
-				for(int i = 0 ; i < (strategy_info->color_mask_subject_cnts[2] + strategy_info->color_mask_subject_cnts[1]); i++ )
-				{
-					ROS_INFO("zzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
-					//int i = 0 , j = 0; i < strategy_info->color_mask_subject_cnts[2] , j < strategy_info->color_mask_subject_cnts[1]; i++ , j++
-					//for(int j = 0; j < strategy_info->color_mask_subject_cnts[1]; j++)
-					//{
-						
-						if((strategy_info->color_mask_subject[2][i].size > 5000) && (strategy_info->color_mask_subject[1][i].size > 5000))//obs have b & y
-						{
-							ROS_INFO("blue area = %d ",strategy_info->color_mask_subject[2][i].size);
-							ROS_INFO("yellow area = %d ",strategy_info->color_mask_subject[1][i].size);
-							// ROS_INFO("y_obs or b_obs is  big enough");
-							b_obs_flag = true;
-							y_obs_flag = true;
-							ROS_INFO("b_obs_flag = true y_obs_flag = true");
-						}
-						else if(strategy_info->color_mask_subject[2][i].size > 5000)//obs is only b
-						{
-							ROS_INFO("blue area = %d ",strategy_info->color_mask_subject[2][i].size);
-							ROS_INFO("b_obs is  big enough");
-							b_obs_flag = true;
-							y_obs_flag = false;
-							ROS_INFO("b_obs_flag = true y_obs_flag = false");
-						}
-						else if(strategy_info->color_mask_subject[1][i].size > 5000)//obs is only y
-						{
-							ROS_INFO("yellow area = %d ",strategy_info->color_mask_subject[1][i].size);
-							ROS_INFO("y_obs is  big enough");
-							b_obs_flag = false;
-							y_obs_flag = true;	
-							ROS_INFO("b_obs_flag = false y_obs_flag = true");
-						}
-						else
-						{
-							ROS_INFO("blue area = %d ",strategy_info->color_mask_subject[2][i].size);
-							ROS_INFO("yellow area = %d ",strategy_inft_cnts[2] 
-							y_obs_flag = false;
-							ROS_INFO("b_obs_flag = false y_obs_flag = false");
-						}
-					//}
-				}
-			}	
-			else
-			{
-				ROS_INFO("no abs");
-				b_obs_flag = false;
-				y_obs_flag = false;
-				ROS_INFO("b_obs_flag = false y_obs_flag = false");
-			}*/
 
-			
 		//0905++++
 
 			ROS_INFO("Focus Matrix");
 			for(int i = 0; i < 32 ;i++)
 			{
 			printf("%2d,",Focus_Matrix[i]);
-			//ROS_INFO("red area = %d ",strategy_info->color_mask_subject[5][i].size);
-			//ROS_INFO("blue area = %d ",strategy_info->color_mask_subject[2][i].size);
-			//ROS_INFO("yellow area = %d ",strategy_info->color_mask_subject[1][i].size);
 			}
 			printf("\n");
 			ROS_INFO("Filter Matrix");
