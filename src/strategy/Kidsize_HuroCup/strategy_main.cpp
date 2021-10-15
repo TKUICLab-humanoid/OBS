@@ -113,8 +113,9 @@ void KidsizeStrategy::strategymain()
                     }
                     else
                     {
-                        //slow down and rotate
-                        if(17 >= Dx && Dx >= 2)                  // speed-- 
+                        //slow down 
+
+                        if(15 >= Dx && Dx >= 2)                  // speed-- 
                         {
                             //ROS_INFO("Dx > 1,speed--,turn right");
                             //ROS_INFO("turn r continuousValue_x = %d",continuousValue_x);
@@ -131,7 +132,7 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
                                     ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); //連續步態的值 
                                     ros::spinOnce();
-                                    tool->Delay(60);
+                                    tool->Delay(10);
 
                                     // if(continuousValue_x % 300 == 0)
                                     // {
@@ -172,12 +173,12 @@ void KidsizeStrategy::strategymain()
                                 ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
                                 if(abs(IMU_Value) > 80)
                                 {
-                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta - turn_angle, IMU_continuous);
+                                    ros_com->sendContinuousValue(Lmove.x, Lmove.y, 0, Lmove.theta - turn_angle, IMU_continuous);
                                 }
                                 else
                                 {
-                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
-                                } 
+                                    ros_com->sendContinuousValue(Rmove.x, Rmove.y, 0, Rmove.theta + turn_angle, IMU_continuous); 
+                                }
                                 //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);
                                 ros::spinOnce();
                                 tool->Delay(50);
@@ -192,7 +193,7 @@ void KidsizeStrategy::strategymain()
                             }
                         }
                         
-                        else if(-17 <= Dx && Dx <= -2)        // speed-- 
+                        else if(-15 <= Dx && Dx <= -2)        // speed-- 
                         {
                             //ROS_INFO("Dx < -1,speed--,turn left");
                             //ROS_INFO("turn l continuousValue_x = %d",continuousValue_x);
@@ -209,7 +210,7 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
                                     ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);  
                                     ros::spinOnce();
-                                    tool->Delay(60);
+                                    tool->Delay(10);
 
                                     // if(continuousValue_x % 300 == 0)
                                     // {
@@ -282,12 +283,12 @@ void KidsizeStrategy::strategymain()
                                 ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
                                 if(abs(IMU_Value) > 80)
                                 {
-                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta - turn_angle, IMU_continuous);
+                                    ros_com->sendContinuousValue(Rmove.x, Rmove.y, 0, Rmove.theta - turn_angle, IMU_continuous);
                                 }
                                 else
                                 {
-                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
-                                } 
+                                    ros_com->sendContinuousValue(Lmove.x, Lmove.y, 0, Lmove.theta + turn_angle, IMU_continuous); 
+                                }  
                                 ros::spinOnce();
                                 //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);  
                                 tool->Delay(50);
@@ -298,6 +299,41 @@ void KidsizeStrategy::strategymain()
                             ROS_INFO("2 > Dx > -2 || Dx == 0 || Dx == -31");
                         }
                         )*/
+                        else if((17 >= Dx >= 15) ||(-15 >= Dx >= -17))
+                        {
+                            if(continuousValue_x > stay.x) // current speed > the speed of stepping 
+                            {
+                                while(continuousValue_x > stay.x)
+                                {
+                                    ROS_INFO("speed-- in turnhead");
+                                    continuousValue_x -= 100;
+                                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                    ROS_INFO("turn_angle = %d",turn_angle);
+                                    ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); //連續步態的值 
+                                    ros::spinOnce();
+                                    tool->Delay(10);
+                                }   
+                            }
+                            else if( abs(IMU_Value) > 10 )//imu fix before turnhead
+                            {
+
+                                ROS_INFO("imu fix before turnhead");
+                                IMU_Value = get_IMU();
+                                IMU_theta = IMU_Modify();
+                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                ROS_INFO("IMU_Value = %lf",IMU_Value);
+                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous); 
+                                ros::spinOnce();
+                                tool->Delay(70);
+                            }
+                            else//ready to turnhead
+                            {
+                                ROS_INFO("AVOID--->TURNHEAD");
+                                turnhead_flag = true;
+                                strategy_state = TURNHEAD;
+                            }
+                        }
                         else //2 > Dx > -2 || Dx == 0 || Dx == -31
                         {
                             ROS_INFO("2 > Dx > -2 || Dx == 0 || Dx == -31");
@@ -439,9 +475,96 @@ void KidsizeStrategy::strategymain()
 
             break;
 
+            case TURNHEAD:
+                ROS_INFO("TURNHEAD");
+                if(turnhead_flag == true)
+                {
+                    ROS_INFO("turnhead_flag == true");
+
+                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1520, 300);           //head up
+                    ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 1447, 300);           //head turn right
+                    tool->Delay(1000);           
+                    ros::spinOnce();
+                    tool->Delay(150);
+
+                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1520, 300);
+                    ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2647, 300);           //head turn left
+                    tool->Delay(2000);           
+                    ros::spinOnce();
+                    tool->Delay(150);
+
+                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1420, 300); 
+                    ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);
+                              //head turn mid
+                    tool->Delay(500);
+
+
+                    if(Dx > 0)// turn right
+                    {
+                        ROS_INFO("turn right after turnhead");
+                        turnhead_flag == false;
+                        ROS_INFO("turnhead_flag == false");
+
+                        //turn_angle = def_turn_angle();
+                        if(Dx > 15 )
+                        {
+                            while(Dx > 15)
+                            {
+                                ROS_INFO("turn angle is -5");
+                                ros_com->sendContinuousValue(Rmove.x, Rmove.y, 0, Rmove.theta - 10, IMU_continuous);
+                                ros::spinOnce();
+                                tool->Delay(50); 
+                            }
+                            strategy_state = AVOID;
+                        }
+                        else
+                        {
+                            turnhead_flag == false;
+                            strategy_state = AVOID;
+                        }
+                    }
+                    else if(Dx < 0)//turn left
+                    {
+                        ROS_INFO("turn left after turnhead");
+                        turnhead_flag == false;
+                        ROS_INFO("turnhead_flag == false");
+
+                        if(Dx < -15)
+                        {
+                            while(Dx < -15)
+                            {
+                                ROS_INFO("turn angle is 5");
+                                ros_com->sendContinuousValue(Lmove.x, Lmove.y, 0, Lmove.theta + 10, IMU_continuous);
+                                ros::spinOnce();
+                                tool->Delay(50); 
+                            }
+                            strategy_state = AVOID;
+                        }
+                        else
+                        {
+                            turnhead_flag == false;
+                            strategy_state = AVOID;
+                        }
+                    }
+                    else//Dx=0
+                    {
+                        ROS_INFO("Dx=0 after turnhead");
+                        turnhead_flag == false;
+                        ROS_INFO("turnhead_flag == false");
+                        strategy_state = AVOID;
+                    }
+
+                }
+                else//turnhead_flag == false
+                {
+                    ROS_INFO("turnhead_flag == false");
+                    strategy_state = AVOID;
+                }
+
+            break;    
             /*case TURNHEAD:
                 ROS_INFO("TURNHEAD");
-                
+
                 if(Dy <= 12)
                 {
                     ROS_INFO("Dy <= 10");
@@ -463,7 +586,7 @@ void KidsizeStrategy::strategymain()
                                 ROS_INFO("turnhead_flag == falsre");
                             
                             //IF LEFTFLAG = TRUE
-                            if(continuousValue_x > minspeed)
+                            if(continuousValue_x > minspeed) //speed down to stay
                             {
                                 ROS_INFO("continuousValue_x > minspeed");
                                 while(continuousValue_x > minspeed)
