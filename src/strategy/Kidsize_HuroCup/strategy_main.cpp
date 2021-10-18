@@ -485,28 +485,32 @@ void KidsizeStrategy::strategymain()
                     ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 1447, 300);           //head turn right
                     tool->Delay(1000);           
                     ros::spinOnce();
+                    turn_WR = WR;
                     tool->Delay(150);
+
 
                     ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1520, 300);
                     ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2647, 300);           //head turn left
                     tool->Delay(2000);           
                     ros::spinOnce();
+                    turn_WL = WL;
                     tool->Delay(150);
+                    
 
                     ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1420, 300); 
-                    ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);
-                              //head turn mid
+                    ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //head turn mid
                     tool->Delay(500);
+                    ROS_INFO(" turn_WR = %d",turn_WR);
+                    ROS_INFO(" turn_WL = %d",turn_WL);
 
-
-                    if(Dx > 0)// turn right
+                    if((turn_WR - turn_WL) > 5 )// turn right
                     {
                         ROS_INFO("turn right after turnhead");
                         turnhead_flag == false;
                         ROS_INFO("turnhead_flag == false");
 
                         //turn_angle = def_turn_angle();
-                        if(Dx > 15 )
+                        if(Dx > 15 ) //obs at left
                         {
                             while(Dx > 15)
                             {
@@ -523,7 +527,7 @@ void KidsizeStrategy::strategymain()
                             strategy_state = AVOID;
                         }
                     }
-                    else if(Dx < 0)//turn left
+                    else if((turn_WL - turn_WR) > 5)//obs at right
                     {
                         ROS_INFO("turn left after turnhead");
                         turnhead_flag == false;
@@ -546,17 +550,18 @@ void KidsizeStrategy::strategymain()
                             strategy_state = AVOID;
                         }
                     }
-                    else//Dx=0
+                    else //abs(turn_WR - turn_WL) < 5
                     {
-                        ROS_INFO("Dx=0 after turnhead");
-                        turnhead_flag == false;
-                        ROS_INFO("turnhead_flag == false");
-                        strategy_state = AVOID;
+                        ROS_INFO("abs(turn_WR - turn_WL) < 5 after turnhead");
+                        //turnhead_flag == false;
+                        //ROS_INFO("turnhead_flag == false");
+                        strategy_state = TURNHEAD;
                     }
 
                 }
                 else//turnhead_flag == false
                 {
+                    turnhead_flag == false;
                     ROS_INFO("turnhead_flag == false");
                     strategy_state = AVOID;
                 }
@@ -1131,6 +1136,8 @@ void KidsizeStrategy::GetParameter(const strategy::GetParameter &msg)
     Dx = msg.Dx;
     RD = msg.RD;
     LD = msg.LD;
+    WR = msg.WR;
+    WL = msg.WL;
     slope_avg = msg.slope_avg;
     LeftblueOBS_XMax = msg.LeftblueOBS_XMax;
     RightblueOBS_XMin = msg.RightblueOBS_XMin;

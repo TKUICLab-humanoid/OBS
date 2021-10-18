@@ -61,6 +61,8 @@ public:
 	int Dy = 0;
 	int RD = 0;
 	int LD = 0;
+	int WR = 0;
+	int WL = 0;
 	int LeftblueOBS_XMax = 0;
 	int RightblueOBS_XMin = 0;
 	int L_XMAX = 0;
@@ -74,8 +76,10 @@ public:
 	int layer_sum = 0;
 	bool layer_flag = false;
 	bool LeftHead_flag = false;
-    bool RightHead_flag = false;
-
+    	bool RightHead_flag = false;
+	int turn_WR = 0;
+	int turn_WL = 0;
+	
 
 	string parameter_path = "N";
 	//0905++++
