@@ -303,6 +303,8 @@ void OBSimage::strategymain()
 		//getparameter_parameter.Xc = Xc;
 		getparameter_parameter.RD = RD;
 		getparameter_parameter.LD = LD;
+		getparameter_parameter.WR = WR;
+		getparameter_parameter.WL = WL;
 		getparameter_parameter.slope_avg = slope_avg;
 		getparameter_parameter.LeftblueOBS_XMax = LeftblueOBS_XMax;
 		getparameter_parameter.RightblueOBS_XMin = RightblueOBS_XMin;

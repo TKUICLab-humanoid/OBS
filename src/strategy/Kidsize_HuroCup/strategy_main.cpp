@@ -99,6 +99,7 @@ void KidsizeStrategy::strategymain()
 
             case AVOID:
                 //printinfo();
+                ROS_INFO(" WL = %d",WL);
                 ROS_INFO("state = AVOID");
                 ROS_INFO("(AVOID)continuousValue_x = %d",continuousValue_x);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //head turn mid
@@ -115,7 +116,7 @@ void KidsizeStrategy::strategymain()
                     {
                         //slow down 
 
-                        if(15 >= Dx && Dx >= 2)                  // speed-- 
+                        if(14 >= Dx && Dx >= 2)                  // speed-- 
                         {
                             //ROS_INFO("Dx > 1,speed--,turn right");
                             //ROS_INFO("turn r continuousValue_x = %d",continuousValue_x);
@@ -193,7 +194,7 @@ void KidsizeStrategy::strategymain()
                             }
                         }
                         
-                        else if(-15 <= Dx && Dx <= -2)        // speed-- 
+                        else if(-14 <= Dx && Dx <= -2)        // speed-- 
                         {
                             //ROS_INFO("Dx < -1,speed--,turn left");
                             //ROS_INFO("turn l continuousValue_x = %d",continuousValue_x);
@@ -299,8 +300,11 @@ void KidsizeStrategy::strategymain()
                             ROS_INFO("2 > Dx > -2 || Dx == 0 || Dx == -31");
                         }
                         )*/
-                        else if((17 >= Dx >= 15) ||(-15 >= Dx >= -17))
+                        
+                        else if((Dx < 17 && Dx > 14) ||(Dx < -14 && Dx > -17))
                         {
+                            ROS_INFO("Dx = %5f",Dx);
+                            ROS_INFO("ready to turnhead");
                             if(continuousValue_x > stay.x) // current speed > the speed of stepping 
                             {
                                 while(continuousValue_x > stay.x)
@@ -485,40 +489,49 @@ void KidsizeStrategy::strategymain()
                     ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 1447, 300);           //head turn right
                     tool->Delay(1000);           
                     ros::spinOnce();
+                    tool->Delay(50);
+                    ROS_INFO(" WR = %d",WR);
                     turn_WR = WR;
-                    tool->Delay(150);
+                    ROS_INFO(" turn_WR = %d",turn_WR);
+                    tool->Delay(100);
 
 
                     ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1520, 300);
                     ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2647, 300);           //head turn left
                     tool->Delay(2000);           
                     ros::spinOnce();
+                    tool->Delay(50);
+                    ROS_INFO(" WL = %d",WL);
                     turn_WL = WL;
-                    tool->Delay(150);
+                    ROS_INFO(" turn_WL = %d",turn_WL);
+                    tool->Delay(100);
                     
 
                     ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1420, 300); 
                     ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //head turn mid
                     tool->Delay(500);
-                    ROS_INFO(" turn_WR = %d",turn_WR);
-                    ROS_INFO(" turn_WL = %d",turn_WL);
+                    tool->Delay(50);
+                    
 
-                    if((turn_WR - turn_WL) > 5 )// turn right
+                    if((turn_WL - turn_WR) > 10)// turn right(turn_WL - turn_WR) > 10
                     {
                         ROS_INFO("turn right after turnhead");
                         turnhead_flag == false;
                         ROS_INFO("turnhead_flag == false");
-
+                        //IMU_Value = get_IMU();
                         //turn_angle = def_turn_angle();
-                        if(Dx > 15 ) //obs at left
+                        if((abs(IMU_Value)) < 70 ) //obs at left
                         {
-                            while(Dx > 15)
+                            while((abs(IMU_Value)) < 70)
                             {
+                                IMU_Value = get_IMU();
+                                ROS_INFO("IMU_Value = %lf",IMU_Value);
                                 ROS_INFO("turn angle is -5");
                                 ros_com->sendContinuousValue(Rmove.x, Rmove.y, 0, Rmove.theta - 10, IMU_continuous);
                                 ros::spinOnce();
                                 tool->Delay(50); 
                             }
+                            turnhead_flag == false;
                             strategy_state = AVOID;
                         }
                         else
@@ -527,21 +540,24 @@ void KidsizeStrategy::strategymain()
                             strategy_state = AVOID;
                         }
                     }
-                    else if((turn_WL - turn_WR) > 5)//obs at right
+                    else if((turn_WR - turn_WL) > 10 )//obs at right
                     {
                         ROS_INFO("turn left after turnhead");
                         turnhead_flag == false;
                         ROS_INFO("turnhead_flag == false");
-
-                        if(Dx < -15)
+                        //IMU_Value = get_IMU();
+                        if((abs(IMU_Value)) < 70)
                         {
-                            while(Dx < -15)
+                            while((abs(IMU_Value)) < 70 )
                             {
+                                IMU_Value = get_IMU();
+                                ROS_INFO("IMU_Value = %lf",IMU_Value);
                                 ROS_INFO("turn angle is 5");
                                 ros_com->sendContinuousValue(Lmove.x, Lmove.y, 0, Lmove.theta + 10, IMU_continuous);
                                 ros::spinOnce();
                                 tool->Delay(50); 
                             }
+                            turnhead_flag == false;
                             strategy_state = AVOID;
                         }
                         else
@@ -550,12 +566,13 @@ void KidsizeStrategy::strategymain()
                             strategy_state = AVOID;
                         }
                     }
-                    else //abs(turn_WR - turn_WL) < 5
+                    else //abs(turn_WR - turn_WL) < 10
                     {
                         ROS_INFO("abs(turn_WR - turn_WL) < 5 after turnhead");
                         //turnhead_flag == false;
                         //ROS_INFO("turnhead_flag == false");
-                        strategy_state = TURNHEAD;
+                        turnhead_flag == false;
+                        strategy_state = AVOID;
                     }
 
                 }
