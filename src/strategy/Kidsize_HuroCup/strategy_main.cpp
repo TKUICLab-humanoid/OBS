@@ -99,7 +99,6 @@ void KidsizeStrategy::strategymain()
 
             case AVOID:
                 //printinfo();
-                ROS_INFO(" WL = %d",WL);
                 ROS_INFO("state = AVOID");
                 ROS_INFO("(AVOID)continuousValue_x = %d",continuousValue_x);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //head turn mid
@@ -301,9 +300,10 @@ void KidsizeStrategy::strategymain()
                         }
                         )*/
                         
-                        else if((Dx < 17 && Dx > 14) ||(Dx < -14 && Dx > -17))
+                        else if( ( (Dx < 17 && Dx > 14) ||(Dx < -14 && Dx > -17) ) && center_Dy < 20)
                         {
                             ROS_INFO("Dx = %5f",Dx);
+                            ROS_INFO(" center_Dy = %d",center_Dy);
                             ROS_INFO("ready to turnhead");
                             if(continuousValue_x > stay.x) // current speed > the speed of stepping 
                             {
@@ -386,6 +386,7 @@ void KidsizeStrategy::strategymain()
                         while(continuousValue_x < maxspeed)
                         { 
                             continuousValue_x += 100;
+                            
                             if(abs(IMU_Value) < 20)
                             {
                                 ROS_INFO("no_obs speed up & use imu");
@@ -1163,6 +1164,7 @@ void KidsizeStrategy::GetParameter(const strategy::GetParameter &msg)
     y_obs_flag = msg.y_obs_flag;
     L_XMAX = msg.L_XMAX;
     R_XMIN = msg.R_XMIN;
+    center_Dy = msg.center_Dy;
 
 }
 
