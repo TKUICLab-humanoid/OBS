@@ -300,10 +300,10 @@ void KidsizeStrategy::strategymain()
                         }
                         )*/
                         
-                        else if( ( (Dx < 17 && Dx > 14) ||(Dx < -14 && Dx > -17) ) && center_Dy < 20)
+                        else if( ( (Dx < 17 && Dx > 14) ||(Dx < -14 && Dx > -17) ) && l_center_Dy < 20 && r_center_Dy < 20 ) //l_center_Dy < 20 && r_center_Dy < 20
                         {
                             ROS_INFO("Dx = %5f",Dx);
-                            ROS_INFO(" center_Dy = %d",center_Dy);
+                            ROS_INFO("l_center_Dy = %d, r_center_Dy = %d",l_center_Dy,r_center_Dy);
                             ROS_INFO("ready to turnhead");
                             if(continuousValue_x > stay.x) // current speed > the speed of stepping 
                             {
@@ -521,9 +521,9 @@ void KidsizeStrategy::strategymain()
                         ROS_INFO("turnhead_flag == false");
                         //IMU_Value = get_IMU();
                         //turn_angle = def_turn_angle();
-                        if((abs(IMU_Value)) < 70 ) //obs at left
+                        if((abs(IMU_Value)) < 50 ) //obs at left (abs(IMU_Value)) < 70 
                         {
-                            while((abs(IMU_Value)) < 70)
+                            while((abs(IMU_Value)) < 50 )
                             {
                                 IMU_Value = get_IMU();
                                 ROS_INFO("IMU_Value = %lf",IMU_Value);
@@ -547,9 +547,9 @@ void KidsizeStrategy::strategymain()
                         turnhead_flag == false;
                         ROS_INFO("turnhead_flag == false");
                         //IMU_Value = get_IMU();
-                        if((abs(IMU_Value)) < 70)
+                        if((abs(IMU_Value)) < 50)// Dx >= 2 && Dx <= -2
                         {
-                            while((abs(IMU_Value)) < 70 )
+                            while((abs(IMU_Value)) < 50 )
                             {
                                 IMU_Value = get_IMU();
                                 ROS_INFO("IMU_Value = %lf",IMU_Value);
@@ -1120,11 +1120,11 @@ int KidsizeStrategy::def_turn_angle()
         }
         else if(abs(Dx) <= 7 && abs(Dx) > 3)
         {
-            continuous_angle_offset = 4;
+            continuous_angle_offset = 5;
         }
         else if(abs(Dx) <= 3 && abs(Dx) > 1)
         {
-            continuous_angle_offset = 3 ;
+            continuous_angle_offset = 4;
         }
         else
         {
@@ -1164,7 +1164,8 @@ void KidsizeStrategy::GetParameter(const strategy::GetParameter &msg)
     y_obs_flag = msg.y_obs_flag;
     L_XMAX = msg.L_XMAX;
     R_XMIN = msg.R_XMIN;
-    center_Dy = msg.center_Dy;
+    l_center_Dy = msg.l_center_Dy;
+    r_center_Dy = msg.r_center_Dy;
 
 }
 

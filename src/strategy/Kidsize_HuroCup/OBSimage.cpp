@@ -228,7 +228,8 @@ void OBSimage::strategymain()
 				{
 					Dy = Deep_Matrix[i];
 				}
-				center_Dy = Deep_Matrix[16];
+				l_center_Dy = Deep_Matrix[8];
+				r_center_Dy = Deep_Matrix[24];
 
 				printf("%2d,",Filter_Matrix[i]);
 				//calculate WR WL
@@ -292,7 +293,8 @@ void OBSimage::strategymain()
 		ROS_INFO("W_R = %d,W_L = %d",W_R,W_L);
 		ROS_INFO("Xb = %.3lf, Dx = %.3lf",Xb,Dx);
 		ROS_INFO("Xc_count = %d, Xi_sum = %d, Xc = %.3lf",Xc_count,Xi_sum,Xc);
-		ROS_INFO("Dy = %d, center_Dy = %d, WR = %d, WL = %d",Dy,center_Dy,WR,WL);
+		ROS_INFO("Dy = %d, WR = %d, WL = %d",Dy,WR,WL);
+		ROS_INFO("l_center_Dy = %d, r_center_Dy = %d",l_center_Dy,r_center_Dy);
 
 		getparameter_parameter.Dy = Dy;
 		getparameter_parameter.Dx = Dx;
@@ -314,7 +316,8 @@ void OBSimage::strategymain()
 		getparameter_parameter.y_obs_flag = y_obs_flag;
 		getparameter_parameter.L_XMAX = L_XMAX;
 		getparameter_parameter.R_XMIN = R_XMIN;
-		getparameter_parameter.center_Dy = center_Dy;
+		getparameter_parameter.l_center_Dy = l_center_Dy;
+		getparameter_parameter.r_center_Dy = r_center_Dy;
 		//0905++++
 
 

@@ -12,4 +12,5 @@ int32 L_XMAX
 int32 R_XMIN
 bool b_obs_flag
 bool y_obs_flag
-int32 center_Dy
+int32 l_center_Dy
+int32 r_center_Dy

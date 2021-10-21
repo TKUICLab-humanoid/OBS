@@ -97,7 +97,8 @@ public:
 	bool in_reddoor_flag = false;
 	bool b_obs_flag = false;
 	bool y_obs_flag = false;
-	int center_Dy = 0;
+	int l_center_Dy = 0;
+	int r_center_Dy = 0;
 	//0905++++
 
 	unsigned char *rValue, *gValue, *bValue;
