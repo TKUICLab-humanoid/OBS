@@ -81,6 +81,7 @@ public:
     	bool RightHead_flag = false;
 	int turn_WR = 0;
 	int turn_WL = 0;
+	bool reddoor_slope_ok_flag = false;
 	
 
 	string parameter_path = "N";

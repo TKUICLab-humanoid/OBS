@@ -78,13 +78,13 @@ void OBSimage::strategymain()
 		{
 			for(int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
 			{
-				if(strategy_info->color_mask_subject[5][i].size > 3500)
+				if(strategy_info->color_mask_subject[5][i].size > 3000)
 				{
 					//ROS_INFO("red area = %d ",strategy_info->color_mask_subject[5][i].size);
 					ROS_INFO("IN_RED");
 					in_reddoor_flag = true;
-					b_obs_flag = false;
-					y_obs_flag = false;
+					b_obs_flag = true;
+					//y_obs_flag = true;
 					//ROS_INFO("in_reddoor_flag = true");
 
 
@@ -92,7 +92,7 @@ void OBSimage::strategymain()
 					//再去策略端拿slope_avg做旋轉修正
 
 
-					if (abs(slope_avg) <= 0.7)
+					if (abs(slope_avg) <= 0.6)
 					{
 						for (int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
 						{
@@ -146,8 +146,8 @@ void OBSimage::strategymain()
 				else
 				{
 					in_reddoor_flag = true;
-					b_obs_flag = false;
-					y_obs_flag = false;
+					b_obs_flag = true;
+					//y_obs_flag = false;
 					ROS_INFO("RED is not big enough");
 					ros::spinOnce();
                     tool->Delay(50);
@@ -295,6 +295,9 @@ void OBSimage::strategymain()
 		ROS_INFO("Xc_count = %d, Xi_sum = %d, Xc = %.3lf",Xc_count,Xi_sum,Xc);
 		ROS_INFO("Dy = %d, WR = %d, WL = %d",Dy,WR,WL);
 		ROS_INFO("l_center_Dy = %d, r_center_Dy = %d",l_center_Dy,r_center_Dy);
+		ROS_INFO("slope_avg = %lf",slope_avg);
+		ROS_INFO("RD = %d ,LD = %d",RD,LD);
+
 
 		getparameter_parameter.Dy = Dy;
 		getparameter_parameter.Dx = Dx;
@@ -303,6 +306,8 @@ void OBSimage::strategymain()
 		ROS_INFO("L_XMAX = %3d",L_XMAX);
 		ROS_INFO("R_XMIN = %3d",R_XMIN);
 		printf("\n");
+		ROS_INFO("LeftblueOBS_XMax = %3d",LeftblueOBS_XMax);
+		ROS_INFO("RightblueOBS_XMin = %3d",RightblueOBS_XMin);
 		//getparameter_parameter.Xc = Xc;
 		getparameter_parameter.RD = RD;
 		getparameter_parameter.LD = LD;
