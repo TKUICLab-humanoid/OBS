@@ -73,12 +73,12 @@ void OBSimage::strategymain()
 
 		//0905++++
 	////////////////////有進紅門，紅門case內影像判斷////////////////////
-
+		//SlopeCalculate();
 		if (strategy_info->color_mask_subject_cnts[5] != 0)				
 		{
 			for(int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
 			{
-				if(strategy_info->color_mask_subject[5][i].size > 3000)
+				if(strategy_info->color_mask_subject[5][i].size > 1000)
 				{
 					//ROS_INFO("red area = %d ",strategy_info->color_mask_subject[5][i].size);
 					ROS_INFO("IN_RED");
@@ -103,13 +103,19 @@ void OBSimage::strategymain()
 					
 					for(int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)	//單塊藍色判斷
 					{
-						L_XMAX = strategy_info->color_mask_subject[2][i].XMax - 0;
-						R_XMIN = 319 - strategy_info->color_mask_subject[2][i].XMin;
+						L_XMAX = strategy_info->color_mask_subject[2][0].XMax - 0;//strategy_info->color_mask_subject[2][0].XMax - 0
+						R_XMIN = 319 - strategy_info->color_mask_subject[2][0].XMin;//319 - strategy_info->color_mask_subject[2][0].XMin
+						//one_b_flag = true;
+						//two_b_flag = false;
+						//ROS_INFO("one_b_flag = true  two_b_flag = false");
 					}
 
 
 					for(int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)   //兩塊藍色同時再螢幕內
 					{
+						//one_b_flag = false;
+						//two_b_flag = true;
+						//ROS_INFO("one_b_flag = false  two_b_flag = true");
 						if(strategy_info->color_mask_subject[2][i].size > 5000 )
 						{
 							XMax_one = strategy_info->color_mask_subject[2][0].XMax;
@@ -118,7 +124,7 @@ void OBSimage::strategymain()
 							XMax_two = strategy_info->color_mask_subject[2][1].XMax;
 						}
 					}
-
+				
 
 					if(XMin_one > XMin_two)						//比較所有xmax &&　xmin ,確保抓到的是正確的值
 					{
@@ -140,6 +146,7 @@ void OBSimage::strategymain()
 					//ROS_INFO("XMin_two = %d",XMin_two);
 					//ROS_INFO("XMax_two = %d",XMax_two);
 					//ROS_INFO("XMax_one = %d",XMax_one);
+					strategy_info->get_image_flag = true;
 					ros::spinOnce();
                     tool->Delay(50);
 				}
@@ -149,6 +156,7 @@ void OBSimage::strategymain()
 					b_obs_flag = true;
 					//y_obs_flag = false;
 					ROS_INFO("RED is not big enough");
+					strategy_info->get_image_flag = true;
 					ros::spinOnce();
                     tool->Delay(50);
 				}
@@ -191,6 +199,7 @@ void OBSimage::strategymain()
 					y_obs_flag = false;
 					ROS_INFO("b_obs_flag = false y_obs_flag = false");
 				}
+				strategy_info->get_image_flag = true;
 				ros::spinOnce();
             	tool->Delay(50);
 			//}
@@ -204,6 +213,7 @@ void OBSimage::strategymain()
 			}
 			printf("\n");
 			ROS_INFO("Filter Matrix");
+			strategy_info->get_image_flag = true;
 			ros::spinOnce();
             tool->Delay(50);
 
@@ -240,6 +250,7 @@ void OBSimage::strategymain()
 
 
 			}
+			strategy_info->get_image_flag = true;
 			ros::spinOnce();
             tool->Delay(50);
 			printf("\n");
@@ -278,6 +289,7 @@ void OBSimage::strategymain()
 				Xb = 31;
 				ROS_INFO("Obstacle in right");
 			}
+			strategy_info->get_image_flag = true;
 			ros::spinOnce();
             tool->Delay(50);
 
@@ -287,7 +299,7 @@ void OBSimage::strategymain()
 		//0905++++
 		strategy_info->get_image_flag = true;
         ros::spinOnce();
-		tool->Delay(150);
+		tool->Delay(50);
 		//0905++++
 
 		ROS_INFO("W_R = %d,W_L = %d",W_R,W_L);
@@ -323,6 +335,8 @@ void OBSimage::strategymain()
 		getparameter_parameter.R_XMIN = R_XMIN;
 		getparameter_parameter.l_center_Dy = l_center_Dy;
 		getparameter_parameter.r_center_Dy = r_center_Dy;
+		getparameter_parameter.one_b_flag = one_b_flag;
+		getparameter_parameter.two_b_flag = two_b_flag;
 		//0905++++
 
 
@@ -331,7 +345,7 @@ void OBSimage::strategymain()
 
         ROS_INFO("\n");
 		//cv::imshow("image",image);
-		cv::waitKey(1);
+		//cv::waitKey(1);
     }
 }
 
@@ -356,7 +370,7 @@ void OBSimage::SlopeCalculate()			//計算斜率之副函式
 
 	for (int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
         {
-		if (strategy_info->color_mask_subject[5][i].size > 3000)
+		if (strategy_info->color_mask_subject[5][i].size > 1000)
 		{
 			for (int j = 0; j < 4; j++)
 			{
