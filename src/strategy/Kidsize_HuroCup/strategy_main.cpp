@@ -866,27 +866,25 @@ void KidsizeStrategy::strategymain()
                         }
                     }
                     else if(continuousValue_x == stay.x)
-                        {
-                        if( abs(slope_avg) > 0.1 ) 
+                    {
+                        if( abs(slope_avg) > 0.1 )
                         {
                             if( reddoor_slope_ok_flag == false)
                             {
                                 while( abs(slope_avg) > 0.1)
                                 {
-                                ROS_INFO("slope fix in REDDOOR");
-                                slope();
-                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                ROS_INFO("slope_avg = %lf",slope_avg);
-                                ROS_INFO("angle_offest = %d",angle_offest);
-                                 //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
-                                 strategy_info->get_image_flag = true;
-                                ros::spinOnce();
-                                tool->Delay(10);
+                                    ROS_INFO("slope fix in REDDOOR");
+                                    slope();
+                                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                    ROS_INFO("slope_avg = %lf",slope_avg);
+                                    ROS_INFO("angle_offest = %d",angle_offest);
+                                    //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                                     strategy_info->get_image_flag = true;
+                                    ros::spinOnce();
+                                    tool->Delay(10);
                                 }
-
-                            reddoor_slope_ok_flag = true ;
+                                reddoor_slope_ok_flag = true ;
                             }
-
                         }
                         else
                         {
@@ -897,7 +895,7 @@ void KidsizeStrategy::strategymain()
 
                 
                 
-                    if(RD < LD)             //對紅門做位移
+                    /*if(RD < LD)             //對紅門做位移
                     {
                         ROS_INFO("LEFT_MOVE");
                         ros_com->sendContinuousValue(LeftMove_X, LeftMove_Y, 0,LeftMove_T, IMU_continuous);
@@ -910,60 +908,11 @@ void KidsizeStrategy::strategymain()
                         tool->Delay(100);
                     }
                     else if(RD == LD)       //對下方藍模做比較
-                    {   
-                        /*if(one_b_flag == true)
-                        {
-                            ROS_INFO("one_b_flag == true");
-                            if( (L_XMAX <= 70) || (R_XMIN <= 70) )
-                            {
-                                ROS_INFO("ready enter CRAWL;");
-                                strategy_state = CRAWL;
-                            }
-                            else if( (L_XMAX > 70) )
-                            {
-                                //if()
-                                ROS_INFO("RIGHT_MOVE");
-                                ROS_INFO("LeftblueOBS_XMax = %3d",LeftblueOBS_XMax);
-                                ros_com->sendContinuousValue(RightMove_X, RightMove_Y, 0, RightMove_T, IMU_continuous);
-                                tool->Delay(100);
-                            }
-                            else if( (R_XMIN > 70) )
-                            {
-                                //if( R_XMIN == 318) 
-                                ROS_INFO("LEFT_MOVE");
-                                ROS_INFO("RightblueOBS_XMin = %3d",RightblueOBS_XMin);
-                                ros_com->sendContinuousValue(LeftMove_X, LeftMove_Y, 0,LeftMove_T, IMU_continuous);
-                                tool->Delay(100);
-                            }
-                        }
-                        else if(two_b_flag == true)
-                        {
-                            ROS_INFO("two_b_flag == true");
-                            if( (LeftblueOBS_XMax < 50) || (RightblueOBS_XMin > 240) || (LeftblueOBS_XMax < 50 && RightblueOBS_XMin > 240) )
-                            {
-                                ROS_INFO("ready enter CRAWL;");
-                                strategy_state = CRAWL;
-                            }
-                            else if( (LeftblueOBS_XMax > 50) )
-                            {
-                                //if()
-                                ROS_INFO("RIGHT_MOVE");
-                                ROS_INFO("LeftblueOBS_XMax = %3d",LeftblueOBS_XMax);
-                                ros_com->sendContinuousValue(RightMove_X, RightMove_Y, 0, RightMove_T, IMU_continuous);
-                                tool->Delay(100);
-                            }
-                            else if( (RightblueOBS_XMin < 270) )
-                            {
-                                //if( R_XMIN == 318) 
-                                ROS_INFO("LEFT_MOVE");
-                                ROS_INFO("RightblueOBS_XMin = %3d",RightblueOBS_XMin);
-                                ros_com->sendContinuousValue(LeftMove_X, LeftMove_Y, 0,LeftMove_T, IMU_continuous);
-                                tool->Delay(100);
-                            }
-                        }*/
+                    {*/   
+                        
                         if( (L_XMAX <= 70) || (R_XMIN <= 70) || (LeftblueOBS_XMax < 50 && RightblueOBS_XMin > 270) )
                         {
-                           ROS_INFO("ready enter CRAWL;");
+                            ROS_INFO("ready enter CRAWL;");
                             strategy_state = CRAWL;
                         }
                         else if( (L_XMAX > 70 && L_XMAX < 300)  )//(L_XMAX > 70 && L_XMAX < 300 ) || (LeftblueOBS_XMax > 50)
@@ -982,7 +931,7 @@ void KidsizeStrategy::strategymain()
                             ros_com->sendContinuousValue(LeftMove_X, LeftMove_Y, 0,LeftMove_T, IMU_continuous);
                             tool->Delay(100);
                         }
-                    }
+                    //}
                 }
                 else
                 {
@@ -998,6 +947,11 @@ void KidsizeStrategy::strategymain()
 
             case CRAWL:
                 ROS_INFO("state = CRAWL");
+                if(continuousValue_x == stay.x)
+                {
+                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);  
+                    tool->Delay(60);
+                }
                 tool->Delay(5000);
                 tool->Delay(5000);
 
