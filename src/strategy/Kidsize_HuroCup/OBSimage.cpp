@@ -152,6 +152,7 @@ void OBSimage::strategymain()
 				}
 				else
 				{
+					SlopeCalculate();
 					in_reddoor_flag = true;
 					b_obs_flag = true;
 					//y_obs_flag = false;
@@ -238,8 +239,8 @@ void OBSimage::strategymain()
 				{
 					Dy = Deep_Matrix[i];
 				}
-				l_center_Dy = Deep_Matrix[8];
-				r_center_Dy = Deep_Matrix[24];
+				l_center_Dy = Deep_Matrix[4];
+				r_center_Dy = Deep_Matrix[28];
 
 				printf("%2d,",Filter_Matrix[i]);
 				//calculate WR WL
@@ -366,7 +367,7 @@ void OBSimage::SlopeCalculate()			//計算斜率之副函式
     int slope_rand[4];
     int slope_Y[4];
     float slope[3];
-    slope_avg = 1000000.0;
+    slope_avg = 100.0;
 
 	for (int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
         {

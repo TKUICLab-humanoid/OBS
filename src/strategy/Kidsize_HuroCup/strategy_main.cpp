@@ -895,22 +895,23 @@ void KidsizeStrategy::strategymain()
 
                 
                 
-                    /*if(RD < LD)             //對紅門做位移
+                    if(RD < LD)             //對紅門做位移
                     {
-                        ROS_INFO("LEFT_MOVE");
+                        ROS_INFO("LEFT_MOVE_1");
                         ros_com->sendContinuousValue(LeftMove_X, LeftMove_Y, 0,LeftMove_T, IMU_continuous);
                         tool->Delay(100);
                     }
                     else if(RD > LD)
                     {
-                        ROS_INFO("RIGHT_MOVE");
+                        ROS_INFO("RIGHT_MOVE_1");
                         ros_com->sendContinuousValue(RightMove_X, RightMove_Y, 0, RightMove_T, IMU_continuous);
                         tool->Delay(100);
                     }
                     else if(RD == LD)       //對下方藍模做比較
-                    {*/   
-                        
-                        if( (L_XMAX <= 70) || (R_XMIN <= 70) || (LeftblueOBS_XMax < 50 && RightblueOBS_XMin > 270) )
+                    {   
+                        //if( abs(slope_avg) <= 0.1 )
+                        //{
+                        if( (L_XMAX <= 65) || (R_XMIN <= 65) || (LeftblueOBS_XMax < 50 && RightblueOBS_XMin > 270) )
                         {
                             ROS_INFO("ready enter CRAWL;");
                             strategy_state = CRAWL;
@@ -931,6 +932,11 @@ void KidsizeStrategy::strategymain()
                             ros_com->sendContinuousValue(LeftMove_X, LeftMove_Y, 0,LeftMove_T, IMU_continuous);
                             tool->Delay(100);
                         }
+                    }  
+                    //else
+                    //{
+                        //strategy_state = REDDOOR;
+                    //}  
                     //}
                 }
                 else
@@ -947,26 +953,27 @@ void KidsizeStrategy::strategymain()
 
             case CRAWL:
                 ROS_INFO("state = CRAWL");
-                if(continuousValue_x == stay.x)
-                {
-                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);  
-                    tool->Delay(60);
-                }
-                tool->Delay(5000);
-                tool->Delay(5000);
 
-                /*if( abs(IMU_Value) > 1 ) 
+                if( abs(slope_avg) > 0.1 )
                 {
-                    ROS_INFO("imu fix in CRAWL");
-                    IMU_Value = get_IMU();
-                    IMU_theta = IMU_Modify();
-                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                    ROS_INFO("IMU_Value = %lf",IMU_Value);
-                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous); 
-                    ros::spinOnce();
-                    tool->Delay(70);
+                    if( reddoor_slope_ok_flag == false)
+                    {
+                        while( abs(slope_avg) > 0.1)
+                        {
+                            ROS_INFO("second slope fix in REDDOOR");
+                            slope();
+                            ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                            ROS_INFO("slope_avg = %lf",slope_avg);
+                            ROS_INFO("angle_offest = %d",angle_offest);
+                            //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                                strategy_info->get_image_flag = true;
+                            ros::spinOnce();
+                            tool->Delay(10);
+                        }
+                        reddoor_slope_ok_flag = true ;
+                    }
                 }
-                else                        //爬行
+                else if (abs(slope_avg) <= 0.1)                        //爬行
                 {
                     //ros_com->sendHeadMotor(HeadMotorID::VerticalID, 2500, 600);
                     //tool->Delay(100);
@@ -975,7 +982,7 @@ void KidsizeStrategy::strategymain()
                     //ros_com->sendBodySector(6);
                     //tool->Delay(3000);
 
-                    for (int crwtime = 0; crwtime <= 20; crwtime++)
+                    /*for (int crwtime = 0; crwtime <= 20; crwtime++)
                     {
                         ROS_INFO("crw");
                         //strategy_info->get_image_flag = true;
@@ -1001,13 +1008,16 @@ void KidsizeStrategy::strategymain()
                         ros_com->sendBodySector(7);
                         tool->Delay(2200);
 
-                    }
+                    }*/
+                    ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
+                    tool->Delay(50);
+                    tool->Delay(5000);
                 }
                 tool->Delay(100);
 
 
                 strategy_state = INIT;              //INIT or AVOID???
-            break;*/
+            break;
             //0905++++++++++++++++*/
 
             default :
