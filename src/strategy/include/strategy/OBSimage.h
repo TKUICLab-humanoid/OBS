@@ -92,7 +92,7 @@ public:
 	int LeftblueOBS_XMax = 0;		//IN reddoor,left side blue obs (XMax)
 	int RightblueOBS_XMin= 0;		//IN reddoor,right side blue obs (XMin)
 
-	float slope_avg;	//IN reddoor,slpoe for RED_DOOR
+	float slope_avg = 0;	//IN reddoor,slpoe for RED_DOOR
 
 	bool in_reddoor_flag = false;
 	bool b_obs_flag = false;

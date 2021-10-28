@@ -540,7 +540,7 @@ void KidsizeStrategy::strategymain()
 
                     ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1520, 300);
                     ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2647, 300);           //head turn left
-                    tool->Delay(2000);     
+                    tool->Delay(1500);     
                     strategy_info->get_image_flag = true;      
                     ros::spinOnce();
                     tool->Delay(10);
@@ -550,7 +550,7 @@ void KidsizeStrategy::strategymain()
                     tool->Delay(100);
                     
 
-                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1420, 300); 
+                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1580, 300); 
                     ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //head turn mid
                     tool->Delay(500);
                     tool->Delay(50);
@@ -563,9 +563,9 @@ void KidsizeStrategy::strategymain()
                         ROS_INFO("turnhead_flag == false");
                         //IMU_Value = get_IMU();
                         //turn_angle = def_turn_angle();
-                        if((abs(IMU_Value)) < 50 ) //obs at left (abs(IMU_Value)) < 70 
+                        if((abs(IMU_Value)) < 80 ) //obs at left (abs(IMU_Value)) < 70 
                         {
-                            while((abs(IMU_Value)) < 50 )
+                            while((abs(IMU_Value)) < 80 )
                             {
                                 IMU_Value = get_IMU();
                                 ROS_INFO("IMU_Value = %lf",IMU_Value);
@@ -590,9 +590,9 @@ void KidsizeStrategy::strategymain()
                         turnhead_flag == false;
                         ROS_INFO("turnhead_flag == false");
                         //IMU_Value = get_IMU();
-                        if((abs(IMU_Value)) < 50)// Dx >= 2 && Dx <= -2
+                        if((abs(IMU_Value)) < 80 )// Dx >= 2 && Dx <= -2
                         {
-                            while((abs(IMU_Value)) < 50 )
+                            while((abs(IMU_Value)) < 80 )
                             {
                                 IMU_Value = get_IMU();
                                 ROS_INFO("IMU_Value = %lf",IMU_Value);
@@ -867,11 +867,11 @@ void KidsizeStrategy::strategymain()
                     }
                     else if(continuousValue_x == stay.x)
                     {
-                        if( abs(slope_avg) > 0.1 )
+                        if( abs(slope_avg) > 0.05 )
                         {
                             if( reddoor_slope_ok_flag == false)
                             {
-                                while( abs(slope_avg) > 0.1)
+                                while( abs(slope_avg) > 0.05)
                                 {
                                     ROS_INFO("slope fix in REDDOOR");
                                     slope();
@@ -879,14 +879,15 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("slope_avg = %lf",slope_avg);
                                     ROS_INFO("angle_offest = %d",angle_offest);
                                     //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
-                                     strategy_info->get_image_flag = true;
+                                    strategy_info->get_image_flag = true;
                                     ros::spinOnce();
-                                    tool->Delay(10);
+                                    tool->Delay(100);
                                 }
+                    
                                 reddoor_slope_ok_flag = true ;
                             }
                         }
-                        else
+                        else if( abs(slope_avg) <= 0.05 )
                         {
                             reddoor_slope_ok_flag = true ;
                         }
@@ -894,7 +895,7 @@ void KidsizeStrategy::strategymain()
                 
 
                 
-                
+
                     if(RD < LD)             //對紅門做位移
                     {
                         ROS_INFO("LEFT_MOVE_1");
@@ -909,14 +910,14 @@ void KidsizeStrategy::strategymain()
                     }
                     else if(RD == LD)       //對下方藍模做比較
                     {   
-                        //if( abs(slope_avg) <= 0.1 )
+                        //if( abs(slope_avg) <= 0.05 )
                         //{
                         if( (L_XMAX <= 65) || (R_XMIN <= 65) || (LeftblueOBS_XMax < 50 && RightblueOBS_XMin > 270) )
                         {
                             ROS_INFO("ready enter CRAWL;");
                             strategy_state = CRAWL;
                         }
-                        else if( (L_XMAX > 70 && L_XMAX < 300)  )//(L_XMAX > 70 && L_XMAX < 300 ) || (LeftblueOBS_XMax > 50)
+                        else if( (L_XMAX > 65 && L_XMAX < 300)  )//(L_XMAX > 70 && L_XMAX < 300 ) || (LeftblueOBS_XMax > 50)
                         {
                             //if()
                             ROS_INFO("RIGHT_MOVE");
@@ -924,7 +925,7 @@ void KidsizeStrategy::strategymain()
                             ros_com->sendContinuousValue(RightMove_X, RightMove_Y, 0, RightMove_T, IMU_continuous);
                             tool->Delay(100);
                         }
-                        else if( (R_XMIN > 70 && R_XMIN < 300)  )//(R_XMIN > 70 && R_XMIN < 300 ) || (RightblueOBS_XMin < 270) 
+                        else if( (R_XMIN > 65 && R_XMIN < 300)  )//(R_XMIN > 70 && R_XMIN < 300 ) || (RightblueOBS_XMin < 270) 
                         {
                             //if( R_XMIN == 318) 
                             ROS_INFO("LEFT_MOVE");
@@ -954,11 +955,11 @@ void KidsizeStrategy::strategymain()
             case CRAWL:
                 ROS_INFO("state = CRAWL");
 
-                if( abs(slope_avg) > 0.1 )
+                if( abs(slope_avg) > 0.05 )
                 {
                     if( reddoor_slope_ok_flag == false)
                     {
-                        while( abs(slope_avg) > 0.1)
+                        while( abs(slope_avg) > 0.05)
                         {
                             ROS_INFO("second slope fix in REDDOOR");
                             slope();
@@ -973,7 +974,7 @@ void KidsizeStrategy::strategymain()
                         reddoor_slope_ok_flag = true ;
                     }
                 }
-                else if (abs(slope_avg) <= 0.1)                        //爬行
+                else if (abs(slope_avg) <= 0.05)                        //爬行
                 {
                     //ros_com->sendHeadMotor(HeadMotorID::VerticalID, 2500, 600);
                     //tool->Delay(100);
@@ -1016,7 +1017,7 @@ void KidsizeStrategy::strategymain()
                 tool->Delay(100);
 
 
-                strategy_state = INIT;              //INIT or AVOID???
+                strategy_state = AVOID;              //INIT or AVOID???
             break;
             //0905++++++++++++++++*/
 
@@ -1351,7 +1352,7 @@ void KidsizeStrategy::slope() //正對障礙物修正之副函式
             ros_com->sendContinuousValue(LeftSlope_X, LeftSlope_Y, 0,LeftSlope_T + angle_offest, IMU_continuous);
             tool->Delay(100);
         }
-        else if (abs(slope_avg) > 0.1 && abs(slope_avg) <= 0.2)
+        else if (abs(slope_avg) > 0.05 && abs(slope_avg) <= 0.2)
         {
             angle_offest = 3;
             ros_com->sendContinuousValue(LeftSlope_X, LeftSlope_Y, 0,LeftSlope_T + angle_offest, IMU_continuous);
@@ -1382,7 +1383,7 @@ void KidsizeStrategy::slope() //正對障礙物修正之副函式
             ros_com->sendContinuousValue(LeftSlope_X, LeftSlope_Y, 0,LeftSlope_T + angle_offest, IMU_continuous);
             tool->Delay(100);
         }
-        else if (abs(slope_avg) > 0.1 && abs(slope_avg) <= 0.2)
+        else if (abs(slope_avg) > 0.05 && abs(slope_avg) <= 0.2)
         {
             angle_offest = -3;
             ros_com->sendContinuousValue(LeftSlope_X, LeftSlope_Y, 0,LeftSlope_T + angle_offest, IMU_continuous);
