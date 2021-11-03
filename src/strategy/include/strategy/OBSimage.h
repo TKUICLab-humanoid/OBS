@@ -50,6 +50,7 @@ public:
 
 	/****************************** function *************************************/
 	void strategymain();
+	void ImageInfo();
 	void INIT_parameter();
 	void SlopeCalculate();
 	/****************************** parameter *************************************/
@@ -57,7 +58,8 @@ public:
 	//int Focus_Matrix[32] = { 5, 5, 6, 7, 8, 8, 9, 9, 10, 10, 11, 13, 15, 15, 16, 16, 16, 16, 15, 15, 13, 11, 10, 10, 9, 9, 8, 8, 7, 6, 5, 5};
 	// int Focus_Matrix[32] = { 7, 7, 8, 8, 8, 10, 10, 11, 11, 12, 12, 13, 15, 15, 16, 16, 16, 16, 15, 15, 13, 12, 12, 11, 11, 10, 10, 8, 8, 8, 7, 7};
 	//int Focus_Matrix[32] = { 13, 13, 13, 13, 14, 14, 14, 14, 15, 15, 15, 15, 16, 16, 16, 16, 16, 16, 16, 16, 15, 15, 15, 15, 14, 14, 14, 14, 13, 13, 13, 13};
-	int Focus_Matrix[32] = { 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 15, 15, 16, 16, 16, 16, 15, 15, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13};
+	int Focus_Matrix[32] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+	//int Focus_Matrix[32] = { 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 15, 15, 16, 16, 16, 16, 15, 15, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13};
 	int Deep_Matrix[32];
 	int Filter_Matrix[32];
 
@@ -65,13 +67,13 @@ public:
 	int WL = 0;		//
 
 	float Xc = 0;	//the center of obstacle in focus matrix
-	float Xb = 0;		//compare WR & WL,setting boundary 
+	int Xb = 0;		//compare WR & WL,setting boundary 
 
 	int Dy = 0;		//min of deepmatrix
 	float Dx = 0;	//distance between Xc and Xb
 
 	int Xc_count = 0;	//calculate number of obstacle in focus matrix
-	int Xi_sum	=	0;	//sum of obstacle in focus matrix x-axis value
+	int Xi_sum = 0;	//sum of obstacle in focus matrix x-axis value
 
 	int W_R = 0;
 	int W_L = 0;

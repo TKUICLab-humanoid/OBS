@@ -88,17 +88,237 @@ void KidsizeStrategy::strategymain()
 
             case AVOID:
                 ROS_INFO("state = AVOID");
-                ROS_INFO("(AVOID)continuousValue_x = %d",continuousValue_x);
+                //ROS_INFO("(AVOID)continuousValue_x = %d",continuousValue_x);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //轉頭至正中
                 tool->Delay(50); 
-                if((in_reddoor_flag == true) && (RD != 0 && LD != 0)) //符合紅門條件
+            
+                /*if((in_reddoor_flag == true) && (RD != 0 && LD != 0)) //符合紅門條件
                 {
                     ROS_INFO("AVOID -> Reddoor");
                     strategy_state = REDDOOR;
                 }
                 else   //不進紅門 做藍黃避障
-                {  
-                    if((Dy <= b_dangerous_distance && b_obs_flag == true) || (Dy <= y_dangerous_distance && y_obs_flag == true)) //畫面有藍或黃 且距離夠近
+                {*/  
+                if(Dy < 24)
+                {
+                    speed = def_speed();
+                    //ROS_INFO("speed = %d",speed);
+                    if(14 >= Dx && Dx >= 2)//障礙物在左
+                    {
+                        if(continuousValue_x > speed) //速度大於目前要求速度 speed-- 邊轉
+                        {
+                            while(continuousValue_x > speed) 
+                            {
+                                //speed = def_speed();
+                                ROS_INFO("speed -- in turn right");
+                                continuousValue_x -= 100;
+                                turn_angle = def_turn_angle();
+                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                ROS_INFO("turn_angle = %d",turn_angle);
+                                ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                                strategy_info->get_image_flag = true;
+                                ros::spinOnce();
+                                tool->Delay(10);
+                            }   
+                        }
+                        else if(continuousValue_x < speed) //速度小於目前要求速度 speed++ 邊轉
+                        {
+                            while(continuousValue_x < speed) 
+                            {
+                                //speed = def_speed();
+                                ROS_INFO("speed ++ in turn right");
+                                continuousValue_x += 100;
+                                turn_angle = def_turn_angle();
+                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                ROS_INFO("turn_angle = %d",turn_angle);
+                                ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                                strategy_info->get_image_flag = true;
+                                ros::spinOnce();
+                                tool->Delay(10);
+                            }
+                        }
+                        else //速度等於目前要求速度 保持速度旋轉
+                        {
+                            ROS_INFO("turn right");
+                            turn_angle = def_turn_angle();
+                            ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                            ROS_INFO("turn_angle = %d",turn_angle);
+                            ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                            ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                            strategy_info->get_image_flag = true;
+                            ros::spinOnce();
+                            tool->Delay(10);
+                        }
+                    }
+                    else if(-14 <= Dx && Dx <= -2)//障礙物在右
+                    {
+                        if(continuousValue_x > speed) //速度大於目前要求速度 speed-- 邊轉
+                        {
+                            while(continuousValue_x > speed) //
+                            {
+                                ROS_INFO("speed -- in turn left");
+                                //speed = def_speed();
+                                continuousValue_x -= 100;
+                                turn_angle = def_turn_angle();
+                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                ROS_INFO("turn_angle = %d",turn_angle);
+                                ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                                strategy_info->get_image_flag = true;
+                                ros::spinOnce();
+                                tool->Delay(10);
+                            }   
+                        }
+                        else if(continuousValue_x < speed) //速度小於目前要求速度 speed++ 邊轉
+                        {
+                            while(continuousValue_x < speed) 
+                            {
+                                ROS_INFO("speed ++ in turn left");
+                                //speed = def_speed();
+                                continuousValue_x += 100;
+                                turn_angle = def_turn_angle();
+                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                ROS_INFO("turn_angle = %d",turn_angle);
+                                ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                                strategy_info->get_image_flag = true;
+                                ros::spinOnce();
+                                tool->Delay(10);
+                            }
+                        }
+                        else //速度等於目前要求速度 保持速度旋轉
+                        {
+                            ROS_INFO("turn left");
+                            turn_angle = def_turn_angle();
+                            ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                            ROS_INFO("turn_angle = %d",turn_angle);
+                            ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                            ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                            strategy_info->get_image_flag = true;
+                            ros::spinOnce();
+                            tool->Delay(10);
+                        }
+                    }
+                    else if(Dx == 0 || Dx == -31 ) //有障礙物 但還沒進焦點
+                    {
+                        if(continuousValue_x > speed) //速度大於目前要求速度 speed-- 保持角度
+                        {
+                            while(continuousValue_x > speed) //
+                            {
+                                ROS_INFO("speed -- in no avoid");
+                                //speed = def_speed();
+                                continuousValue_x -= 100;
+                                //turn_angle = def_turn_angle();
+                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                ROS_INFO("turn_angle = %d",turn_angle);
+                                ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                                strategy_info->get_image_flag = true;
+                                ros::spinOnce();
+                                tool->Delay(10);
+                            }   
+                        }
+                        else if(continuousValue_x < speed) //速度小於目前要求速度 speed++ 保持角度
+                        {
+                            while(continuousValue_x < speed) 
+                            {
+                                ROS_INFO("speed ++ in no avoid");
+                                //speed = def_speed();
+                                continuousValue_x += 100;
+                                //turn_angle = def_turn_angle();
+                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                ROS_INFO("turn_angle = %d",turn_angle);
+                                ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                                strategy_info->get_image_flag = true;
+                                ros::spinOnce();
+                                tool->Delay(10);
+                            }
+                        }
+                        else //速度等於目前要求速度 保持速度 保持角度
+                        {
+                            ROS_INFO("in no avoid");
+                            //turn_angle = def_turn_angle();
+                            ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                            ROS_INFO("turn_angle = %d",turn_angle);
+                            ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                            ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                            strategy_info->get_image_flag = true;
+                            ros::spinOnce();
+                            tool->Delay(10);
+                        }
+                    }
+                    else //2 > Dx > -2  障礙物在邊邊
+                    {
+                        if(continuousValue_x < maxspeed)//若小於最高速 speed++
+                        {
+                            while(continuousValue_x < maxspeed) //
+                            {
+                                ROS_INFO("speed ++ in no avoid");
+                                continuousValue_x += 100;
+                                //turn_angle = def_turn_angle();
+                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                ROS_INFO("turn_angle = %d",turn_angle);
+                                ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                                strategy_info->get_image_flag = true;
+                                ros::spinOnce();
+                                tool->Delay(10);
+                            }
+                        }
+                        else if(continuousValue_x == maxspeed) //保持目前角度直走
+                        {   
+                            ROS_INFO("void speed up finish in no avoid");
+                            ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                            ROS_INFO("turn_angle = %d",turn_angle);
+                            ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                            ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
+                            strategy_info->get_image_flag = true;
+                            ros::spinOnce();
+                            tool->Delay(10);
+                            
+                        }
+                    }
+                    //else if(17 > Dx > 14 || -14 > Dx > -17) //case TURNHEAD ?
+                }
+                else //Dy = 24 no obs
+                {
+                    speed = def_speed();
+                    if(continuousValue_x < maxspeed)//若小於最高速 speed++
+                    {
+                        while(continuousValue_x < maxspeed) //
+                        {
+                            ROS_INFO("speed ++ in no obs");
+                            continuousValue_x += 100;
+                            //turn_angle = def_turn_angle();
+                            ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                            ROS_INFO("turn_angle = %d",turn_angle);
+                            ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                            ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                            strategy_info->get_image_flag = true;
+                            ros::spinOnce();
+                            tool->Delay(10);
+                        }
+                    }
+                    else if(continuousValue_x == maxspeed) //保持目前角度直走
+                    {   
+                        ROS_INFO("void speed up finish in no obs");
+                        ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                        ROS_INFO("turn_angle = %d",turn_angle);
+                        ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                        ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
+                        strategy_info->get_image_flag = true;
+                        ros::spinOnce();
+                        tool->Delay(10);
+                        
+                    }
+                }
+                
+
+
+                    /*if((Dy <= b_dangerous_distance && b_obs_flag == true) || (Dy <= y_dangerous_distance && y_obs_flag == true)) //畫面有藍或黃 且距離夠近
                     {
                         if(14 >= Dx && Dx >= 2) //障礙物在左
                         {
@@ -342,11 +562,11 @@ void KidsizeStrategy::strategymain()
                                 ROS_INFO("Dy = %d",Dy);
                             }
                         }
-                    }
-                }
+                    }*/
+                //}
             break;
 
-            case TURNHEAD: //轉頭
+            /*case TURNHEAD: //轉頭
                 ROS_INFO("TURNHEAD");
                 if(turnhead_flag == true)
                 {
@@ -415,26 +635,26 @@ void KidsizeStrategy::strategymain()
                             turnhead_flag == false;
                             strategy_state = AVOID;
                         }
-                        /*if((abs(IMU_Value)) < 80 ) //原地旋轉直到 imu > 80
-                        {
-                            while((abs(IMU_Value)) < 80 )
-                            {
-                                IMU_Value = get_IMU();
-                                ROS_INFO("IMU_Value = %lf",IMU_Value);
-                                ROS_INFO("turn angle is -10");
-                                ros_com->sendContinuousValue(Rmove.x, Rmove.y, 0, Rmove.theta - 10, IMU_continuous);
-                                strategy_info->get_image_flag = true;
-                                ros::spinOnce();
-                                tool->Delay(10); 
-                            }
-                            turnhead_flag == false;
-                            strategy_state = AVOID;
-                        }
-                        else //imu > 80後做一般避障策略
-                        {
-                            turnhead_flag == false;
-                            strategy_state = AVOID;
-                        }*/
+                        //if((abs(IMU_Value)) < 80 ) //原地旋轉直到 imu > 80
+                        //{
+                        //    while((abs(IMU_Value)) < 80 )
+                        //    {
+                        //        IMU_Value = get_IMU();
+                        //        ROS_INFO("IMU_Value = %lf",IMU_Value);
+                        //        ROS_INFO("turn angle is -10");
+                        //        ros_com->sendContinuousValue(Rmove.x, Rmove.y, 0, Rmove.theta - 10, IMU_continuous);
+                        //        strategy_info->get_image_flag = true;
+                        //        ros::spinOnce();
+                        //        tool->Delay(10); 
+                        //    }
+                        //    turnhead_flag == false;
+                        //    strategy_state = AVOID;
+                        //}
+                        //else //imu > 80後做一般避障策略
+                        //{
+                        //    turnhead_flag == false;
+                        //    strategy_state = AVOID;
+                        //}
                     }
                     else if((turn_WR - turn_WL) > 10 ) //右權重大於左權重 代表缺口在左邊
                     {
@@ -469,26 +689,26 @@ void KidsizeStrategy::strategymain()
                             turnhead_flag == false;
                             strategy_state = AVOID;
                         }
-                        /*if((abs(IMU_Value)) < 80 ) //原地旋轉直到 imu > 80
-                        {
-                            while((abs(IMU_Value)) < 80 )
-                            {
-                                IMU_Value = get_IMU();
-                                ROS_INFO("IMU_Value = %lf",IMU_Value);
-                                ROS_INFO("turn angle is 10");
-                                ros_com->sendContinuousValue(Lmove.x, Lmove.y, 0, Lmove.theta + 10, IMU_continuous);
-                                strategy_info->get_image_flag = true;
-                                ros::spinOnce();
-                                tool->Delay(10); 
-                            }
-                            turnhead_flag == false;
-                            strategy_state = AVOID;
-                        }
-                        else
-                        {
-                            turnhead_flag == false;
-                            strategy_state = AVOID;
-                        }*/
+                        //if((abs(IMU_Value)) < 80 ) //原地旋轉直到 imu > 80
+                        //{
+                        //    while((abs(IMU_Value)) < 80 )
+                        //    {
+                        //        IMU_Value = get_IMU();
+                        //        ROS_INFO("IMU_Value = %lf",IMU_Value);
+                        //        ROS_INFO("turn angle is 10");
+                        //        ros_com->sendContinuousValue(Lmove.x, Lmove.y, 0, Lmove.theta + 10, IMU_continuous);
+                        //        strategy_info->get_image_flag = true;
+                        //        ros::spinOnce();
+                        //        tool->Delay(10); 
+                        //    }
+                        //    turnhead_flag == false;
+                        //    strategy_state = AVOID;
+                       // }
+                        //else
+                        //{
+                        //    turnhead_flag == false;
+                        //    strategy_state = AVOID;
+                        //}
                     }
                     else //imu > 80後做一般避障策略
                     {
@@ -504,10 +724,10 @@ void KidsizeStrategy::strategymain()
                     ROS_INFO("turnhead_flag == false");
                     strategy_state = AVOID;
                 }
-            break;    
+            break;*/    
 
             //0905++++++++++++++++
-            case REDDOOR:
+            /*case REDDOOR:
                 if(in_reddoor_flag == true)
                 {
                     ROS_INFO("state = REDDOOR");
@@ -619,9 +839,9 @@ void KidsizeStrategy::strategymain()
                 tool->Delay(100);
             
                 //strategy_state = CRAWL;
-            break;
+            break;*/
 
-            case CRAWL:
+            /*case CRAWL:
                 ROS_INFO("state = CRAWL");
 
                 if( abs(slope_avg) > 0.05 )
@@ -652,33 +872,33 @@ void KidsizeStrategy::strategymain()
                     //ros_com->sendBodySector(6);
                     //tool->Delay(3000);
 
-                    /*for (int crwtime = 0; crwtime <= 20; crwtime++)
-                    {
-                        ROS_INFO("crw");
+                    //for (int crwtime = 0; crwtime <= 20; crwtime++)
+                    //{
+                    //    ROS_INFO("crw");
                         //strategy_info->get_image_flag = true;
                         //ros::spinOnce();
-                        for (int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)
-                        {
-                            if (strategy_info->color_mask_subject[2][i].size > 32000)
-                            {
-                                ROS_INFO("stand up1");
-                                break;
-                            }
-                        }
-                        strategy_info->get_image_flag = true;
-                        ros::spinOnce();
-                        for (int i = 0; i < strategy_info->color_mask_subject_cnts[1]; i++)
-                        {
-                            if (strategy_info->color_mask_subject[1][i].size > 35000)
-                            {
-                                ROS_INFO("stand up2");
-                                break;
-                            }
-                        }
-                        ros_com->sendBodySector(7);
-                        tool->Delay(2200);
+                    //    for (int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)
+                    //    {
+                    //        if (strategy_info->color_mask_subject[2][i].size > 32000)
+                    //        {
+                    //            ROS_INFO("stand up1");
+                    //            break;
+                    //        }
+                    //    }
+                    //    strategy_info->get_image_flag = true;
+                    //    ros::spinOnce();
+                    //    for (int i = 0; i < strategy_info->color_mask_subject_cnts[1]; i++)
+                    //    {
+                    //        if (strategy_info->color_mask_subject[1][i].size > 35000)
+                    //        {
+                    //            ROS_INFO("stand up2");
+                    //            break;
+                    //        }
+                    //    }
+                    //    ros_com->sendBodySector(7);
+                    //    tool->Delay(2200);
 
-                    }*/
+                    //}
                     ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
                     tool->Delay(50);
                     tool->Delay(5000);
@@ -687,7 +907,7 @@ void KidsizeStrategy::strategymain()
 
 
                 strategy_state = AVOID;              //INIT or AVOID???
-            break;
+            break;*/
             //0905++++++++++++++++*/
 
             default :
@@ -820,6 +1040,34 @@ void KidsizeStrategy::printinfo()
     ROS_INFO("\n");
 }
 
+int KidsizeStrategy::def_speed()
+{
+    if( (Dy >= 20 && Dy < 24) )
+    {
+        continuous_speed = stay.x + 3500;
+    }
+    else if( (Dy >= 16 && Dy < 20) )
+    {
+        continuous_speed = stay.x + 3000;
+    }
+    else if( (Dy >= 12 && Dy < 16) )
+    {
+        continuous_speed = stay.x + 2000;
+    }
+    else if( (Dy >= 8 && Dy < 12) )
+    {
+        continuous_speed = stay.x + 1000;
+    }
+    else if( (Dy >= 4 && Dy < 8) )
+    {
+        continuous_speed = stay.x + 500;
+    }
+    else if( (Dy >= 0 && Dy < 4) )
+    {
+        continuous_speed = stay.x;
+    }
+    return continuous_speed;
+}
 int KidsizeStrategy::def_turn_angle() //用Dx判斷旋轉角度之副函式
 {
     if(Dx > 0)                       //Dx > 0 -> obstacle in left -> turn right

@@ -24,9 +24,10 @@ void OBSimage::strategymain()
 	if(strategy_info->getStrategyStart())
 	{	
 		cv::Mat image = strategy_info->cvimg->image;
+		//cv::Mat img (24, 32, CV_8UC3,cv::Scalar(255,255,255));
+		//cv::Mat img_resize(640, 480, CV_8UC3,cv::Scalar(255,255,255));
 
 		ROS_INFO("Deep Matrix");
-			
         for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
         {
             Deep_Matrix[compress_width] = 0;
@@ -50,31 +51,13 @@ void OBSimage::strategymain()
 			printf("%2d,",Deep_Matrix[compress_width]);
         }
 		printf("\n");
-		/*for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10  ; compress_height++)
-        {
-            for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10 ; compress_width++)
-            {
-                bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-                gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-                rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
-				if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
-				{
-					printf("1  ");
-				}
-				else
-				{
-					printf("0  ");
-				}
-			}
-			printf("\n");
-		}*/
 
 		INIT_parameter();
 
 		//0905++++
 	////////////////////有進紅門，紅門case內影像判斷////////////////////
 		//SlopeCalculate();
-		if (strategy_info->color_mask_subject_cnts[5] != 0)				
+		/*if (strategy_info->color_mask_subject_cnts[5] != 0)				
 		{
 			for(int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
 			{
@@ -165,10 +148,10 @@ void OBSimage::strategymain()
 			}
 		}
 		////////////////////未進紅門，其餘影像判斷////////////////////		
-		else
-		{
-			ROS_INFO("NOT_IN_RED");
-			in_reddoor_flag = false;
+		//else
+		//{
+			//ROS_INFO("NOT_IN_RED");
+			//in_reddoor_flag = false;
 			ROS_INFO("in_reddoor_flag = false");
 			//if(Filter_Matrix[i] > 0)
 			//{
@@ -203,14 +186,14 @@ void OBSimage::strategymain()
 				strategy_info->get_image_flag = true;
 				ros::spinOnce();
             	tool->Delay(50);
-			//}
+			//}*/
 
 		//0905++++
 
 			ROS_INFO("Focus Matrix");
 			for(int i = 0; i < 32 ;i++)
 			{
-			printf("%2d,",Focus_Matrix[i]);
+				printf("%2d,",Focus_Matrix[i]);
 			}
 			printf("\n");
 			ROS_INFO("Filter Matrix");
@@ -233,21 +216,20 @@ void OBSimage::strategymain()
 				{
 					Filter_Matrix[i] = 0;
 				}
-				//printf("%2d,",Filter_Matrix[i]);
 
 				if(Deep_Matrix[i] < Dy)							//get DeepMatrix min
 				{
 					Dy = Deep_Matrix[i];
 				}
-				l_center_Dy = Deep_Matrix[8];
-				r_center_Dy = Deep_Matrix[24];
+				//l_center_Dy = Deep_Matrix[8];
+				//r_center_Dy = Deep_Matrix[24];
 
 				printf("%2d,",Filter_Matrix[i]);
 				//calculate WR WL
-				//WR += (32-i) * Filter_Matrix[i];
-				//WL += (i+1) * Filter_Matrix[i];
-				WR += (32-i) * (24-Deep_Matrix[i]);
-				WL += (i+1) * (24-Deep_Matrix[i]);
+				WR += (32-i) * Filter_Matrix[i];
+				WL += (i+1) * Filter_Matrix[i];
+				//WR += (32-i) * (24-Deep_Matrix[i]);
+				//WL += (i+1) * (24-Deep_Matrix[i]);
 
 
 			}
@@ -280,12 +262,12 @@ void OBSimage::strategymain()
 				}
 			}*/
 
-			if((WR - WL) > 5)											
+			if( WR >= WL )		//(WR - WL) > 5									
 			{
 				Xb = 0;
 				ROS_INFO("Obstacle in left");
 			}
-			else if((WL - WR) > 5)
+			else if( WL > WR )		//(WL - WR) > 5
 			{
 				Xb = 31;
 				ROS_INFO("Obstacle in right");
@@ -295,32 +277,66 @@ void OBSimage::strategymain()
             tool->Delay(50);
 
 			Dx = Xc - Xb;
+
+			ImageInfo();
+
+
+		//}
+		/*for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
+		{
+			for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10 ; compress_height++)
+			{
+				bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
+				gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
+				rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
+				if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
+				{
+				//printf("1  ");
+					if(Filter_Matrix[compress_width] > (23-compress_height))
+					{
+						//printf("111111\n");
+						//printf("Deep_Matrix[compress_width] = %d, compress_height = %d\n",Deep_Matrix[compress_width],24-compress_height);
+						img.at<cv::Vec3b>(compress_height, compress_width)[0] = 0;
+						img.at<cv::Vec3b>(compress_height, compress_width)[1] = 0;
+						img.at<cv::Vec3b>(compress_height, compress_width)[2] = 195;
+					}
+					else
+					{
+						//printf("else Deep_Matrix[compress_width] = %d, compress_height = %d\n",Deep_Matrix[compress_width],24-compress_height);
+						//printf("222222\n");
+						img.at<cv::Vec3b>(compress_height, compress_width)[0] = 0;
+						img.at<cv::Vec3b>(compress_height, compress_width)[1] = 0;
+						img.at<cv::Vec3b>(compress_height, compress_width)[2] = 0;
+						//img.at<uchar>(compress_height, compress_width) = 0;
+					}
+				}
+				else
+				{
+					//printf("3333333\n");
+					//printf("0  ");
+					img.at<cv::Vec3b>(compress_height, compress_width)[0] = 255;
+					img.at<cv::Vec3b>(compress_height, compress_width)[1] = 255;
+					img.at<cv::Vec3b>(compress_height, compress_width)[2] = 255;
+					//img.at<uchar>(compress_height, compress_width) = 255;
+				}
+			}
+			//printf("\n");
 		}
+		resize(img,img_resize,cv::Size(640,480),0,0);
+		for(int compress_height = 0 ; compress_height < IMAGEWIDTH/10  ; compress_height++)
+		{
+			line(img_resize,cv::Point(compress_height*20,0),cv::Point(compress_height*20,480),cv::Scalar(125));         //horizantal
+			for(int compress_width = 0 ; compress_width < IMAGEHEIGHT/10 ; compress_width++)
+			{
+				line(img_resize,cv::Point(0,compress_width*20),cv::Point(640,compress_width*20),cv::Scalar(125));       //verticle
+			}
+		}*/
+
 
 		//0905++++
-		strategy_info->get_image_flag = true;
-        ros::spinOnce();
-		tool->Delay(50);
-		//0905++++
-
-		ROS_INFO("W_R = %d,W_L = %d",W_R,W_L);
-		ROS_INFO("Xb = %.3lf, Dx = %.3lf",Xb,Dx);
-		ROS_INFO("Xc_count = %d, Xi_sum = %d, Xc = %.3lf",Xc_count,Xi_sum,Xc);
-		ROS_INFO("Dy = %d, WR = %d, WL = %d",Dy,WR,WL);
-		ROS_INFO("l_center_Dy = %d, r_center_Dy = %d",l_center_Dy,r_center_Dy);
-		ROS_INFO("slope_avg = %lf",slope_avg);
-		ROS_INFO("RD = %d ,LD = %d",RD,LD);
-
-
 		getparameter_parameter.Dy = Dy;
 		getparameter_parameter.Dx = Dx;
-
 		//0905++++
-		ROS_INFO("L_XMAX = %3d",L_XMAX);
-		ROS_INFO("R_XMIN = %3d",R_XMIN);
-		printf("\n");
-		ROS_INFO("LeftblueOBS_XMax = %3d",LeftblueOBS_XMax);
-		ROS_INFO("RightblueOBS_XMin = %3d",RightblueOBS_XMin);
 		//getparameter_parameter.Xc = Xc;
 		getparameter_parameter.RD = RD;
 		getparameter_parameter.LD = LD;
@@ -350,6 +366,22 @@ void OBSimage::strategymain()
     }
 }
 
+void OBSimage::ImageInfo()
+{
+	ROS_INFO("WR = %d, WL = %d,Xb = %d",WR,WL,Xb);
+	ROS_INFO("Xc_count = %d, Xi_sum = %d, Xc = %.3lf",Xc_count,Xi_sum,Xc);
+	ROS_INFO("Dx = %.3lf",Dx);
+	ROS_INFO("Dy = %d",Dy);
+	//ROS_INFO("W_R = %d,W_L = %d",W_R,W_L);
+	//ROS_INFO("l_center_Dy = %d, r_center_Dy = %d",l_center_Dy,r_center_Dy);
+	//ROS_INFO("slope_avg = %lf",slope_avg);
+	//ROS_INFO("RD = %d ,LD = %d",RD,LD);
+	//ROS_INFO("L_XMAX = %3d",L_XMAX);
+	//ROS_INFO("R_XMIN = %3d",R_XMIN);
+	//ROS_INFO("LeftblueOBS_XMax = %3d",LeftblueOBS_XMax);
+	//ROS_INFO("RightblueOBS_XMin = %3d",RightblueOBS_XMin);
+
+}
 void OBSimage::INIT_parameter()
 {
 	Xc_count = 0;
@@ -361,7 +393,7 @@ void OBSimage::INIT_parameter()
 	WL = 0;	
 	Dy = Deep_Matrix[0];
 }
-void OBSimage::SlopeCalculate()			//計算斜率之副函式
+/*void OBSimage::SlopeCalculate()			//計算斜率之副函式
 {
     bool Check_label_model_flag = true;
     int slope_rand[4];
@@ -444,4 +476,4 @@ void OBSimage::SlopeCalculate()			//計算斜率之副函式
 		}
             
         }
-}
+}*/

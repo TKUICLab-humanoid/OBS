@@ -91,6 +91,7 @@ public:
 	/******************subscribe deepmatrix parameter******************/
 
 	int continuous_angle_offset = 0;
+	int continuous_speed = 0;
 	bool init_flag = true;
 	float IMU_Value = 0;
 	float IMU_getValue = 0;
@@ -138,6 +139,7 @@ public:
 	int y_dangerous_distance = 0;
 	int continuousValue_x = 0;
 	int turn_angle = 0;
+	int speed =0;
 	int IMU_angle_offest = 0;
 	int IMU_theta = 0;
 	bool turnhead_flag = false;
@@ -158,7 +160,8 @@ public:
 	void GetParameter(const strategy::GetParameter &msg);
 	void initparameterpath();
 	void readparameter();
-	int  def_turn_angle();
+	int def_turn_angle();
+	int def_speed();
 	void printinfo();
 	int IMU_Modify();
 	void readpreturnparameter();
