@@ -264,7 +264,7 @@ void KidsizeStrategy::strategymain()
                             
                         }
                     }
-                    //else if(17 > Dx > 14 || -14 > Dx > -17) //case TURNHEAD ?
+                    //else if(17 > Dx > 14 || -14 > Dx > -17) //case TURNHEAD ? speed -- to stay.speed -> imu fix ->case turnhead
                 }
                 else //Dy = 24 no obs
                 {
