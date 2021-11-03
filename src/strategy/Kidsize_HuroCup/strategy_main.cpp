@@ -42,7 +42,7 @@ void KidsizeStrategy::strategymain()
                 }
                 
                 //head motor angle set 
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1580, 300);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1500, 300);
                 tool->Delay(50);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300); 
                 tool->Delay(50);
@@ -103,7 +103,7 @@ void KidsizeStrategy::strategymain()
                 {
                     speed = def_speed();
                     //ROS_INFO("speed = %d",speed);
-                    if(14 >= Dx && Dx >= 2)//障礙物在左
+                    if(16 >= Dx && Dx >= 2)//障礙物在左
                     {
                         if(continuousValue_x > speed) //速度大於目前要求速度 speed-- 邊轉
                         {
@@ -152,7 +152,7 @@ void KidsizeStrategy::strategymain()
                             tool->Delay(10);
                         }
                     }
-                    else if(-14 <= Dx && Dx <= -2)//障礙物在右
+                    else if(-16 <= Dx && Dx <= -2)//障礙物在右
                     {
                         if(continuousValue_x > speed) //速度大於目前要求速度 speed-- 邊轉
                         {
@@ -203,31 +203,14 @@ void KidsizeStrategy::strategymain()
                     }
                     else if(Dx == 0 || Dx == -31 ) //有障礙物 但還沒進焦點
                     {
-                        if(continuousValue_x > speed) //速度大於目前要求速度 speed-- 保持角度
-                        {
-                            while(continuousValue_x > speed) //
-                            {
-                                ROS_INFO("speed -- in no avoid");
-                                //speed = def_speed();
-                                continuousValue_x -= 100;
-                                //turn_angle = def_turn_angle();
-                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                ROS_INFO("turn_angle = %d",turn_angle);
-                                ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
-                                strategy_info->get_image_flag = true;
-                                ros::spinOnce();
-                                tool->Delay(10);
-                            }   
-                        }
-                        else if(continuousValue_x < speed) //速度小於目前要求速度 speed++ 保持角度
+                        if(continuousValue_x < speed) //速度小於目前要求速度 speed++ 保持角度
                         {
                             while(continuousValue_x < speed) 
                             {
                                 ROS_INFO("speed ++ in no avoid");
                                 //speed = def_speed();
                                 continuousValue_x += 100;
-                                //turn_angle = def_turn_angle();
+                                turn_angle = def_turn_angle();
                                 ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                 ROS_INFO("turn_angle = %d",turn_angle);
                                 ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
@@ -240,7 +223,7 @@ void KidsizeStrategy::strategymain()
                         else //速度等於目前要求速度 保持速度 保持角度
                         {
                             ROS_INFO("in no avoid");
-                            //turn_angle = def_turn_angle();
+                            turn_angle = def_turn_angle();
                             ROS_INFO("continuousValue_x = %d",continuousValue_x);
                             ROS_INFO("turn_angle = %d",turn_angle);
                             ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
@@ -250,7 +233,7 @@ void KidsizeStrategy::strategymain()
                             tool->Delay(10);
                         }
                     }
-                    else //2 > Dx > -2  障礙物在邊邊
+                    else if(2 > Dx > -2)//2 > Dx > -2  障礙物在邊邊 17 > Dx > 14 || -14 > Dx > -17 
                     {
                         if(continuousValue_x < maxspeed)//若小於最高速 speed++
                         {
@@ -1042,17 +1025,25 @@ void KidsizeStrategy::printinfo()
 
 int KidsizeStrategy::def_speed()
 {
-    if( (Dy >= 20 && Dy < 24) )
+    if( (Dy >= 22 && Dy < 24) )
     {
         continuous_speed = stay.x + 3500;
     }
-    else if( (Dy >= 16 && Dy < 20) )
+    else if( (Dy >= 20 && Dy < 22) )
     {
         continuous_speed = stay.x + 3000;
     }
-    else if( (Dy >= 12 && Dy < 16) )
+    else if( (Dy >= 18 && Dy < 20) )
+    {
+        continuous_speed = stay.x + 2500;
+    }
+    else if( (Dy >= 16 && Dy < 28) )
     {
         continuous_speed = stay.x + 2000;
+    }
+    else if( (Dy >= 12 && Dy < 16) )
+    {
+        continuous_speed = stay.x + 1500;
     }
     else if( (Dy >= 8 && Dy < 12) )
     {
@@ -1101,17 +1092,17 @@ int KidsizeStrategy::def_turn_angle() //用Dx判斷旋轉角度之副函式
         else if(abs(Dx) <= 4 && abs(Dx) > 3)
         {
             //ROS_INFO("abs(x_boundary) < 10 && abs(x_boundary) > 7");
-            continuous_angle_offset = -3;
+            continuous_angle_offset = -4;
         }
         else if(abs(Dx) <= 3 && abs(Dx) > 2)
         {
             //ROS_INFO("abs(x_boundary) < 10 && abs(x_boundary) > 7");
-            continuous_angle_offset = -2;
+            continuous_angle_offset = -3;
         }
         else
         {
             //ROS_INFO("abs(Dx) < 1");
-            continuous_angle_offset = -1;
+            continuous_angle_offset = -2;
         }
     }
 
@@ -1136,24 +1127,24 @@ int KidsizeStrategy::def_turn_angle() //用Dx判斷旋轉角度之副函式
         }
         else if(abs(Dx) <= 6 && abs(Dx) > 4)
         {
-            continuous_angle_offset = 4;
+            continuous_angle_offset = 5;
         }
         else if(abs(Dx) <= 4 && abs(Dx) > 3)
         {
-            continuous_angle_offset = 3;
+            continuous_angle_offset = 4;
         }
         else if(abs(Dx) <= 3 && abs(Dx) > 2)
         {
-            continuous_angle_offset = 2;
+            continuous_angle_offset = 3;
         }
         else
         {
-            continuous_angle_offset = 1;
+            continuous_angle_offset = 2;
         }   
     }
     else
     {
-        
+        continuous_angle_offset = 0;
     }
 
     return continuous_angle_offset;
