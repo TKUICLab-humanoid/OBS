@@ -89,6 +89,7 @@ void KidsizeStrategy::strategymain()
             case AVOID:
                 ROS_INFO("state = AVOID");
                 IMU_Value = get_IMU();
+                ROS_INFO("IMU_Value = %lf",IMU_Value);
                 //ROS_INFO("(AVOID)continuousValue_x = %d",continuousValue_x);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //轉頭至正中
                 tool->Delay(50); 
@@ -112,7 +113,7 @@ void KidsizeStrategy::strategymain()
                             {
                                 if( imu_ok_flag == false) //避障前用imu對正障礙物   /*Dx >= 7 &&  abs (IMU_Value) > 20 &&*/ 
                                 {
-                                    while( abs (IMU_Value) < 10 )   /*Dx >= 7 &&  */
+                                    while( abs (IMU_Value) > 10 )   /*Dx >= 7 &&  */
                                     {
                                         ROS_INFO("imu befor turn right");
                                         continuousValue_x -= 100;
@@ -129,6 +130,7 @@ void KidsizeStrategy::strategymain()
                                     }
                                 }
                                 imu_ok_flag = true;
+                                ROS_INFO("imu_ok_flag = true");
                                 if(imu_ok_flag == true)
                                 {
                                     //speed = def_speed();
@@ -152,7 +154,7 @@ void KidsizeStrategy::strategymain()
                             {
                                 if(  imu_ok_flag == false) //避障前用imu對正障礙物   /*Dx >= 7 &&  abs (IMU_Value) > 20 &&*/
                                 {
-                                    while( abs (IMU_Value) < 10 )   /*Dx >= 7 &&  */
+                                    while( abs (IMU_Value) > 10 )   /*Dx >= 7 &&  */
                                     {
                                         ROS_INFO("imu befor turn right");
                                         continuousValue_x += 100;
@@ -169,6 +171,7 @@ void KidsizeStrategy::strategymain()
                                     }
                                 }
                                 imu_ok_flag = true;
+                                ROS_INFO("imu_ok_flag = true");
                                 if(imu_ok_flag == true)
                                 {
                                     //speed = def_speed();
@@ -189,7 +192,7 @@ void KidsizeStrategy::strategymain()
                         {
                             if( /*Dx >= 7 &&  abs (IMU_Value) > 20 &&*/ imu_ok_flag == false ) //避障前用imu對正障礙物
                             {
-                                while( /*Dx >= 7 &&  */abs (IMU_Value) < 10 )
+                                while( /*Dx >= 7 &&  */abs (IMU_Value) > 10 )
                                 {
                                     ROS_INFO("imu befor turn right");
                                     IMU_Value = get_IMU();
@@ -205,6 +208,7 @@ void KidsizeStrategy::strategymain()
                                 }
                             }
                             imu_ok_flag = true;
+                            ROS_INFO("imu_ok_flag = true");
                             if(imu_ok_flag == true) //速度等於目前要求速度 保持速度旋轉
                             {
                                 ROS_INFO("turn right");
@@ -227,7 +231,7 @@ void KidsizeStrategy::strategymain()
                             {
                                 if( /*Dx <= -7 &&  abs(IMU_Value) > 10 */imu_ok_flag == false) //避障前用imu對正障礙物
                                 {
-                                    while( abs(IMU_Value) < 10 )
+                                    while( abs(IMU_Value) > 10 )
                                     {
                                         ROS_INFO("imu befor turn left");
                                         continuousValue_x -= 100;
@@ -244,6 +248,7 @@ void KidsizeStrategy::strategymain()
                                     }
                                 }
                                 imu_ok_flag = true;
+                                ROS_INFO("imu_ok_flag = true");
                                 if(imu_ok_flag == true)
                                 {
                                     //speed = def_speed();
@@ -266,7 +271,7 @@ void KidsizeStrategy::strategymain()
                             {
                                 if( /*Dx <= -7 &&  abs(IMU_Value) > 10 */imu_ok_flag == false) //避障前用imu對正障礙物
                                 {
-                                    while( abs(IMU_Value) < 10 )
+                                    while( abs(IMU_Value) > 10 )
                                     {
                                         ROS_INFO("imu befor turn left");
                                         continuousValue_x += 100;
@@ -283,6 +288,7 @@ void KidsizeStrategy::strategymain()
                                     }
                                 }
                                 imu_ok_flag = true;
+                                ROS_INFO("imu_ok_flag = true");
                                 if(imu_ok_flag == true)
                                 {
                                     //speed = def_speed();
@@ -303,7 +309,7 @@ void KidsizeStrategy::strategymain()
                         {
                             if( /*Dx <= -7 &&  abs(IMU_Value) > 10 */imu_ok_flag == false) //避障前用imu對正障礙物
                             {
-                                while(abs(IMU_Value) < 10 )
+                                while(abs(IMU_Value) > 10 )
                                 {
                                     ROS_INFO("imu befor turn left");
                                     IMU_Value = get_IMU();
@@ -319,6 +325,7 @@ void KidsizeStrategy::strategymain()
                                 }
                             }
                             imu_ok_flag = true;
+                            ROS_INFO("imu_ok_flag = true");
                             if(imu_ok_flag == true) //速度等於目前要求速度 保持速度旋轉
                             {
                                 ROS_INFO("turn left");
@@ -410,6 +417,7 @@ void KidsizeStrategy::strategymain()
                     else if(2 > Dx > -2)//2 > Dx > -2  障礙物在邊邊 17 > Dx > 14 || -14 > Dx > -17 
                     {
                         imu_ok_flag = false;
+                        ROS_INFO("imu_ok_flag = false");
                         if(continuousValue_x < maxspeed)//若小於最高速 speed++
                         {
                             while(continuousValue_x < maxspeed) //
