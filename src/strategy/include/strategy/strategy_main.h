@@ -80,10 +80,11 @@ public:
 	int layer_sum = 0;
 	bool layer_flag = false;
 	bool LeftHead_flag = false;
-    	bool RightHead_flag = false;
+    bool RightHead_flag = false;
 	int turn_WR = 0;
 	int turn_WL = 0;
 	bool reddoor_slope_ok_flag = false;
+	bool imu_ok_flag = false;
 	
 
 	string parameter_path = "N";
