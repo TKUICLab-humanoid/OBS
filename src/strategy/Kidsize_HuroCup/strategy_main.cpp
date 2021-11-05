@@ -448,7 +448,7 @@ void KidsizeStrategy::strategymain()
                             tool->Delay(10);
                         }
                     }
-                    /*else if( ( (Dx < 17 && Dx > 14) ||(Dx < -14 && Dx > -17) ) && l_center_Dy < 20 && r_center_Dy < 20 ) //障礙物在面前一整片
+                    else if( ( (Dx < 17 && Dx > 14) ||(Dx < -14 && Dx > -17) ) && l_center_Dy < 20 && r_center_Dy < 20 ) //障礙物在面前一整片
                     {
                         ROS_INFO("Dx = %5f",Dx);
                         ROS_INFO("l_center_Dy = %d, r_center_Dy = %d",l_center_Dy,r_center_Dy);
@@ -457,21 +457,40 @@ void KidsizeStrategy::strategymain()
                         {
                             while(continuousValue_x > stay.x)
                             {
-                                ROS_INFO("speed-- in turnhead");
-                                continuousValue_x -= 100;
-                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                ROS_INFO("turn_angle = %d",turn_angle);
-                                ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);  
-                                strategy_info->get_image_flag = true;
-                                ros::spinOnce();
-                                tool->Delay(10);
+                                if( abs(IMU_Value) > 10 )
+                                {
+                                    ROS_INFO(" first imu fix before turnhead");
+                                    continuousValue_x -= 100;
+                                    IMU_Value = get_IMU();
+                                    IMU_theta = IMU_Modify();
+                                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                    ROS_INFO("IMU_Value = %lf",IMU_Value);
+                                    ROS_INFO("IMU_theta = %lf",IMU_theta);
+                                    ROS_INFO("stay.theta + IMU_theta  = %lf",stay.theta + IMU_theta);
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous); 
+                                    strategy_info->get_image_flag = true;
+                                    ros::spinOnce();
+                                    tool->Delay(10);
+                                }
+                                else
+                                {
+                                    ROS_INFO("speed-- in turnhead");
+                                    continuousValue_x -= 100;
+                                    turn_angle = 0;
+                                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                    ROS_INFO("turn_angle = %d",turn_angle);
+                                    ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);  
+                                    strategy_info->get_image_flag = true;
+                                    ros::spinOnce();
+                                    tool->Delay(10);
+                                }
                             }   
                         }
                         else if( abs(IMU_Value) > 10 ) //避障前用imu對正障礙物
                         {
 
-                            ROS_INFO("imu fix before turnhead");
+                            ROS_INFO("second imu fix before turnhead");
                             IMU_Value = get_IMU();
                             IMU_theta = IMU_Modify();
                             ROS_INFO("continuousValue_x = %d",continuousValue_x);
@@ -489,7 +508,7 @@ void KidsizeStrategy::strategymain()
                             turnhead_flag = true;
                             strategy_state = TURNHEAD;
                         }
-                    }*/
+                    }
                     else if(2 > Dx > -2)//2 > Dx > -2  障礙物在邊邊 17 > Dx > 14 || -14 > Dx > -17 
                     {
                         imu_ok_flag = false;
