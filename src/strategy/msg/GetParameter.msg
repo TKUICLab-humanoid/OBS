@@ -14,5 +14,7 @@ bool b_obs_flag
 bool y_obs_flag
 int32 l_center_Dy
 int32 r_center_Dy
+int32 center_Dy
 bool one_b_flag
 bool two_b_flag
+

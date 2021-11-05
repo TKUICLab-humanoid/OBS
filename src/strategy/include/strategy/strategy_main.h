@@ -74,6 +74,7 @@ public:
 	bool y_obs_flag = false;
 	int l_center_Dy = 0;
 	int r_center_Dy = 0;
+	int center_Dy = 0;
 	bool one_b_flag = false;
 	bool two_b_flag = false;
 	int check_no_obs_cnt = 0;
