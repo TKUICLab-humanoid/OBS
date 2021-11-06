@@ -221,8 +221,8 @@ void OBSimage::strategymain()
 				{
 					Dy = Deep_Matrix[i];
 				}
-				l_center_Dy = Deep_Matrix[8];
-				r_center_Dy = Deep_Matrix[24];
+				l_center_Dy = Filter_Matrix[9];
+				r_center_Dy = Filter_Matrix[23];
 				center_Dy = Filter_Matrix[16];
 
 				printf("%2d,",Filter_Matrix[i]);
