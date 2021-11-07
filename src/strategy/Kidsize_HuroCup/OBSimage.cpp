@@ -24,8 +24,8 @@ void OBSimage::strategymain()
 	if(strategy_info->getStrategyStart())
 	{	
 		cv::Mat image = strategy_info->cvimg->image;
-		//cv::Mat img (24, 32, CV_8UC3,cv::Scalar(255,255,255));
-		//cv::Mat img_resize(640, 480, CV_8UC3,cv::Scalar(255,255,255));
+		cv::Mat img (24, 32, CV_8UC3,cv::Scalar(255,255,255));
+		cv::Mat img_resize(640, 480, CV_8UC3,cv::Scalar(255,255,255));
 
 		ROS_INFO("Deep Matrix");
         for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
@@ -283,7 +283,7 @@ void OBSimage::strategymain()
 
 
 		//}
-		/*for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
+		for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
 		{
 			for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10 ; compress_height++)
 			{
@@ -321,9 +321,10 @@ void OBSimage::strategymain()
 					//img.at<uchar>(compress_height, compress_width) = 255;
 				}
 			}
-			//printf("\n");
+			printf("\n");
 		}
 		resize(img,img_resize,cv::Size(640,480),0,0);
+		//resize(img,img,cv::Size(640,480),0,0);
 		for(int compress_height = 0 ; compress_height < IMAGEWIDTH/10  ; compress_height++)
 		{
 			line(img_resize,cv::Point(compress_height*20,0),cv::Point(compress_height*20,480),cv::Scalar(125));         //horizantal
@@ -331,7 +332,7 @@ void OBSimage::strategymain()
 			{
 				line(img_resize,cv::Point(0,compress_width*20),cv::Point(640,compress_width*20),cv::Scalar(125));       //verticle
 			}
-		}*/
+		}
 
 
 		//0905++++
@@ -363,8 +364,12 @@ void OBSimage::strategymain()
 		GetParameter_Publish.publish(getparameter_parameter);
 
         ROS_INFO("\n");
-		//cv::imshow("image",image);
-		//cv::waitKey(1);
+		//cv::namedWindow("img_resize", CV_WINDOW_NORMAL);
+		//cv::resizeWindow("img", 480, 640);
+		cv::resizeWindow("img_resize", 640, 480);
+		cv::imshow("img_resize",img_resize);
+		cv::waitKey(1);
+		//cv::destroyWindow("img_resize");
     }
 }
 
@@ -473,7 +478,7 @@ void OBSimage::INIT_parameter()
 			slope[0] = float(slope_Y[1] - slope_Y[0]) / float(slope_rand[1] - slope_rand[0]);
 			slope[1] = float(slope_Y[2] - slope_Y[1]) / float(slope_rand[2] - slope_rand[1]);
 			slope[2] = float(slope_Y[3] - slope_Y[2]) / float(slope_rand[3] - slope_rand[2]);
-			slope_avg = (slope[0] + slope[1] + slope[2]) / 3;
+			slope_avg = (slope[0] + slope[1] + slope[2]) / 3;image
 			break;
 		}
             
