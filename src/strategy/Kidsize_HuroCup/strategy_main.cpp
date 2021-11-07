@@ -450,7 +450,7 @@ void KidsizeStrategy::strategymain()
                     }
                     else if( ( (Dx < 17 && Dx > 14) ||(Dx < -14 && Dx > -17) )  ) //障礙物在面前一整片
                     {
-                        if( l_center_Dy != 0 && r_center_Dy != 0 )
+                        if( l_center_Dy < 13 && r_center_Dy < 13)
                         {
                             ROS_INFO("Dx = %5f",Dx);
                             ROS_INFO("l_center_Dy = %d, r_center_Dy = %d",l_center_Dy,r_center_Dy);
@@ -516,11 +516,11 @@ void KidsizeStrategy::strategymain()
                             if( Dx > 0 )
                             {
                                 ROS_INFO("turn right");
-                                turn_angle = def_turn_angle();
+                                //turn_angle = def_turn_angle();
                                 ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                 ROS_INFO("turn_angle = %d",turn_angle);
                                 ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta - 2, IMU_continuous); 
                                 strategy_info->get_image_flag = true;
                                 ros::spinOnce();
                                 tool->Delay(10);
@@ -528,11 +528,11 @@ void KidsizeStrategy::strategymain()
                             else if( Dx < 0 )
                             {
                                 ROS_INFO("turn left");
-                                turn_angle = def_turn_angle();
+                                //turn_angle = def_turn_angle();
                                 ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                 ROS_INFO("turn_angle = %d",turn_angle);
                                 ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + 2, IMU_continuous); 
                                 strategy_info->get_image_flag = true;
                                 ros::spinOnce();
                                 tool->Delay(10);
@@ -1382,35 +1382,47 @@ int KidsizeStrategy::def_speed()
 {
     if( (Dy >= 22 && Dy < 24) )
     {
-        continuous_speed = stay.x + 3500;
+        continuous_speed = stay.x + 4000;
     }
     else if( (Dy >= 20 && Dy < 22) )
     {
-        continuous_speed = stay.x + 3000;
+        continuous_speed = stay.x + 3500;
     }
     else if( (Dy >= 18 && Dy < 20) )
     {
-        continuous_speed = stay.x + 2500;
+        continuous_speed = stay.x + 3000;
     }
-    else if( (Dy >= 16 && Dy < 28) )
+    else if( (Dy >= 16 && Dy < 18) )
     {
-        continuous_speed = stay.x + 2000;
+        continuous_speed = stay.x + 2500;
     }
     else if( (Dy >= 12 && Dy < 16) )
     {
+        continuous_speed = stay.x + 2000;
+    }
+    else if( (Dy >= 10 && Dy < 12) )
+    {
         continuous_speed = stay.x + 1500;
     }
-    else if( (Dy >= 8 && Dy < 12) )
+    else if( (Dy >= 8 && Dy < 10) )
+    {
+        continuous_speed = stay.x + 1200;
+    }
+    else if( (Dy >= 6 && Dy < 8) )
     {
         continuous_speed = stay.x + 1000;
     }
-    else if( (Dy >= 4 && Dy < 8) )
+    else if( (Dy >= 4 && Dy < 6) )
+    {
+        continuous_speed = stay.x + 700;
+    }
+    else if( (Dy >= 2 && Dy < 4) )
     {
         continuous_speed = stay.x + 500;
     }
-    else if( (Dy >= 0 && Dy < 4) )
+    else if( (Dy >= 0 && Dy < 2) )
     {
-        continuous_speed = stay.x;
+        continuous_speed = stay.x ;
     }
     return continuous_speed;
 }
