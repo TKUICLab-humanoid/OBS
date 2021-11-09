@@ -24,8 +24,8 @@ void OBSimage::strategymain()
 	if(strategy_info->getStrategyStart())
 	{	
 		cv::Mat image = strategy_info->cvimg->image;
-		cv::Mat img (24, 32, CV_8UC3,cv::Scalar(255,255,255));
-		cv::Mat img_resize(640, 480, CV_8UC3,cv::Scalar(255,255,255));
+		//cv::Mat img (24, 32, CV_8UC3,cv::Scalar(255,255,255));
+		//cv::Mat img_resize(640, 480, CV_8UC3,cv::Scalar(255,255,255));
 
 		ROS_INFO("Deep Matrix");
         for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
@@ -221,8 +221,8 @@ void OBSimage::strategymain()
 				{
 					Dy = Deep_Matrix[i];
 				}
-				l_center_Dy = Deep_Matrix[9];
-				r_center_Dy = Deep_Matrix[23];
+				l_center_Dy = Deep_Matrix[8];
+				r_center_Dy = Deep_Matrix[24];
 				center_Dy = Filter_Matrix[16];
 
 				printf("%2d,",Filter_Matrix[i]);
@@ -283,56 +283,56 @@ void OBSimage::strategymain()
 
 
 		//}
-		for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
-		{
-			for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10 ; compress_height++)
+			/*for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
 			{
-				bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
-				gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
-				rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
-				if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
+				for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10 ; compress_height++)
 				{
-				//printf("1  ");
-					if(Filter_Matrix[compress_width] > (23-compress_height))
+					bValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 0));
+					gValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 1));
+					rValue = (image.data + ((compress_height*IMAGEWIDTH/10 + compress_width) * 3 + 2));
+					if((*rValue == 128 && *gValue == 0 && *bValue == 128) || (*rValue == 0 && *gValue == 128 && *bValue == 128))
 					{
-						//printf("111111\n");
-						//printf("Deep_Matrix[compress_width] = %d, compress_height = %d\n",Deep_Matrix[compress_width],24-compress_height);
-						img.at<cv::Vec3b>(compress_height, compress_width)[0] = 0;
-						img.at<cv::Vec3b>(compress_height, compress_width)[1] = 0;
-						img.at<cv::Vec3b>(compress_height, compress_width)[2] = 195;
+					//printf("1  ");
+						if(Filter_Matrix[compress_width] > (23-compress_height))
+						{
+							//printf("111111\n");
+							//printf("Deep_Matrix[compress_width] = %d, compress_height = %d\n",Deep_Matrix[compress_width],24-compress_height);
+							img.at<cv::Vec3b>(compress_height, compress_width)[0] = 0;
+							img.at<cv::Vec3b>(compress_height, compress_width)[1] = 0;
+							img.at<cv::Vec3b>(compress_height, compress_width)[2] = 195;
+						}
+						else
+						{
+							//printf("else Deep_Matrix[compress_width] = %d, compress_height = %d\n",Deep_Matrix[compress_width],24-compress_height);
+							//printf("222222\n");
+							img.at<cv::Vec3b>(compress_height, compress_width)[0] = 0;
+							img.at<cv::Vec3b>(compress_height, compress_width)[1] = 0;
+							img.at<cv::Vec3b>(compress_height, compress_width)[2] = 0;
+							//img.at<uchar>(compress_height, compress_width) = 0;
+						}
 					}
 					else
 					{
-						//printf("else Deep_Matrix[compress_width] = %d, compress_height = %d\n",Deep_Matrix[compress_width],24-compress_height);
-						//printf("222222\n");
-						img.at<cv::Vec3b>(compress_height, compress_width)[0] = 0;
-						img.at<cv::Vec3b>(compress_height, compress_width)[1] = 0;
-						img.at<cv::Vec3b>(compress_height, compress_width)[2] = 0;
-						//img.at<uchar>(compress_height, compress_width) = 0;
+						//printf("3333333\n");
+						//printf("0  ");
+						img.at<cv::Vec3b>(compress_height, compress_width)[0] = 255;
+						img.at<cv::Vec3b>(compress_height, compress_width)[1] = 255;
+						img.at<cv::Vec3b>(compress_height, compress_width)[2] = 255;
+						//img.at<uchar>(compress_height, compress_width) = 255;
 					}
 				}
-				else
-				{
-					//printf("3333333\n");
-					//printf("0  ");
-					img.at<cv::Vec3b>(compress_height, compress_width)[0] = 255;
-					img.at<cv::Vec3b>(compress_height, compress_width)[1] = 255;
-					img.at<cv::Vec3b>(compress_height, compress_width)[2] = 255;
-					//img.at<uchar>(compress_height, compress_width) = 255;
-				}
+				// printf("\n");
 			}
-			printf("\n");
-		}
-		resize(img,img_resize,cv::Size(640,480),0,0);
-		//resize(img,img,cv::Size(640,480),0,0);
-		for(int compress_height = 0 ; compress_height < IMAGEWIDTH/10  ; compress_height++)
-		{
-			line(img_resize,cv::Point(compress_height*20,0),cv::Point(compress_height*20,480),cv::Scalar(125));         //horizantal
-			for(int compress_width = 0 ; compress_width < IMAGEHEIGHT/10 ; compress_width++)
+			resize(img,img_resize,cv::Size(640,480),0,0);
+			//resize(img,img,cv::Size(640,480),0,0);
+			for(int compress_height = 0 ; compress_height < IMAGEWIDTH/10  ; compress_height++)
 			{
-				line(img_resize,cv::Point(0,compress_width*20),cv::Point(640,compress_width*20),cv::Scalar(125));       //verticle
-			}
-		}
+				line(img_resize,cv::Point(compress_height*20,0),cv::Point(compress_height*20,480),cv::Scalar(125));         //horizantal
+				for(int compress_width = 0 ; compress_width < IMAGEHEIGHT/10 ; compress_width++)
+				{
+					line(img_resize,cv::Point(0,compress_width*20),cv::Point(640,compress_width*20),cv::Scalar(125));       //verticle
+				}
+			}*/
 
 
 		//0905++++
@@ -366,9 +366,9 @@ void OBSimage::strategymain()
         ROS_INFO("\n");
 		//cv::namedWindow("img_resize", CV_WINDOW_NORMAL);
 		//cv::resizeWindow("img", 480, 640);
-		cv::resizeWindow("img_resize", 640, 480);
+		/*cv::resizeWindow("img_resize", 640, 480);
 		cv::imshow("img_resize",img_resize);
-		cv::waitKey(1);
+		cv::waitKey(1);*/
 		//cv::destroyWindow("img_resize");
     }
 }
