@@ -105,9 +105,9 @@ public:
 	int l_center_Dy = 0;
 	int r_center_Dy = 0;
 	int center_Dy = 0;
-	int Deep_sum= 0;
 	bool one_b_flag = false;
 	bool two_b_flag = false;
+	int Deep_sum = 0;
 	//0905++++
 
 	unsigned char *rValue, *gValue, *bValue;

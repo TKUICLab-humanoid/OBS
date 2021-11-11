@@ -15,7 +15,6 @@ bool y_obs_flag
 int32 l_center_Dy
 int32 r_center_Dy
 int32 center_Dy
-int32 Deep_sum
 bool one_b_flag
 bool two_b_flag
-
+int32 Deep_sum

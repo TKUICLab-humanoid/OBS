@@ -88,6 +88,7 @@ void KidsizeStrategy::strategymain()
 
             case AVOID:
                 ROS_INFO("state = AVOID");
+                ROS_INFO(" Deep_sum = %d",Deep_sum);
                 //IMU_Value = get_IMU();
                 //ROS_INFO("IMU_Value = %lf",IMU_Value);
                 //ROS_INFO("(AVOID)continuousValue_x = %d",continuousValue_x);
@@ -431,6 +432,23 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("speed ++ obs not focus");
                                     //speed = def_speed();
                                     continuousValue_x += 100;
+                                    turn_angle = def_turn_angle();
+                                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                    ROS_INFO("turn_angle = %d",turn_angle);
+                                    ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                                    strategy_info->get_image_flag = true;
+                                    ros::spinOnce();
+                                    tool->Delay(10);
+                                }
+                            }
+                            if(continuousValue_x > speed) //速度大於目前要求速度 speed-- 保持角度
+                            {
+                                while(continuousValue_x > speed) 
+                                {
+                                    ROS_INFO("speed -- obs not focus");
+                                    //speed = def_speed();
+                                    continuousValue_x -= 100;
                                     turn_angle = def_turn_angle();
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                     ROS_INFO("turn_angle = %d",turn_angle);
@@ -922,7 +940,7 @@ void KidsizeStrategy::strategymain()
                     ros::spinOnce();
                     tool->Delay(10);
 
-                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1850, 300);             //低頭 1700
+                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1600, 300);             //低頭 1700
                     ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 1447, 300);           //頭像右轉
                     tool->Delay(1000);    
                     strategy_info->get_image_flag = true;       
@@ -937,7 +955,7 @@ void KidsizeStrategy::strategymain()
                     tool->Delay(100);
 
 
-                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1850, 300);             //低頭 1700
+                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1600, 300);             //低頭 1700
                     ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2647, 300);           //頭像左轉
                     tool->Delay(1500);     
                     strategy_info->get_image_flag = true;      
@@ -1086,6 +1104,10 @@ void KidsizeStrategy::strategymain()
 
             //0905++++++++++++++++
             case REDDOOR:
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1600, 300);             //頭回正常高度
+                //ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //頭轉回正中
+                tool->Delay(500);
+                //tool->Delay(50);
                 if(in_reddoor_flag == true)
                 {
                     ROS_INFO("state = REDDOOR");
@@ -1151,19 +1173,19 @@ void KidsizeStrategy::strategymain()
                         }
                         else if(RD == LD)       //對下方藍模做比較
                         {   
-                            if( (L_XMAX <= 65) || (R_XMIN <= 65) || (LeftblueOBS_XMax < 50 && RightblueOBS_XMin > 270) )
+                            if( (L_XMAX <= 65) || (R_XMIN <= 65) || (LeftblueOBS_XMax < 65 && RightblueOBS_XMin > 230) )
                             {
                                 ROS_INFO("ready enter CRAWL;");
                                 strategy_state = CRAWL;
                             }
-                            else if( (L_XMAX > 65 && L_XMAX < 300)  )//(L_XMAX > 70 && L_XMAX < 300 ) || (LeftblueOBS_XMax > 50)
+                            else if( (L_XMAX > 65) && (L_XMAX < 300)  )//(L_XMAX > 70 && L_XMAX < 300 ) || (LeftblueOBS_XMax > 50)
                             {
                                 ROS_INFO("RIGHT_MOVE");
                                 ROS_INFO("LeftblueOBS_XMax = %3d",LeftblueOBS_XMax);
                                 ros_com->sendContinuousValue(RightMove_X, RightMove_Y, 0, RightMove_T, IMU_continuous);
                                 tool->Delay(100);
                             }
-                            else if( (R_XMIN > 65 && R_XMIN < 300)  )//(R_XMIN > 70 && R_XMIN < 300 ) || (RightblueOBS_XMin < 270) 
+                            else if( (R_XMIN > 65) && (R_XMIN < 300)  )//(R_XMIN > 70 && R_XMIN < 300 ) || (RightblueOBS_XMin < 270) 
                             { 
                                 ROS_INFO("LEFT_MOVE");
                                 ROS_INFO("RightblueOBS_XMin = %3d",RightblueOBS_XMin);
@@ -1199,7 +1221,7 @@ void KidsizeStrategy::strategymain()
                 //strategy_state = CRAWL;
             break;
 
-            /*case CRAWL:
+            case CRAWL:
                 ROS_INFO("state = CRAWL");
 
                 if( abs(slope_avg) > 0.05 )
@@ -1265,7 +1287,7 @@ void KidsizeStrategy::strategymain()
 
 
                 strategy_state = AVOID;              //INIT or AVOID???
-            break;*/
+            break;
             //0905++++++++++++++++*/
 
             default :
@@ -1568,7 +1590,7 @@ void KidsizeStrategy::GetParameter(const strategy::GetParameter &msg) //GetParam
     center_Dy = msg.center_Dy;
     one_b_flag = msg.one_b_flag;
     two_b_flag = msg.two_b_flag;
-
+    Deep_sum = msg.Deep_sum;
 }
 
 void KidsizeStrategy::readparameter() //步態參數之讀檔

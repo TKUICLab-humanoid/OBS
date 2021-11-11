@@ -148,11 +148,12 @@ void OBSimage::strategymain()
 			}
 		}
 		////////////////////未進紅門，其餘影像判斷////////////////////		
-		//else
-		//{
+		else
+		{
 			ROS_INFO("NOT_IN_RED");
 			in_reddoor_flag = false;
 			ROS_INFO("in_reddoor_flag = false");
+		}
 			//if(Filter_Matrix[i] > 0)
 			//{
 				/*if ((strategy_info->color_mask_subject_cnts[2] != 0) && (strategy_info->color_mask_subject_cnts[1] != 0))
@@ -221,9 +222,11 @@ void OBSimage::strategymain()
 				{
 					Dy = Deep_Matrix[i];
 				}
+				//Deep_sum += Deep_Matrix[i];
 				l_center_Dy = Deep_Matrix[8];
 				r_center_Dy = Deep_Matrix[24];
 				center_Dy = Filter_Matrix[16];
+
 				Deep_sum += Deep_Matrix[i];
 
 				printf("%2d,",Filter_Matrix[i]);
@@ -283,7 +286,7 @@ void OBSimage::strategymain()
 			ImageInfo();
 
 
-		//}
+		
 			/*for(int compress_width = 0 ; compress_width < IMAGEWIDTH/10  ; compress_width++)
 			{
 				for(int compress_height = 0 ; compress_height < IMAGEHEIGHT/10 ; compress_height++)
@@ -356,9 +359,9 @@ void OBSimage::strategymain()
 		getparameter_parameter.l_center_Dy = l_center_Dy;
 		getparameter_parameter.r_center_Dy = r_center_Dy;
 		getparameter_parameter.center_Dy = center_Dy;
-		getparameter_parameter.Deep_sum = Deep_sum;
 		getparameter_parameter.one_b_flag = one_b_flag;
 		getparameter_parameter.two_b_flag = two_b_flag;
+		getparameter_parameter.Deep_sum = Deep_sum;
 		//0905++++
 
 
@@ -381,6 +384,7 @@ void OBSimage::ImageInfo()
 	ROS_INFO("Xc_count = %d, Xi_sum = %d, Xc = %.3lf",Xc_count,Xi_sum,Xc);
 	ROS_INFO("Dx = %.3lf",Dx);
 	ROS_INFO("Dy = %d",Dy);
+	ROS_INFO("Deep_sum = %d",Deep_sum);
 	//ROS_INFO("W_R = %d,W_L = %d",W_R,W_L);
 	//ROS_INFO("l_center_Dy = %d, r_center_Dy = %d, center_Dy = %d",l_center_Dy,r_center_Dy,center_Dy);
 	ROS_INFO("slope_avg = %lf",slope_avg);
@@ -400,6 +404,7 @@ void OBSimage::INIT_parameter()
 	W_L = 0;
 	WR = 0;
 	WL = 0;	
+	Deep_sum = 0;
 	Dy = Deep_Matrix[0];
 }
 void OBSimage::SlopeCalculate()			//計算斜率之副函式
