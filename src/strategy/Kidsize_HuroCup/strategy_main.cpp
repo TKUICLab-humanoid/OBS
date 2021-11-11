@@ -42,7 +42,7 @@ void KidsizeStrategy::strategymain()
                 }
                 
                 //head motor angle set 
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1460, 300);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1490, 300);
                 tool->Delay(50);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300); 
                 tool->Delay(50);
@@ -456,7 +456,7 @@ void KidsizeStrategy::strategymain()
                     }
                     else if( ( (Dx < 17 && Dx > 14) ||(Dx < -14 && Dx > -17) )  ) //障礙物在面前一整片
                     {
-                        if( l_center_Dy <= 13 && r_center_Dy <= 13)
+                        if( l_center_Dy <= 14 && r_center_Dy <= 14)
                         {
                             ROS_INFO("Dx = %5f",Dx);
                             ROS_INFO("l_center_Dy = %d, r_center_Dy = %d",l_center_Dy,r_center_Dy);
@@ -512,7 +512,7 @@ void KidsizeStrategy::strategymain()
                                 ros::spinOnce();
                                 tool->Delay(10);
                             }
-                            else //進入轉頭
+                            else  //進入轉頭
                             { 
                                 ROS_INFO("AVOID--->TURNHEAD");
                                 turnhead_flag = true;
@@ -615,7 +615,7 @@ void KidsizeStrategy::strategymain()
                         }
                     }
                 }
-                else //Dy = 24 no obs
+                else if (Dy = 24 )//Dy = 24 no obs
                 {
                     speed = def_speed();
                     if(continuousValue_x < maxspeed)//若小於最高速 speed++
@@ -639,11 +639,14 @@ void KidsizeStrategy::strategymain()
                     }
                     else if(continuousValue_x == maxspeed) //保持目前角度直走
                     {   
+                        IMU_Value = get_IMU();
+                        IMU_theta = IMU_Modify();
+                        IMU_theta = IMU_angle_offest;
                         ROS_INFO("void speed up finish in no obs");
                         ROS_INFO("continuousValue_x = %d",continuousValue_x);
                         ROS_INFO("turn_angle = %d",turn_angle);
                         ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                        ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
+                        ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous);  
                         strategy_info->get_image_flag = true;
                         ros::spinOnce();
                         tool->Delay(10);
@@ -899,6 +902,7 @@ void KidsizeStrategy::strategymain()
                         }
                     }*/
                 //}
+                ROS_INFO("break");
             break;
 
             case TURNHEAD: //轉頭
@@ -917,7 +921,7 @@ void KidsizeStrategy::strategymain()
                     ros::spinOnce();
                     tool->Delay(10);
 
-                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1700, 300);             //低頭
+                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1850, 300);             //低頭 1700
                     ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 1447, 300);           //頭像右轉
                     tool->Delay(1000);    
                     strategy_info->get_image_flag = true;       
@@ -929,7 +933,7 @@ void KidsizeStrategy::strategymain()
                     tool->Delay(100);
 
 
-                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1700, 300);             //低頭
+                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1850, 300);             //低頭 1700
                     ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2647, 300);           //頭像左轉
                     tool->Delay(1500);     
                     strategy_info->get_image_flag = true;      
@@ -941,13 +945,13 @@ void KidsizeStrategy::strategymain()
                     tool->Delay(100);
                     
 
-                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1460, 300);             //頭回正常高度
+                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1490, 300);             //頭回正常高度
                     ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //頭轉回正中
                     tool->Delay(500);
                     tool->Delay(50);
                     
 
-                    if((turn_WL - turn_WR) > 10) //左權重大於右權重 代表缺口在右邊
+                    if((turn_WL - turn_WR) > 100) //左權重大於右權重 代表缺口在右邊
                     {
                         ROS_INFO("turn right after turnhead");
                         turnhead_flag == false;
@@ -1002,7 +1006,7 @@ void KidsizeStrategy::strategymain()
                         //    strategy_state = AVOID;
                         //}
                     }
-                    else if((turn_WR - turn_WL) > 10 ) //右權重大於左權重 代表缺口在左邊
+                    else if((turn_WR - turn_WL) > 100 ) //右權重大於左權重 代表缺口在左邊
                     {
                         ROS_INFO("turn left after turnhead");
                         turnhead_flag == false;
@@ -1059,7 +1063,7 @@ void KidsizeStrategy::strategymain()
                     }
                     else //imu > 80後做一般避障策略
                     {
-                        ROS_INFO("abs(turn_WR - turn_WL) < 10 after turnhead");
+                        ROS_INFO("abs(turn_WR - turn_WL) < 100 after turnhead");
                         turnhead_flag == false;
                         strategy_state = AVOID;
                     }
@@ -1308,27 +1312,27 @@ int KidsizeStrategy::IMU_Modify() //用imu值判斷修正角度之副函式
         }
         else if (abs(IMU_Value) >= 30 && abs(IMU_Value) < 45)
         {
-            IMU_angle_offest = 8;
+            IMU_angle_offest = 9;
         }
         else if (abs(IMU_Value) >= 15 && abs(IMU_Value) < 30)
         {
-            IMU_angle_offest = 6;
+            IMU_angle_offest = 8;
         }
         else if (abs(IMU_Value) >= 10 && abs(IMU_Value) < 15)
         {
-            IMU_angle_offest = 4;
+            IMU_angle_offest = 7;
         }
         else if (abs(IMU_Value) >= 5 && abs(IMU_Value) < 10)
         {
-            IMU_angle_offest = 3;
+            IMU_angle_offest = 5;
         }
         else if (abs(IMU_Value) >= 2 && abs(IMU_Value) < 5)
         {
-            IMU_angle_offest = 2;
+            IMU_angle_offest = 4;
         }
         else
         {
-            IMU_angle_offest = 1;
+            IMU_angle_offest = 2;
         }
     }
     else if(IMU_Value > 0)
@@ -1343,27 +1347,27 @@ int KidsizeStrategy::IMU_Modify() //用imu值判斷修正角度之副函式
         }
         else if (abs(IMU_Value) >= 30 && abs(IMU_Value) < 45)
         {
-            IMU_angle_offest = -8;
+            IMU_angle_offest = -9;
         }
         else if (abs(IMU_Value) >= 15 && abs(IMU_Value) < 30)
         {
-            IMU_angle_offest = -6;
+            IMU_angle_offest = -8;
         }
         else if (abs(IMU_Value) >= 10 && abs(IMU_Value) < 15)
         {
-            IMU_angle_offest = -4;
+            IMU_angle_offest = -7;
         }
         else if (abs(IMU_Value) >= 5 && abs(IMU_Value) < 10)
         {
-            IMU_angle_offest = -3;
+            IMU_angle_offest = -5;
         }
         else if (abs(IMU_Value) >= 2 && abs(IMU_Value) < 5)
         {
-            IMU_angle_offest = -2;
+            IMU_angle_offest = -4;
         }
         else
         {
-            IMU_angle_offest = -1;
+            IMU_angle_offest = -2;
         }
     }
     ROS_INFO("(IMU_Modify)IMU_Value = %lf",IMU_Value);
@@ -1444,42 +1448,42 @@ int KidsizeStrategy::def_turn_angle() //用Dx判斷旋轉角度之副函式
         if(abs(Dx) <= 16 && abs(Dx) > 13)
         {
             //ROS_INFO("abs(x_boundary) < 16 && abs(x_boundary) > 11");
-            continuous_angle_offset = -10;
+            continuous_angle_offset = -11;
         }
         else if(abs(Dx) <= 13 && abs(Dx) > 10)
         {
            // ROS_INFO("abs(x_boundary) < 13 && abs(x_boundary) > 10");
-            continuous_angle_offset = -9;
+            continuous_angle_offset = -11;
         }
         else if(abs(Dx) <= 10 && abs(Dx) > 8)
         {
            // ROS_INFO("abs(x_boundary) < 13 && abs(x_boundary) > 10");
-            continuous_angle_offset = -8;
+            continuous_angle_offset = -10;
         }
         else if(abs(Dx) <= 8 && abs(Dx) > 6)
         {
             //ROS_INFO("abs(x_boundary) < 10 && abs(x_boundary) > 7");
-            continuous_angle_offset = -8;
+            continuous_angle_offset = -10;
         }
         else if(abs(Dx) <= 6 && abs(Dx) > 4)
         {
             //ROS_INFO("abs(x_boundary) < 10 && abs(x_boundary) > 7");
-            continuous_angle_offset = -6;
+            continuous_angle_offset = -9;
         }
         else if(abs(Dx) <= 4 && abs(Dx) > 3)
         {
             //ROS_INFO("abs(x_boundary) < 10 && abs(x_boundary) > 7");
-            continuous_angle_offset = -6;
+            continuous_angle_offset = -8;
         }
         else if(abs(Dx) <= 3 && abs(Dx) > 2)
         {
             //ROS_INFO("abs(x_boundary) < 10 && abs(x_boundary) > 7");
-            continuous_angle_offset = -5;
+            continuous_angle_offset = -7;
         }
         else
         {
             //ROS_INFO("abs(Dx) < 1");
-            continuous_angle_offset = -4;
+            continuous_angle_offset = -5;
         }
     }
 
@@ -1504,19 +1508,19 @@ int KidsizeStrategy::def_turn_angle() //用Dx判斷旋轉角度之副函式
         }
         else if(abs(Dx) <= 6 && abs(Dx) > 4)
         {
-            continuous_angle_offset = 6;
+            continuous_angle_offset = 7;
         }
         else if(abs(Dx) <= 4 && abs(Dx) > 3)
         {
-            continuous_angle_offset = 6;
+            continuous_angle_offset = 7;
         }
         else if(abs(Dx) <= 3 && abs(Dx) > 2)
         {
-            continuous_angle_offset = 5;
+            continuous_angle_offset = 6;
         }
         else
         {
-            continuous_angle_offset = 4;
+            continuous_angle_offset = 5;
         }   
     }
     else
