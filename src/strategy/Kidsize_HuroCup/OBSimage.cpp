@@ -57,7 +57,7 @@ void OBSimage::strategymain()
 		//0905++++
 	////////////////////有進紅門，紅門case內影像判斷////////////////////
 		//SlopeCalculate();
-		/*if (strategy_info->color_mask_subject_cnts[5] != 0)				
+		if (strategy_info->color_mask_subject_cnts[5] != 0)				
 		{
 			for(int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
 			{
@@ -65,8 +65,8 @@ void OBSimage::strategymain()
 				{
 					//ROS_INFO("red area = %d ",strategy_info->color_mask_subject[5][i].size);
 					ROS_INFO("IN_RED");
-					in_reddoor_flag = true;
-					b_obs_flag = true;
+					//in_reddoor_flag = true;
+					//b_obs_flag = true;
 					//y_obs_flag = true;
 					//ROS_INFO("in_reddoor_flag = true");
 
@@ -137,7 +137,7 @@ void OBSimage::strategymain()
 				{
 					SlopeCalculate();
 					in_reddoor_flag = true;
-					b_obs_flag = true;
+					//b_obs_flag = true;
 					//y_obs_flag = false;
 					ROS_INFO("RED is not big enough");
 					strategy_info->get_image_flag = true;
@@ -150,12 +150,12 @@ void OBSimage::strategymain()
 		////////////////////未進紅門，其餘影像判斷////////////////////		
 		//else
 		//{
-			//ROS_INFO("NOT_IN_RED");
-			//in_reddoor_flag = false;
+			ROS_INFO("NOT_IN_RED");
+			in_reddoor_flag = false;
 			ROS_INFO("in_reddoor_flag = false");
 			//if(Filter_Matrix[i] > 0)
 			//{
-				if ((strategy_info->color_mask_subject_cnts[2] != 0) && (strategy_info->color_mask_subject_cnts[1] != 0))
+				/*if ((strategy_info->color_mask_subject_cnts[2] != 0) && (strategy_info->color_mask_subject_cnts[1] != 0))
 				{
 					ROS_INFO("obs are b & y");
 					b_obs_flag = true;
@@ -224,6 +224,7 @@ void OBSimage::strategymain()
 				l_center_Dy = Deep_Matrix[8];
 				r_center_Dy = Deep_Matrix[24];
 				center_Dy = Filter_Matrix[16];
+				Deep_sum += Deep_Matrix[i];
 
 				printf("%2d,",Filter_Matrix[i]);
 				//calculate WR WL
@@ -355,6 +356,7 @@ void OBSimage::strategymain()
 		getparameter_parameter.l_center_Dy = l_center_Dy;
 		getparameter_parameter.r_center_Dy = r_center_Dy;
 		getparameter_parameter.center_Dy = center_Dy;
+		getparameter_parameter.Deep_sum = Deep_sum;
 		getparameter_parameter.one_b_flag = one_b_flag;
 		getparameter_parameter.two_b_flag = two_b_flag;
 		//0905++++
@@ -381,12 +383,12 @@ void OBSimage::ImageInfo()
 	ROS_INFO("Dy = %d",Dy);
 	//ROS_INFO("W_R = %d,W_L = %d",W_R,W_L);
 	//ROS_INFO("l_center_Dy = %d, r_center_Dy = %d, center_Dy = %d",l_center_Dy,r_center_Dy,center_Dy);
-	//ROS_INFO("slope_avg = %lf",slope_avg);
-	//ROS_INFO("RD = %d ,LD = %d",RD,LD);
-	//ROS_INFO("L_XMAX = %3d",L_XMAX);
-	//ROS_INFO("R_XMIN = %3d",R_XMIN);
-	//ROS_INFO("LeftblueOBS_XMax = %3d",LeftblueOBS_XMax);
-	//ROS_INFO("RightblueOBS_XMin = %3d",RightblueOBS_XMin);
+	ROS_INFO("slope_avg = %lf",slope_avg);
+	ROS_INFO("RD = %d ,LD = %d",RD,LD);
+	ROS_INFO("L_XMAX = %3d",L_XMAX);
+	ROS_INFO("R_XMIN = %3d",R_XMIN);
+	ROS_INFO("LeftblueOBS_XMax = %3d",LeftblueOBS_XMax);
+	ROS_INFO("RightblueOBS_XMin = %3d",RightblueOBS_XMin);
 
 }
 void OBSimage::INIT_parameter()
@@ -400,7 +402,7 @@ void OBSimage::INIT_parameter()
 	WL = 0;	
 	Dy = Deep_Matrix[0];
 }
-/*void OBSimage::SlopeCalculate()			//計算斜率之副函式
+void OBSimage::SlopeCalculate()			//計算斜率之副函式
 {
     bool Check_label_model_flag = true;
     int slope_rand[4];
@@ -409,7 +411,7 @@ void OBSimage::INIT_parameter()
     slope_avg = 10.0;
 
 	for (int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
-        {
+    {
 		if (strategy_info->color_mask_subject[5][i].size > 1000)
 		{
 			for (int j = 0; j < 4; j++)
@@ -478,9 +480,9 @@ void OBSimage::INIT_parameter()
 			slope[0] = float(slope_Y[1] - slope_Y[0]) / float(slope_rand[1] - slope_rand[0]);
 			slope[1] = float(slope_Y[2] - slope_Y[1]) / float(slope_rand[2] - slope_rand[1]);
 			slope[2] = float(slope_Y[3] - slope_Y[2]) / float(slope_rand[3] - slope_rand[2]);
-			slope_avg = (slope[0] + slope[1] + slope[2]) / 3;image
+			slope_avg = (slope[0] + slope[1] + slope[2]) / 3;
 			break;
 		}
             
-        }
-}*/
+    }
+}
