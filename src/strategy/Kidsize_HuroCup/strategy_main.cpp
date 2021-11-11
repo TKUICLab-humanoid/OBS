@@ -88,8 +88,8 @@ void KidsizeStrategy::strategymain()
 
             case AVOID:
                 ROS_INFO("state = AVOID");
-                IMU_Value = get_IMU();
-                ROS_INFO("IMU_Value = %lf",IMU_Value);
+                //IMU_Value = get_IMU();
+                //ROS_INFO("IMU_Value = %lf",IMU_Value);
                 //ROS_INFO("(AVOID)continuousValue_x = %d",continuousValue_x);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //轉頭至正中
                 tool->Delay(50); 
@@ -113,7 +113,7 @@ void KidsizeStrategy::strategymain()
                             {
                                 if( imu_ok_flag == false &&  Dx >= 6 ) //避障前用imu對正障礙物   /*Dx >= 7 &&  abs (IMU_Value) > 20 &&*/ 
                                 {
-                                    ROS_INFO("imu befor turn right");
+                                    ROS_INFO("imu & speed -- befor turn right");
                                     continuousValue_x -= 100;
                                     IMU_Value = get_IMU();
                                     IMU_theta = IMU_Modify();
@@ -168,7 +168,7 @@ void KidsizeStrategy::strategymain()
                             {
                                 if(  imu_ok_flag == false && Dx >= 6 ) //避障前用imu對正障礙物   /*Dx >= 7 &&  abs (IMU_Value) > 20 &&*/
                                 {
-                                    ROS_INFO("imu befor turn right");
+                                    ROS_INFO("imu & speed ++ befor turn right");
                                     continuousValue_x += 100;
                                     IMU_Value = get_IMU();
                                     IMU_theta = IMU_Modify();
@@ -272,7 +272,7 @@ void KidsizeStrategy::strategymain()
                             {
                                 if( /*Dx <= -7 &&  abs(IMU_Value) > 10 */imu_ok_flag == false && Dx <= -6 ) //避障前用imu對正障礙物  Dx <= -7
                                 {
-                                    ROS_INFO("imu befor turn left_1");
+                                    ROS_INFO("imu & speed -- befor turn left");
                                     continuousValue_x -= 100;
                                     IMU_Value = get_IMU();
                                     IMU_theta = IMU_Modify();
@@ -326,7 +326,7 @@ void KidsizeStrategy::strategymain()
                             {
                                 if( /*Dx <= -7 &&  abs(IMU_Value) > 10 */imu_ok_flag == false && Dx <= -6 ) //避障前用imu對正障礙物 Dx <= -7
                                 {
-                                    ROS_INFO("imu befor turn left_2");
+                                    ROS_INFO("imu & speed ++ befor turn left");
                                     continuousValue_x += 100;
                                     IMU_Value = get_IMU();
                                     IMU_theta = IMU_Modify();
@@ -378,7 +378,7 @@ void KidsizeStrategy::strategymain()
                         {
                             if( /*Dx <= -7 &&  abs(IMU_Value) > 10 */(imu_ok_flag == false && Dx <= -6) ) //避障前用imu對正障礙物 Dx <= -7
                             {
-                                ROS_INFO("imu befor turn left_3");
+                                ROS_INFO("imu befor turn left");
                                 IMU_Value = get_IMU();
                                 IMU_theta = IMU_Modify();
                                 IMU_theta = IMU_angle_offest;
@@ -428,7 +428,7 @@ void KidsizeStrategy::strategymain()
                         {
                             while(continuousValue_x < speed) 
                             {
-                                ROS_INFO("speed ++ in no avoid");
+                                ROS_INFO("speed ++ obs not focus");
                                 //speed = def_speed();
                                 continuousValue_x += 100;
                                 turn_angle = def_turn_angle();
@@ -443,7 +443,7 @@ void KidsizeStrategy::strategymain()
                         }
                         else //速度等於目前要求速度 保持速度 保持角度
                         {
-                            ROS_INFO("in no avoid");
+                            ROS_INFO("obs not focus");
                             turn_angle = def_turn_angle();
                             ROS_INFO("continuousValue_x = %d",continuousValue_x);
                             ROS_INFO("turn_angle = %d",turn_angle);
@@ -557,7 +557,7 @@ void KidsizeStrategy::strategymain()
                             {
                                 while(continuousValue_x < maxspeed) //
                                 {
-                                    ROS_INFO("speed ++ in no avoid");
+                                    ROS_INFO("speed ++ in go straight");
                                     continuousValue_x += 100;
                                     //turn_angle = def_turn_angle();
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
@@ -571,7 +571,7 @@ void KidsizeStrategy::strategymain()
                             }
                             else if(continuousValue_x == maxspeed) //保持目前角度直走
                             {   
-                                ROS_INFO("void speed up finish in no avoid");
+                                ROS_INFO("void speed up finish in go straight");
                                 ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                 ROS_INFO("turn_angle = %d",turn_angle);
                                 ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
