@@ -65,7 +65,7 @@ void OBSimage::strategymain()
 				{
 					//ROS_INFO("red area = %d ",strategy_info->color_mask_subject[5][i].size);
 					ROS_INFO("IN_RED");
-					//in_reddoor_flag = true;
+					in_reddoor_flag = true;
 					//b_obs_flag = true;
 					//y_obs_flag = true;
 					//ROS_INFO("in_reddoor_flag = true");
@@ -135,7 +135,7 @@ void OBSimage::strategymain()
 				}
 				else
 				{
-					SlopeCalculate();
+					//SlopeCalculate();
 					in_reddoor_flag = true;
 					//b_obs_flag = true;
 					//y_obs_flag = false;
@@ -386,7 +386,7 @@ void OBSimage::ImageInfo()
 	ROS_INFO("Dy = %d",Dy);
 	ROS_INFO("Deep_sum = %d",Deep_sum);
 	//ROS_INFO("W_R = %d,W_L = %d",W_R,W_L);
-	//ROS_INFO("l_center_Dy = %d, r_center_Dy = %d, center_Dy = %d",l_center_Dy,r_center_Dy,center_Dy);
+	ROS_INFO("l_center_Dy = %d, r_center_Dy = %d, center_Dy = %d",l_center_Dy,r_center_Dy,center_Dy);
 	ROS_INFO("slope_avg = %lf",slope_avg);
 	ROS_INFO("RD = %d ,LD = %d",RD,LD);
 	ROS_INFO("L_XMAX = %3d",L_XMAX);
@@ -413,7 +413,7 @@ void OBSimage::SlopeCalculate()			//計算斜率之副函式
     int slope_rand[4];
     int slope_Y[4];
     float slope[3];
-    slope_avg = 10.0;
+    slope_avg = 0.0;
 
 	for (int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
     {
