@@ -820,7 +820,7 @@ void KidsizeStrategy::strategymain()
                     ROS_INFO("headup in reddor");
                     tool->Delay(500);
                 
-                    if( Dy > 5 )
+                    if( (Dy > 5) && (redoor_dis == false))
                     {
                         ROS_INFO("distance too far");
                         continuousValue_x = stay.x + 1000;
@@ -828,7 +828,7 @@ void KidsizeStrategy::strategymain()
                         ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
                         tool->Delay(60);
                     }
-                    else if( Dy < 2 )
+                    else if( (Dy < 2) && (redoor_dis == false))
                     {
                         ROS_INFO("distance too short");
                         continuousValue_x = stay.x - 1000;
@@ -839,6 +839,8 @@ void KidsizeStrategy::strategymain()
                     else
                     {
                         ROS_INFO("distance is ok");
+                        redoor_dis = true;
+
                     
                         //減速到原地踏步
                         if(continuousValue_x > stay.x) // current speed > the speed of stepping 

@@ -89,6 +89,7 @@ public:
 	int turn_WL = 0;
 	bool reddoor_slope_ok_flag = false;
 	bool imu_ok_flag = false;
+	bool redoor_dis = false;
 	
 
 	string parameter_path = "N";
