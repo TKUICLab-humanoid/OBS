@@ -973,21 +973,21 @@ void KidsizeStrategy::strategymain()
                             {   
                                 if( /*(L_XMAX <= 65) || (R_XMIN <= 65) || */(LeftblueOBS_XMax < 75 && RightblueOBS_XMin > 260) )
                                 {
-                                    if( Dy < 2 ) 
-                                    {
-                                        //while( Dy < 3 )
-                                        //{
-                                            ROS_INFO("back back");
-                                            continuousValue_x = stay.x - 1000;
-                                            ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
-                                            tool->Delay(60);
-                                        //}
-                                    }
-                                    else
-                                    {
+                                    // if( Dy < 2 ) 
+                                    // {
+                                    //     //while( Dy < 3 )
+                                    //     //{
+                                    //         ROS_INFO("back back");
+                                    //         continuousValue_x = stay.x - 1000;
+                                    //         ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
+                                    //         tool->Delay(60);
+                                    //     //}
+                                    // }
+                                    // else
+                                    // {
                                         ROS_INFO("ready enter CRAWL;");
                                         strategy_state = CRAWL;
-                                    }
+                                    //}
                                 }
                                 else if( (L_XMAX > 65) && (L_XMAX < 300)  )//(L_XMAX > 70 && L_XMAX < 300 ) || (LeftblueOBS_XMax > 50)
                                 {
@@ -1068,67 +1068,90 @@ void KidsizeStrategy::strategymain()
             break;
 
             case CRAWL:
-                ROS_INFO("state = CRAWL");
+            ROS_INFO("state = CRAWL");
 
-                if( abs(slope_avg) > 0.05 )
+            if( (Dy > 5) && (crawl_dis == false))
                 {
-                    if( reddoor_slope_ok_flag == false)
+                    ROS_INFO("distance too far");
+                    continuousValue_x = stay.x + 1000;
+                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
+                    tool->Delay(60);
+                }
+                else if( (Dy < 2) && (crawl_dis == false))
+                {
+                    ROS_INFO("distance too short");
+                    continuousValue_x = stay.x - 1000;
+                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
+                    tool->Delay(60);
+                }
+                else
+                {
+                    ROS_INFO("distance is ok");
+                    crawl_dis = true;
+
+                    if( abs(slope_avg) > 0.05 )
                     {
-                        while( abs(slope_avg) > 0.05)
+                        if( reddoor_slope_ok_flag == false)
                         {
-                            ROS_INFO("slope fix in crawl");
-                            slope();
-                            ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                            ROS_INFO("slope_avg = %lf",slope_avg);
-                            ROS_INFO("angle_offest = %d",angle_offest);
-                            //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
-                            strategy_info->get_image_flag = true;
-                            ros::spinOnce();
-                            tool->Delay(10);
+                            while( abs(slope_avg) > 0.05)
+                            {
+                                ROS_INFO("slope fix in crawl");
+                                slope();
+                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                ROS_INFO("slope_avg = %lf",slope_avg);
+                                ROS_INFO("angle_offest = %d",angle_offest);
+                                //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                                strategy_info->get_image_flag = true;
+                                ros::spinOnce();
+                                tool->Delay(10);
+                            }
+                            reddoor_slope_ok_flag = true ;
                         }
-                        reddoor_slope_ok_flag = true ;
+                    }
+                    else if (abs(slope_avg) <= 0.05)                        //爬行
+                    {
+                        //ros_com->sendHeadMotor(HeadMotorID::VerticalID, 2500, 600);
+                        //tool->Delay(100);
+                        //ros_com->sendBodySector(5);
+                        //tool->Delay(1000);
+                        //ros_com->sendBodySector(6);
+                        //tool->Delay(3000);
+
+                        //for (int crwtime = 0; crwtime <= 20; crwtime++)
+                        //{
+                        //    ROS_INFO("crw");
+                            //strategy_info->get_image_flag = true;
+                            //ros::spinOnce();
+                        //    for (int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)
+                        //    {
+                        //        if (strategy_info->color_mask_subject[2][i].size > 32000)
+                        //        {
+                        //            ROS_INFO("stand up1");
+                        //            break;
+                        //        }
+                        //    }
+                        //    strategy_info->get_image_flag = true;
+                        //    ros::spinOnce();
+                        //    for (int i = 0; i < strategy_info->color_mask_subject_cnts[1]; i++)
+                        //    {
+                        //        if (strategy_info->color_mask_subject[1][i].size > 35000)
+                        //        {
+                        //            ROS_INFO("stand up2");
+                        //            break;
+                        //        }
+                        //    }
+                        //    ros_com->sendBodySector(7);
+                        //    tool->Delay(2200);
+
+                        //}
+                        ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
+                        tool->Delay(50);
+                        tool->Delay(5000);
                     }
                 }
-                else if (abs(slope_avg) <= 0.05)                        //爬行
-                {
-                    //ros_com->sendHeadMotor(HeadMotorID::VerticalID, 2500, 600);
-                    //tool->Delay(100);
-                    //ros_com->sendBodySector(5);
-                    //tool->Delay(1000);
-                    //ros_com->sendBodySector(6);
-                    //tool->Delay(3000);
-
-                    //for (int crwtime = 0; crwtime <= 20; crwtime++)
-                    //{
-                    //    ROS_INFO("crw");
-                        //strategy_info->get_image_flag = true;
-                        //ros::spinOnce();
-                    //    for (int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)
-                    //    {
-                    //        if (strategy_info->color_mask_subject[2][i].size > 32000)
-                    //        {
-                    //            ROS_INFO("stand up1");
-                    //            break;
-                    //        }
-                    //    }
-                    //    strategy_info->get_image_flag = true;
-                    //    ros::spinOnce();
-                    //    for (int i = 0; i < strategy_info->color_mask_subject_cnts[1]; i++)
-                    //    {
-                    //        if (strategy_info->color_mask_subject[1][i].size > 35000)
-                    //        {
-                    //            ROS_INFO("stand up2");
-                    //            break;
-                    //        }
-                    //    }
-                    //    ros_com->sendBodySector(7);
-                    //    tool->Delay(2200);
-
-                    //}
-                    ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
-                    tool->Delay(50);
-                    tool->Delay(5000);
-                }
+                
                 tool->Delay(100);
 
                 ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 

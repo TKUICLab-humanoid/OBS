@@ -90,6 +90,7 @@ public:
 	bool reddoor_slope_ok_flag = false;
 	bool imu_ok_flag = false;
 	bool redoor_dis = false;
+	bool crawl_dis = false;
 	
 
 	string parameter_path = "N";
