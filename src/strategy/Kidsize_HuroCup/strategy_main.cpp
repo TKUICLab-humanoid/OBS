@@ -819,10 +819,34 @@ void KidsizeStrategy::strategymain()
                     ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1620, 300);
                     ROS_INFO("headup in reddor");
                     tool->Delay(500);
-                
-                    if( (Dy > 5) && (redoor_dis == false))
+
+                    if( abs(slope_avg) > 0.05 )
                     {
-                        ROS_INFO("distance too far");
+                        //if( reddoor_slope_ok_flag == false)
+                        //{
+                            while( abs(slope_avg) > 0.05)
+                            {
+                                ROS_INFO("first slope fix in red");
+                                slope();
+                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                ROS_INFO("slope_avg = %lf",slope_avg);
+                                ROS_INFO("angle_offest = %d",angle_offest);
+                                //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                                strategy_info->get_image_flag = true;
+                                ros::spinOnce();
+                                tool->Delay(10);
+                            }
+                            reddoor_slope_ok_flag = true ;
+                        //}
+                    }
+                    else if (abs(slope_avg) <= 0.05)
+                    {
+                        reddoor_slope_ok_flag = true ;
+                    }
+                
+                    if( (Dy >= 4) && (redoor_dis == false))
+                    {
+                        ROS_INFO("distance too far 1");
                         continuousValue_x = stay.x + 1000;
                         ROS_INFO("continuousValue_x = %d",continuousValue_x);
                         ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
@@ -830,7 +854,7 @@ void KidsizeStrategy::strategymain()
                     }
                     else if( (Dy < 2) && (redoor_dis == false))
                     {
-                        ROS_INFO("distance too short");
+                        ROS_INFO("distance too short 1");
                         continuousValue_x = stay.x - 1000;
                         ROS_INFO("continuousValue_x = %d",continuousValue_x);
                         ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
@@ -838,9 +862,12 @@ void KidsizeStrategy::strategymain()
                     }
                     else
                     {
-                        ROS_INFO("distance is ok");
+                        ROS_INFO("distance is ok 1");
                         redoor_dis = true;
-
+                        // continuousValue_x = stay.x ;
+                        // ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                        // ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);
+                        ROS_INFO("redoor_dis = true");
                     
                         //減速到原地踏步
                         if(continuousValue_x > stay.x) // current speed > the speed of stepping 
@@ -861,8 +888,8 @@ void KidsizeStrategy::strategymain()
                         {
                             if( abs(slope_avg) > 0.05 )
                             {
-                                if( reddoor_slope_ok_flag == false)
-                                {
+                                //if( reddoor_slope_ok_flag == false)
+                                //{
                                     while( abs(slope_avg) > 0.05)
                                     {
                                         ROS_INFO("slope fix in REDDOOR");
@@ -876,7 +903,7 @@ void KidsizeStrategy::strategymain()
                                         tool->Delay(100);
                                     }
                                     reddoor_slope_ok_flag = true ;
-                                }
+                                //}
                             }
                             else if( abs(slope_avg) <= 0.05 )
                             {
@@ -900,78 +927,7 @@ void KidsizeStrategy::strategymain()
                             }
                             else if(RD == LD)       //對下方藍模做比較
                             {   
-                                if( /*(L_XMAX <= 65) || (R_XMIN <= 65) || */(LeftblueOBS_XMax < 75 && RightblueOBS_XMin > 270) )
-                                {
-                                    if( Dy < 3 ) 
-                                    {
-                                        //while( Dy < 3 )
-                                        //{
-                                            ROS_INFO("back back");
-                                            continuousValue_x = stay.x - 1000;
-                                            ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
-                                            tool->Delay(60);
-                                        //}
-                                    }
-                                    else
-                                    {    //減速到原地踏步
-                        if(continuousValue_x > stay.x) // current speed > the speed of stepping 
-                        {
-                            while(continuousValue_x > stay.x)
-                            {
-                                ROS_INFO("speed-- in REDDOOR");
-                                continuousValue_x -= 100;
-                                //turn_angle = def_turn_angle();
-                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                ROS_INFO("turn_angle = %d",turn_angle);
-                                ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);  
-                                tool->Delay(60);
-                            }
-                        }
-                        else if(continuousValue_x == stay.x)
-                        {
-                            if( abs(slope_avg) > 0.05 )
-                            {
-                                if( reddoor_slope_ok_flag == false)
-                                {
-                                    while( abs(slope_avg) > 0.05)
-                                    {
-                                        ROS_INFO("slope fix in REDDOOR");
-                                        slope();
-                                        ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                        ROS_INFO("slope_avg = %lf",slope_avg);
-                                        ROS_INFO("angle_offest = %d",angle_offest);
-                                        //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
-                                        strategy_info->get_image_flag = true;
-                                        ros::spinOnce();
-                                        tool->Delay(100);
-                                    }
-                                    reddoor_slope_ok_flag = true ;
-                                }
-                            }
-                            else if( abs(slope_avg) <= 0.05 )
-                            {
-                                reddoor_slope_ok_flag = true ;
-                            }
-                        }
-
-                        if( abs(slope_avg) <= 0.05 )//再次確認斜率
-                        {
-                            if(RD < LD)             //對紅門做位移
-                            {
-                                ROS_INFO("LEFT_MOVE_1");
-                                ros_com->sendContinuousValue(LeftMove_X, LeftMove_Y, 0,LeftMove_T, IMU_continuous);
-                                tool->Delay(100);
-                            }
-                            else if(RD > LD)
-                            {
-                                ROS_INFO("RIGHT_MOVE_1");
-                                ros_com->sendContinuousValue(RightMove_X, RightMove_Y, 0, RightMove_T, IMU_continuous);
-                                tool->Delay(100);
-                            }
-                            else if(RD == LD)       //對下方藍模做比較
-                            {   
-                                if( /*(L_XMAX <= 65) || (R_XMIN <= 65) || */(LeftblueOBS_XMax < 75 && RightblueOBS_XMin > 260) )
+                                if( /*(L_XMAX <= 65) || (R_XMIN <= 65) || */(LeftblueOBS_XMax < 65 && RightblueOBS_XMin > 260) )
                                 {
                                     // if( Dy < 2 ) 
                                     // {
@@ -1004,57 +960,11 @@ void KidsizeStrategy::strategymain()
                                     tool->Delay(100);
                                 }
                             } 
-                        } 
-                        else if( abs(slope_avg) > 0.05 )//若再次確認時斜率>0.05 則再次修正
-                        {
-                            while( abs(slope_avg) > 0.05)
-                            {
-                                ROS_INFO("second slope fix in REDDOOR");
-                                slope();
-                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                ROS_INFO("slope_avg = %lf",slope_avg);
-                                ROS_INFO("angle_offest = %d",angle_offest);
-                                //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
-                                strategy_info->get_image_flag = true;
-                                ros::spinOnce();
-                                tool->Delay(100);
-                            }
-                            reddoor_slope_ok_flag = true ;
                         }
-                                    }
-                                }
-                                else if( (L_XMAX > 65) && (L_XMAX < 300)  )//(L_XMAX > 70 && L_XMAX < 300 ) || (LeftblueOBS_XMax > 50)
-                                {
-                                    ROS_INFO("RIGHT_MOVE");
-                                    ROS_INFO("LeftblueOBS_XMax = %3d",LeftblueOBS_XMax);
-                                    ros_com->sendContinuousValue(RightMove_X, RightMove_Y, 0, RightMove_T, IMU_continuous);
-                                    tool->Delay(100);
-                                }
-                                else if( (R_XMIN > 65) && (R_XMIN < 300)  )//(R_XMIN > 70 && R_XMIN < 300 ) || (RightblueOBS_XMin < 270) 
-                                { 
-                                    ROS_INFO("LEFT_MOVE");
-                                    ROS_INFO("RightblueOBS_XMin = %3d",RightblueOBS_XMin);
-                                    ros_com->sendContinuousValue(LeftMove_X, LeftMove_Y, 0,LeftMove_T, IMU_continuous);
-                                    tool->Delay(100);
-                                }
-                            } 
-                        } 
-                        else if( abs(slope_avg) > 0.05 )//若再次確認時斜率>0.05 則再次修正
+                        else
                         {
-                            while( abs(slope_avg) > 0.05)
-                            {
-                                ROS_INFO("second slope fix in REDDOOR");
-                                slope();
-                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                ROS_INFO("slope_avg = %lf",slope_avg);
-                                ROS_INFO("angle_offest = %d",angle_offest);
-                                //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
-                                strategy_info->get_image_flag = true;
-                                ros::spinOnce();
-                                tool->Delay(100);
-                            }
-                            reddoor_slope_ok_flag = true ;
-                        }
+                            strategy_state = REDDOOR;
+                        } 
                     }    
                 }
                 else 
@@ -1070,95 +980,125 @@ void KidsizeStrategy::strategymain()
             case CRAWL:
             ROS_INFO("state = CRAWL");
 
-            if( (Dy > 5) && (crawl_dis == false))
+            reddoor_slope_ok_flag = false;
+            if( abs(slope_avg) > 0.05 )
+            {
+                if( reddoor_slope_ok_flag == false)
                 {
-                    ROS_INFO("distance too far");
-                    continuousValue_x = stay.x + 1000;
-                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
-                    tool->Delay(60);
-                }
-                else if( (Dy < 2) && (crawl_dis == false))
-                {
-                    ROS_INFO("distance too short");
-                    continuousValue_x = stay.x - 1000;
-                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
-                    tool->Delay(60);
-                }
-                else
-                {
-                    ROS_INFO("distance is ok");
-                    crawl_dis = true;
-
-                    if( abs(slope_avg) > 0.05 )
+                    while( abs(slope_avg) > 0.05)
                     {
-                        if( reddoor_slope_ok_flag == false)
+                        ROS_INFO("slope fix in crawl");
+                        slope();
+                        ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                        ROS_INFO("slope_avg = %lf",slope_avg);
+                        ROS_INFO("angle_offest = %d",angle_offest);
+                        //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                        strategy_info->get_image_flag = true;
+                        ros::spinOnce();
+                        tool->Delay(10);
+                    }
+                    reddoor_slope_ok_flag = true ;
+                }
+            }
+            else if (abs(slope_avg) <= 0.05)
+            {
+                reddoor_slope_ok_flag = true ;
+            }
+
+            if( (Dy > 4) && (crawl_dis == false))
+            {
+                ROS_INFO("distance too far 2");
+                continuousValue_x = stay.x + 1000;
+                ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
+                tool->Delay(60);
+            }
+            else if( (Dy <= 2) && (crawl_dis == false))
+            {
+                ROS_INFO("distance too short 2");
+                continuousValue_x = stay.x - 1000;
+                ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
+                tool->Delay(60);
+            }
+            else
+            {
+                ROS_INFO("distance is ok 2");
+                crawl_dis = true;
+                continuousValue_x = stay.x ;
+                ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);
+                ROS_INFO("crawl_dis = true");
+
+                if( abs(slope_avg) > 0.01 )
+                {
+                    //if( reddoor_slope_ok_flag == false)
+                    //{
+                        while( abs(slope_avg) > 0.01)
                         {
-                            while( abs(slope_avg) > 0.05)
-                            {
-                                ROS_INFO("slope fix in crawl");
-                                slope();
-                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                ROS_INFO("slope_avg = %lf",slope_avg);
-                                ROS_INFO("angle_offest = %d",angle_offest);
-                                //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
-                                strategy_info->get_image_flag = true;
-                                ros::spinOnce();
-                                tool->Delay(10);
-                            }
-                            reddoor_slope_ok_flag = true ;
+                            ROS_INFO("slope fix in crawl 2");
+                            slope();
+                            ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                            ROS_INFO("slope_avg = %lf",slope_avg);
+                            ROS_INFO("angle_offest = %d",angle_offest);
+                            //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
+                            strategy_info->get_image_flag = true;
+                            ros::spinOnce();
+                            tool->Delay(10);
                         }
-                    }
-                    else if (abs(slope_avg) <= 0.05)                        //爬行
-                    {
-                        //ros_com->sendHeadMotor(HeadMotorID::VerticalID, 2500, 600);
-                        //tool->Delay(100);
-                        //ros_com->sendBodySector(5);
-                        //tool->Delay(1000);
-                        //ros_com->sendBodySector(6);
-                        //tool->Delay(3000);
-
-                        //for (int crwtime = 0; crwtime <= 20; crwtime++)
-                        //{
-                        //    ROS_INFO("crw");
-                            //strategy_info->get_image_flag = true;
-                            //ros::spinOnce();
-                        //    for (int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)
-                        //    {
-                        //        if (strategy_info->color_mask_subject[2][i].size > 32000)
-                        //        {
-                        //            ROS_INFO("stand up1");
-                        //            break;
-                        //        }
-                        //    }
-                        //    strategy_info->get_image_flag = true;
-                        //    ros::spinOnce();
-                        //    for (int i = 0; i < strategy_info->color_mask_subject_cnts[1]; i++)
-                        //    {
-                        //        if (strategy_info->color_mask_subject[1][i].size > 35000)
-                        //        {
-                        //            ROS_INFO("stand up2");
-                        //            break;
-                        //        }
-                        //    }
-                        //    ros_com->sendBodySector(7);
-                        //    tool->Delay(2200);
-
-                        //}
-                        ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
-                        tool->Delay(50);
-                        tool->Delay(5000);
-                    }
+                        reddoor_slope_ok_flag = true ;
+                    //}
                 }
+                else if (abs(slope_avg) <= 0.01)                        //爬行
+                {
+                    //ros_com->sendHeadMotor(HeadMotorID::VerticalID, 2500, 600);
+                    //tool->Delay(100);
+                    //ros_com->sendBodySector(5);
+                    //tool->Delay(1000);
+                    //ros_com->sendBodySector(6);
+                    //tool->Delay(3000);
+
+                    //for (int crwtime = 0; crwtime <= 20; crwtime++)
+                    //{
+                    //    ROS_INFO("crw");
+                        //strategy_info->get_image_flag = true;
+                        //ros::spinOnce();
+                    //    for (int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)
+                    //    {
+                    //        if (strategy_info->color_mask_subject[2][i].size > 32000)
+                    //        {
+                    //            ROS_INFO("stand up1");
+                    //            break;
+                    //        }
+                    //    }
+                    //    strategy_info->get_image_flag = true;
+                    //    ros::spinOnce();
+                    //    for (int i = 0; i < strategy_info->color_mask_subject_cnts[1]; i++)
+                    //    {
+                    //        if (strategy_info->color_mask_subject[1][i].size > 35000)
+                    //        {
+                    //            ROS_INFO("stand up2");
+                    //            break;
+                    //        }
+                    //    }
+                    //    ros_com->sendBodySector(7);
+                    //    tool->Delay(2200);
+
+                    //}
+                    ROS_INFO("crw");
+                    ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
+                    tool->Delay(50);
+                    tool->Delay(5000);
+                }
+            }
                 
                 tool->Delay(100);
 
-                ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
+                /*ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
                 tool->Delay(50);
-                tool->Delay(5000);
+                tool->Delay(5000);*/
 
-                strategy_state = AVOID;              //INIT or AVOID???
+                //strategy_state = AVOID;              //INIT or AVOID???
             break;
             //0905++++++++++++++++*/
 
