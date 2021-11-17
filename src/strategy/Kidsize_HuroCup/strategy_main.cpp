@@ -697,9 +697,17 @@ void KidsizeStrategy::strategymain()
                     /*ROS_INFO(" WR = %d",WR);
                     turn_WR = WR; //紀錄此刻之右權重
                     ROS_INFO(" turn_WR = %d",turn_WR);*/
-                    ROS_INFO(" Deep_sum = %d",Deep_sum);
-                    Deep_sum_R = Deep_sum; //紀錄此刻之右權重
-                    ROS_INFO(" Deep_sum_R = %d",Deep_sum_R);
+                    if((in_reddoor_flag == true) && (RD != 0 && LD != 0)) //符合紅門條件
+                    {
+                        ROS_INFO(" Reddoor at rifht");
+                        R_door_flag = true;
+                    }
+                    else   //
+                    {
+                        ROS_INFO(" Deep_sum = %d",Deep_sum);
+                        Deep_sum_R = Deep_sum; //紀錄此刻之右權重
+                        ROS_INFO(" Deep_sum_R = %d",Deep_sum_R);
+                    }
                     tool->Delay(100);
 
 
@@ -712,9 +720,17 @@ void KidsizeStrategy::strategymain()
                     /*ROS_INFO(" WL = %d",WL);
                     turn_WL = WL; //紀錄此刻之左權重
                     ROS_INFO(" turn_WL = %d",turn_WL);*/
-                    ROS_INFO(" Deep_sum = %d",Deep_sum);
-                    Deep_sum_L = Deep_sum; //紀錄此刻之右權重
-                    ROS_INFO(" Deep_sum_L = %d",Deep_sum_L);
+                    if((in_reddoor_flag == true) && (RD != 0 && LD != 0)) //符合紅門條件
+                    {
+                        ROS_INFO(" Reddoor at left");
+                        L_door_flag = true;
+                    }
+                    else   //
+                    {
+                        ROS_INFO(" Deep_sum = %d",Deep_sum);
+                        Deep_sum_L = Deep_sum; //紀錄此刻之右權重
+                        ROS_INFO(" Deep_sum_L = %d",Deep_sum_L);
+                    }
                     tool->Delay(100);
                     
 
@@ -723,85 +739,118 @@ void KidsizeStrategy::strategymain()
                     tool->Delay(500);
                     tool->Delay(50);
                     
-
-                    if((Deep_sum_R - Deep_sum_L) > 5) //左權重大於右權重 代表缺口在右邊 //(turn_WL - turn_WR) > 100
+                    if( R_door_flag == true )
                     {
-                        ROS_INFO("turn right after turnhead");
-                        turnhead_flag == false;
-                        ROS_INFO("turnhead_flag == false");
-
-                        if( abs(Dx) >= 2)
+                        if( (in_reddoor_flag != true) && (RD == 0 && LD == 0) )
                         {
-                            while( abs(Dx) >= 2)
+                            while( (in_reddoor_flag != true) && (RD == 0 && LD == 0) )
                             {
-                                ROS_INFO("turn right in turnhead");
-                                //turn_angle = def_turn_angle();
-                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                ROS_INFO("turn_angle = %d",turn_angle);
-                                ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                                if(abs(IMU_Value) > 80) //若超過90度修正
-                                {
-                                    ros_com->sendContinuousValue(Lmove.x, Lmove.y, 0, Lmove.theta + 5, IMU_continuous);
-                                }
-                                else
-                                {
-                                    ros_com->sendContinuousValue(Rmove.x, Rmove.y, 0, Rmove.theta - 10, IMU_continuous); 
-                                }
-                                strategy_info->get_image_flag = true;
-                                ros::spinOnce();
-                                tool->Delay(10);
+                                ROS_INFO("RIGHT_MOVE turnhead");
+                                IMU_Value = get_IMU();
+                                IMU_theta = IMU_Modify();
+                                IMU_theta = IMU_angle_offest;
+                                ROS_INFO("RightMove_T + IMU_theta  = %lf",RightMove_T + IMU_theta);
+                                ros_com->sendContinuousValue(RightMove_X, RightMove_Y, 0, RightMove_T + IMU_theta, IMU_continuous);
+                                tool->Delay(100);
                             }
                         }
-                        if( abs(Dx) < 2 ) //0 < Dx < 2
+                    }
+                    else if( L_door_flag == true )
+                    {
+                        if( (in_reddoor_flag != true) && (RD == 0 && LD == 0) )
                         {
-                            ROS_INFO("finish turn right in turnhead");
+                            while( (in_reddoor_flag != true) && (RD == 0 && LD == 0) )
+                            {
+                                ROS_INFO("LEFT_MOVE turnhead");
+                                IMU_Value = get_IMU();
+                                IMU_theta = IMU_Modify();
+                                IMU_theta = IMU_angle_offest;
+                                ROS_INFO("LeftMove_T + IMU_theta  = %lf",LeftMove_T + IMU_theta);
+                                ros_com->sendContinuousValue(LeftMove_X, LeftMove_Y, 0,LeftMove_T + IMU_theta, IMU_continuous);
+                                tool->Delay(100);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if((Deep_sum_R - Deep_sum_L) > 5) //左權重大於右權重 代表缺口在右邊 //(turn_WL - turn_WR) > 100
+                        {
+                            ROS_INFO("turn right after turnhead");
+                            turnhead_flag == false;
+                            ROS_INFO("turnhead_flag == false");
+
+                            if( abs(Dx) >= 2)
+                            {
+                                while( abs(Dx) >= 2)
+                                {
+                                    ROS_INFO("turn right in turnhead");
+                                    //turn_angle = def_turn_angle();
+                                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                    ROS_INFO("turn_angle = %d",turn_angle);
+                                    ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                                    if(abs(IMU_Value) > 80) //若超過90度修正
+                                    {
+                                        ros_com->sendContinuousValue(Lmove.x, Lmove.y, 0, Lmove.theta + 5, IMU_continuous);
+                                    }
+                                    else
+                                    {
+                                        ros_com->sendContinuousValue(Rmove.x, Rmove.y, 0, Rmove.theta - 10, IMU_continuous); 
+                                    }
+                                    strategy_info->get_image_flag = true;
+                                    ros::spinOnce();
+                                    tool->Delay(10);
+                                }
+                            }
+                            if( abs(Dx) < 2 ) //0 < Dx < 2
+                            {
+                                ROS_INFO("finish turn right in turnhead");
+                                turnhead_flag == false;
+                                strategy_state = AVOID;
+                            }
+                        }
+                        else if( (Deep_sum_L - Deep_sum_R) > 5 ) //右權重大於左權重 代表缺口在左邊 //(turn_WR - turn_WL) > 100 
+                        {
+                            ROS_INFO("turn left after turnhead");
+                            turnhead_flag == false;
+                            ROS_INFO("turnhead_flag == false");
+
+                            if( abs(Dx) >= 2)
+                            {
+                                while( abs(Dx) >= 2)
+                                {
+                                    ROS_INFO("turn left in turnhead");
+                                    //turn_angle = def_turn_angle();
+                                    ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                    ROS_INFO("turn_angle = %d",turn_angle);
+                                    ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                                    if(abs(IMU_Value) > 80) //若超過90度修正
+                                    {
+                                        ros_com->sendContinuousValue(Rmove.x, Rmove.y, 0, Rmove.theta - 5, IMU_continuous);
+                                    }
+                                    else
+                                    {
+                                        ros_com->sendContinuousValue(Lmove.x, Lmove.y, 0, Lmove.theta + 10, IMU_continuous); 
+                                    }  
+                                    strategy_info->get_image_flag = true;
+                                    ros::spinOnce();
+                                    tool->Delay(10);
+                                }
+                            }
+                            if( abs(Dx) < 2 ) //0 > Dx > -2
+                            {
+                                ROS_INFO("finish turn left in turnhead");
+                                turnhead_flag == false;
+                                strategy_state = AVOID;
+                            }
+
+                        }
+                        else //imu > 80後做一般避障策略
+                        {
+                            ROS_INFO("abs(turn_WR - turn_WL) < 100 after turnhead");
                             turnhead_flag == false;
                             strategy_state = AVOID;
                         }
                     }
-                    else if( (Deep_sum_L - Deep_sum_R) > 5 ) //右權重大於左權重 代表缺口在左邊 //(turn_WR - turn_WL) > 100 
-                    {
-                        ROS_INFO("turn left after turnhead");
-                        turnhead_flag == false;
-                        ROS_INFO("turnhead_flag == false");
-
-                        if( abs(Dx) >= 2)
-                        {
-                            while( abs(Dx) >= 2)
-                            {
-                                ROS_INFO("turn left in turnhead");
-                                //turn_angle = def_turn_angle();
-                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                ROS_INFO("turn_angle = %d",turn_angle);
-                                ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                                if(abs(IMU_Value) > 80) //若超過90度修正
-                                {
-                                    ros_com->sendContinuousValue(Rmove.x, Rmove.y, 0, Rmove.theta - 5, IMU_continuous);
-                                }
-                                else
-                                {
-                                    ros_com->sendContinuousValue(Lmove.x, Lmove.y, 0, Lmove.theta + 10, IMU_continuous); 
-                                }  
-                                strategy_info->get_image_flag = true;
-                                ros::spinOnce();
-                                tool->Delay(10);
-                            }
-                        }
-                        if( abs(Dx) < 2 ) //0 > Dx > -2
-                        {
-                            ROS_INFO("finish turn left in turnhead");
-                            turnhead_flag == false;
-                            strategy_state = AVOID;
-                        }
-
-                    }
-                    else //imu > 80後做一般避障策略
-                    {
-                        ROS_INFO("abs(turn_WR - turn_WL) < 100 after turnhead");
-                        turnhead_flag == false;
-                        strategy_state = AVOID;
-                    }
-
                 }
                 else //turnhead_flag == false 回一般避障策略
                 {

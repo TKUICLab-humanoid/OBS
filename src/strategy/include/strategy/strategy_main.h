@@ -91,6 +91,8 @@ public:
 	bool imu_ok_flag = false;
 	bool redoor_dis = false;
 	bool crawl_dis = false;
+	bool R_door_flag = false;
+	bool L_door_flag = false;
 	
 
 	string parameter_path = "N";
