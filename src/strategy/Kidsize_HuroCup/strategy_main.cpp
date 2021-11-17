@@ -42,7 +42,7 @@ void KidsizeStrategy::strategymain()
                 }
                 
                 //head motor angle set 
-                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1490, 300);
+                ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1520, 300);
                 tool->Delay(50);
                 ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300); 
                 tool->Delay(50);
@@ -484,7 +484,9 @@ void KidsizeStrategy::strategymain()
                                             ROS_INFO(" first imu fix before turnhead");
                                             continuousValue_x -= 100;
                                             IMU_Value = get_IMU();
-                                            IMU_theta = IMU_Modify();
+                                            IMU_theta = IMU_Modify();strategy_info->get_image_flag = true;
+                                    ros::spinOnce();
+                                    tool->Delay(10);
                                             IMU_theta = IMU_angle_offest;
                                             ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                             ROS_INFO("IMU_Value = %lf",IMU_Value);
@@ -701,6 +703,7 @@ void KidsizeStrategy::strategymain()
                     {
                         ROS_INFO(" Reddoor at rifht");
                         R_door_flag = true;
+                        ROS_INFO(" R_door_flag = true");
                     }
                     else   //
                     {
@@ -724,6 +727,7 @@ void KidsizeStrategy::strategymain()
                     {
                         ROS_INFO(" Reddoor at left");
                         L_door_flag = true;
+                        ROS_INFO(" L_door_flag = true");
                     }
                     else   //
                     {
@@ -734,41 +738,49 @@ void KidsizeStrategy::strategymain()
                     tool->Delay(100);
                     
 
-                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1490, 300);             //頭回正常高度
+                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1520, 300);             //頭回正常高度
                     ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //頭轉回正中
                     tool->Delay(500);
                     tool->Delay(50);
                     
                     if( R_door_flag == true )
                     {
-                        if( (in_reddoor_flag != true) && (RD == 0 && LD == 0) )
+                        if( (in_reddoor_flag == false) )
                         {
-                            while( (in_reddoor_flag != true) && (RD == 0 && LD == 0) )
+                            while( l_center_Dy != 24 )
                             {
                                 ROS_INFO("RIGHT_MOVE turnhead");
                                 IMU_Value = get_IMU();
                                 IMU_theta = IMU_Modify();
                                 IMU_theta = IMU_angle_offest;
-                                ROS_INFO("RightMove_T + IMU_theta  = %lf",RightMove_T + IMU_theta);
+                                ROS_INFO("RightMove_T + IMU_theta  = %d",RightMove_T + IMU_theta);
                                 ros_com->sendContinuousValue(RightMove_X, RightMove_Y, 0, RightMove_T + IMU_theta, IMU_continuous);
                                 tool->Delay(100);
+                                strategy_info->get_image_flag = true;
+                                ros::spinOnce();
+                                tool->Delay(10);
                             }
+                            strategy_state = AVOID;
                         }
                     }
                     else if( L_door_flag == true )
                     {
-                        if( (in_reddoor_flag != true) && (RD == 0 && LD == 0) )
+                        if( (in_reddoor_flag == false) )
                         {
-                            while( (in_reddoor_flag != true) && (RD == 0 && LD == 0) )
+                            while( r_center_Dy != 24 )
                             {
                                 ROS_INFO("LEFT_MOVE turnhead");
                                 IMU_Value = get_IMU();
                                 IMU_theta = IMU_Modify();
                                 IMU_theta = IMU_angle_offest;
-                                ROS_INFO("LeftMove_T + IMU_theta  = %lf",LeftMove_T + IMU_theta);
+                                ROS_INFO("LeftMove_T + IMU_theta  = %d",LeftMove_T + IMU_theta);
                                 ros_com->sendContinuousValue(LeftMove_X, LeftMove_Y, 0,LeftMove_T + IMU_theta, IMU_continuous);
                                 tool->Delay(100);
+                                strategy_info->get_image_flag = true;
+                                ros::spinOnce();
+                                tool->Delay(10);
                             }
+                            strategy_state = AVOID;
                         }
                     }
                     else
@@ -1184,6 +1196,7 @@ float KidsizeStrategy::get_IMU() //回傳imu值之副函式
     {
         IMU_getValue = strategy_info->getIMUValue().Yaw;
     }
+    ROS_INFO("IMU_getValue = %lf",IMU_getValue);
     return IMU_getValue;
 }
 
