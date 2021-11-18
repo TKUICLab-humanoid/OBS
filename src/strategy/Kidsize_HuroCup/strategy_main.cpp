@@ -485,8 +485,8 @@ void KidsizeStrategy::strategymain()
                                             continuousValue_x -= 100;
                                             IMU_Value = get_IMU();
                                             IMU_theta = IMU_Modify();strategy_info->get_image_flag = true;
-                                    ros::spinOnce();
-                                    tool->Delay(10);
+                                            ros::spinOnce();
+                                            tool->Delay(10);
                                             IMU_theta = IMU_angle_offest;
                                             ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                             ROS_INFO("IMU_Value = %lf",IMU_Value);
@@ -740,8 +740,10 @@ void KidsizeStrategy::strategymain()
 
                     ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1520, 300);             //頭回正常高度
                     ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300);           //頭轉回正中
-                    tool->Delay(500);
-                    tool->Delay(50);
+                    tool->Delay(1000);
+                    strategy_info->get_image_flag = true;      
+                    ros::spinOnce();
+                    tool->Delay(10);
                     
                     if( R_door_flag == true )
                     {
@@ -760,7 +762,12 @@ void KidsizeStrategy::strategymain()
                                 ros::spinOnce();
                                 tool->Delay(10);
                             }
-                            strategy_state = AVOID;
+                            //strategy_state =  REDDOOR;
+                        }
+                        else
+                        {
+                            ROS_INFO("AVOID -> Reddoor");
+                            strategy_state = REDDOOR;
                         }
                     }
                     else if( L_door_flag == true )
@@ -780,7 +787,12 @@ void KidsizeStrategy::strategymain()
                                 ros::spinOnce();
                                 tool->Delay(10);
                             }
-                            strategy_state = AVOID;
+                            //strategy_state =  REDDOOR;
+                        }
+                        else
+                        {
+                            ROS_INFO("AVOID -> Reddoor");
+                            strategy_state = REDDOOR;
                         }
                     }
                     else
@@ -800,7 +812,7 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                                    if(abs(IMU_Value) > 80) //若超過90度修正
+                                    if(abs(IMU_Value) > 70) //若超過90度修正
                                     {
                                         ros_com->sendContinuousValue(Lmove.x, Lmove.y, 0, Lmove.theta + 5, IMU_continuous);
                                     }
@@ -835,7 +847,7 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                                    if(abs(IMU_Value) > 80) //若超過90度修正
+                                    if(abs(IMU_Value) > 70) //若超過90度修正
                                     {
                                         ros_com->sendContinuousValue(Rmove.x, Rmove.y, 0, Rmove.theta - 5, IMU_continuous);
                                     }
@@ -1327,7 +1339,7 @@ int KidsizeStrategy::def_speed()
     }
     else if( (Dy >= 6 && Dy < 8) )
     {
-        continuous_speed = stay.x + 500;
+        continuous_speed = stay.x + 1000;
     }
     else if( (Dy >= 4 && Dy < 6) )
     {
