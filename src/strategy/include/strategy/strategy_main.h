@@ -93,6 +93,7 @@ public:
 	bool crawl_dis = false;
 	bool R_door_flag = false;
 	bool L_door_flag = false;
+	bool crw_up_flag = false;
 	
 
 	string parameter_path = "N";

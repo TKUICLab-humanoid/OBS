@@ -1124,44 +1124,70 @@ void KidsizeStrategy::strategymain()
                 }
                 else if (abs(slope_avg) <= 0.01)                        //爬行
                 {
-                    //ros_com->sendHeadMotor(HeadMotorID::VerticalID, 2500, 600);
-                    //tool->Delay(100);
+                    ROS_INFO(" ready crw");
+                    ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
+                    tool->Delay(500);
+                    ros_com->sendBodySector(29);
+                    tool->Delay(500);
+                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 2500, 600);
+                    tool->Delay(100);
                     //ros_com->sendBodySector(5);
                     //tool->Delay(1000);
-                    //ros_com->sendBodySector(6);
-                    //tool->Delay(3000);
+                    ros_com->sendBodySector(6);  //down
+                    tool->Delay(3000);
 
-                    //for (int crwtime = 0; crwtime <= 20; crwtime++)
-                    //{
-                    //    ROS_INFO("crw");
-                        //strategy_info->get_image_flag = true;
-                        //ros::spinOnce();
-                    //    for (int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)
-                    //    {
-                    //        if (strategy_info->color_mask_subject[2][i].size > 32000)
-                    //        {
-                    //            ROS_INFO("stand up1");
-                    //            break;
-                    //        }
-                    //    }
-                    //    strategy_info->get_image_flag = true;
-                    //    ros::spinOnce();
-                    //    for (int i = 0; i < strategy_info->color_mask_subject_cnts[1]; i++)
-                    //    {
-                    //        if (strategy_info->color_mask_subject[1][i].size > 35000)
-                    //        {
-                    //            ROS_INFO("stand up2");
-                    //            break;
-                    //        }
-                    //    }
-                    //    ros_com->sendBodySector(7);
-                    //    tool->Delay(2200);
+                    for (int crwtime = 0; crwtime <= 30; crwtime++)
+                    {
+                        ROS_INFO("crw");
+                        ROS_INFO("crw_up_flag = false");
+                        strategy_info->get_image_flag = true;
+                        ros::spinOnce();
+                        for (int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)
+                        {
+                            if (strategy_info->color_mask_subject[2][i].size > 32000)
+                            {
+                                ROS_INFO("stand up1");
+                                crw_up_flag = true;
+                                ROS_INFO("crw_up_flag = true");
+                                break;
+                            }
+                        }
+                        strategy_info->get_image_flag = true;
+                        ros::spinOnce();
+                        for (int i = 0; i < strategy_info->color_mask_subject_cnts[1]; i++)
+                        {
+                            if (strategy_info->color_mask_subject[1][i].size > 35000)
+                            {
+                                ROS_INFO("stand up2");
+                                crw_up_flag = true;
+                                ROS_INFO("crw_up_flag = true");
+                                break;
+                            }
+                        }
+                        if (crw_up_flag == true)
+                        {
+                            ROS_INFO("ready stand");
+                            break;
+                        }
+                        strategy_info->get_image_flag = true;
+                        ros::spinOnce();
 
-                    //}
-                    ROS_INFO("crw");
-                    ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
-                    tool->Delay(50);
-                    tool->Delay(5000);
+                        ros_com->sendBodySector(7); // crw
+                        tool->Delay(2200);
+
+                    }
+                    tool->Delay(500);
+                    ros_com->sendBodySector(8);  //stand up
+                    tool->Delay(11000);
+                    ros_com->sendBodySector(29);
+                    tool->Delay(3000);
+                    continuousValue_x = 0;
+                    tool->Delay(3000);
+                    strategy_state = AVOID;
+                    // ROS_INFO("crw");
+                    // ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
+                    // tool->Delay(50);
+                    // tool->Delay(5000);
                 }
             }
                 
