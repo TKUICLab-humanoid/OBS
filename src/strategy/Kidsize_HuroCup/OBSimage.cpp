@@ -284,6 +284,17 @@ void OBSimage::strategymain()
 
 			Dx = Xc - Xb;
 
+			/*for (int i = 0; i < strategy_info->color_mask_subject_cnts[1]; i++)
+			{
+				ROS_INFO("y_size = %d",strategy_info->color_mask_subject[1][i].size);
+				break;
+			}
+			for (int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)
+			{
+				ROS_INFO("b_size= = %d",strategy_info->color_mask_subject[2][i].size);
+				break;
+			}*/
+
 			ImageInfo();
 
 

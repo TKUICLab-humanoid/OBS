@@ -1000,7 +1000,7 @@ void KidsizeStrategy::strategymain()
                             }
                             else if(RD == LD)       //對下方藍模做比較
                             {   
-                                if( /*(L_XMAX <= 65) || (R_XMIN <= 65) || */(LeftblueOBS_XMax < 65 && RightblueOBS_XMin > 260) )
+                                if( /*(L_XMAX <= 65) || (R_XMIN <= 65) || */(LeftblueOBS_XMax < 50 && RightblueOBS_XMin > 260) )
                                 {
                                     // if( Dy < 2 ) 
                                     // {
@@ -1078,7 +1078,7 @@ void KidsizeStrategy::strategymain()
                 reddoor_slope_ok_flag = true ;
             }
 
-            if( (Dy > 4) && (crawl_dis == false))
+            if( (Dy > 9) && (crawl_dis == false))
             {
                 ROS_INFO("distance too far 2");
                 continuousValue_x = stay.x + 1000;
@@ -1086,7 +1086,7 @@ void KidsizeStrategy::strategymain()
                 ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
                 tool->Delay(60);
             }
-            else if( (Dy <= 2) && (crawl_dis == false))
+            else if( (Dy <= 8) && (crawl_dis == false))
             {
                 ROS_INFO("distance too short 2");
                 continuousValue_x = stay.x - 1000;
@@ -1125,26 +1125,38 @@ void KidsizeStrategy::strategymain()
                 else if (abs(slope_avg) <= 0.01)                        //爬行
                 {
                     ROS_INFO(" ready crw");
+                    ROS_INFO("LeftblueOBS_XMax = %d",LeftblueOBS_XMax);
+                    ROS_INFO("RightblueOBS_XMin = %d",RightblueOBS_XMin);
                     ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
                     tool->Delay(500);
                     ros_com->sendBodySector(29);
                     tool->Delay(500);
-                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 2500, 600);
+                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 2400, 600);
                     tool->Delay(100);
                     //ros_com->sendBodySector(5);
                     //tool->Delay(1000);
                     ros_com->sendBodySector(6);  //down
-                    tool->Delay(3000);
+                    tool->Delay(5000);
+                    for(int crwtime = 0; crwtime <= 5; crwtime++)
+                    {
+                        ROS_INFO("crw______test______");
+                        strategy_info->get_image_flag = true;
+                        ros::spinOnce();
 
-                    for (int crwtime = 0; crwtime <= 30; crwtime++)
+                        ros_com->sendBodySector(7); // crw
+                        tool->Delay(1000);
+                        ROS_INFO("crw______test______out");
+                    }
+
+                    for (int crwtime = 0; crwtime <= 20; crwtime++)
                     {
                         ROS_INFO("crw");
                         ROS_INFO("crw_up_flag = false");
-                        strategy_info->get_image_flag = true;
-                        ros::spinOnce();
-                        for (int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)
+                        // strategy_info->get_image_flag = true;
+                        // ros::spinOnce();
+                        for (int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)         //blue
                         {
-                            if (strategy_info->color_mask_subject[2][i].size > 32000)
+                            if (strategy_info->color_mask_subject[2][i].size > 17000)//32000
                             {
                                 ROS_INFO("stand up1");
                                 crw_up_flag = true;
@@ -1152,11 +1164,11 @@ void KidsizeStrategy::strategymain()
                                 break;
                             }
                         }
-                        strategy_info->get_image_flag = true;
-                        ros::spinOnce();
-                        for (int i = 0; i < strategy_info->color_mask_subject_cnts[1]; i++)
+                        // strategy_info->get_image_flag = true;
+                        // ros::spinOnce();
+                        for (int i = 0; i < strategy_info->color_mask_subject_cnts[1]; i++)         //yellow
                         {
-                            if (strategy_info->color_mask_subject[1][i].size > 35000)
+                            if (strategy_info->color_mask_subject[1][i].size > 23000)//35000
                             {
                                 ROS_INFO("stand up2");
                                 crw_up_flag = true;
@@ -1173,17 +1185,19 @@ void KidsizeStrategy::strategymain()
                         ros::spinOnce();
 
                         ros_com->sendBodySector(7); // crw
-                        tool->Delay(2200);
+                        tool->Delay(1000);
 
                     }
                     tool->Delay(500);
                     ros_com->sendBodySector(8);  //stand up
-                    tool->Delay(11000);
+                    tool->Delay(7000);
                     ros_com->sendBodySector(29);
-                    tool->Delay(3000);
+                    tool->Delay(2500);
                     continuousValue_x = 0;
-                    tool->Delay(3000);
-                    strategy_state = AVOID;
+                    // tool->Delay(3000);
+                    Continuous_flag = false;
+                    ROS_INFO("Continuous_flag = false");
+                    strategy_state = INIT;
                     // ROS_INFO("crw");
                     // ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
                     // tool->Delay(50);
@@ -1615,7 +1629,7 @@ void KidsizeStrategy::slope() //正對障礙物修正之副函式
         }
         else if (abs(slope_avg) > 0.05 && abs(slope_avg) <= 0.1)
         {
-            angle_offest = 2;
+            angle_offest = 1;
             ros_com->sendContinuousValue(LeftSlope_X, LeftSlope_Y, 0,LeftSlope_T + angle_offest, IMU_continuous);
             tool->Delay(100);
         }
@@ -1658,7 +1672,7 @@ void KidsizeStrategy::slope() //正對障礙物修正之副函式
         }
         else if (abs(slope_avg) > 0.05 && abs(slope_avg) <= 0.1)
         {
-            angle_offest = -2;
+            angle_offest = -1;
             ros_com->sendContinuousValue(LeftSlope_X, LeftSlope_Y, 0,LeftSlope_T + angle_offest, IMU_continuous);
             tool->Delay(100);
         }
