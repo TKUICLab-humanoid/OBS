@@ -32,6 +32,9 @@ void KidsizeStrategy::strategymain()
                 ROS_INFO("state = INIT");
                 continuous_angle_offset = 0;
                 turn_angle = 0;
+                in_reddoor_flag =false;
+                ros_com->sendBodySector(5);
+                tool->Delay(1000);
                 if(!Continuous_flag)
                 {
                     ROS_INFO("before start ");
@@ -74,7 +77,9 @@ void KidsizeStrategy::strategymain()
                     tool->Delay(50);
                     ROS_INFO("No preturn");
                 }
-
+                strategy_info->get_image_flag = true;
+                ros::spinOnce();
+                tool->Delay(10);
                 strategy_state = AVOID;  //開始一般避障策略
 
                 /*
@@ -289,9 +294,8 @@ void KidsizeStrategy::strategymain()
                                             IMU_Value = get_IMU();
                                             IMU_theta = IMU_Modify();
                                             ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                                            ROS_INFO("IMU_Value = %lf",IMU_Value);
-                                            ROS_INFO("IMU_theta = %lf",IMU_theta);
-                                            ROS_INFO("stay.theta + IMU_theta  = %lf",stay.theta + IMU_theta);
+                                            ROS_INFO("IMU_Value = %lf",IMU_Value);ros::spinOnce();
+                                            tool->Delay(10);
                                             ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous); 
                                             strategy_info->get_image_flag = true;
                                             ros::spinOnce();
@@ -640,14 +644,14 @@ void KidsizeStrategy::strategymain()
                             {
                                 ROS_INFO("speed ++ in no obs");
                                 continuousValue_x += 100;
-                                IMU_Value = get_IMU();
-                                IMU_theta = IMU_Modify();
-                                IMU_theta = IMU_angle_offest;
+                                //IMU_Value = get_IMU();
+                                //IMU_theta = IMU_Modify();
+                                //IMU_theta = IMU_angle_offest;
                                 //turn_angle = def_turn_angle();
                                 ROS_INFO("IMU_Value = %lf",IMU_Value);
                                 ROS_INFO("IMU_theta = %lf",IMU_theta);
                                 ROS_INFO("stay.theta + IMU_theta  = %lf",stay.theta + IMU_theta);
-                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous); 
+                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta /*+ IMU_theta*/, IMU_continuous); 
                                 strategy_info->get_image_flag = true;
                                 ros::spinOnce();
                                 tool->Delay(10);
@@ -655,14 +659,14 @@ void KidsizeStrategy::strategymain()
                         }
                         else if(continuousValue_x == maxspeed) //保持目前角度直走
                         {   
-                            IMU_Value = get_IMU();
-                            IMU_theta = IMU_Modify();
-                            IMU_theta = IMU_angle_offest;
+                            //IMU_Value = get_IMU();
+                            //IMU_theta = IMU_Modify();
+                            //IMU_theta = IMU_angle_offest;
                             ROS_INFO("void speed up finish in no obs");
                             ROS_INFO("continuousValue_x = %d",continuousValue_x);
                             ROS_INFO("turn_angle = %d",turn_angle);
                             ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                            ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous);  
+                            ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta /*+ IMU_theta*/, IMU_continuous);  
                             strategy_info->get_image_flag = true;
                             ros::spinOnce();
                             tool->Delay(10);
@@ -812,13 +816,16 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                                    IMU_Value = get_IMU();
                                     if(abs(IMU_Value) > 70) //若超過90度修正
                                     {
-                                        ros_com->sendContinuousValue(Lmove.x, Lmove.y, 0, Lmove.theta + 5, IMU_continuous);
+                                        ros_com->sendContinuousValue(Lmove.x, Lmove.y, 0, Lmove.theta + 10, IMU_continuous);
+                                        ROS_INFO("turn_angle = %d", Lmove.theta + 5);
                                     }
                                     else
                                     {
                                         ros_com->sendContinuousValue(Rmove.x, Rmove.y, 0, Rmove.theta - 10, IMU_continuous); 
+                                        ROS_INFO("turn_angle = %d",  Rmove.theta - 10);
                                     }
                                     strategy_info->get_image_flag = true;
                                     ros::spinOnce();
@@ -847,13 +854,16 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                                    IMU_Value = get_IMU();
                                     if(abs(IMU_Value) > 70) //若超過90度修正
                                     {
-                                        ros_com->sendContinuousValue(Rmove.x, Rmove.y, 0, Rmove.theta - 5, IMU_continuous);
+                                        ros_com->sendContinuousValue(Rmove.x, Rmove.y, 0, Rmove.theta - 10, IMU_continuous);
+                                        ROS_INFO("turn_angle = %d", Rmove.theta - 5);
                                     }
                                     else
                                     {
                                         ros_com->sendContinuousValue(Lmove.x, Lmove.y, 0, Lmove.theta + 10, IMU_continuous); 
+                                        ROS_INFO("turn_angle = %d", Lmove.theta + 10);
                                     }  
                                     strategy_info->get_image_flag = true;
                                     ros::spinOnce();
@@ -1078,7 +1088,7 @@ void KidsizeStrategy::strategymain()
                 reddoor_slope_ok_flag = true ;
             }
 
-            if( (Dy > 9) && (crawl_dis == false))
+            if( (Dy > 8) && (crawl_dis == false))
             {
                 ROS_INFO("distance too far 2");
                 continuousValue_x = stay.x + 1000;
@@ -1086,7 +1096,7 @@ void KidsizeStrategy::strategymain()
                 ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
                 tool->Delay(60);
             }
-            else if( (Dy <= 8) && (crawl_dis == false))
+            else if( (Dy <= 7) && (crawl_dis == false))
             {
                 ROS_INFO("distance too short 2");
                 continuousValue_x = stay.x - 1000;
@@ -1128,13 +1138,12 @@ void KidsizeStrategy::strategymain()
                     ROS_INFO("LeftblueOBS_XMax = %d",LeftblueOBS_XMax);
                     ROS_INFO("RightblueOBS_XMin = %d",RightblueOBS_XMin);
                     ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
-                    tool->Delay(500);
+                    tool->Delay(2000);
                     ros_com->sendBodySector(29);
-                    tool->Delay(500);
+                    tool->Delay(1000);
                     ros_com->sendHeadMotor(HeadMotorID::VerticalID, 2400, 600);
-                    tool->Delay(100);
-                    //ros_com->sendBodySector(5);
-                    //tool->Delay(1000);
+                    tool->Delay(500);
+                    tool->Delay(1000);
                     ros_com->sendBodySector(6);  //down
                     tool->Delay(5000);
                     for(int crwtime = 0; crwtime <= 5; crwtime++)
@@ -1156,7 +1165,7 @@ void KidsizeStrategy::strategymain()
                         // ros::spinOnce();
                         for (int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)         //blue
                         {
-                            if (strategy_info->color_mask_subject[2][i].size > 17000)//32000
+                            if (/*(strategy_info->color_mask_subject[2][i].size > 8000) &&*/ (Dy < 19))//17000
                             {
                                 ROS_INFO("stand up1");
                                 crw_up_flag = true;
@@ -1168,7 +1177,7 @@ void KidsizeStrategy::strategymain()
                         // ros::spinOnce();
                         for (int i = 0; i < strategy_info->color_mask_subject_cnts[1]; i++)         //yellow
                         {
-                            if (strategy_info->color_mask_subject[1][i].size > 23000)//35000
+                            if (/*(strategy_info->color_mask_subject[1][i].size > 5000) &&*/ (Dy < 14))//23000
                             {
                                 ROS_INFO("stand up2");
                                 crw_up_flag = true;
@@ -1188,6 +1197,10 @@ void KidsizeStrategy::strategymain()
                         tool->Delay(1000);
 
                     }
+                    ros_com->sendHeadMotor(HeadMotorID::VerticalID, 1520, 300);
+                    tool->Delay(50);
+                    ros_com->sendHeadMotor(HeadMotorID::HorizontalID, 2047, 300); 
+                    tool->Delay(50);
                     tool->Delay(500);
                     ros_com->sendBodySector(8);  //stand up
                     tool->Delay(7000);

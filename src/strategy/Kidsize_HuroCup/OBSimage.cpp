@@ -284,7 +284,7 @@ void OBSimage::strategymain()
 
 			Dx = Xc - Xb;
 
-			/*for (int i = 0; i < strategy_info->color_mask_subject_cnts[1]; i++)
+			for (int i = 0; i < strategy_info->color_mask_subject_cnts[1]; i++)
 			{
 				ROS_INFO("y_size = %d",strategy_info->color_mask_subject[1][i].size);
 				break;
@@ -293,7 +293,7 @@ void OBSimage::strategymain()
 			{
 				ROS_INFO("b_size= = %d",strategy_info->color_mask_subject[2][i].size);
 				break;
-			}*/
+			}
 
 			ImageInfo();
 
@@ -383,9 +383,9 @@ void OBSimage::strategymain()
         ROS_INFO("\n");
 		//cv::namedWindow("img_resize", CV_WINDOW_NORMAL);
 		//cv::resizeWindow("img", 480, 640);
-		cv::resizeWindow("img_resize", 640, 480);
+		/*cv::resizeWindow("img_resize", 640, 480);
 		cv::imshow("img_resize",img_resize);
-		cv::waitKey(1);
+		cv::waitKey(1);*/
 		//cv::destroyWindow("img_resize");
     }
 }
@@ -425,7 +425,7 @@ void OBSimage::SlopeCalculate()			//計算斜率之副函式
     int slope_rand[4];
     int slope_Y[4];
     float slope[3];
-    slope_avg = 10.0;
+    slope_avg = 0.0;
 
 	for (int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
     {
@@ -499,6 +499,10 @@ void OBSimage::SlopeCalculate()			//計算斜率之副函式
 			slope[2] = float(slope_Y[3] - slope_Y[2]) / float(slope_rand[3] - slope_rand[2]);
 			slope_avg = (slope[0] + slope[1] + slope[2]) / 3;
 			break;
+		}
+		else
+		{
+			slope_avg = 0;
 		}
             
     }
