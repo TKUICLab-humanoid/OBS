@@ -64,7 +64,7 @@ void OBSimage::strategymain()
 			{
 				if(strategy_info->color_mask_subject[5][i].size > 1000)
 				{
-					//ROS_INFO("red area = %d ",strategy_info->color_mask_subject[5][i].size);
+					ROS_INFO("red area = %d ",strategy_info->color_mask_subject[5][i].size);
 					ROS_INFO("IN_RED");
 					in_reddoor_flag = true;
 					//b_obs_flag = true;

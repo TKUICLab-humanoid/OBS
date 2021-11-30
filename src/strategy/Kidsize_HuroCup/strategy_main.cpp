@@ -483,6 +483,7 @@ void KidsizeStrategy::strategymain()
                                 {
                                     while(continuousValue_x > stay.x)
                                     {
+                                        IMU_Value = get_IMU();
                                         if( abs(IMU_Value) > 5 )
                                         {
                                             ROS_INFO(" first imu fix before turnhead");
@@ -595,7 +596,14 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + 0, IMU_continuous);  
+                                    if(abs(IMU_Value) > 80) //若超過90度修正
+                                    {
+                                        ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous); 
+                                    }
+                                    else
+                                    {
+                                        ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta /*+ IMU_theta*/, IMU_continuous); 
+                                    }  
                                     strategy_info->get_image_flag = true;
                                     ros::spinOnce();
                                     tool->Delay(10);
@@ -626,7 +634,17 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
+                                    IMU_Value = get_IMU();
+                                    IMU_theta = IMU_Modify();
+                                    IMU_theta = IMU_angle_offest;
+                                    if(abs(IMU_Value) > 80) //若超過90度修正
+                                    {
+                                        ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous); 
+                                    }
+                                    else
+                                    {
+                                        ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta /*+ IMU_theta*/, IMU_continuous); 
+                                    }  
                                     strategy_info->get_image_flag = true;
                                     ros::spinOnce();
                                     tool->Delay(10);
@@ -651,7 +669,17 @@ void KidsizeStrategy::strategymain()
                                 ROS_INFO("IMU_Value = %lf",IMU_Value);
                                 ROS_INFO("IMU_theta = %lf",IMU_theta);
                                 ROS_INFO("stay.theta + IMU_theta  = %lf",stay.theta + IMU_theta);
-                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta /*+ IMU_theta*/, IMU_continuous); 
+                                IMU_Value = get_IMU();
+                                IMU_theta = IMU_Modify();
+                                IMU_theta = IMU_angle_offest;
+                                if(abs(IMU_Value) > 80) //若超過90度修正
+                                {
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous); 
+                                }
+                                else
+                                {
+                                    ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta /*+ IMU_theta*/, IMU_continuous); 
+                                }
                                 strategy_info->get_image_flag = true;
                                 ros::spinOnce();
                                 tool->Delay(10);
@@ -666,7 +694,17 @@ void KidsizeStrategy::strategymain()
                             ROS_INFO("continuousValue_x = %d",continuousValue_x);
                             ROS_INFO("turn_angle = %d",turn_angle);
                             ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                            ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta /*+ IMU_theta*/, IMU_continuous);  
+                            IMU_Value = get_IMU();
+                            IMU_theta = IMU_Modify();
+                            IMU_theta = IMU_angle_offest;
+                            if(abs(IMU_Value) > 80) //若超過90度修正
+                            {
+                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous); 
+                            }
+                            else
+                            {
+                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta /*+ IMU_theta*/, IMU_continuous); 
+                            }  
                             strategy_info->get_image_flag = true;
                             ros::spinOnce();
                             tool->Delay(10);
@@ -817,7 +855,7 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
                                     IMU_Value = get_IMU();
-                                    if(abs(IMU_Value) > 70) //若超過90度修正
+                                    if(abs(IMU_Value) > 80) //若超過90度修正
                                     {
                                         ros_com->sendContinuousValue(Lmove.x, Lmove.y, 0, Lmove.theta + 10, IMU_continuous);
                                         ROS_INFO("turn_angle = %d", Lmove.theta + 5);
@@ -855,7 +893,7 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
                                     IMU_Value = get_IMU();
-                                    if(abs(IMU_Value) > 70) //若超過90度修正
+                                    if(abs(IMU_Value) > 80) //若超過90度修正
                                     {
                                         ros_com->sendContinuousValue(Rmove.x, Rmove.y, 0, Rmove.theta - 10, IMU_continuous);
                                         ROS_INFO("turn_angle = %d", Rmove.theta - 5);
@@ -903,6 +941,24 @@ void KidsizeStrategy::strategymain()
                     ROS_INFO("headup in reddor");
                     tool->Delay(500);
 
+                    for(int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
+			        {
+				        if(strategy_info->color_mask_subject[5][i].size > 50000)
+				        {
+                            ROS_INFO("distance too short b");
+                            continuousValue_x = stay.x - 1000;
+                            while(strategy_info->color_mask_subject[5][i].size > 50000)
+                            {
+                                ROS_INFO("continuousValue_x = %d",continuousValue_x);
+                                ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);
+                                tool->Delay(60);
+                                strategy_info->get_image_flag = true;
+                                ros::spinOnce();
+                                tool->Delay(10);
+                            }
+                        }
+                    }    
+
                     if( abs(slope_avg) > 0.05 )
                     {
                         //if( reddoor_slope_ok_flag == false)
@@ -927,7 +983,7 @@ void KidsizeStrategy::strategymain()
                         reddoor_slope_ok_flag = true ;
                     }
                 
-                    if( (Dy >= 4) && (redoor_dis == false))
+                    if( (Dy >= 4) && (redoor_dis == false) )
                     {
                         ROS_INFO("distance too far 1");
                         continuousValue_x = stay.x + 1000;
@@ -935,12 +991,21 @@ void KidsizeStrategy::strategymain()
                         ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
                         tool->Delay(60);
                     }
-                    else if( (Dy < 2) && (redoor_dis == false))
+                    else if( ((Dy < 2) && (redoor_dis == false)))
                     {
                         ROS_INFO("distance too short 1");
                         continuousValue_x = stay.x - 1000;
                         ROS_INFO("continuousValue_x = %d",continuousValue_x);
-                        ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);  
+                        ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta , IMU_continuous);
+                        for (int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)         //red
+                        {
+                            if ( strategy_info->color_mask_subject[5][i].size < 5000 )
+                            {
+                                redoor_dis = true;
+                                ROS_INFO("redoor_dis = true");
+                                break;
+                            }
+                        }  
                         tool->Delay(60);
                     }
                     else
@@ -1165,7 +1230,7 @@ void KidsizeStrategy::strategymain()
                         // ros::spinOnce();
                         for (int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)         //blue
                         {
-                            if (/*(strategy_info->color_mask_subject[2][i].size > 8000) &&*/ (Dy < 19))//17000
+                            if (/*(strategy_info->color_mask_subject[2][i].size > 8000) &&*/ (Dy < 20))//17000
                             {
                                 ROS_INFO("stand up1");
                                 crw_up_flag = true;
