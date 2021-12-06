@@ -436,6 +436,9 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                                    IMU_Value = get_IMU();
+                                    IMU_theta = IMU_Modify();
+                                    IMU_theta = IMU_angle_offest;
                                     //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
                                     if(abs(IMU_Value) > 70) //若超過90度修正
                                     {
@@ -461,6 +464,9 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                                    IMU_Value = get_IMU();
+                                    IMU_theta = IMU_Modify();
+                                    IMU_theta = IMU_angle_offest;
                                     //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous); 
                                     if(abs(IMU_Value) > 70) //若超過90度修正
                                     {
@@ -482,6 +488,9 @@ void KidsizeStrategy::strategymain()
                                 ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                 ROS_INFO("turn_angle = %d",turn_angle);
                                 ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                                IMU_Value = get_IMU();
+                                IMU_theta = IMU_Modify();
+                                IMU_theta = IMU_angle_offest;
                                 //ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + turn_angle, IMU_continuous);
                                 if(abs(IMU_Value) > 70) //若超過90度修正
                                 {
@@ -513,7 +522,8 @@ void KidsizeStrategy::strategymain()
                                             ROS_INFO(" first imu fix before turnhead");
                                             continuousValue_x -= 100;
                                             IMU_Value = get_IMU();
-                                            IMU_theta = IMU_Modify();strategy_info->get_image_flag = true;
+                                            IMU_theta = IMU_Modify();
+                                            strategy_info->get_image_flag = true;
                                             ros::spinOnce();
                                             tool->Delay(10);
                                             IMU_theta = IMU_angle_offest;
@@ -620,6 +630,9 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
+                                    IMU_Value = get_IMU();
+                                    IMU_theta = IMU_Modify();
+                                    IMU_theta = IMU_angle_offest;
                                     if(abs(IMU_Value) > 70) //若超過90度修正
                                     {
                                         ros_com->sendContinuousValue(continuousValue_x, stay.y, 0, stay.theta + IMU_theta, IMU_continuous); 
@@ -878,7 +891,6 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                                    IMU_Value = get_IMU();
                                     if(abs(IMU_Value) > 70) //若超過90度修正
                                     {
                                         ros_com->sendContinuousValue(Lmove.x, Lmove.y, 0, Lmove.theta + 10, IMU_continuous);
@@ -916,7 +928,6 @@ void KidsizeStrategy::strategymain()
                                     ROS_INFO("continuousValue_x = %d",continuousValue_x);
                                     ROS_INFO("turn_angle = %d",turn_angle);
                                     ROS_INFO("stay.theta + turn_angle = %d",stay.theta + turn_angle);
-                                    IMU_Value = get_IMU();
                                     if(abs(IMU_Value) > 70) //若超過90度修正
                                     {
                                         ros_com->sendContinuousValue(Rmove.x, Rmove.y, 0, Rmove.theta - 10, IMU_continuous);
@@ -1254,7 +1265,7 @@ void KidsizeStrategy::strategymain()
                     ros_com->sendBodyAuto(0, 0, 0, 0, WalkingMode::ContinuousStep, IMU_continuous); 
                     tool->Delay(2000);
                     ros_com->sendBodySector(29);
-                    tool->Delay(1500);
+                    tool->Delay(2000);
                     ros_com->sendBodySector(6);  //down
                     tool->Delay(5000);
                     ros_com->sendHeadMotor(HeadMotorID::VerticalID, 2400, 600);
@@ -1280,7 +1291,7 @@ void KidsizeStrategy::strategymain()
                         // ros::spinOnce();
                         for (int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)         //blue
                         {
-                            if ((strategy_info->color_mask_subject[2][i].size > 3000) && (Dy < 20))//17000
+                            if ((strategy_info->color_mask_subject[2][i].size > 3000) && (Dy < 21))//17000
                             {
                                 ROS_INFO("stand up1");
                                 crw_up_flag = true;
@@ -1292,7 +1303,7 @@ void KidsizeStrategy::strategymain()
                         // ros::spinOnce();
                         for (int i = 0; i < strategy_info->color_mask_subject_cnts[1]; i++)         //yellow
                         {
-                            if ((strategy_info->color_mask_subject[1][i].size > 5000) && (Dy < 14))//23000
+                            if ((strategy_info->color_mask_subject[1][i].size > 5000) && (Dy < 15))//23000
                             {
                                 ROS_INFO("stand up2");
                                 crw_up_flag = true;
@@ -1392,11 +1403,19 @@ int KidsizeStrategy::IMU_Modify() //用imu值判斷修正角度之副函式
         {
             IMU_angle_offest = 12;
         }
-        else if (abs(IMU_Value) >= 70 && abs(IMU_Value) < 90)
+        else if (abs(IMU_Value) >= 80 && abs(IMU_Value) < 90)
         {
-            IMU_angle_offest = 3;
+            IMU_angle_offest = 12;//8
         }
-        else if (abs(IMU_Value) >= 45 && abs(IMU_Value) < 70)
+        else if (abs(IMU_Value) >= 70 && abs(IMU_Value) < 80)
+        {
+            IMU_angle_offest = 11;//7
+        }
+        else if (abs(IMU_Value) >= 60 && abs(IMU_Value) < 70)
+        {
+            IMU_angle_offest = 10;//6
+        }
+        else if (abs(IMU_Value) >= 45 && abs(IMU_Value) < 60)
         {
             IMU_angle_offest = 10;
         }
@@ -1431,11 +1450,19 @@ int KidsizeStrategy::IMU_Modify() //用imu值判斷修正角度之副函式
         {
             IMU_angle_offest = -12;
         }
-        else if (abs(IMU_Value) >= 70 && abs(IMU_Value) < 90)
+        else if (abs(IMU_Value) >= 80 && abs(IMU_Value) < 90)
+        {
+            IMU_angle_offest = -4;
+        }
+        else if (abs(IMU_Value) >= 70 && abs(IMU_Value) < 80)
         {
             IMU_angle_offest = -3;
         }
-        else if (abs(IMU_Value) >= 45 && abs(IMU_Value) < 70)
+        else if (abs(IMU_Value) >= 60 && abs(IMU_Value) < 70)
+        {
+            IMU_angle_offest = -2;
+        }
+        else if (abs(IMU_Value) >= 45 && abs(IMU_Value) < 60)
         {
             IMU_angle_offest = -10;
         }

@@ -84,6 +84,10 @@ void OBSimage::strategymain()
 							RD = strategy_info->color_mask_subject[5][i].XMax - 0;
 						}
 					}
+					else
+					{
+
+					}
 					
 					for(int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)	//單塊藍色判斷
 					{
@@ -133,6 +137,7 @@ void OBSimage::strategymain()
 					strategy_info->get_image_flag = true;
 					ros::spinOnce();
                     tool->Delay(50);
+					break;
 				}
 				else
 				{
@@ -144,6 +149,7 @@ void OBSimage::strategymain()
 					strategy_info->get_image_flag = true;
 					ros::spinOnce();
                     tool->Delay(50);
+					break;
 				}
 				
 			}
@@ -503,6 +509,7 @@ void OBSimage::SlopeCalculate()			//計算斜率之副函式
 		else
 		{
 			slope_avg = 0;
+			break;
 		}
             
     }
