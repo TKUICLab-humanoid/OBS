@@ -1448,7 +1448,7 @@ int KidsizeStrategy::IMU_Modify() //用imu值判斷修正角度之副函式
     {
         if (abs(IMU_Value) >= 90)
         {
-            IMU_angle_offest = -12;
+            IMU_angle_offest = -8;//-12
         }
         else if (abs(IMU_Value) >= 80 && abs(IMU_Value) < 90)
         {
