@@ -80,14 +80,15 @@ void OBSimage::strategymain()
 					{
 						for (int i = 0; i < strategy_info->color_mask_subject_cnts[5]; i++)
 						{
-							LD = 319 - strategy_info->color_mask_subject[5][i].XMin;
+							LD = 318 - strategy_info->color_mask_subject[5][i].XMin;
 							RD = strategy_info->color_mask_subject[5][i].XMax - 0;
 						}
 					}
 					else
 					{
-
+						
 					}
+
 					
 					for(int i = 0; i < strategy_info->color_mask_subject_cnts[2]; i++)	//單塊藍色判斷
 					{
