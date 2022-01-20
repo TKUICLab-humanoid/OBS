@@ -12,7 +12,7 @@
 //////////////////////////////////////////////////////////
 
 #include <stdlib.h>
-#include "strategy/DeepMatrix.h"
+#include "strategy/GetParameter.h"
 #include <sys/time.h>
 #include <std_msgs/Int16.h>
 #include <std_msgs/Bool.h>
@@ -23,76 +23,6 @@
 
 ros::Subscriber DeepMatrix_subscribe;
 
-enum strategy_state
-{
-    P_INIT,
-    P_MATRIX_CALCULATE,
-    P_FIND_WALKINGSTATE,
-    P_FM_TURNHEAD,
-    P_WALKINGGAIT,
-    P_DOOR,
-    P_CRAWL
-};
-
-struct obstacle_data
-{
-    int x;
-    int y;
-    int x_min;
-    int x_max;
-    int y_min;
-    int y_max;
-    int size;
-};
-
-enum walking_command
-{
-    FORWARD_FAST,
-    FORWARD_NORMAL,
-    FORWARD_SLOW,
-    RMOVE_FAST,
-    RMOVE_NORMAL,
-    RMOVE_SLOW,
-    LMOVE_FAST,
-    LMOVE_NORMAL,
-    LMOVE_SLOW,
-	DIRmap_RIGHT,
-	DIRmap_LEFT,
-    WC_BIGLEFT,
-    WC_MIDLEFT,
-    WC_LEFT,
-    WC_BIGRIGHT,
-    WC_MIDRIGHT,
-    WC_RIGHT,
-    continuousValue_Ry,
-    continuousValue_Ly,
-	continuousValue_Rt,////add
-	continuousValue_Lt,////add
-	continuousValue_R2t,////add
-	continuousValue_L2t,////add
-	RMOVE_DOOR,
-	LMOVE_DOOR
-};
-
-struct label_model_coordinates
-{
-        float x, y;
-};
-
-
-enum direction
-{
-    Right,
-    Left
-};
-
-enum Head_direction
-{
-    RHD_Center,
-    RHD_Right,
-    RHD_Left
-};
-
 using namespace std;
 
 class KidsizeStrategy 
@@ -100,7 +30,7 @@ class KidsizeStrategy
 public:
 	KidsizeStrategy(ros::NodeHandle &nh) 
 	{
-		DeepMatrix_subscribe = nh.subscribe("/strategy/DeepMatrix_Topic", 1, &KidsizeStrategy::GetDeepMatrix,this);
+		DeepMatrix_subscribe = nh.subscribe("/strategy/GetParameter_Topic", 1, &KidsizeStrategy::GetParameter,this);
 		strategy_info = StrategyInfoInstance::getInstance();
 		tool = ToolInstance::getInstance();
 		ros_com = RosCommunicationInstance::getInstance();
@@ -112,131 +42,141 @@ public:
 	ToolInstance *tool;
 	StrategyInfoInstance *strategy_info;
 
-	strategy_state m_state;
-	walking_command spec_RLmove_state;
-	walking_command walking_state;
-	walking_command pre_walking_state;
-	obstacle_data obs_data;
-	direction turn_direction;
-	Head_direction head_direction;
-	Head_direction door_direction;
-	label_model_coordinates red_obs_left_coordinates;
-	label_model_coordinates red_obs_right_coordinates;
+	//////////////////////////////////////new strategy parameter ////////////////////////////////////////////
 
-	vector<obstacle_data> m_obs_vector;
-	vector<obstacle_data> m_finish_obs_vector;
+	
+	/*********************stategy_main parameter ********************/
+	
+	enum strategy_state
+	{
+		INIT,
+		AVOID,
+		TURNHEAD,
+		REDDOOR,
+		CRAWL
+	};
 
-	ObjectData blue_obs;
-	ObjectData blue_obs_second;
-	ObjectData blue_obs_third;
-	ObjectData P_DOOR_blue;
-	ObjectData P_DOOR_blues;
-	SensorMode IMU_continuous;
-	SensorMode IMU_single;
+	/***************subscribe deepmatrix parameter******************/
+	//0905++++
+	int Dy = 0;
+	int RD = 0;
+	int LD = 0;
+	int WR = 0;
+	int WL = 0;
+	int LeftblueOBS_XMax = 0;
+	int RightblueOBS_XMin = 0;
+	int L_XMAX = 0;
+	int R_XMIN = 0;
+	float slope_avg;
+	float Dx = 0;
+	bool in_reddoor_flag = false;
+	bool b_obs_flag = false;
+	bool y_obs_flag = false;
+	int l_center_Dy = 0;
+	int r_center_Dy = 0;
+	int center_Dy = 0;
+	int Deep_sum = 0;
+	int Deep_sum_R = 0;
+	int Deep_sum_L = 0;
+	bool one_b_flag = false;
+	bool two_b_flag = false;
+	int check_no_obs_cnt = 0;
+	int layer_sum = 0;
+	bool layer_flag = false;
+	bool LeftHead_flag = false;
+    bool RightHead_flag = false;
+	int turn_WR = 0;
+	int turn_WL = 0;
+	bool reddoor_slope_ok_flag = false;
+	bool imu_ok_flag = false;
+	bool redoor_dis = false;
+	bool crawl_dis = false;
+	bool R_door_flag = false;
+	bool L_door_flag = false;
+	bool crw_up_flag = false;
+	
 
-	int DeepMatrixValue[32];
-	int FilterMatrix[32];
-	int RMoveValue = 0;
-	int LMoveValue = 0;
-	int true_RMoveValue=0;
-	int true_LMoveValue=0;
-	int compareObs;
-	int compareObssize;
-	int bigobs;
-	int decideforward;
-	int decidemove;
-	int LRmove_cnt;
-	int fixed_LRmove_cnt;
-	int continuousValue_x;
-	int continuous_x_offset;
-	int continuous_y_offset;
-	int continuous_y_offset_RIGHT;
-	int continuous_y_offset_LEFT;
-	int continuous_theta_offset;
-	int continuous_theta_offset_RIGHT;
-	int continuous_theta_offset_LEFT;
-	int continuous_x_offset_RIGHT;
-	int continuous_x_offset_LEFT;
-	int RHead_X;
-	int LHead_X;
-	int insideFMcnt;
-	int first_cnt=0;
-	int Rrightimage=0;
-	int Rleftimage=0;
-	int Ry_fastest;
-	int Ly_fastest;
-   	int dirmap[3];
-	int dirdata[47];
-	int cntTopYellow_x=0;
-	int cntBottomYellow_x=0;
-	int BottomYellowPoint=0;
-	int MidYellowPoint=0;
-	int TopYellowPoint=0;
-        
-	float slope_avg;         //red door slope
-	float slope_avg_blue;    //blue obs slope
-	float slope;
-	float IMU_slope;
-	float sidelineslope;
-
-	bool in_reddoor_flag=false;	//add
-    bool slope_flag=false;
-	bool Blue_obs_flag = false;
-	bool Red_Door_flag = false;
-	bool first_enter_door = true;
-	bool turnslope_flag = false;
-	bool zero_flag = true;
-	bool check_obs = false;
-	bool checking_obs;
-	bool check_road = false;
-	bool face_to_door = false;
-	bool Center_door = false;
-	bool rest_flag = false;
-	bool pcrawl_flag = false;
-	bool stand_flag = false;
-	bool red_modle_flag = false;
-	bool check_LRmove_flag = false;
-	bool special_obs_flag = false;
-	bool Continuous_flag = false;
-	bool first_continuous_flag = false;
-	bool Turnhead_flag = false;
-	bool turnhead_open_cnt = true;
-	bool second_flag = false;
-	bool check_hole = false;
-	bool door_localization = false;
-	bool first_move_flag =false;
-	bool first_act_flag = true;
-	bool p_door = false;
-	bool movecnt = true;
-	bool First_flag = false;  //第一個藍色障礙物旗標（判斷藍色障礙物在紅門下個數）
-	bool crw_up = false;      //爬的過程中看紅門後的障礙物距離多少,決定要不要爬起
-	bool hole_flag = true;
-	bool sidelinewarning=false;
-	bool rightsidelinewarning=false;
-	bool leftsidelinewarning=false;
-	bool sideline_zero_flag=false;
-	bool twentyflag=false;
-    int First_width = 0;
-	int angle_offset = 0;
-	int continous_angle_offest = 0;
 	string parameter_path = "N";
-	string m_state_string="a";
-	string walking_state_string="a";
-	void GetDeepMatrix(const strategy::DeepMatrix &msg);
-	void SlopeCalculate();
-	void facetodoorfun();
-	void FaceToObsFun();	//when face to blue obs
-	void initparameterpath();
-	void load_dirtxt();
-	void readwalkinggait();
-    void turnslope();
-	void give_angle();
-	void IMUSlope();
-	void FaceToFinialLineFun();
-	void traverse();
-	void sideline();
-	void printinfo();
-};
+	//0905++++
+	/******************subscribe deepmatrix parameter******************/
 
-//bool isStart = false;
+	int continuous_angle_offset = 0;
+	int continuous_speed = 0;
+	bool init_flag = true;
+	float IMU_Value = 0;
+	float IMU_getValue = 0;
+	
+	/*********************stategy_main parameter ********************/
+	strategy_state strategy_state;
+	//walking_command walking_state;
+	SensorMode IMU_continuous;
+	int angle_offest = 0;
+	bool Continuous_flag = false;
+
+	/******************ini  parameter******************/
+
+	struct walking_gait
+	{
+		int x;
+		int y;
+		int theta;
+	};
+
+	walking_gait stay;
+	walking_gait Rmove;
+	walking_gait Lmove;
+
+	//0905++++
+	int LeftMove_X;
+	int LeftMove_Y;
+	int LeftMove_T;
+	int RightMove_X;
+	int RightMove_Y;
+	int RightMove_T;
+	int LeftSlope_X;
+	int LeftSlope_Y;
+	int LeftSlope_T;
+	int RightSlope_X;
+	int RightSlope_Y;
+	int RightSlope_T;
+	//0905++++
+
+	int maxspeed = 0;
+	int midspeed = 0;
+	int minspeed = 0;
+	
+	int b_dangerous_distance = 0;
+	int y_dangerous_distance = 0;
+	int continuousValue_x = 0;
+	int turn_angle = 0;
+	int speed =0;
+	int IMU_angle_offest = 0;
+	int IMU_theta = 0;
+	bool turnhead_flag = false;
+	bool check_anotherside_obs = false;
+
+	//-------preturn----------
+	int preturn_enable = 0;
+	int preturn_speed = 0;
+	int preturn_dir = 0;
+	int preturn_theta = 0;
+	int preturn_time = 0;
+
+	
+	/****************** ini parameter******************/
+	
+	////////////////////////////////////////function/////////////////////////////////////////////
+
+	void GetParameter(const strategy::GetParameter &msg);
+	void initparameterpath();
+	void readparameter();
+	int def_turn_angle();
+	int def_speed();
+	void printinfo();
+	int IMU_Modify();
+	void readpreturnparameter();
+	void slope();
+	float get_IMU();
+
+};
 
