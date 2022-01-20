@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
 	message_generation
 	roscpp
 	roslib
+	rospy
 	sensor_msgs
 	std_msgs
 	tku_msgs
@@ -53,12 +54,4 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
-
-add_executable(strategy Kidsize_HuroCup/strategy_main.cpp)
-add_dependencies(strategy ${catkin_EXPORTED_TARGETS})
-target_link_libraries(strategy ${catkin_LIBRARIES} ${TKU_LIBRARIES} ${ROSCOMMUNICATION_LIBRARIES})
-
-add_executable(OBSIMAGEPROCESS Kidsize_HuroCup/OBSimage.cpp)
-add_dependencies(OBSIMAGEPROCESS ${catkin_EXPORTED_TARGETS})
-target_link_libraries(OBSIMAGEPROCESS ${catkin_LIBRARIES} ${TKU_LIBRARIES} ${ROSCOMMUNICATION_LIBRARIES} ${OpenCV_LIBRARIES})
 
