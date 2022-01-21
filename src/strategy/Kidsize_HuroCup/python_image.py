@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #coding=utf-8
+# from turtle import st
 import rospy
 import numpy as np
 from hello1 import Sendmessage
@@ -22,7 +23,12 @@ Xc_count = 0
 Xc_num = 0
 Now_speed = 0
 Goal_speed = 0
-status = 0
+Turn_angle_status = 0
+Straight_status = 0
+Turn_status = 0
+Angle = 0
+max_speed_flag = False
+walking = False
 
 #==============================image===============================
 def Image_Init():
@@ -45,13 +51,13 @@ def Image_Info():
     print()
     # print(Focus_Matrix)
     # print(deep.Deep_Matrix)
-    # print(Filter_Matrix)
-    print('WR = '+ str(WR))
-    print('WL = '+ str(WL))
-    print('Xb = '+ str(Xb))
+    print(Filter_Matrix)
+    # print('WR = '+ str(WR))
+    # print('WL = '+ str(WL))
+    # print('Xb = '+ str(Xb))
     # print('Xc_count = '+ str(Xc_count))
     # print('Xc_num = '+ str(Xc_num))
-    print('Xc = '+ str(Xc))
+    # print('Xc = '+ str(Xc))
     print('Dx = '+ str(Dx))
     print('Dy = '+ str(Dy))
 
@@ -77,41 +83,62 @@ def Normal_Obs_Parameter():
         Xb = 0
     Dx = Xc - Xb
 #=============================strategy=============================
-'''def Straight_Speed(Dy):
-    global Goal_speed
-    if Dy ==24:
-        Goal_speed = 3000
+def Straight_Speed():
+    global Goal_speed 
+    if Dy ==24 or max_speed_flag == True:
+        Goal_speed = 1500
         pass
     elif 16 <= Dy < 24:
-        Goal_speed = 2000
-        pass
-    elif 8 <= Dy < 16:
         Goal_speed = 1000
         pass
-    elif 0 <= Dy < 8:
+    elif 8 <= Dy < 16:
         Goal_speed = 500
         pass
-def Straight_Move(Goal_speed,x=0,y=0,z=0,theta=0,sensor=0):
-    global status
-    if status == 1:     #speed ++
-        while x < Goal_speed:
-            x += 100
-            send.sendContinuousValue(x,y,z,theta,sensor)
-            pass
+    elif 0 <= Dy < 8:
+        Goal_speed = 0
         pass
-    elif status == 2:   #speed --
-        while x > Goal_speed:
-            x -= 100
-            send.sendContinuousValue(x,y,z,theta,sensor)
-            pass
+    print( 'Goal_speed = ' + str(Goal_speed))
+
+def Turn_Angle(Turn_angle_status):
+    global Angle 
+    if Turn_angle_status == 0: #R
+        print('turn right')
+        Angle = -10
         pass
-    elif status == 0:
-        while x == Goal_speed:
-            send.sendContinuousValue(x,y,z,theta,sensor)
-            pass
-        pass'''
-# def Turn(Dx):
+    elif Turn_angle_status == 1: #L
+        print('turn left')
+        Angle = 10
+        pass
+    else: 
+        Angle = 0
+    print( 'Angle = ' + str(Angle))
+
+def Move(Straight_status=0,x=0,y=0,z=0,theta=0,sensor=0):
+    print('Straight_status = ' + str(Straight_status))
+    if Straight_status == 1:     #speed ++
+        print('go')
+        send.sendContinuousValue(x + Goal_speed,y,z,theta,sensor)
+        pass
+    elif Straight_status == 2:   #speed --
+        send.sendContinuousValue(x + 2000,y,z,theta,sensor)
+        pass
+    elif Straight_status == 0:
+        print('turn')
+        send.sendContinuousValue(x,y,z,theta,sensor)
+        send.sendContinuousValue(x + Goal_speed,y,z,theta + Angle,sensor)
+        pass
+    print( 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa = ' + str(theta + Angle))
+# def Turn(Turn_status=0,x=0,y=0,z=0,theta=0,sensor=0):
+#     print('Turn_status = ' + str(Turn_status))
+#     if Turn_status == 1:     #L
+#         print('turn left')
+#         send.sendContinuousValue(x,y,z,theta + 5,sensor)
+#         pass
+#     elif Turn_status == 0: #R
+#         print('turn right')
+#         send.sendContinuousValue(x,y,z,theta - 5,sensor)
 #     pass
+
 # def IMU_Fix():
 #     pass
 # def Turn_Head():
@@ -123,97 +150,64 @@ if __name__ == '__main__':
         deep = deep_calculate()
         send = Sendmessage()
         while not rospy.is_shutdown():
-            if send.Web == True:
-                print("send.Web = True")
-                pass
-            if send.Web == False:
-                #print("send.Web = False")
+            # if send.Web == True:
+            #     print("send.Web = True")
+            #     pass
+            # print("walking")
+            if send.is_start == True:
+            # if send.Web == False:
+                print("start")
                 #==============================image===============================
-                Focus_Matrix = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+                # Focus_Matrix = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+                Focus_Matrix = [7, 7, 7, 7, 9, 9, 9, 9, 11, 11, 11, 11, 12, 12, 13, 13, 13, 13, 12, 12, 11, 11, 11, 11, 9, 9, 9, 9, 7, 7, 7, 7]
                 Image_Init()
                 Normal_Obs_Parameter()
                 Image_Info()
                 #=============================strategy=============================
-                '''if Dy < 24:
-                    if  > Goal_speed:
-                        #speed--
-                        Straight_Speed(Dy)
-                        print('Goal_speed = ' + str(Goal_speed) )
-                        Straight_Move(status = 2)
-                        pass
-                    elif Now_speed == Goal_speed:
-                        #stand
-                        Straight_Speed(Dy)
-                        print('Goal_speed = ' + str(Goal_speed) )
-                        Straight_Move(status = 0)
-                        pass
-                    pass
-                elif Dy == 24:
-                    #speed++ until maxspeed
-                    Straight_Speed(Dy)
-                    print('Goal_speed = ' + str(Goal_speed) )
-                    Straight_Move(status = 1)
-                    pass'''
-                    #=====================================
-                '''if Dy < 24:
-                    if 17 > Dx > 2:
-                        if Now_speed > Goal_speed:
-                            print('go & speed -- R')
-                            # go & speed -- 
-                            # def Straight_Speed
-                            # def Straight_Move(Goal_speed)
-                            #Turn_Right
-                            print('Turn_Right 1')
-                            # def Turn(Dx)
-                            pass
-                        elif Now_speed == Goal_speed:
-                            print('go R')
-                            # go 
-                            # def Straight_Speed
-                            # def Straight_Move(Goal_speed)
-                            #Turn_Right
-                            print('Turn_Right 2')
-                            # def Turn(Dx)
-                            pass
-                        pass
-                    elif -2 > Dx > -17:
-                        if Now_speed > Goal_speed:
-                            print('go & speed -- L')
-                            # go & speed -- 
-                            # def Straight_Speed
-                            # def Straight_Move(Goal_speed)
-                            #Turn_Right
-                            print('Turn_Left 1')
-                            # def Turn(Dx)
-                            pass
-                        elif Now_speed == Goal_speed:
-                            print('go L')
-                            # go 
-                            # def Straight_Speed
-                            # def Straight_Move(Goal_speed)
-                            #Turn_Right
-                            print('Turn_Left 2')
-                            # def Turn(Dx)
-                            pass
-                        pass
+                send.sendHeadMotor(1,2048,100)
+                send.sendHeadMotor(2,1520,100)
+                if walking == False:
+                    send.sendBodyAuto(0,0,0,0,1,0)
+                    time.sleep(1.5) 
+                walking = True
+                
+                max_speed_flag == False
+
+                if Dy < 24:
+                    if 17 > Dx > 2 :        #turn right
+                        print('avoid')
+                        Straight_Speed()
+                        Turn_Angle(Turn_angle_status = 0)
+                        Move(Straight_status = 0)
+                        # Turn(Turn_status = 0)
+                    elif -2 > Dx > -17:     #turn left
+                        print('avoid')
+                        Straight_Speed()
+                        Turn_Angle(Turn_angle_status = 1)
+                        Move(Straight_status = 0)
+                        # Turn(Turn_status = 1)
                     elif 2 >= Dx >= -2:
-                        if Now_speed < Goal_speed:
-                            print('walk straight after obs ++')
-                            # go & speed ++ 
-                            # def Straight_Speed
-                            # def Straight_Move(Goal_speed)
-                            pass
-                        elif Now_speed == Goal_speed:
-                            print('walk straight after obs')
-                            # go 
-                            # def Straight_Speed
-                            # def Straight_Move(Goal_speed)
-                            pass
+                        print('no avoid')
+                        max_speed_flag == True
+                        # Straight_Speed()
+                        Move(Straight_status = 2)
                         pass
                     pass
                 elif Dy == 24:
-                    #go with max speed
-                    print('walk straight with max speed')
-                    pass'''
+                    print('go straight')
+                    Straight_Speed()
+                    Move(Straight_status = 1)
+                    pass
+            if send.is_start == False:
+                print("stop")
+                # print(send.is_start)
+                if walking == True:
+                    send.sendContinuousValue(0,0,0,0,0)
+                    time.sleep(1.5) 
+                    send.sendBodyAuto(0,0,0,0,1,0)
+                    walking = False
+                time.sleep(1)
+                send.sendBodySector(29)
+            print('walking ====== ' + str(walking))
     except rospy.ROSInterruptException:
         pass

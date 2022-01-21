@@ -8,6 +8,7 @@ SensorSet,ObjectList,LabelModelObjectList,RobotPos,SetGoalPoint,SoccerDataList,S
 from std_msgs.msg import Int16,Bool
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
+import cv2
 import time
 
 class Sendmessage:     
@@ -23,6 +24,7 @@ class Sendmessage:
         
         self.Web = False
         self.Label_Model = [0 for i in range(320*240)]
+        # self.Label_Model = np.zeros([320*240])
         self.bridge = CvBridge()
         self.color_mask_subject_cnts = [0 for i in range(8)]
         self.color_mask_subject_X = [[0]*320 for i in range(8)]
@@ -39,11 +41,13 @@ class Sendmessage:
         self.imu_value_Pitch = 0
         self.DIOValue = 0x00
         self.is_start = False
-
+        self.time = 0
         aaaa = rospy.init_node('talker', anonymous=True)
         object_list_sub = rospy.Subscriber("/Object/List",ObjectList, self.getObject)
         label_model_sub = rospy.Subscriber("/LabelModel/List",LabelModelObjectList, self.getLabelModel)
-        
+        #compress_image_sub = rospy.Subscriber("compress_image",Image, self.catchImage)
+        #image_raw_sub = rospy.Subscriber("colormodel_image",Image, self.RawImage)
+        #origin_image_sub = rospy.Subscriber("orign_image",Image, self.OriginImage)
         start_sub = rospy.Subscriber("/web/start",Bool, self.startFunction)
         DIO_ack_sub = rospy.Subscriber("/package/FPGAack",Int16, self.DIOackFunction)
         sensor_sub = rospy.Subscriber("/package/sensorpackage",SensorPackage, self.sensorPackageFunction)
@@ -108,53 +112,39 @@ class Sendmessage:
 
     def sendSensorSet(self,R,P,Y,DesireSet,IMUReset,ForceState,GainSet):
         msg = SensorSet()
-        msg.Roll  = R
-        msg.Pitch = P
-        msg.Yaw   = Y
-        msg.DesireSet = DesireSet
-        msg.IMUReset = IMUReset
-        msg.ForceState = ForceState
-        msg.GainSet = GainSet
+        msg.sensor_P = P * 1000
+        msg.sensor_I = I * 1000
+        msg.sensor_D = D * 1000
+        msg.sensor_modeset = modeset
         self.sensor_pub.publish(msg)
 
     def sendSensorReset(self):
         msg = SensorSet()
-        msg.Roll  = 0
-        msg.Pitch = 0
-        msg.Yaw   = 0
-        msg.DesireSet = False
-        msg.IMUReset = True
-        msg.ForceState = False
-        msg.GainSet = False
+        msg.sensor_modeset = 0x02
         self.sensor_pub.publish(msg)
 
     def strategy(self):
         send = Sendmessage()
         while not rospy.is_shutdown():
-            send.drawImageFunction(1,0,0,320,120,120,152,245,255)
-            print(self.Web)
-            time.sleep(0.3)
-            send.sendBodySector(1010)
-            time.sleep(4)
-            time.sleep(0.3)
-            send.sendBodySector(1011)
-            time.sleep(4)
-            time.sleep(0.3)
-            send.sendBodySector(1020)
-            time.sleep(4)
-            time.sleep(0.3)
-            send.sendBodySector(1021)
-            time.sleep(4)
-            print("1")
+            if send.Web == True:
+                send.sendSensorReset()
+                cv2.imshow("aaaaaa",send.rawimg)
+                cv2.waitKey(3)
+                print(send.Label_Model[33333])
             
             
-
+    #def catchImage(self,msg):
+    #    self.cvimg = self.bridge.imgmsg_to_cv2(msg,"bgr8")
+    #def RawImage(self,msg):
+    #    self.rawimg = self.bridge.imgmsg_to_cv2(msg,"bgr8")
+    #def OriginImage(self,msg):
+    #    self.originimg = self.bridge.imgmsg_to_cv2(msg,"bgr8")
     def startFunction(self,msg):
         self.Web = msg.data
     def getLabelModel(self,msg):
-        for i in range (320*240):
-            self.Label_Model[i] = msg.LabelModel[i]    
+        self.Label_Model = msg.LabelModel    
     def getObject(self,msg):
+        time_start = time.time()
         for i in range (8):
             self.color_mask_subject_cnts[i] = msg.Objectlist[i].cnt
             for j in range (self.color_mask_subject_cnts[i]):
@@ -168,6 +158,8 @@ class Sendmessage:
                 self.color_mask_subject_Width[i][j] = msg.Objectlist[i].Colorarray[j].Width
                 self.color_mask_subject_Height[i][j] = msg.Objectlist[i].Colorarray[j].Height
                 self.color_mask_subject_size[i][j] = msg.Objectlist[i].Colorarray[j].size
+        time_end = time.time()
+        # self.time = time_end - time_start
     def sensorPackageFunction(self,msg):        
         self.imu_value_Roll  = msg.IMUData[0]
         self.imu_value_Pitch = msg.IMUData[1]
@@ -177,7 +169,7 @@ class Sendmessage:
             self.is_start = True
         else:
             self.is_start = False
-        
+        self.DIOValue = msg.data
     
 if __name__ == '__main__':
     try:

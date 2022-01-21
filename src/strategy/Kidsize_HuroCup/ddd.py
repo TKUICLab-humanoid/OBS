@@ -24,6 +24,7 @@ class deep_calculate:
             print(e)
         cv_image = cv2.resize(cv_image, (320, 240))
         cv_image_2 = cv2.resize(cv_image, (32, 24))
+
         self.Deep_Matrix = []
         for compress_width in range(0, 32, 1):
             self.Deep_Matrix.append(0)
@@ -37,7 +38,8 @@ class deep_calculate:
                 if compress_height == 0:
                     self.Deep_Matrix[compress_width] = 24
         #print(self.Deep_Matrix)
-        cv2.imshow("Image_show",cv_image)
+
+        # cv2.imshow("Image_show",cv_image)
         cv2.waitKey(1)
 
 if __name__ == '__main__':
