@@ -27,8 +27,9 @@ Turn_angle_status = 0
 Straight_status = 0
 Turn_status = 0
 Angle = 0
-max_speed_flag = False
 walking = False
+Yaw_wen = 0
+imu_angle = 0
 
 #==============================image===============================
 def Image_Init():
@@ -70,7 +71,6 @@ def Normal_Obs_Parameter():
             Xc_count += 1
             Xc_num += i
             Xc = int(Xc_num) // int(Xc_count)
-            pass
         else :
             Filter_Matrix[i] = 0
         WR += (32-i) * Filter_Matrix[i]
@@ -85,32 +85,48 @@ def Normal_Obs_Parameter():
 #=============================strategy=============================
 def Straight_Speed():
     global Goal_speed 
-    if Dy ==24 or max_speed_flag == True:
-        Goal_speed = 1500
-        pass
+    if Dy ==24:
+        Goal_speed = 2000
     elif 16 <= Dy < 24:
-        Goal_speed = 1000
-        pass
+        Goal_speed = 1500
     elif 8 <= Dy < 16:
+        Goal_speed = 1000
+    elif 4 <= Dy < 8:
         Goal_speed = 500
-        pass
-    elif 0 <= Dy < 8:
+    elif 0 <= Dy < 4:
         Goal_speed = 0
-        pass
+    return Goal_speed
     print( 'Goal_speed = ' + str(Goal_speed))
 
 def Turn_Angle(Turn_angle_status):
-    global Angle 
+    global Angle
     if Turn_angle_status == 0: #R
         print('turn right')
-        Angle = -10
-        pass
+        if 17 > Dx >= 12:
+            Angle = -8
+        elif 12 > Dx >= 8:
+            Angle = -6
+        elif 8 > Dx >= 4:
+            Angle = -4
+        elif 4 > Dx >= 2:
+            Angle = -2
+        elif 2 > Dx >= 0:
+            Angle = 0
     elif Turn_angle_status == 1: #L
         print('turn left')
-        Angle = 10
-        pass
+        if -12 >= Dx > -17:
+            Angle = 8
+        elif -8 >= Dx > -12:
+            Angle = 6
+        elif -4 >= Dx > -8:
+            Angle = 4
+        elif -2 >= Dx > -4:
+            Angle = 2
+        elif 0 >= Dx > -2:
+            Angle = 0
     else: 
         Angle = 0
+    return Angle
     print( 'Angle = ' + str(Angle))
 
 def Move(Straight_status=0,x=0,y=0,z=0,theta=0,sensor=0):
@@ -118,16 +134,12 @@ def Move(Straight_status=0,x=0,y=0,z=0,theta=0,sensor=0):
     if Straight_status == 1:     #speed ++
         print('go')
         send.sendContinuousValue(x + Goal_speed,y,z,theta,sensor)
-        pass
-    elif Straight_status == 2:   #speed --
+    elif Straight_status == 2:   #max speed
         send.sendContinuousValue(x + 2000,y,z,theta,sensor)
-        pass
     elif Straight_status == 0:
         print('turn')
-        send.sendContinuousValue(x,y,z,theta,sensor)
         send.sendContinuousValue(x + Goal_speed,y,z,theta + Angle,sensor)
-        pass
-    print( 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa = ' + str(theta + Angle))
+    print( 'theta + Angle = ' + str(theta + Angle))
 # def Turn(Turn_status=0,x=0,y=0,z=0,theta=0,sensor=0):
 #     print('Turn_status = ' + str(Turn_status))
 #     if Turn_status == 1:     #L
@@ -139,8 +151,39 @@ def Move(Straight_status=0,x=0,y=0,z=0,theta=0,sensor=0):
 #         send.sendContinuousValue(x,y,z,theta - 5,sensor)
 #     pass
 
-# def IMU_Fix():
-#     pass
+def IMU_Fix():
+    global Yaw_wen,imu_angle
+    Yaw_wen = send.imu_value_Yaw
+    print('Yaw = ' + str(Yaw_wen))
+
+    if Yaw_wen > 0: #fix to r
+        if Yaw_wen >= 45:
+            imu_angle = -10
+        elif 45 > Yaw_wen >= 20:
+            imu_angle = -8
+        elif 20 > Yaw_wen >= 10:
+            imu_angle = -6
+        elif 10 > Yaw_wen >= 5:
+            imu_angle = -4
+        elif 5 > Yaw_wen >= 2:
+            imu_angle = -2
+        elif 2 > Yaw_wen >= 0:
+            imu_angle = 0
+    elif Yaw_wen <=0: #fix to l
+        if -45 >= Yaw_wen:
+            imu_angle =  10
+        elif -20 >= Yaw_wen > -45:
+            imu_angle = 8
+        elif -10 >= Yaw_wen > -20:
+            imu_angle = 6
+        elif -5 >= Yaw_wen > -10:
+            imu_angle = 4
+        elif -2 >= Yaw_wen > -5:
+            imu_angle = 2
+        elif 0 >= Yaw_wen > -2:
+            imu_angle = 0
+    print( 'imu_angle = ' + str(imu_angle))
+    return imu_angle
 # def Turn_Head():
 #     pass
 
@@ -170,8 +213,6 @@ if __name__ == '__main__':
                     send.sendBodyAuto(0,0,0,0,1,0)
                     time.sleep(1.5) 
                 walking = True
-                
-                max_speed_flag == False
 
                 if Dy < 24:
                     if 17 > Dx > 2 :        #turn right
@@ -188,16 +229,11 @@ if __name__ == '__main__':
                         # Turn(Turn_status = 1)
                     elif 2 >= Dx >= -2:
                         print('no avoid')
-                        max_speed_flag == True
-                        # Straight_Speed()
                         Move(Straight_status = 2)
-                        pass
-                    pass
                 elif Dy == 24:
                     print('go straight')
                     Straight_Speed()
                     Move(Straight_status = 1)
-                    pass
             if send.is_start == False:
                 print("stop")
                 # print(send.is_start)
