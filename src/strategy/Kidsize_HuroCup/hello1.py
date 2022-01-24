@@ -110,7 +110,7 @@ class Sendmessage:
         MotorData.Speed = Speed
         self.single_motor_data_pub.publish(MotorData)
 
-    def sendSensorSet(self,R,P,Y,DesireSet,IMUReset,ForceState,GainSet):
+    def sendSensorSet(self,P,I,D,modeset):
         msg = SensorSet()
         msg.sensor_P = P * 1000
         msg.sensor_I = I * 1000
