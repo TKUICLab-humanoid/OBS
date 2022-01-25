@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #coding=utf-8
 # from turtle import st
+from email import header
+from tkinter import CENTER
 import rospy
 import numpy as np
 from hello1 import Sendmessage
@@ -31,6 +33,11 @@ walking = False
 Yaw_wen = 0
 imu_angle = 0
 IMU_ok = False
+Deep_sum = 0
+R_deep_sum = 0
+L_deep_sum = 0
+L_Deep = 0
+R_Deep = 0
 
 #==============================image===============================
 def Image_Init():
@@ -64,7 +71,7 @@ def Image_Info():
     print('Dy = '+ str(Dy))
 
 def Normal_Obs_Parameter():
-    global Filter_Matrix, Xc, Dy, WR, WL, Xb, Dx, Xc_count, Xc_num
+    global Filter_Matrix, Xc, Dy, WR, WL, Xb, Dx, Xc_count, Xc_num, Deep_sum, R_Deep, L_Deep
     for i in range (0, 32, 1):
         Filter_Matrix.append(0)
         Filter_Matrix[i] = Focus_Matrix[i] - deep.Deep_Matrix[i]
@@ -78,6 +85,9 @@ def Normal_Obs_Parameter():
         WL += (i+1) * Filter_Matrix[i]
         if deep.Deep_Matrix[i] < Dy:
             Dy = deep.Deep_Matrix[i]
+        Deep_sum += deep.Deep_Matrix[i]
+        L_Deep = deep.Deep_Matrix[4]
+        R_Deep = deep.Deep_Matrix[28]
     if WL > WR:
         Xb = 31
     elif WL <= WR:
@@ -197,8 +207,53 @@ def IMU_Fix():
             imu_angle = 0
     print( 'imu_angle = ' + str(imu_angle))
     return imu_angle
-# def Turn_Head():
-#     pass
+def Turn_Head(x = -200 ,y = -100 ,z = 0 ,theta = 2 ,sensor = 0 ):
+    #turn head right
+    send.sendHeadMotor(1,1600,100)
+    send.sendHeadMotor(2,1447,100)
+    time.sleep(1) 
+    #recode R_deep_sum
+    R_deep_sum = Deep_sum
+    #turn head leght
+    send.sendHeadMotor(1,1600,100)
+    send.sendHeadMotor(2,2647,100)
+    time.sleep(1)
+    L_deep_sum = Deep_sum
+    #recode L_deep_sum
+    #turn head center
+    send.sendHeadMotor(1,2048,100)
+    send.sendHeadMotor(2,1520,100)
+    time.sleep(1)
+
+    if R_deep_sum - L_deep_sum > 0 :
+        if Yaw_wen < 80:
+            while Yaw_wen < 80:
+                send.sendContinuousValue(x,y,z,theta - 8,sensor)
+        # turn head to center 
+        time.sleep(1)
+        if L_Deep != 24 or R_Deep != 24:
+            while L_Deep != 24 or R_Deep != 24:
+                send.sendContinuousValue(x + 2000,y,z,theta,sensor)
+        # turn head 
+        time.sleep(1)
+        if Yaw_wen >5:
+            while Yaw_wen >5:
+                send.sendContinuousValue(x,y,z,theta + 8,sensor)
+    elif L_deep_sum - R_deep_sum >0 :
+        if Yaw_wen < 80:
+            while Yaw_wen < 80:
+                send.sendContinuousValue(x,y,z,theta + 8,sensor)
+        # turn head to center 
+        time.sleep(1)
+        if L_Deep != 24 or R_Deep != 24:
+            while L_Deep != 24 or R_Deep != 24:
+                send.sendContinuousValue(x + 2000,y,z,theta,sensor)
+        # turn head 
+        time.sleep(1)
+        if Yaw_wen >5:
+            while Yaw_wen >5:
+                send.sendContinuousValue(x,y,z,theta - 8,sensor)
+    pass
 
 if __name__ == '__main__':
     try:
