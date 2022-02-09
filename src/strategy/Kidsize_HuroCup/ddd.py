@@ -32,7 +32,7 @@ class deep_calculate:
                 blue = cv_image_2.item(compress_height, compress_width, 0)
                 green = cv_image_2.item(compress_height, compress_width, 1)
                 red = cv_image_2.item(compress_height, compress_width, 2)
-                if (blue == 128 and green == 0 and red == 128):
+                if (blue == 128 and green == 0 and red == 128) or (blue == 128 and green == 128 and red == 0) :
                     self.Deep_Matrix[compress_width] = 23 - compress_height
                     break
                 if compress_height == 0:

@@ -148,7 +148,6 @@ class Sendmessage:
         for i in range (8):
             self.color_mask_subject_cnts[i] = msg.Objectlist[i].cnt
             for j in range (self.color_mask_subject_cnts[i]):
-
                 self.color_mask_subject_X[i][j] = msg.Objectlist[i].Colorarray[j].X
                 self.color_mask_subject_Y[i][j] = msg.Objectlist[i].Colorarray[j].Y
                 self.color_mask_subject_XMin[i][j] = msg.Objectlist[i].Colorarray[j].XMin
