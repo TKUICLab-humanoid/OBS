@@ -41,10 +41,17 @@ R_min = 0
 R_max = 0
 B_left = 0
 B_right = 0
+XMax_one = 0
+XMin_one = 0
+XMin_two = 0
+XMax_two = 0
+B_min = 0
+B_max = 0
+
 
 #==============================image===============================
 def Image_Init():
-    global Filter_Matrix, Xc, Dy, WR, WL, Xb, Dx, Xc_count, Xc_num, Deep_sum, L_Deep, R_Deep, R_min, R_max, B_left, B_right
+    global Filter_Matrix, Xc, Dy, WR, WL, Xb, Dx, Xc_count, Xc_num, Deep_sum, L_Deep, R_Deep, R_min, R_max, B_min, B_max, B_left, B_right, XMax_one, XMin_one, XMin_two, XMax_two
     Filter_Matrix = []
     Xc = 0
     Dy = 24
@@ -61,8 +68,12 @@ def Image_Init():
     R_max = 0
     B_left = 0
     B_right = 0
-
-
+    XMax_one = 0
+    XMin_one = 0
+    XMin_two = 0
+    XMax_two = 0
+    B_min = 0
+    B_max = 0
 
 def Image_Info():
     print()
@@ -84,21 +95,36 @@ def Image_Info():
         print('red_flag = '+ str(red_flag))
         print('R_min = '+ str(R_min))
         print('R_max = '+ str(R_max))
+        print('B_min = '+ str(B_min))
+        print('B_max = '+ str(B_max))
         print('B_left = '+ str(B_left))
         print('B_right = '+ str(B_right))
 
 def Normal_Obs_Parameter():
-    global Filter_Matrix, Xc, Dy, WR, WL, Xb, Dx, Xc_count, Xc_num, Deep_sum, R_Deep, L_Deep, red_flag, R_min, R_max, B_left, B_right
+    global Filter_Matrix, Xc, Dy, WR, WL, Xb, Dx, Xc_count, Xc_num, Deep_sum, R_Deep, L_Deep, red_flag, R_min, R_max, B_min, B_max, B_left, B_right, XMax_one, XMin_one, XMin_two, XMax_two
     if send.color_mask_subject_size[5][0] > 5000 :
         red_flag = True
         R_min = send.color_mask_subject_XMin[5][0] 
         R_max = send.color_mask_subject_XMax[5][0]
+
         if send.color_mask_subject_cnts[2] == 1 :
-            B_left = send.color_mask_subject_XMin[2][0]
-            B_right = send.color_mask_subject_XMax[2][0]
+            B_min = send.color_mask_subject_XMin[2][0]
+            B_max = send.color_mask_subject_XMax[2][0]
         elif send.color_mask_subject_cnts[2] == 2 :
-            B_left = send.color_mask_subject_XMax[2][0]
-            B_right = send.color_mask_subject_XMin[2][1]
+            XMax_one = send.color_mask_subject_XMax[2][0]
+            XMin_one = send.color_mask_subject_XMin[2][0]
+            XMin_two = send.color_mask_subject_XMin[2][1]
+            XMax_two = send.color_mask_subject_XMax[2][1]
+
+        if XMin_one > XMin_two	:				
+            B_right = XMin_one
+        elif XMin_one < XMin_two :
+            B_right = XMin_two
+        if XMax_one > XMax_two : 
+            B_left = XMax_two
+        elif XMax_one < XMax_two :
+            B_left = XMax_one
+
     else : 
         red_flag = False
         for i in range (0, 32, 1):
@@ -127,18 +153,27 @@ def Normal_Obs_Parameter():
 
 def Move(Straight_status = 0 ,x = -400 ,y = -100 ,z = 0 ,theta = 2 ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
-    if Straight_status == 1:     #speed ++
-        print('go')
+    if Straight_status == 0:    #speed + turn
+        print('turn')
+        send.sendContinuousValue(x + Goal_speed,y,z,theta + Angle,sensor)
+    elif Straight_status == 1:     #speed ++
+        print('go straight')
         send.sendContinuousValue(x + Goal_speed,y,z,theta,sensor)
     elif Straight_status == 2:   #max speed
         print('max speed')
         send.sendContinuousValue(x + 2000,y,z,theta,sensor)
-    elif Straight_status == 0:
-        print('turn')
-        send.sendContinuousValue(x + Goal_speed,y,z,theta + Angle,sensor)
-    elif Straight_status == 3:
+    elif Straight_status == 3:  #speed + imu
         print('imu fix')
         send.sendContinuousValue(x + Goal_speed,y,z,theta + imu_angle,sensor)
+    elif Straight_status == 4:  #left move
+        print('left move')
+        send.sendContinuousValue(x,y + 800,z,theta,sensor)
+    elif Straight_status == 5:  #right move
+        print('right move')
+        send.sendContinuousValue(x,y - 800,z,theta,sensor)
+    elif Straight_status == 6:  #stay
+        print('stay')
+        send.sendContinuousValue(x,y,z,theta,sensor)
 
 
 def Turn_Head(x = -400 ,y = -100 ,z = 0 ,theta = 2 ,sensor = 0 ):
@@ -220,6 +255,9 @@ def Turn_Head(x = -400 ,y = -100 ,z = 0 ,theta = 2 ,sensor = 0 ):
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
+
+def Slope_fix():
+    pass
 
 def IMU_Yaw_ini():
     global  Yaw_wen
@@ -340,10 +378,21 @@ if __name__ == '__main__':
                     print('red strategyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy')
                     if R_min == 1 and R_max == 318 :
                         print('red center')
+                        if (B_min == 1 and B_max < 20) or (B_max == 318 and B_min > 300) or (B_min == 0 and B_min == 0 and B_right == 0 and B_left == 0) or (B_right > 280 and B_left < 40) :
+                            print('CCCCCCCCCCCCCCCCRWAL')
+                            Move(Straight_status = 6)
+                        elif B_min == 1 and B_max > 20 :
+                            print('move R 11111')
+                            Move(Straight_status = 5)
+                        elif B_max == 318 and B_min < 300 :
+                            print('move L 11111')
+                            Move(Straight_status = 4)
                     elif R_min == 1 and R_max < 318 : 
                         print('move L')
+                        Move(Straight_status = 4)
                     elif R_min > 1 and R_max == 318 : 
                         print('move R')
+                        Move(Straight_status = 5)
                 else :
                     get_IMU()
                     if Dy < 24:
