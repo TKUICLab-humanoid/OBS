@@ -102,7 +102,7 @@ def Image_Info():
 
 def Normal_Obs_Parameter():
     global Filter_Matrix, Xc, Dy, WR, WL, Xb, Dx, Xc_count, Xc_num, Deep_sum, R_Deep, L_Deep, red_flag, R_min, R_max, B_min, B_max, B_left, B_right, XMax_one, XMin_one, XMin_two, XMax_two
-    if send.color_mask_subject_size[5][0] > 5000 :
+    if send.color_mask_subject_size[5][0] > 1000 :
         red_flag = True
         R_min = send.color_mask_subject_XMin[5][0] 
         R_max = send.color_mask_subject_XMax[5][0]
@@ -357,8 +357,8 @@ if __name__ == '__main__':
             #     pass
             # print("walking")
 
-            # if send.is_start == True:
-            if send.Web == False:
+            if send.is_start == True:
+            # if send.Web == False:
                 # print("start")
                 #==============================image===============================
                 # Focus_Matrix = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
@@ -436,16 +436,16 @@ if __name__ == '__main__':
                         IMU_Fix()
                         Move(Straight_status = 3)
                     print('IMU_ok ====== ' + str(IMU_ok))
-            # if send.is_start == False:
-            #     print("stop")
-            #     if walking == True:
-            #         send.sendContinuousValue(0,0,0,0,0)
-            #         time.sleep(1.5) 
-            #         send.sendBodyAuto(0,0,0,0,1,0)
-            #         walking = False
-            #     time.sleep(1)
-            #     send.sendBodySector(29)
-            #     IMU_Yaw_ini()
-            # print('walking ====== ' + str(walking))
+            if send.is_start == False:
+                print("stop")
+                if walking == True:
+                    send.sendContinuousValue(0,0,0,0,0)
+                    time.sleep(1.5) 
+                    send.sendBodyAuto(0,0,0,0,1,0)
+                    walking = False
+                time.sleep(1)
+                send.sendBodySector(29)
+                IMU_Yaw_ini()
+            print('walking ====== ' + str(walking))
     except rospy.ROSInterruptException:
         pass
