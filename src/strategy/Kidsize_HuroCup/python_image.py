@@ -373,24 +373,29 @@ if __name__ == '__main__':
                     send.sendBodyAuto(0,0,0,0,1,0)
                     time.sleep(1.5) 
                 walking = True
-
                 if red_flag == True:
                     print('red strategyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy')
-                    if R_min == 1 and R_max == 318 :
+                    # get_IMU()
+                    # if abs(Yaw_wen) > 5:
+                    #     while abs(Yaw_wen) > 5:
+                    #         get_IMU()
+                    #         IMU_Fix()
+                    #         Move(Straight_status = 3)
+                    if R_min < 2 and R_max > 315 :
                         print('red center')
-                        if (B_min == 1 and B_max < 20) or (B_max == 318 and B_min > 300) or (B_min == 0 and B_min == 0 and B_right == 0 and B_left == 0) or (B_right > 280 and B_left < 40) :
+                        if (B_min < 2 and B_max < 20) or (B_max > 315 and B_min > 300) or (B_min == 0 and B_min == 0 and B_right == 0 and B_left == 0) or (B_right > 280 and B_left < 40) :
                             print('CCCCCCCCCCCCCCCCRWAL')
                             Move(Straight_status = 6)
-                        elif B_min == 1 and B_max > 20 :
+                        elif B_min < 2 and B_max > 20 :
                             print('move R 11111')
                             Move(Straight_status = 5)
-                        elif B_max == 318 and B_min < 300 :
+                        elif B_max > 315 and B_min < 300 :
                             print('move L 11111')
                             Move(Straight_status = 4)
-                    elif R_min == 1 and R_max < 318 : 
+                    elif R_min < 2 and R_max < 315 : 
                         print('move L')
                         Move(Straight_status = 4)
-                    elif R_min > 1 and R_max == 318 : 
+                    elif R_min > 2 and R_max > 315 : 
                         print('move R')
                         Move(Straight_status = 5)
                 else :
@@ -434,7 +439,7 @@ if __name__ == '__main__':
                         print('go straight')
                         Straight_Speed()
                         IMU_Fix()
-                        Move(Straight_status = 3)
+                        Move(Straight_status = 1)
                     print('IMU_ok ====== ' + str(IMU_ok))
             if send.is_start == False:
                 print("stop")
@@ -447,5 +452,7 @@ if __name__ == '__main__':
                 send.sendBodySector(29)
                 IMU_Yaw_ini()
             print('walking ====== ' + str(walking))
+            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa    ',R_min)
+            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa    ',R_max)
     except rospy.ROSInterruptException:
         pass
