@@ -47,6 +47,8 @@ XMin_two = 0
 XMax_two = 0
 B_min = 0
 B_max = 0
+First_Reddoor = False
+redoor_dis = False
 
 
 #==============================image===============================
@@ -124,34 +126,34 @@ def Normal_Obs_Parameter():
             B_left = XMax_two
         elif XMax_one < XMax_two :
             B_left = XMax_one
-
     else : 
         red_flag = False
-        for i in range (0, 32, 1):
-            Filter_Matrix.append(0)
-            Filter_Matrix[i] = Focus_Matrix[i] - deep.Deep_Matrix[i]
-            if Filter_Matrix[i] >= 0 :
-                Xc_count += 1
-                Xc_num += i
-                Xc = int(Xc_num) // int(Xc_count)
-            else :
-                Filter_Matrix[i] = 0
-            WR += (32-i) * Filter_Matrix[i]
-            WL += (i+1) * Filter_Matrix[i]
-            if deep.Deep_Matrix[i] < Dy:
-                Dy = deep.Deep_Matrix[i]
-            Deep_sum += deep.Deep_Matrix[i]
-            L_Deep = deep.Deep_Matrix[4]
-            R_Deep = deep.Deep_Matrix[28]
-        if WL > WR:
-            Xb = 31
-        elif WL <= WR:
-            Xb = 0
-        Dx = Xc - Xb
+
+    for i in range (0, 32, 1):
+        Filter_Matrix.append(0)
+        Filter_Matrix[i] = Focus_Matrix[i] - deep.Deep_Matrix[i]
+        if Filter_Matrix[i] >= 0 :
+            Xc_count += 1
+            Xc_num += i
+            Xc = int(Xc_num) // int(Xc_count)
+        else :
+            Filter_Matrix[i] = 0
+        WR += (32-i) * Filter_Matrix[i]
+        WL += (i+1) * Filter_Matrix[i]
+        if deep.Deep_Matrix[i] < Dy:
+            Dy = deep.Deep_Matrix[i]
+        Deep_sum += deep.Deep_Matrix[i]
+        L_Deep = deep.Deep_Matrix[4]
+        R_Deep = deep.Deep_Matrix[28]
+    if WL > WR:
+        Xb = 31
+    elif WL <= WR:
+        Xb = 0
+    Dx = Xc - Xb
 #=============================strategy=============================
 
 
-def Move(Straight_status = 0 ,x = -400 ,y = -100 ,z = 0 ,theta = 2 ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -500 ,y = -100 ,z = 0 ,theta = 2 ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
     if Straight_status == 0:    #speed + turn
         print('turn')
@@ -174,9 +176,15 @@ def Move(Straight_status = 0 ,x = -400 ,y = -100 ,z = 0 ,theta = 2 ,sensor = 0 )
     elif Straight_status == 6:  #stay
         print('stay')
         send.sendContinuousValue(x,y,z,theta,sensor)
+    elif Straight_status == 7:  #reddoor go
+        print('reddoor go')
+        send.sendContinuousValue(x + 500,y,z,theta,sensor)
+    elif Straight_status == 8:  #reddoor back
+        print('reddoor back')
+        send.sendContinuousValue(x - 500,y,z,theta,sensor)
 
 
-def Turn_Head(x = -400 ,y = -100 ,z = 0 ,theta = 2 ,sensor = 0 ):
+def Turn_Head(x = -500 ,y = -100 ,z = 0 ,theta = 2 ,sensor = 0 ):
     global R_deep_sum, L_deep_sum, L_Deep, R_Deep
     send.sendContinuousValue(x,y,z,theta,sensor)
     send.sendHeadMotor(1,1447,100)
@@ -369,35 +377,54 @@ if __name__ == '__main__':
                 #=============================strategy=============================
                 if walking == False:
                     send.sendHeadMotor(1,2048,100)
-                    send.sendHeadMotor(2,1420,100)
+                    send.sendHeadMotor(2,1520,100)
                     send.sendBodyAuto(0,0,0,0,1,0)
                     time.sleep(1.5) 
                 walking = True
                 if red_flag == True:
                     print('red strategyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy')
-                    # get_IMU()
-                    # if abs(Yaw_wen) > 5:
-                    #     while abs(Yaw_wen) > 5:
-                    #         get_IMU()
-                    #         IMU_Fix()
-                    #         Move(Straight_status = 3)
-                    if R_min < 2 and R_max > 315 :
-                        print('red center')
-                        if (B_min < 2 and B_max < 20) or (B_max > 315 and B_min > 300) or (B_min == 0 and B_min == 0 and B_right == 0 and B_left == 0) or (B_right > 280 and B_left < 40) :
-                            print('CCCCCCCCCCCCCCCCRWAL')
-                            Move(Straight_status = 6)
-                        elif B_min < 2 and B_max > 20 :
-                            print('move R 11111')
-                            Move(Straight_status = 5)
-                        elif B_max > 315 and B_min < 300 :
-                            print('move L 11111')
-                            Move(Straight_status = 4)
-                    elif R_min < 2 and R_max < 315 : 
-                        print('move L')
-                        Move(Straight_status = 4)
-                    elif R_min > 2 and R_max > 315 : 
-                        print('move R')
-                        Move(Straight_status = 5)
+                    print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ====== ' + str(Dy))
+                    get_IMU()
+                    if abs(Yaw_wen) > 5:
+                        while abs(Yaw_wen) > 5:
+                            get_IMU()
+                            IMU_Fix()
+                            Move(Straight_status = 3)
+                            
+                    if First_Reddoor == False :
+                        First_Reddoor = True
+                        send.sendHeadMotor(1,2048,100)
+                        send.sendHeadMotor(2,1620,100)
+                        time.sleep(0.5)
+                    elif First_Reddoor == True :
+                        if (Dy >= 6) and (redoor_dis == False) :
+                            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+                            Move(Straight_status = 7)
+                            pass
+                        elif (Dy < 3) and (redoor_dis == False) :
+                            print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
+                            Move(Straight_status = 8)
+                            pass
+                        else :
+                            redoor_dis == True
+                            print('ccccccccccccccccccccccccccccccccccccc')
+                            if R_min < 2 and R_max > 315 :
+                                print('red center')
+                                if (B_min < 2 and B_max < 20) or (B_max > 315 and B_min > 300) or (B_min == 0 and B_min == 0 and B_right == 0 and B_left == 0) or (B_right > 280 and B_left < 40) :
+                                    print('CCCCCCCCCCCCCCCCRWAL')
+                                    Move(Straight_status = 6)
+                                elif B_min < 2 and B_max > 20 :
+                                    print('move R 11111')
+                                    Move(Straight_status = 5)
+                                elif B_max > 315 and B_min < 300 :
+                                    print('move L 11111')
+                                    Move(Straight_status = 4)
+                            elif R_min < 2 and R_max < 315 : 
+                                print('move L')
+                                Move(Straight_status = 4)
+                            elif R_min > 2 and R_max > 315 : 
+                                print('move R')
+                                Move(Straight_status = 5)
                 else :
                     get_IMU()
                     if Dy < 24:
@@ -451,8 +478,6 @@ if __name__ == '__main__':
                 time.sleep(1)
                 send.sendBodySector(29)
                 IMU_Yaw_ini()
-            print('walking ====== ' + str(walking))
-            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa    ',R_min)
-            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa    ',R_max)
+            # print('walking ====== ' + str(walking))
     except rospy.ROSInterruptException:
         pass
