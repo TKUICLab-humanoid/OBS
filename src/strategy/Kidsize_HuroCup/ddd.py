@@ -9,6 +9,7 @@ from tku_msgs.msg import camera
 import cv2 
 import sys
 import time
+import math
 
 class deep_calculate:
     def __init__(self):
@@ -16,6 +17,16 @@ class deep_calculate:
         self.Image_compress_sub = rospy.Subscriber("colormodel_image",Image, self.convert)			# 訂閱攝像頭資訊 #"/kidsize/camera/image_raw" #"compress_image" #"/usb_cam/image_raw"
         #self.Deep_Matrix = []
         # rospy.spin()
+        self.first_red = True
+        self.x1 = 0
+        self.y1 = 0
+        self.x2 = 0
+        self.y2 = 0
+        self.cnt = 0
+        self.a = True
+        self.b = True
+        self.slope = 0
+        self.degree = 0
 
     def convert(self, imgmsg):
         try:
@@ -24,6 +35,57 @@ class deep_calculate:
             print(e)
         cv_image = cv2.resize(cv_image, (320, 240))
         cv_image_2 = cv2.resize(cv_image, (32, 24))
+
+        self.R_min = send.color_mask_subject_XMin[5][0] - 1
+        self.R_max = send.color_mask_subject_XMax[5][0] + 1
+        self.red_width = self.R_max - self.R_min 
+        self.x1 = 0
+        self.y1 = 0
+        self.x2 = 1
+        self.y2 = 0
+        self.cnt = 0
+        
+        if send.color_mask_subject_size[5][0] > 1000 :
+            for compress_width in range(0, 320, 1):
+                self.a = True
+                for compress_height in range(239, -1, -1):
+                    blue = cv_image.item(compress_height, compress_width, 0)
+                    green = cv_image.item(compress_height, compress_width, 1)
+                    red = cv_image.item(compress_height, compress_width, 2)
+                    if (blue == 255 and green == 255 and red == 0) :
+                        if self.a == True :
+                            self.cnt += 1
+                            self.a = False
+                    if (blue == 255 and green == 255 and red == 0) and self.first_red == True:
+                        self.first_red = False
+                        self.x1 = compress_width
+                        self.y1 = 239 - compress_height
+                    if abs(self.red_width - self.cnt) <= 2 and self.b == True:
+                        self.b = False
+                        self.x2 = compress_width
+                        self.y2 = 239 - compress_height 
+        else :
+            self.x1 = 0
+            self.y1 = 0
+            self.x2 = 1
+            self.y2 = 0
+            self.slope = 0
+                
+        self.first_red = True
+        self.b = True
+        self.slope = int( (self.y2 - self.y1) / (self.x2 - self.x1) )
+        self.degree = math.degrees(self.slope)
+        print('=======================================')
+        print('x1 = ',self.x1)
+        print('y1 = ',self.y1)
+        # print('self.cnt = ',self.cnt)
+        # print('self.R_min = ',self.R_min)
+        # print('self.R_max = ',self.R_max)
+        # print('red_width = ',self.red_width)
+        print('x2 = ',self.x2)
+        print('y2 = ',self.y2)
+        print('slope = ',self.slope)
+        print('degree = ',self.degree)
 
         self.Deep_Matrix = []
         for compress_width in range(0, 32, 1):
@@ -38,6 +100,7 @@ class deep_calculate:
                 if compress_height == 0:
                     self.Deep_Matrix[compress_width] = 24
         #print(self.Deep_Matrix)
+
         # cv2.imshow("Image_show",cv_image)
         cv2.waitKey(1)
 
