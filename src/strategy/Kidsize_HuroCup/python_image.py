@@ -177,7 +177,7 @@ def Move(Straight_status = 0 ,x = -500 ,y = -100 ,z = 0 ,theta = 2 ,sensor = 0 )
         print('stay')
         send.sendContinuousValue(x,y,z,theta,sensor)
     elif Straight_status == 7:  #reddoor go
-        print('reddoor go')
+        print('reddoor forward')
         send.sendContinuousValue(x + 500,y,z,theta,sensor)
     elif Straight_status == 8:  #reddoor back
         print('reddoor back')
@@ -265,6 +265,7 @@ def Turn_Head(x = -500 ,y = -100 ,z = 0 ,theta = 2 ,sensor = 0 ):
                 get_IMU()
 
 def Slope_fix():
+    # print('slope = ',deep.degree)
     pass
 
 def IMU_Yaw_ini():
@@ -277,7 +278,7 @@ def get_IMU():
     print('Yaw = ' + str(Yaw_wen))
     return Yaw_wen
 
-def IMU_Fix():
+def IMU_Angle():
     global imu_angle
     if Yaw_wen > 0: #fix to r
         if Yaw_wen >= 45:
@@ -365,9 +366,8 @@ if __name__ == '__main__':
             #     pass
             # print("walking")
 
-            if send.is_start == True:
-            # if send.Web == False:
-                # print("start")
+            # if send.is_start == True:
+            if send.Web == False:
                 #==============================image===============================
                 # Focus_Matrix = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
                 Focus_Matrix = [7, 7, 7, 7, 9, 9, 9, 9, 11, 11, 11, 11, 12, 12, 13, 13, 13, 13, 12, 12, 11, 11, 11, 11, 9, 9, 9, 9, 7, 7, 7, 7]
@@ -382,15 +382,14 @@ if __name__ == '__main__':
                     time.sleep(1.5) 
                 walking = True
                 if red_flag == True:
-                    print('red strategyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy')
-                    print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ====== ' + str(Dy))
+                    print('In Reddoor')
+                    # print('Dy = ' + str(Dy))
                     get_IMU()
                     if abs(Yaw_wen) > 5:
                         while abs(Yaw_wen) > 5:
                             get_IMU()
-                            IMU_Fix()
+                            IMU_Angle()
                             Move(Straight_status = 3)
-                            
                     if First_Reddoor == False :
                         First_Reddoor = True
                         send.sendHeadMotor(1,2048,100)
@@ -398,16 +397,13 @@ if __name__ == '__main__':
                         time.sleep(0.5)
                     elif First_Reddoor == True :
                         if (Dy >= 6) and (redoor_dis == False) :
-                            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
                             Move(Straight_status = 7)
                             pass
                         elif (Dy < 3) and (redoor_dis == False) :
-                            print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
                             Move(Straight_status = 8)
                             pass
                         else :
                             redoor_dis == True
-                            print('ccccccccccccccccccccccccccccccccccccc')
                             if R_min < 2 and R_max > 315 :
                                 print('red center')
                                 if (B_min < 2 and B_max < 20) or (B_max > 315 and B_min > 300) or (B_min == 0 and B_min == 0 and B_right == 0 and B_left == 0) or (B_right > 280 and B_left < 40) :
@@ -429,33 +425,33 @@ if __name__ == '__main__':
                     get_IMU()
                     if Dy < 24:
                         if 14 >= Dx >= 2 :        #turn right
-                            print('avoid')
+                            print('right avoid')
                             Straight_Speed()
                             if abs(Yaw_wen) > 5 and IMU_ok == False:
-                                IMU_Fix()
+                                IMU_Angle()
                                 Move(Straight_status = 3)
                             else:
                                 Turn_Angle(Turn_angle_status = 0)
                                 Move(Straight_status = 0)
 
-                            if abs(Yaw_wen) < 10 :
+                            if abs(Yaw_wen) < 5 :
                                 IMU_ok = True
                             # Turn(Turn_status = 0)
                         elif -2 >= Dx >= -14 :     #turn left
-                            print('avoid')
+                            print('left avoid')
                             Straight_Speed()
                             if abs(Yaw_wen) > 5 and IMU_ok == False:
-                                IMU_Fix()
+                                IMU_Angle()
                                 Move(Straight_status = 3)
                             else:
                                 Turn_Angle(Turn_angle_status = 1)
                                 Move(Straight_status = 0)
 
-                            if abs(Yaw_wen) < 10 :
+                            if abs(Yaw_wen) < 5 :
                                 IMU_ok = True
                             # Turn(Turn_status = 1)
                         elif (Dx < 17 and Dx > 14) or (Dx < -14 and Dx > -17):
-                            print('TTTTTTTTTTT')
+                            print('TTTTTTTTTTTurn Head')
                             Turn_Head()
                             pass
                         elif 2 > Dx > -2:
@@ -465,19 +461,20 @@ if __name__ == '__main__':
                     elif Dy == 24:
                         print('go straight')
                         Straight_Speed()
-                        IMU_Fix()
+                        IMU_Angle()
                         Move(Straight_status = 1)
                     print('IMU_ok ====== ' + str(IMU_ok))
-            if send.is_start == False:
-                print("stop")
-                if walking == True:
-                    send.sendContinuousValue(0,0,0,0,0)
-                    time.sleep(1.5) 
-                    send.sendBodyAuto(0,0,0,0,1,0)
-                    walking = False
-                time.sleep(1)
-                send.sendBodySector(29)
-                IMU_Yaw_ini()
+            # if send.is_start == False:
+            #     print("stop")
+            #     if walking == True:
+            #         send.sendContinuousValue(0,0,0,0,0)
+            #         time.sleep(1.5) 
+            #         send.sendBodyAuto(0,0,0,0,1,0)
+            #         walking = False
+            #     time.sleep(1)
+            #     send.sendBodySector(29)
+            #     IMU_Yaw_ini()
             # print('walking ====== ' + str(walking))
+            Slope_fix()
     except rospy.ROSInterruptException:
         pass
