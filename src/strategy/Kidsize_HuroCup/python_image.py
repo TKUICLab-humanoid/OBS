@@ -153,7 +153,7 @@ def Normal_Obs_Parameter():
 #=============================strategy=============================
 
 
-def Move(Straight_status = 0 ,x = -200 ,y = -300 ,z = 0 ,theta = -3 ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -400 ,y = -300 ,z = 0 ,theta = 2 ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
     if Straight_status == 0:    #speed + turn
         print('turn')
@@ -184,7 +184,7 @@ def Move(Straight_status = 0 ,x = -200 ,y = -300 ,z = 0 ,theta = -3 ,sensor = 0 
         send.sendContinuousValue(x - 500,y,z,theta,sensor)
 
 
-def Turn_Head(x = -200 ,y = -300 ,z = 0 ,theta = -3 ,sensor = 0 ):
+def Turn_Head(x = -400 ,y = -300 ,z = 0 ,theta = 2 ,sensor = 0 ):
     global R_deep_sum, L_deep_sum, L_Deep, R_Deep
     send.sendContinuousValue(x,y,z,theta,sensor)
     send.sendHeadMotor(1,1447,100)
@@ -212,18 +212,21 @@ def Turn_Head(x = -200 ,y = -300 ,z = 0 ,theta = -3 ,sensor = 0 ):
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                send.sendContinuousValue(x,y,z,theta - 12,sensor)
+                send.sendContinuousValue(x,y,z,theta - 8,sensor)
         send.sendHeadMotor(1,2647,100)
         send.sendHeadMotor(2,1600,100) 
         time.sleep(1)
         Image_Init()
         Normal_Obs_Parameter()
-        if L_Deep != 24 or R_Deep != 24:
-            while L_Deep != 24 or R_Deep != 24:
+        if L_Deep < 12 : #L_Deep != 24 or R_Deep != 24
+            while L_Deep < 12 : #L_Deep != 24 or R_Deep != 24
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                send.sendContinuousValue(x + 2000,y,z,theta,sensor)
+                if abs(Yaw_wen) > 87 :
+                    send.sendContinuousValue(x + 2000,y,z,theta + 2,sensor)
+                else :
+                    send.sendContinuousValue(x + 2000,y,z,theta - 2,sensor)
         send.sendHeadMotor(1,2048,100)
         send.sendHeadMotor(2,1520,100) 
         time.sleep(1)
@@ -233,7 +236,7 @@ def Turn_Head(x = -200 ,y = -300 ,z = 0 ,theta = -3 ,sensor = 0 ):
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                send.sendContinuousValue(x,y,z,theta + 12,sensor)
+                send.sendContinuousValue(x,y,z,theta + 8,sensor)
     elif L_deep_sum > R_deep_sum :
         get_IMU()
         if abs(Yaw_wen) < 80:
@@ -241,25 +244,28 @@ def Turn_Head(x = -200 ,y = -300 ,z = 0 ,theta = -3 ,sensor = 0 ):
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                send.sendContinuousValue(x,y,z,theta + 12,sensor)
+                send.sendContinuousValue(x,y,z,theta + 8,sensor)
         send.sendHeadMotor(1,1447,100)
         send.sendHeadMotor(2,1600,100) 
         time.sleep(1)
         Image_Init()
         Normal_Obs_Parameter()
-        if L_Deep > 12 or R_Deep > 12:
-            while L_Deep > 12 or R_Deep > 12:
+        if R_Deep < 12 : #L_Deep > 12 or R_Deep > 12
+            while R_Deep < 12 : #L_Deep > 12 or R_Deep > 12
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                send.sendContinuousValue(x + 2000,y,z,theta,sensor)
+                if abs(Yaw_wen) > 87 :
+                    send.sendContinuousValue(x + 2000,y,z,theta - 2,sensor)
+                else :
+                    send.sendContinuousValue(x + 2000,y,z,theta + 2,sensor)
         send.sendHeadMotor(1,2048,100)
         send.sendHeadMotor(2,1520,100) 
         time.sleep(1)
         get_IMU()
         if abs(Yaw_wen) > 5:
             while abs(Yaw_wen) > 5:
-                send.sendContinuousValue(x,y,z,theta - 12,sensor)
+                send.sendContinuousValue(x,y,z,theta - 8,sensor)
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
@@ -427,7 +433,7 @@ if __name__ == '__main__':
                         if 14 >= Dx >= 2 :        #turn right
                             print('right avoid')
                             Straight_Speed()
-                            if abs(Yaw_wen) > 5 and IMU_ok == False:
+                            if ( abs(Yaw_wen) > 5 and IMU_ok == False ) and Dx >= 9 :
                                 IMU_Angle()
                                 Move(Straight_status = 3)
                             else:
@@ -440,7 +446,7 @@ if __name__ == '__main__':
                         elif -2 >= Dx >= -14 :     #turn left
                             print('left avoid')
                             Straight_Speed()
-                            if abs(Yaw_wen) > 5 and IMU_ok == False:
+                            if ( abs(Yaw_wen) > 5 and IMU_ok == False ) and Dx <= -9:
                                 IMU_Angle()
                                 Move(Straight_status = 3)
                             else:
@@ -451,7 +457,14 @@ if __name__ == '__main__':
                                 IMU_ok = True
                             # Turn(Turn_status = 1)
                         elif (Dx < 17 and Dx > 15) or (Dx < -15 and Dx > -17) :
-                            if L_Deep < 12 and R_Deep < 12 :
+                            IMU_Angle()
+                            if ( abs(Yaw_wen) > 5 and IMU_ok == False ) :
+                                IMU_Angle()
+                                Move(Straight_status = 3)
+                            if abs(Yaw_wen) < 5 :
+                                IMU_ok = True
+                            Move(Straight_status = 6)
+                            if ( L_Deep < 20 ) and ( R_Deep < 20 ) :
                                 print('TTTTTTTTTTTurn Head')
                                 Turn_Head()
                             else :
@@ -470,6 +483,7 @@ if __name__ == '__main__':
                         IMU_Angle()
                         Move(Straight_status = 1)
                     print('IMU_ok ====== ' + str(IMU_ok))
+            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ====== ' + str(Dx))
             if send.is_start == False:
                 print("stop")
                 if walking == True:
