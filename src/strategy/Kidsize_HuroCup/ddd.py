@@ -18,6 +18,7 @@ class deep_calculate:
         #self.Deep_Matrix = []
         # rospy.spin()
         self.first_red = True
+        self.aa = 0
         self.x1 = 0
         self.y1 = 0
         self.x2 = 0
@@ -101,7 +102,7 @@ class deep_calculate:
                 if compress_height == 0:
                     self.Deep_Matrix[compress_width] = 24
         # print(self.Deep_Matrix)
-
+        self.aa = self.Deep_Matrix
         # cv2.imshow("Image_show",cv_image)
         cv2.waitKey(1)
 
