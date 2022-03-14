@@ -51,6 +51,9 @@ B_max = 0
 First_Reddoor = False
 redoor_dis = False
 
+PreTurn_L = False
+PreTurn_R = False
+
 
 #==============================image===============================
 def Image_Init():
@@ -185,6 +188,12 @@ def Move(Straight_status = 0 ,x = -300 ,y = -400 ,z = 0 ,theta = -3 ,sensor = 0 
     elif Straight_status == 8:  #reddoor back
         print('Straight_status = reddoor back')
         send.sendContinuousValue(x - 500,y,z,theta,sensor)
+    elif Straight_status == 9:  #preturn left
+        print('Straight_status =preturn left')
+        send.sendContinuousValue(x + 500,y,z,theta + 8,sensor)
+    elif Straight_status == 10:  #preturn right
+        print('Straight_status = preturn right')
+        send.sendContinuousValue(x + 500,y,z,theta - 8,sensor)
 
 
 def Turn_Head(x = -300 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
@@ -402,6 +411,20 @@ if __name__ == '__main__':
                     send.sendBodyAuto(0,0,0,0,1,0)
                     time.sleep(1.5) 
                 walking = True
+                if PreTurn_L == True :
+                    get_IMU()
+                    if abs(Yaw_wen) < 30:
+                        while abs(Yaw_wen) < 30:
+                            get_IMU()
+                            Move(Straight_status = 9)
+                    PreTurn_L = False
+                elif PreTurn_R == True : 
+                    get_IMU()
+                    if abs(Yaw_wen) < 30:
+                        while abs(Yaw_wen) < 30:
+                            get_IMU()
+                            Move(Straight_status = 10)
+                    PreTurn_R = False
                 if red_flag == True:
                     print('In Reddoor')
                     # print('Dy = ' + str(Dy))
