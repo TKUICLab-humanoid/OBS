@@ -159,7 +159,7 @@ def Normal_Obs_Parameter():
 #=============================strategy=============================
 
 
-def Move(Straight_status = 0 ,x = -300 ,y = -400 ,z = 0 ,theta = -3 ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -100 ,y = 0 ,z = 0 ,theta = -5 ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
     if Straight_status == 0:    #speed + turn
         print('Straight_status = turn')
@@ -169,7 +169,7 @@ def Move(Straight_status = 0 ,x = -300 ,y = -400 ,z = 0 ,theta = -3 ,sensor = 0 
         send.sendContinuousValue(x + Goal_speed,y,z,theta,sensor)
     elif Straight_status == 2:   #max speed
         print('Straight_status = max speed')
-        send.sendContinuousValue(x + 2000,y,z,theta,sensor)
+        send.sendContinuousValue(x + 2000,y+100,z,theta+1,sensor)
     elif Straight_status == 3:  #speed + imu
         print('Straight_status = imu fix')
         send.sendContinuousValue(x + Goal_speed,y,z,theta + imu_angle,sensor)
@@ -196,7 +196,7 @@ def Move(Straight_status = 0 ,x = -300 ,y = -400 ,z = 0 ,theta = -3 ,sensor = 0 
         send.sendContinuousValue(x + 500,y,z,theta - 8,sensor)
 
 
-def Turn_Head(x = -300 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
+def Turn_Head(x = -100 ,y = 0 ,z = 0 ,theta = -5  ,sensor = 0 ):
     global R_deep_sum, L_deep_sum, L_Deep, R_Deep
     send.sendContinuousValue(x,y,z,theta,sensor)
     send.sendHeadMotor(1,1447,100)
@@ -219,12 +219,12 @@ def Turn_Head(x = -300 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
 
     if R_deep_sum > L_deep_sum :
         get_IMU()
-        if abs(Yaw_wen) < 78:
-            while abs(Yaw_wen) < 78:
+        if abs(Yaw_wen) < 75:
+            while abs(Yaw_wen) < 75:
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                send.sendContinuousValue(x - 100,y + 400,z,theta - 8,sensor)
+                send.sendContinuousValue(x - 200,y + 1000,z,theta - 10,sensor)
         send.sendHeadMotor(1,2647,100)
         send.sendHeadMotor(2,1600,100) 
         time.sleep(1)
@@ -250,7 +250,7 @@ def Turn_Head(x = -300 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                send.sendContinuousValue(x - 300,y - 300,z,theta + 12,sensor)
+                send.sendContinuousValue(x - 300,y - 200,z,theta + 15,sensor)
     elif L_deep_sum > R_deep_sum :
         get_IMU()
         if abs(Yaw_wen) < 83:
@@ -258,7 +258,7 @@ def Turn_Head(x = -300 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                send.sendContinuousValue(x - 300,y - 400,z,theta + 14,sensor)
+                send.sendContinuousValue(x ,y ,z,theta + 15,sensor)
         send.sendHeadMotor(1,1447,100)
         send.sendHeadMotor(2,1600,100) 
         time.sleep(1)
@@ -281,7 +281,7 @@ def Turn_Head(x = -300 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
         get_IMU()
         if abs(Yaw_wen) > 5:
             while abs(Yaw_wen) > 5:
-                send.sendContinuousValue(x - 100,y + 400 ,z,theta - 6,sensor)
+                send.sendContinuousValue(x - 200,y + 400 ,z,theta - 10,sensor)
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
