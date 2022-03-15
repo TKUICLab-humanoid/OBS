@@ -50,9 +50,11 @@ B_min = 0
 B_max = 0
 First_Reddoor = False
 redoor_dis = False
-
-PreTurn_L = False
+imu_flag = True
+# PreTurn_L = False
+PreTurn_L = True
 PreTurn_R = False
+# PreTurn_R = True
 
 
 #==============================image===============================
@@ -159,7 +161,7 @@ def Normal_Obs_Parameter():
 #=============================strategy=============================
 
 
-def Move(Straight_status = 0 ,x = -100 ,y = 0 ,z = 0 ,theta = -5 ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = 0 ,y = 0 ,z = 0 ,theta = -4 ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
     if Straight_status == 0:    #speed + turn
         print('Straight_status = turn')
@@ -169,16 +171,19 @@ def Move(Straight_status = 0 ,x = -100 ,y = 0 ,z = 0 ,theta = -5 ,sensor = 0 ):
         send.sendContinuousValue(x + Goal_speed,y,z,theta,sensor)
     elif Straight_status == 2:   #max speed
         print('Straight_status = max speed')
-        send.sendContinuousValue(x + 2000,y+100,z,theta+1,sensor)
+        send.sendContinuousValue(x + 2500,y+100,z,theta+1,sensor)
     elif Straight_status == 3:  #speed + imu
         print('Straight_status = imu fix')
-        send.sendContinuousValue(x + Goal_speed,y,z,theta + imu_angle,sensor)
+        if red_flag == True:
+            send.sendContinuousValue(x,y,z,theta + imu_angle,sensor)
+        else:
+            send.sendContinuousValue(x + Goal_speed,y,z,theta + imu_angle,sensor)
     elif Straight_status == 4:  #left move
         print('Straight_status = left move')
-        send.sendContinuousValue(x - 200,y + 1200,z,theta,sensor)
+        send.sendContinuousValue(x - 200,y + 1000,z,theta + 1,sensor)
     elif Straight_status == 5:  #right move
         print('Straight_status = right move')
-        send.sendContinuousValue(x - 200,y - 600,z,theta - 1,sensor)
+        send.sendContinuousValue(x - 200,y - 700,z,theta - 1,sensor)
     elif Straight_status == 6:  #stay
         print('Straight_status = stay')
         send.sendContinuousValue(x,y,z,theta,sensor)
@@ -187,16 +192,16 @@ def Move(Straight_status = 0 ,x = -100 ,y = 0 ,z = 0 ,theta = -5 ,sensor = 0 ):
         send.sendContinuousValue(x + 500,y,z,theta,sensor)
     elif Straight_status == 8:  #reddoor back
         print('Straight_status = reddoor back')
-        send.sendContinuousValue(x - 500,y,z,theta,sensor)
+        send.sendContinuousValue(x - 800,y,z,theta,sensor)
     elif Straight_status == 9:  #preturn left
         print('Straight_status =preturn left')
-        send.sendContinuousValue(x + 500,y,z,theta + 8,sensor)
+        send.sendContinuousValue(x + 500,y,z,theta + 12,sensor)
     elif Straight_status == 10:  #preturn right
         print('Straight_status = preturn right')
         send.sendContinuousValue(x + 500,y,z,theta - 8,sensor)
 
 
-def Turn_Head(x = -100 ,y = 0 ,z = 0 ,theta = -5  ,sensor = 0 ):
+def Turn_Head(x = 0 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
     global R_deep_sum, L_deep_sum, L_Deep, R_Deep
     send.sendContinuousValue(x,y,z,theta,sensor)
     send.sendHeadMotor(1,1447,100)
@@ -334,9 +339,9 @@ def IMU_Angle():
 def Straight_Speed():
     global Goal_speed 
     if Dy ==24:
-        Goal_speed = 2000
+        Goal_speed = 2500
     elif 16 <= Dy < 24:
-        Goal_speed = 1500
+        Goal_speed = 2000
     elif 12 <= Dy < 16:
         Goal_speed = 1000
     elif 8 <= Dy < 12:
@@ -385,6 +390,25 @@ def Turn_Angle(Turn_angle_status):
     print( 'Angle = ' + str(Angle))
     return Angle
 
+def Crawl():
+    global Straight_status
+    if abs(Yaw_wen) > 3:
+        while abs(Yaw_wen) > 3:
+            print('Crawl_imUUUUU')
+            get_IMU()
+            IMU_Angle()
+            Move(Straight_status = 3)
+    if(send.color_mask_subject_YMax[5][0] < 60):
+        Move(Straight_status = 7)
+        print('crawlllllll forwardddddddddd')
+    elif(send.color_mask_subject_YMax[5][0] > 70):
+        Move(Straight_status = 8)
+        print('crawlllllll backkkkkkkk')
+    else:
+        print('CCCCCCCCCCCCCCCCRWAL')
+        send.sendBodyAuto(0,0,0,0,1,0)
+        time.sleep(10)
+
 if __name__ == '__main__':
     try:
         print("try main")
@@ -429,30 +453,32 @@ if __name__ == '__main__':
                     print('In Reddoor')
                     # print('Dy = ' + str(Dy))
                     get_IMU()
-                    if abs(Yaw_wen) > 5:
+                    if abs(Yaw_wen) > 5 and (imu_flag == True):
                         while abs(Yaw_wen) > 5:
                             get_IMU()
                             IMU_Angle()
                             Move(Straight_status = 3)
+                        imu_flag = False
                     if First_Reddoor == False :
                         First_Reddoor = True
                         send.sendHeadMotor(1,2048,100)
-                        send.sendHeadMotor(2,1620,100)
+                        send.sendHeadMotor(2,1700,100)
                         time.sleep(0.5)
                     elif First_Reddoor == True :
-                        if (Dy >= 6) and (redoor_dis == False) :
+                        # print('DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDYYYYYYYYYYYYYYYYYYYYY = ',Dy)
+                        print('YYYYYYYYYYYYYYYMMMMMMMMMIIIIIIIIINNNNNNNNN = ',send.color_mask_subject_YMax[5][0])
+                        if (send.color_mask_subject_YMax[5][0] < 60) and (redoor_dis == False) :
                             Move(Straight_status = 7)
                             pass
-                        elif (Dy < 3) and (redoor_dis == False) :
+                        elif (send.color_mask_subject_YMax[5][0] > 70) and (redoor_dis == False) :
                             Move(Straight_status = 8)
                             pass
                         else :
-                            redoor_dis == True
+                            redoor_dis = True
                             if R_min < 2 and R_max > 315 :
                                 print('red center')
                                 if (B_max == 0 and B_min == 0 and B_left >= 20 and B_right <= 300) or (B_max == 0 and B_min == 0 and B_right == 0 and B_left == 0):# if (B_min < 2 and B_max < 20) or (B_max > 315 and B_min > 300) or (B_max == 0 and B_min == 0 and B_right == 0 and B_left == 0) or (B_right > 280 and B_left < 40) :
-                                    print('CCCCCCCCCCCCCCCCRWAL')
-                                    send.sendBodyAuto(0,0,0,0,1,0)
+                                    Crawl()
                                     # Move(Straight_status = 6)
                                 elif B_min < 2 and B_max > 20 :
                                     print('move R 11111')
@@ -522,7 +548,7 @@ if __name__ == '__main__':
                         IMU_Angle()
                         Move(Straight_status = 1)
                     print('IMU_ok ====== ' + str(IMU_ok))
-            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ====== ' + str(Dx))
+            # print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ====== ' + str(Dy))
             if send.is_start == False:
                 print("stop")
                 if walking == True:
