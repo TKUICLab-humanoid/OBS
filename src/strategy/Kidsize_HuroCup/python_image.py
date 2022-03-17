@@ -51,8 +51,8 @@ B_max = 0
 First_Reddoor = False
 redoor_dis = False
 imu_flag = True
-# PreTurn_L = False
-PreTurn_L = True
+PreTurn_L = False
+# PreTurn_L = True
 PreTurn_R = False
 # PreTurn_R = True
 
@@ -161,7 +161,7 @@ def Normal_Obs_Parameter():
 #=============================strategy=============================
 
 
-def Move(Straight_status = 0 ,x = 0 ,y = 0 ,z = 0 ,theta = -4 ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = 0 ,y = 0 ,z = 0 ,theta = -3 ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
     if Straight_status == 0:    #speed + turn
         print('Straight_status = turn')
@@ -171,7 +171,7 @@ def Move(Straight_status = 0 ,x = 0 ,y = 0 ,z = 0 ,theta = -4 ,sensor = 0 ):
         send.sendContinuousValue(x + Goal_speed,y,z,theta,sensor)
     elif Straight_status == 2:   #max speed
         print('Straight_status = max speed')
-        send.sendContinuousValue(x + 2500,y+100,z,theta+1,sensor)
+        send.sendContinuousValue(x + 2500,y+200,z,theta,sensor)
     elif Straight_status == 3:  #speed + imu
         print('Straight_status = imu fix')
         if red_flag == True:
@@ -180,7 +180,7 @@ def Move(Straight_status = 0 ,x = 0 ,y = 0 ,z = 0 ,theta = -4 ,sensor = 0 ):
             send.sendContinuousValue(x + Goal_speed,y,z,theta + imu_angle,sensor)
     elif Straight_status == 4:  #left move
         print('Straight_status = left move')
-        send.sendContinuousValue(x - 200,y + 1000,z,theta + 1,sensor)
+        send.sendContinuousValue(x +100,y + 500,z,theta + 1,sensor)
     elif Straight_status == 5:  #right move
         print('Straight_status = right move')
         send.sendContinuousValue(x - 200,y - 700,z,theta - 1,sensor)
@@ -201,7 +201,7 @@ def Move(Straight_status = 0 ,x = 0 ,y = 0 ,z = 0 ,theta = -4 ,sensor = 0 ):
         send.sendContinuousValue(x + 500,y,z,theta - 8,sensor)
 
 
-def Turn_Head(x = 0 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
+def Turn_Head(x = 0 ,y = 0 ,z = 0 ,theta = -3  ,sensor = 0 ):
     global R_deep_sum, L_deep_sum, L_Deep, R_Deep
     send.sendContinuousValue(x,y,z,theta,sensor)
     send.sendHeadMotor(1,1447,100)
@@ -229,7 +229,7 @@ def Turn_Head(x = 0 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                send.sendContinuousValue(x - 200,y + 1000,z,theta - 10,sensor)
+                send.sendContinuousValue(x - 200,y + 800,z,theta - 8,sensor)
         send.sendHeadMotor(1,2647,100)
         send.sendHeadMotor(2,1600,100) 
         time.sleep(1)
@@ -255,22 +255,22 @@ def Turn_Head(x = 0 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                send.sendContinuousValue(x - 300,y - 200,z,theta + 15,sensor)
+                send.sendContinuousValue(x - 300,y - 500,z,theta + 15,sensor)
     elif L_deep_sum > R_deep_sum :
         get_IMU()
-        if abs(Yaw_wen) < 83:
-            while abs(Yaw_wen) < 83:
+        if abs(Yaw_wen) < 75:
+            while abs(Yaw_wen) < 75:
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                send.sendContinuousValue(x ,y ,z,theta + 15,sensor)
+                send.sendContinuousValue(x ,y - 200 ,z,theta + 15,sensor)
         send.sendHeadMotor(1,1447,100)
         send.sendHeadMotor(2,1600,100) 
         time.sleep(1)
         Image_Init()
         Normal_Obs_Parameter()
-        if  abs(Dx) >= 1 : #L_Deep > 12 or R_Deep > 12 / R_Deep < 12  #R_Deep < 12
-            while  abs(Dx) >= 1 : #L_Deep > 12 or R_Deep > 12 / R_Deep < 12
+        if  abs(Dx) >= 2 : #L_Deep > 12 or R_Deep > 12 / R_Deep < 12  #R_Deep < 12
+            while  abs(Dx) >= 2 : #L_Deep > 12 or R_Deep > 12 / R_Deep < 12
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
@@ -286,7 +286,7 @@ def Turn_Head(x = 0 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
         get_IMU()
         if abs(Yaw_wen) > 5:
             while abs(Yaw_wen) > 5:
-                send.sendContinuousValue(x - 200,y + 400 ,z,theta - 10,sensor)
+                send.sendContinuousValue(x + 300,y + 700 ,z,theta - 7,sensor)
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
@@ -364,11 +364,11 @@ def Turn_Angle(Turn_angle_status):
         elif 12 > Dx >= 8:
             Angle = -11
         elif 8 > Dx >= 6:
-            Angle = -9
+            Angle = -10
         elif 6 > Dx >= 4:
-            Angle = -8
+            Angle = -9
         elif 4 > Dx >= 2:
-            Angle = -7
+            Angle = -8
         elif 2 > Dx >= 0:
             Angle = 0
     elif Turn_angle_status == 1: #L
@@ -452,13 +452,6 @@ if __name__ == '__main__':
                 if red_flag == True:
                     print('In Reddoor')
                     # print('Dy = ' + str(Dy))
-                    get_IMU()
-                    if abs(Yaw_wen) > 5 and (imu_flag == True):
-                        while abs(Yaw_wen) > 5:
-                            get_IMU()
-                            IMU_Angle()
-                            Move(Straight_status = 3)
-                        imu_flag = False
                     if First_Reddoor == False :
                         First_Reddoor = True
                         send.sendHeadMotor(1,2048,100)
@@ -467,38 +460,46 @@ if __name__ == '__main__':
                     elif First_Reddoor == True :
                         # print('DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDYYYYYYYYYYYYYYYYYYYYY = ',Dy)
                         print('YYYYYYYYYYYYYYYMMMMMMMMMIIIIIIIIINNNNNNNNN = ',send.color_mask_subject_YMax[5][0])
-                        if (send.color_mask_subject_YMax[5][0] < 60) and (redoor_dis == False) :
-                            Move(Straight_status = 7)
-                            pass
-                        elif (send.color_mask_subject_YMax[5][0] > 70) and (redoor_dis == False) :
-                            Move(Straight_status = 8)
-                            pass
+                        get_IMU()
+                        if abs(Yaw_wen) > 5 and (imu_flag == True):
+                            while abs(Yaw_wen) > 5:
+                                get_IMU()
+                                IMU_Angle()
+                                Move(Straight_status = 3)
+                            imu_flag = False
                         else :
-                            redoor_dis = True
-                            if R_min < 2 and R_max > 315 :
-                                print('red center')
-                                if (B_max == 0 and B_min == 0 and B_left >= 20 and B_right <= 300) or (B_max == 0 and B_min == 0 and B_right == 0 and B_left == 0):# if (B_min < 2 and B_max < 20) or (B_max > 315 and B_min > 300) or (B_max == 0 and B_min == 0 and B_right == 0 and B_left == 0) or (B_right > 280 and B_left < 40) :
-                                    Crawl()
-                                    # Move(Straight_status = 6)
-                                elif B_min < 2 and B_max > 20 :
-                                    print('move R 11111')
-                                    Move(Straight_status = 5)
-                                elif B_max > 315 and B_min < 300 :
-                                    print('move L 11111')
+                            if (send.color_mask_subject_YMax[5][0] < 60) and (redoor_dis == False) :
+                                Move(Straight_status = 7)
+                                pass
+                            elif (send.color_mask_subject_YMax[5][0] > 70) and (redoor_dis == False) :
+                                Move(Straight_status = 8)
+                                pass
+                            else :
+                                redoor_dis = True
+                                if R_min < 2 and R_max > 315 :
+                                    print('red center')
+                                    if (B_max == 0 and B_min == 0 and B_left >= 20 and B_right <= 300) or (B_max == 0 and B_min == 0 and B_right == 0 and B_left == 0):# if (B_min < 2 and B_max < 20) or (B_max > 315 and B_min > 300) or (B_max == 0 and B_min == 0 and B_right == 0 and B_left == 0) or (B_right > 280 and B_left < 40) :
+                                        Crawl()
+                                        # Move(Straight_status = 6)
+                                    elif B_min < 2 and B_max > 20 :
+                                        print('move R 11111')
+                                        Move(Straight_status = 5)
+                                    elif B_max > 315 and B_min < 300 :
+                                        print('move L 11111')
+                                        Move(Straight_status = 4)
+                                elif R_min < 2 and R_max < 315 : 
+                                    print('move L')
                                     Move(Straight_status = 4)
-                            elif R_min < 2 and R_max < 315 : 
-                                print('move L')
-                                Move(Straight_status = 4)
-                            elif R_min > 2 and R_max > 315 : 
-                                print('move R')
-                                Move(Straight_status = 5)
+                                elif R_min > 2 and R_max > 315 : 
+                                    print('move R')
+                                    Move(Straight_status = 5)
                 else :
                     get_IMU()
                     if Dy < 24:
                         if 14 >= Dx > 2 :        #turn right
                             print('right avoid')
                             Straight_Speed()
-                            if ( abs(Yaw_wen) > 5 and IMU_ok == False ) and Dx >= 8 :
+                            if ( abs(Yaw_wen) > 5 and IMU_ok == False ) and Dx >= 5 :
                                 IMU_Angle()
                                 Move(Straight_status = 3)
                             else:
