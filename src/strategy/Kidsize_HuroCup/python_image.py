@@ -161,7 +161,7 @@ def Normal_Obs_Parameter():
 #=============================strategy=============================
 
 
-def Move(Straight_status = 100 ,x = 0 ,y = 0 ,z = 0 ,theta = -4 ,sensor = 0 ):
+def Move(Straight_status = -300 ,x = 0 ,y = 0 ,z = 0 ,theta = -5 ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
     if Straight_status == 0:    #speed + turn
         print('Straight_status = turn')
@@ -180,10 +180,10 @@ def Move(Straight_status = 100 ,x = 0 ,y = 0 ,z = 0 ,theta = -4 ,sensor = 0 ):
             send.sendContinuousValue(x + Goal_speed,y,z,theta + imu_angle,sensor)
     elif Straight_status == 4:  #left move
         print('Straight_status = left move')
-        send.sendContinuousValue(x - 400,y + 600,z,theta - 1,sensor)
+        send.sendContinuousValue(x - 400,y + 600,z,theta +2,sensor)
     elif Straight_status == 5:  #right move
         print('Straight_status = right move')
-        send.sendContinuousValue(x - 600,y - 700,z,theta - 1,sensor)
+        send.sendContinuousValue(x - 600,y - 700,z,theta ,sensor)
     elif Straight_status == 6:  #stay
         print('Straight_status = stay')
         send.sendContinuousValue(x,y,z,theta,sensor)
@@ -201,7 +201,7 @@ def Move(Straight_status = 100 ,x = 0 ,y = 0 ,z = 0 ,theta = -4 ,sensor = 0 ):
         send.sendContinuousValue(x + 500,y,z,theta - 8,sensor)
 
 
-def Turn_Head(x = -200 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
+def Turn_Head(x = -300 ,y = 0 ,z = 0 ,theta = -5  ,sensor = 0 ):
     global R_deep_sum, L_deep_sum, L_Deep, R_Deep
     send.sendContinuousValue(x,y,z,theta,sensor)
     send.sendHeadMotor(1,1447,100)
@@ -223,6 +223,16 @@ def Turn_Head(x = -200 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
     print('L_deep_sum = ',L_deep_sum)
 
     if R_deep_sum > L_deep_sum :
+        Image_Init()
+        Normal_Obs_Parameter()
+        Image_Info()
+        if ( L_Deep > 3 ) or ( R_Deep > 3 ):
+            while ( L_Deep > 3 ) or ( R_Deep > 3 ):
+                Image_Init()
+                Normal_Obs_Parameter()
+                Image_Info()
+                Move(Straight_status = 7) 
+            print('TTTTTTTTTTTurn Headrrrrrrrr')
         get_IMU()
         if abs(Yaw_wen) < 75:
             while abs(Yaw_wen) < 75:
@@ -240,7 +250,7 @@ def Turn_Head(x = -200 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                if abs(Yaw_wen) > 85 :#視步態更動
+                if abs(Yaw_wen) > 82 :#視步態更動
                     send.sendContinuousValue(x + 2000,y,z,theta + 2,sensor)
                     print(' Dx = ',Dx)
                 else :
@@ -257,13 +267,23 @@ def Turn_Head(x = -200 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
                 get_IMU()
                 send.sendContinuousValue(x ,y - 500,z,theta + 14,sensor)
     elif L_deep_sum > R_deep_sum :
+        Image_Init()
+        Normal_Obs_Parameter()
+        Image_Info()
+        if ( L_Deep > 3 ) or ( R_Deep > 3 ):
+            while ( L_Deep > 3 ) or ( R_Deep > 3 ):
+                Image_Init()
+                Normal_Obs_Parameter()
+                Image_Info()
+                Move(Straight_status = 7) 
+            print('TTTTTTTTTTTurn Headlllllllllll')
         get_IMU()
         if abs(Yaw_wen) < 75:
             while abs(Yaw_wen) < 75:
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                send.sendContinuousValue(x-100 ,y - 200 ,z,theta + 15,sensor)
+                send.sendContinuousValue(x-600 ,y - 200 ,z,theta + 15,sensor)
         send.sendHeadMotor(1,1447,100)
         send.sendHeadMotor(2,1600,100) 
         time.sleep(1)
@@ -285,8 +305,8 @@ def Turn_Head(x = -200 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
         time.sleep(1)
         get_IMU()
         if abs(Yaw_wen) > 40:
-            while abs(Yaw_wen) > 40:
-                send.sendContinuousValue(x + 300,y + 700 ,z,theta - 9,sensor)
+            while abs(Yaw_wen) > 40:    
+                send.sendContinuousValue(x -500,y + 400 ,z,theta - 7,sensor)
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
@@ -376,13 +396,13 @@ def Turn_Angle(Turn_angle_status):
         if -12 >= Dx > -17:
             Angle = 15
         elif -8 >= Dx > -12:
-            Angle = 15
+            Angle = 16
         elif -6 >= Dx > -8:
-            Angle = 14
+            Angle = 15
         elif -4 >= Dx > -6:
-            Angle = 14
+            Angle = 15
         elif -2 >= Dx > -4:
-            Angle = 12
+            Angle = 13
         elif 0 >= Dx > -2:
             Angle = 0
     else: 
@@ -424,7 +444,7 @@ if __name__ == '__main__':
             # if send.Web == False:
                 #==============================image===============================
                 # Focus_Matrix = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
-                Focus_Matrix = [5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9, 10, 10, 11, 11, 11, 11, 10, 10, 9, 9, 9, 9, 8, 8, 7, 7, 6, 6, 5, 5]
+                Focus_Matrix = [5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7, 6, 6, 6, 6, 5, 5]
                 Image_Init()
                 Normal_Obs_Parameter()
                 Image_Info()
@@ -496,7 +516,7 @@ if __name__ == '__main__':
                 else :
                     get_IMU()
                     if Dy < 24:
-                        if 14 >= Dx > 2 :        #turn right
+                        if 14 > Dx > 2 :        #turn right
                             print('right avoid')
                             Straight_Speed()
                             if ( abs(Yaw_wen) > 5 and IMU_ok == False ) and Dx >= 5 :
@@ -509,7 +529,7 @@ if __name__ == '__main__':
                             if abs(Yaw_wen) < 5 :
                                 IMU_ok = True
                             # Turn(Turn_status = 0)
-                        elif -2 > Dx >= -14 :     #turn left
+                        elif -2 > Dx > -14 :     #turn left
                             print('left avoid')
                             Straight_Speed()
                             if ( abs(Yaw_wen) > 5 and IMU_ok == False ) and Dx <= -7 :
@@ -531,15 +551,8 @@ if __name__ == '__main__':
                                 IMU_ok = True
                             Move(Straight_status = 6)
                             if abs(Yaw_wen) < 3:
-                                if ( L_Deep < 20 ) and ( R_Deep < 20 ) and ( C_Deep < 24 ):
+                                if ( L_Deep < 12 ) and ( R_Deep < 12 ) and ( C_Deep < 20 ):
                                     # if (C_Deep -R_Deep)  and (C_Deep-L_Deep)
-                                    if ( L_Deep > 3 ) or ( R_Deep > 3 ):
-                                        while ( L_Deep > 3 ) or ( R_Deep > 3 ):
-                                            Image_Init()
-                                            Normal_Obs_Parameter()
-                                            Image_Info()
-                                            Move(Straight_status = 7) 
-                                        print('TTTTTTTTTTTurn Head')
                                     Turn_Head()
                                 else :
                                     if Dx > 0 :
