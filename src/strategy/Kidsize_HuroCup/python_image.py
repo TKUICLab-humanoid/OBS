@@ -322,7 +322,7 @@ def Turn_Head(x = -600 ,y = 0 ,z = 0 ,theta = -5  ,sensor = 0 ):
                 get_IMU()
 
 def Slope_fix():
-    global slope_angle
+    global slope_angle ,slope_Rcnt,slope_Lcnt
     print('slope = ',deep.slope)
     if deep.slope > 0: #fix to r
         if deep.slope >= 1:
@@ -337,6 +337,7 @@ def Slope_fix():
             slope_angle = 6
         elif 0.03 > deep.slope >= 0:
             slope_angle = 1
+            slope_Rcnt += 1
     elif deep.slope <= 0: #fix to l
         if -1 >= deep.slope:
             slope_angle = -12
@@ -350,6 +351,7 @@ def Slope_fix():
             slope_angle = -3
         elif 0 >= deep.slope > -0.03:
             slope_angle = -1
+            slope_Lcnt  += 1
     print( 'slope_angle = ' + str(slope_angle))
     return slope_angle
 
@@ -453,7 +455,7 @@ def Crawl():
     if send.color_mask_subject_YMax[5][0] < 130 or send.color_mask_subject_YMax[5][0] > 140:
         while send.color_mask_subject_YMax[5][0] < 130 or send.color_mask_subject_YMax[5][0] > 140:
             print('ccccccccccccccccccccccccccccrrrrrrrrrrrrrrrrrr')
-            if abs(deep.slope) > 0.03 and (slopR_flag == False) and (slopL_flag == False):
+            if abs(deep.slope) > 0.03 :#and (slopR_flag == False) and (slopL_flag == False):
                 # while abs(deep.slope) > 0.03 or slopR_flag == False or slopL_flag == False:
                 while abs(deep.slope) > 0.03 and slope_flag == True:
                     Slope_fix()
@@ -559,7 +561,7 @@ if __name__ == '__main__':
                     if First_Reddoor == False :
                         First_Reddoor = True
                         send.sendHeadMotor(1,2048,100)
-                        send.sendHeadMotor(2,1700,100)
+                        send.sendHeadMotor(2,1800,100)
                         time.sleep(0.5)
                     elif First_Reddoor == True :
                         # print('DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDYYYYYYYYYYYYYYYYYYYYY = ',Dy)
@@ -568,26 +570,20 @@ if __name__ == '__main__':
                         print('YYYYYYYYYYYYYYYMMMMMMMMMIIIIIIIIINNNNNNNNN = ',send.color_mask_subject_YMax[5][0])
                         print('slope = ',deep.slope)
 
-                        if abs(deep.slope) > 0.03 and (slope_flag == True) and (slopR_flag == False) and (slopL_flag == False):
-                            send.sendHeadMotor(1,2048,100)
-                            send.sendHeadMotor(2,1800,100)
-                            time.sleep(0.5)
+                        if abs(deep.slope) > 0.03 and (slope_flag == True):
+                            # send.sendHeadMotor(1,2048,100)
+                            # send.sendHeadMotor(2,1800,100)
+                            # time.sleep(0.5)
                             # while abs(deep.slope) > 0.03 or slopR_flag == False or slopL_flag == False:
                             # while slopR_flag == False or slopL_flag == False:
-                            while abs(deep.slope) > 0.03 and slope_flag == True:
+                            # while abs(deep.slope) > 0.03 and (slope_flag == True):
+                            while abs(deep.slope) > 0.03 or (slope_Rcnt <5) or (slope_Lcnt <5):
                                 Slope_fix()
                                 Move(Straight_status = 11)
                                 print('crawl3333333333333333333333333333333333')
-                                print('r = ',slopR_flag)
-                                print('l = ',slopL_flag)
-                                if deep.slope < 0.03:
-                                    # slopR_flag == True
-                                    slope_Rcnt += 1
-                                if deep.slope < -0.03:
-                                    # slopL_flag == True
-                                    slope_Lcnt += 1
-                                # if slopR_flag == True and slopL_flag ==True:
-                                if slope_Rcnt >=10 and slope_Lcnt >= 10:
+                                print('rcnt = ',slope_Rcnt)
+                                print('lcnt = ',slope_Lcnt)
+                                if slope_Rcnt >=10 or slope_Lcnt >=10:
                                     break
                                 # if -0.03 < deep.slope < 0.03 :
                                 #     slope_cnt += 1
