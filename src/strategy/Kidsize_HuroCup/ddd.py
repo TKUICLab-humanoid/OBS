@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #coding=utf-8
+from re import T
 import rospy
 import numpy as np
 from hello1 import Sendmessage
@@ -21,13 +22,14 @@ class deep_calculate:
         self.aa = 0
         self.x1 = 0
         self.y1 = 0
-        self.x2 = 0
+        self.x2 = 1
         self.y2 = 0
         self.cnt = 0
         self.a = True
         self.b = True
         self.slope = 0
         self.degree = 0
+        self.red_width = 0
 
     def convert(self, imgmsg):
         try:
@@ -36,53 +38,60 @@ class deep_calculate:
             print(e)
         cv_image = cv2.resize(cv_image, (320, 240))
         cv_image_2 = cv2.resize(cv_image, (32, 24))
+        # send = Sendmessage()
+        # #註解掉ddd有值 python_image有sent error 沒註解掉python_image可跑值為0 ddd值為0
 
-        # self.R_min = self.send.color_mask_subject_XMin[5][0] - 1
-        # self.R_max = self.send.color_mask_subject_XMax[5][0] + 1
-        # self.red_width = self.R_max - self.R_min 
-        # self.x1 = 0
-        # self.y1 = 0
-        # self.x2 = 1
-        # self.y2 = 0
-        # self.cnt = 0
-        
-        # if self.send.color_mask_subject_size[5][0] > 1000 :
-        #     for compress_width in range(0, 320, 1):
-        #         self.a = True
-        #         for compress_height in range(239, -1, -1):
-        #             blue = cv_image.item(compress_height, compress_width, 0)
-        #             green = cv_image.item(compress_height, compress_width, 1)
-        #             red = cv_image.item(compress_height, compress_width, 2)
-        #             if (blue == 255 and green == 255 and red == 0) :
-        #                 if self.a == True :
-        #                     self.cnt += 1
-        #                     self.a = False
-        #             if (blue == 255 and green == 255 and red == 0) and self.first_red == True:
-        #                 self.first_red = False
-        #                 self.x1 = compress_width
-        #                 self.y1 = 239 - compress_height
-        #             if abs(self.red_width - self.cnt) <= 2 and self.b == True:
-        #                 self.b = False
-        #                 self.x2 = compress_width
-        #                 self.y2 = 239 - compress_height 
-        # else :
-        #     self.x1 = 0
-        #     self.y1 = 0
-        #     self.x2 = 1
-        #     self.y2 = 0
-        #     self.slope = 0
-                
-        # self.first_red = True
-        # self.b = True
-        # self.slope =  (self.y2 - self.y1) / (self.x2 - self.x1) 
-        # self.degree = int(math.degrees(self.slope))
+        self.red_width = 0
+        for compress_width in range(0, 32, 1):
+            self.r = True
+            for compress_height in range(23, -1, -1):
+                blue = cv_image_2.item(compress_height, compress_width, 0)
+                green = cv_image_2.item(compress_height, compress_width, 1)
+                red = cv_image_2.item(compress_height, compress_width, 2)
+                if (blue == 255 and green == 255 and red == 0) and (self.r == True) :
+                    self.red_width += 1
+                    self.r = False
+        # print('red_width = ',self.red_width)
+
+        self.x1 = 0
+        self.y1 = 0
+        self.x2 = 1
+        self.y2 = 0
+        self.cnt = 0
+
+        for compress_width in range(0, 32, 1):
+            self.a = True
+            for compress_height in range(23, -1, -1):
+                blue = cv_image_2.item(compress_height, compress_width, 0)
+                green = cv_image_2.item(compress_height, compress_width, 1)
+                red = cv_image_2.item(compress_height, compress_width, 2)
+                if (blue == 255 and green == 255 and red == 0) :
+                    if self.a == True :
+                        self.cnt += 1
+                        self.a = False
+                if (blue == 255 and green == 255 and red == 0) and self.first_red == True:
+                    self.first_red = False
+                    self.x1 = compress_width
+                    self.y1 = 23 - compress_height
+                if abs(self.red_width - self.cnt) <= 2 and self.b == True:
+                    self.b = False
+                    self.x2 = compress_width
+                    self.y2 = 23 - compress_height 
+        if (self.x2 - self.x1) == 0:
+            self.first_red = True
+            self.b = True
+            self.degree = 0
+            self.slope = 0
+        else:
+            self.first_red = True
+            self.b = True
+            self.slope =  (self.y2 - self.y1) / (self.x2 - self.x1) 
+            self.degree = int(math.degrees(self.slope))
         
         # print('=======================================')
         # print('x1 = ',self.x1)
         # print('y1 = ',self.y1)
         # print('self.cnt = ',self.cnt)
-        # print('self.R_min = ',self.R_min)
-        # print('self.R_max = ',self.R_max)
         # print('red_width = ',self.red_width)
         # print('x2 = ',self.x2)
         # print('y2 = ',self.y2)
@@ -111,9 +120,9 @@ class deep_calculate:
         # lowera = np.array([78,43,46])
         # uppera = np.array([99,255,255])
         # mask = cv2.inRange(hsv,lowera,uppera)
-        # edges = cv2.Canny(mask,50,150,apertureSize=5)
+        # edges = cv2.Canny(mask,50,150)
 
-        # lines = cv2.HoughLinesP(edges,1,np.pi / 180,50,lines=None,minLineLength=0,maxLineGap=30)
+        # lines = cv2.HoughLinesP(edges,1,np.pi / 180,100,lines=None,minLineLength=0,maxLineGap=30)
         # # lines = cv2.HoughLines(edges,1,np.pi / 180,0)
         # # print("lines=",lines)
         # for line in lines:
@@ -125,10 +134,10 @@ class deep_calculate:
         #     y1 = float(y1)
         #     y2 = float(y2)
 
-        #     print ('x1=',x1)
-        #     print ('x2=',x2)
-        #     print ('y1=',y1)
-        #     print ('y2=',y2)
+        #     # print ('x1=',x1)
+        #     # print ('x2=',x2)
+        #     # print ('y1=',y1)
+        #     # print ('y2=',y2)
 
         #     if x1==0 or x2==0 or y1==0 or y2==0 :
         #         result=0
