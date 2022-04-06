@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #coding=utf-8
 # from turtle import st
+from re import L
 import rospy
 import numpy as np
 from hello1 import Sendmessage
@@ -174,7 +175,7 @@ def Normal_Obs_Parameter():
 #=============================strategy=============================
 
 
-def Move(Straight_status = 0 ,x = -400 ,y = 0 ,z = 0 ,theta = -5 ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -600 ,y = -400 ,z = 0 ,theta = -4  ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
     if Straight_status == 0:    #speed + turn
         print('Straight_status = turn')
@@ -193,19 +194,19 @@ def Move(Straight_status = 0 ,x = -400 ,y = 0 ,z = 0 ,theta = -5 ,sensor = 0 ):
             send.sendContinuousValue(x + Goal_speed,y,z,theta + imu_angle,sensor)
     elif Straight_status == 4:  #left move
         print('Straight_status = left move')
-        send.sendContinuousValue(x - 100,y + 1000,z,theta,sensor)
+        send.sendContinuousValue(x - 100,y + 1100,z,theta-1,sensor)
     elif Straight_status == 5:  #right move
         print('Straight_status = right move')
-        send.sendContinuousValue(x - 100 ,y - 700,z,theta -1 ,sensor)
+        send.sendContinuousValue(x - 100,y - 600,z,theta -3 ,sensor)
     elif Straight_status == 6:  #stay
         print('Straight_status = stay')
         send.sendContinuousValue(x,y,z,theta,sensor)
     elif Straight_status == 7:  #reddoor go
         print('Straight_status = reddoor forward')
-        send.sendContinuousValue(x + 800,y - 100,z,theta,sensor)
+        send.sendContinuousValue(x + 500,y - 200,z,theta,sensor)
     elif Straight_status == 8:  #reddoor back
         print('Straight_status = reddoor back')
-        send.sendContinuousValue(x - 400,y - 300,z,theta ,sensor)
+        send.sendContinuousValue(x - 400,y,z,theta -2,sensor)
     elif Straight_status == 9:  #preturn left
         print('Straight_status =preturn left')
         send.sendContinuousValue(x + 500,y,z,theta + 12,sensor)
@@ -217,7 +218,7 @@ def Move(Straight_status = 0 ,x = -400 ,y = 0 ,z = 0 ,theta = -5 ,sensor = 0 ):
         send.sendContinuousValue(x,y,z,theta + slope_angle,sensor)
 
 
-def Turn_Head(x = -400 ,y = 0 ,z = 0 ,theta = -5  ,sensor = 0 ):
+def Turn_Head(x = -600 ,y = -400 ,z = 0 ,theta = -4  ,sensor = 0 ):
     global R_deep_sum, L_deep_sum, L_Deep, R_Deep
     send.sendContinuousValue(x,y,z,theta,sensor)
     send.sendHeadMotor(1,1447,100)
@@ -266,7 +267,7 @@ def Turn_Head(x = -400 ,y = 0 ,z = 0 ,theta = -5  ,sensor = 0 ):
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                if abs(Yaw_wen) > 82 :#視步態更動
+                if abs(Yaw_wen) > 87 :#視步態更動
                     send.sendContinuousValue(x + 2000,y,z,theta + 5,sensor)
                     print(' Dx = ',Dx)
                 else :
@@ -281,7 +282,7 @@ def Turn_Head(x = -400 ,y = 0 ,z = 0 ,theta = -5  ,sensor = 0 ):
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                send.sendContinuousValue(x ,y - 1000,z,theta + 15,sensor)
+                send.sendContinuousValue(x ,y - 900,z,theta + 15,sensor)
     elif L_deep_sum > R_deep_sum :
         Image_Init()
         Normal_Obs_Parameter()
@@ -299,7 +300,7 @@ def Turn_Head(x = -400 ,y = 0 ,z = 0 ,theta = -5  ,sensor = 0 ):
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                send.sendContinuousValue(x ,y-500 ,z,theta + 15,sensor)
+                send.sendContinuousValue(x ,y-300 ,z,theta + 15,sensor)
         send.sendHeadMotor(1,1447,100)
         send.sendHeadMotor(2,1550,100) 
         time.sleep(1)
@@ -322,7 +323,7 @@ def Turn_Head(x = -400 ,y = 0 ,z = 0 ,theta = -5  ,sensor = 0 ):
         get_IMU()
         if abs(Yaw_wen) > 40:
             while abs(Yaw_wen) > 40:    
-                send.sendContinuousValue(x ,y + 900 ,z,theta - 7,sensor)
+                send.sendContinuousValue(x ,y + 300 ,z,theta - 7,sensor)
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
@@ -332,17 +333,17 @@ def Slope_fix():
     print('slope = ',deep.slope)
     if deep.slope > 0: #fix to l
         if deep.slope >= 1:
-            slope_angle = 15
-        elif 1 > deep.slope >= 0.36:
             slope_angle = 13
-        elif 0.36 > deep.slope >= 0.17:
+        elif 1 > deep.slope >= 0.36:
             slope_angle = 11
+        elif 0.36 > deep.slope >= 0.17:
+            slope_angle = 9
         elif 0.17 > deep.slope >= 0.08:
-            slope_angle = 8
-        elif 0.08 > deep.slope >= 0.03:
             slope_angle = 6
+        elif 0.08 > deep.slope >= 0.03:
+            slope_angle = 4
         elif 0.03 > deep.slope >= 0:
-            slope_angle = 1
+            slope_angle = 0
             slope_Lcnt  += 1
         # if slope_Lcnt > 400:
         #     slopL_flag == True
@@ -353,13 +354,13 @@ def Slope_fix():
         elif -0.36 >= deep.slope > -1:
             slope_angle = -8
         elif -0.17 >= deep.slope > -0.36:
-            slope_angle = -5
+            slope_angle = -7
         elif -0.08 >= deep.slope > -0.17:
-            slope_angle = -3
+            slope_angle = -5
         elif -0.03 >= deep.slope > -0.08:
-            slope_angle = -2
+            slope_angle = -4
         elif 0 >= deep.slope > -0.03:
-            slope_angle = -1
+            slope_angle = 0
             slope_Rcnt  += 1
         # if slope_Rcnt > 400:
         #     slopR_flag == True
@@ -465,8 +466,8 @@ def Turn_Angle(Turn_angle_status):
 
 def Crawl():
     global Straight_status ,slopL_flag ,slopR_flag
-    if send.color_mask_subject_YMax[5][0] < 110 or send.color_mask_subject_YMax[5][0] > 120 or 110 <= send.color_mask_subject_YMax[5][0] <= 120:
-        while send.color_mask_subject_YMax[5][0] < 110 or send.color_mask_subject_YMax[5][0] > 120 or 110 <= send.color_mask_subject_YMax[5][0] <= 120:
+    if send.color_mask_subject_YMax[5][0] < 140 or send.color_mask_subject_YMax[5][0] > 150 or 140 <= send.color_mask_subject_YMax[5][0] <= 150:
+        while send.color_mask_subject_YMax[5][0] < 140 or send.color_mask_subject_YMax[5][0] > 150 or 140 <= send.color_mask_subject_YMax[5][0] <= 150:
             print('ccccccccccccccccccccccccccccrrrrrrrrrrrrrrrrrr')
             # if abs(deep.slope) > 0.03 :#and (slopR_flag == False) and (slopL_flag == False):
             #     # while abs(deep.slope) > 0.03 or slopR_flag == False or slopL_flag == False:
@@ -491,38 +492,38 @@ def Crawl():
             #         #     slope_cnt = 0
             #         # if slope_cnt > 2 :
             #         #     break
-            if(send.color_mask_subject_YMax[5][0] < 110):
+            if(send.color_mask_subject_YMax[5][0] < 140):
                 Move(Straight_status = 7)
                 print('crawlllllll forwardddddddddd')
-            elif(send.color_mask_subject_YMax[5][0] > 120):
+            elif(send.color_mask_subject_YMax[5][0] > 150):
                 Move(Straight_status = 8)
                 print('crawlllllll backkkkkkkk')
-            elif 110 <= send.color_mask_subject_YMax[5][0] <= 120:
-                if abs(deep.slope)  > 0.03 and (slopR_flag == False) and (slopL_flag == False):
-                    # while abs(deep.slope) > 0.03 or slopR_flag == False or slopL_flag == False:
-                    while abs(deep.slope) > 0.03 or slope_flag == True:
-                        Slope_fix()
-                        Move(Straight_status = 11)
-                        print('crawl22222222222222222222222222222222')
-                        Image_Info()
-                        # print('r = ',slopR_flag)
-                        # print('l = ',slopL_flag)
-                        # if deep.slope < 0.03:
-                        #     # slopR_flag == True
-                        #     slope_Rcnt += 1
-                        # if deep.slope < -0.03:
-                            # slopL_flag == True
-                            # slope_Lcnt += 1
-                        # if slopR_flag == True and slopL_flag ==True:
-                        # if (slopR_flag == True) or (slopL_flag ==True):
-                        if slope_Rcnt > 400 or slopL_flag > 400:
-                            break
-                        # if -0.03 < deep.slope < 0.03 :
-                        #     slope_cnt += 1
-                        # else :
-                        #     slope_cnt = 0
-                        # if slope_cnt > 2 :
-                        #     break
+            elif 140 <= send.color_mask_subject_YMax[5][0] <= 150:
+                # if abs(deep.slope)  > 0.03 and (slopR_flag == False) and (slopL_flag == False):
+                #     # while abs(deep.slope) > 0.03 or slopR_flag == False or slopL_flag == False:
+                #     while abs(deep.slope) > 0.03 or slope_flag == True:
+                #         Slope_fix()
+                #         Move(Straight_status = 11)
+                #         print('crawl22222222222222222222222222222222')
+                #         Image_Info()
+                #         # print('r = ',slopR_flag)
+                #         # print('l = ',slopL_flag)
+                #         # if deep.slope < 0.03:
+                #         #     # slopR_flag == True
+                #         #     slope_Rcnt += 1
+                #         # if deep.slope < -0.03:
+                #             # slopL_flag == True
+                #             # slope_Lcnt += 1
+                #         # if slopR_flag == True and slopL_flag ==True:
+                #         # if (slopR_flag == True) or (slopL_flag ==True):
+                #         if slope_Rcnt > 400 or slopL_flag > 400:
+                #             break
+                #         # if -0.03 < deep.slope < 0.03 :
+                #         #     slope_cnt += 1
+                #         # else :
+                #         #     slope_cnt = 0
+                #         # if slope_cnt > 2 :
+                #         #     break
                 print('CCCCCCCCCCCCCCCCRWAL')
                 print('rcnt = ',slope_Rcnt)
                 print('lcnt = ',slope_Lcnt)
@@ -619,20 +620,20 @@ if __name__ == '__main__':
                         print('YYYYYYYYYYYYYYYMMMMMMMMMIIIIIIIIINNNNNNNNN = ',send.color_mask_subject_YMax[5][0])
                         print('slope = ',deep.slope)
 
-                        if abs(deep.slope) > 0.03 and (slope_flag == True):
+                        if abs(deep.slope) > 0.08 and (slope_flag == True):
                             # send.sendHeadMotor(1,2048,100)
                             # send.sendHeadMotor(2,1800,100)
                             # time.sleep(0.5)
                             # while abs(deep.slope) > 0.03 or slopR_flag == False or slopL_flag == False:
                             # while slopR_flag == False or slopL_flag == False:
                             # while abs(deep.slope) > 0.03 and (slope_flag == True):
-                            while abs(deep.slope) > 0.03 or slope_flag == True:
+                            while abs(deep.slope) > 0.08 or slope_flag == True:
                                 Slope_fix()
                                 Move(Straight_status = 11)
                                 Image_Info()
                                 print('crawl3333333333333333333333333333333333')
                                 # if (slopR_flag == True) or (slopL_flag ==True):
-                                if slope_Rcnt > 400 or slopL_flag > 400:
+                                if slope_Rcnt > 400 or slope_Lcnt > 400:
                                     break
                                 # if -0.03 < deep.slope < 0.03 :
                                 #     slope_cnt += 1
@@ -647,40 +648,124 @@ if __name__ == '__main__':
                             send.sendHeadMotor(2,1700,100)
                             time.sleep(0.5)
                         else :
-                            if (send.color_mask_subject_YMax[5][0] < 110) and (redoor_dis == False) :
+                            if (send.color_mask_subject_YMax[5][0] < 140) and (redoor_dis == False) :
                                 Move(Straight_status = 7)
                                 pass
-                            elif (send.color_mask_subject_YMax[5][0] > 120) and (redoor_dis == False) :
+                            elif (send.color_mask_subject_YMax[5][0] > 150) and (redoor_dis == False) :
                                 Move(Straight_status = 8)
                                 pass
                             else :
                                 redoor_dis = True
                                 if R_min < 2 and R_max > 315 :
                                     print('red center')
-                                    if (B_max == 0 and B_min == 0 and B_left <= 60 and B_right >= 250) or (B_max == 0 and B_min == 0 and B_right == 0 and B_left == 0):# if (B_min < 2 and B_max < 20) or (B_max > 315 and B_min > 300) or (B_max == 0 and B_min == 0 and B_right == 0 and B_left == 0) or (B_right > 280 and B_left < 40) :
-                                        Crawl()
+                                    print('BBBBBBBRRRRRRRRRRRRFFFFFFLLLLLLLAAAAAAAGGGGG = ',BR_flag)
+                                    print('BBBLLLLLLLLLLLLLLLLFFFFFFFFFFFFFFFF = ',BL_flag)
+                                    if (B_max == 0 and B_min == 0 and B_left <= 65 and BR_flag == True) or (B_max == 0 and B_min == 0 and B_right > 285 and BL_flag == True) or (B_max == 0 and B_min == 0 and B_right == 0 and B_left == 0):
+                                        if abs(deep.slope)  > 0.03 or slope_flag == True:
+                                            # while abs(deep.slope) > 0.03 or slopR_flag == False or slopL_flag == False:
+                                            while abs(deep.slope) > 0.03 or slope_flag == True:
+                                                Slope_fix()
+                                                Move(Straight_status = 11)
+                                                print('crawl22222222222222222222222222222222')
+                                                Image_Info()
+                                                # print('r = ',slopR_flag)
+                                                # print('l = ',slopL_flag)
+                                                # if deep.slope < 0.03:
+                                                #     # slopR_flag == True
+                                                #     slope_Rcnt += 1
+                                                # if deep.slope < -0.03:
+                                                    # slopL_flag == True
+                                                    # slope_Lcnt += 1
+                                                # if slopR_flag == True and slopL_flag ==True:
+                                                # if (slopR_flag == True) or (slopL_flag ==True):
+                                                if slope_Rcnt > 400 or slope_Lcnt > 400:
+                                                    break
+                                                # if -0.03 < deep.slope < 0.03 :
+                                                #     slope_cnt += 1
+                                                # else :
+                                                #     slope_cnt = 0
+                                                # if slope_cnt > 2 :
+                                                #     break
+                                        else :
+                                            Crawl()
                                         # Move(Straight_status = 6)
-                                    elif (B_min < 2 and B_max > 20) or (B_left > 50 and B_right >= 270):#右看左44右247  左看左90右290  中間左60右265
+                                    elif (B_min < 2 and B_max > 20):# or (B_left > 50 and B_right >= 270)
                                         print('move R 11111')
                                         BR_flag = True
-                                        Move(Straight_status = 5)
-                                    elif (B_max > 315 and B_min < 300) or (B_left <= 55 and B_right < 270):
+                                        BL_flag = False
+                                        if send.color_mask_subject_YMax[5][0] < 140:
+                                            rx = 200
+                                        elif send.color_mask_subject_YMax[5][0] > 150 :
+                                            rx = -200
+                                        else :
+                                            rx = 0
+                                        if abs(deep.slope)  > 0.03 or slope_flag == True:
+                                            Slope_fix() 
+                                        send.sendContinuousValue(-700 + rx , -1200 ,0,-4 + slope_angle,0)
+                                        # Move(Straight_status = 5)
+                                    elif (B_max > 315 and B_min < 300):# or (B_left <= 55 and B_right < 270)
                                         print('move L 11111')
                                         BL_flag = True
-                                        Move(Straight_status = 4)
+                                        BR_flag = False
+                                        if send.color_mask_subject_YMax[5][0] < 140:
+                                            rx = 200
+                                        elif send.color_mask_subject_YMax[5][0] > 150 :
+                                            rx = -200
+                                        else :
+                                            rx = 0
+                                        if abs(deep.slope)  > 0.03 or slope_flag == True:
+                                            Slope_fix() 
+                                        send.sendContinuousValue(-700 + rx , 400 ,0,-4 + slope_angle,0)
+                                        # Move(Straight_status = 4)
                                     else :
                                         if BR_flag == True:
-                                            Move(Straight_status = 5)
+                                            if send.color_mask_subject_YMax[5][0] < 140:
+                                                rx = 200
+                                            elif send.color_mask_subject_YMax[5][0] > 150 :
+                                                rx = -200
+                                            else :
+                                                rx = 0
+                                            if abs(deep.slope)  > 0.03 or slope_flag == True:
+                                                Slope_fix() 
+                                            send.sendContinuousValue(-700 + rx , -1200 ,0,-4 + slope_angle,0)
+                                            # Move(Straight_status = 5)
                                             print('BBBBBBBBBBBBBBRRRRRRRRRRR =',BR_flag)
                                         elif BL_flag == True:
-                                            Move(Straight_status = 4)
+                                            if send.color_mask_subject_YMax[5][0] < 140:
+                                                rx = 200
+                                            elif send.color_mask_subject_YMax[5][0] > 150 :
+                                                rx = -200
+                                            else :
+                                                rx = 0
+                                            if abs(deep.slope)  > 0.03 or slope_flag == True:
+                                                Slope_fix() 
+                                            send.sendContinuousValue(-700 + rx , 400 ,0,-4 + slope_angle,0)
+                                            # Move(Straight_status = 4)
                                             print('BBBBBBBBBBLLLLLLLLLLLLLLLLLLLL = ',BL_flag)
                                 elif R_min < 2 and R_max < 315 : 
                                     print('move L')
-                                    Move(Straight_status = 4)
+                                    if send.color_mask_subject_YMax[5][0] < 140:
+                                        rx = 200
+                                    elif send.color_mask_subject_YMax[5][0] > 150 :
+                                        rx = -200
+                                    else :
+                                        rx = 0
+                                    if abs(deep.slope)  > 0.03 or slope_flag == True:
+                                        Slope_fix() 
+                                    send.sendContinuousValue(-700 + rx , 400 ,0,-4 + slope_angle,0)
+                                    # Move(Straight_status = 4)
                                 elif R_min > 2 and R_max > 315 : 
                                     print('move R')
-                                    Move(Straight_status = 5)
+                                    if send.color_mask_subject_YMax[5][0] < 140:
+                                        rx = 200
+                                    elif send.color_mask_subject_YMax[5][0] > 150 :
+                                        rx = -200
+                                    else :
+                                        rx = 0
+                                    if abs(deep.slope)  > 0.03 or slope_flag == True:
+                                        Slope_fix() 
+                                    send.sendContinuousValue(-700 + rx , -1200 ,0,-4 + slope_angle,0)
+                                    # Move(Straight_status = 5)
                 else :
                     get_IMU()
                     if Dy < 24:
@@ -742,6 +827,8 @@ if __name__ == '__main__':
                         IMU_Angle()
                         Move(Straight_status = 1)
                     print('IMU_ok ====== ' + str(IMU_ok))
+            # print('BBBBBBBBBBBBBBBBBBB___LLLLLLLLLLLLLL = ',B_left)
+            # print('BBBBBBBBBBBBBBBBBBB___RRRRRRRRRRRRRR = ',B_right)
             # print('LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL ====== ' + str(L_Deep))
             # print('RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ====== ' + str(R_Deep))
             # print('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC ====== ' + str(C_Deep))
