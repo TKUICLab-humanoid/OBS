@@ -175,7 +175,7 @@ def Normal_Obs_Parameter():
 #=============================strategy=============================
 
 
-def Move(Straight_status = 0 ,x = -700 ,y = -400 ,z = 0 ,theta = -5  ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -600 ,y = -600 ,z = 0 ,theta = -5  ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
     if Straight_status == 0:    #speed + turn
         print('Straight_status = turn')
@@ -185,7 +185,7 @@ def Move(Straight_status = 0 ,x = -700 ,y = -400 ,z = 0 ,theta = -5  ,sensor = 0
         send.sendContinuousValue(x + Goal_speed,y,z,theta+ 4,sensor)
     elif Straight_status == 2:   #max speed
         print('Straight_status = max speed')
-        send.sendContinuousValue(x + 2500,y-100,z,theta + 2,sensor)     
+        send.sendContinuousValue(x + 2500,y-100,z,theta + 3,sensor)     
     elif Straight_status == 3:  #speed + imu
         print('Straight_status = imu fix')
         if red_flag == True:
@@ -218,7 +218,7 @@ def Move(Straight_status = 0 ,x = -700 ,y = -400 ,z = 0 ,theta = -5  ,sensor = 0
         send.sendContinuousValue(x,y,z,theta + slope_angle,sensor)
 
 
-def Turn_Head(x = -700 ,y = -400 ,z = 0 ,theta = -5  ,sensor = 0 ):
+def Turn_Head(x = -600 ,y = -600 ,z = 0 ,theta = -5  ,sensor = 0 ):
     global R_deep_sum, L_deep_sum, L_Deep, R_Deep
     send.sendContinuousValue(x,y,z,theta,sensor)
     time.sleep(1)
@@ -257,7 +257,7 @@ def Turn_Head(x = -700 ,y = -400 ,z = 0 ,theta = -5  ,sensor = 0 ):
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                send.sendContinuousValue(x ,y + 800,z,theta - 8,sensor)
+                send.sendContinuousValue(x ,y + 1000,z,theta - 8,sensor)
         send.sendHeadMotor(1,2647,100)
         send.sendHeadMotor(2,1550,100) 
         time.sleep(1)
@@ -301,7 +301,7 @@ def Turn_Head(x = -700 ,y = -400 ,z = 0 ,theta = -5  ,sensor = 0 ):
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                send.sendContinuousValue(x ,y-600 ,z,theta + 15,sensor)
+                send.sendContinuousValue(x ,y - 700 ,z,theta + 15,sensor)
         send.sendHeadMotor(1,1447,100)
         send.sendHeadMotor(2,1550,100) 
         time.sleep(1)
@@ -600,7 +600,7 @@ if __name__ == '__main__':
                     send.sendHeadMotor(1,2048,100)
                     send.sendHeadMotor(2,1550,100)
                     send.sendBodySector(999)#收手
-                    send.sendBodySector(1218)#長腳
+                    # send.sendBodySector(1218)#長腳
                     time.sleep(1.5)
                     send.sendBodyAuto(0,0,0,0,1,0)
                     time.sleep(1.5) 
@@ -715,7 +715,7 @@ if __name__ == '__main__':
                                             rx = 0
                                         if abs(deep.slope)  > 0.03 or slope_flag == True:
                                             Slope_fix() 
-                                        send.sendContinuousValue(-700 + rx , -1200 ,0,-8 + slope_angle,0)
+                                        send.sendContinuousValue(-600 + rx , -1200 ,0,-9 + slope_angle,0)
                                         # Move(Straight_status = 5)
                                     elif (B_max > 315 and B_min < 300):# or (B_left <= 55 and B_right < 270)
                                         print('move L 11111')
@@ -729,7 +729,7 @@ if __name__ == '__main__':
                                             rx = 0
                                         if abs(deep.slope)  > 0.03 or slope_flag == True:
                                             Slope_fix() 
-                                        send.sendContinuousValue(-600 + rx , 700 ,0,-5 + slope_angle,0)
+                                        send.sendContinuousValue(-600 + rx , 700 ,0,-6 + slope_angle,0)
                                         # Move(Straight_status = 4)
                                     else :
                                         if BR_flag == True:
@@ -741,7 +741,7 @@ if __name__ == '__main__':
                                                 rx = 0
                                             if abs(deep.slope)  > 0.03 or slope_flag == True:
                                                 Slope_fix() 
-                                            send.sendContinuousValue(-700 + rx , -1200 ,0,-8 + slope_angle,0)
+                                            send.sendContinuousValue(-600 + rx , -1200 ,0,-9 + slope_angle,0)
                                             # Move(Straight_status = 5)
                                             print('BBBBBBBBBBBBBBRRRRRRRRRRR =',BR_flag)
                                         elif BL_flag == True:
@@ -753,7 +753,7 @@ if __name__ == '__main__':
                                                 rx = 0
                                             if abs(deep.slope)  > 0.03 or slope_flag == True:
                                                 Slope_fix() 
-                                            send.sendContinuousValue(-600 + rx , 700 ,0,-5 + slope_angle,0)
+                                            send.sendContinuousValue(-600 + rx , 700 ,0,-6 + slope_angle,0)
                                             # Move(Straight_status = 4)
                                             print('BBBBBBBBBBLLLLLLLLLLLLLLLLLLLL = ',BL_flag)
                                 elif R_min < 2 and R_max < 315 : 
@@ -766,7 +766,7 @@ if __name__ == '__main__':
                                         rx = 0
                                     if abs(deep.slope)  > 0.03 or slope_flag == True:
                                         Slope_fix() 
-                                    send.sendContinuousValue(-600 + rx , 700 ,0,-5 + slope_angle,0)
+                                    send.sendContinuousValue(-600 + rx , 700 ,0,-6 + slope_angle,0)
                                     # Move(Straight_status = 4)
                                 elif R_min > 2 and R_max > 315 : 
                                     print('move R')
@@ -778,7 +778,7 @@ if __name__ == '__main__':
                                         rx = 0
                                     if abs(deep.slope)  > 0.03 or slope_flag == True:
                                         Slope_fix() 
-                                    send.sendContinuousValue(-600 + rx , -1200 ,0,-8 + slope_angle,0)
+                                    send.sendContinuousValue(-600 + rx , -1200 ,0,-9 + slope_angle,0)
                                     # Move(Straight_status = 5)
                 else :
                     get_IMU()
