@@ -65,6 +65,7 @@ slope_Rcnt = 0
 slope_Lcnt = 0
 BR_flag = False
 BL_flag = False
+crawl_cnt = 0
 
 #==============================image===============================
 def Image_Init():
@@ -175,7 +176,7 @@ def Normal_Obs_Parameter():
 #=============================strategy=============================
 
 
-def Move(Straight_status = 0 ,x = -600 ,y = -600 ,z = 0 ,theta = -5  ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -400 ,y = -400 ,z = 0 ,theta = -4  ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
     if Straight_status == 0:    #speed + turn
         print('Straight_status = turn')
@@ -203,10 +204,10 @@ def Move(Straight_status = 0 ,x = -600 ,y = -600 ,z = 0 ,theta = -5  ,sensor = 0
         send.sendContinuousValue(x,y,z,theta,sensor)
     elif Straight_status == 7:  #reddoor go
         print('Straight_status = reddoor forward')
-        send.sendContinuousValue(x + 1000,y - 200,z,theta + 1,sensor)
+        send.sendContinuousValue(x + 1000,y + 100,z,theta + 2,sensor)
     elif Straight_status == 8:  #reddoor back
         print('Straight_status = reddoor back')
-        send.sendContinuousValue(x - 400,y,z,theta -1,sensor)
+        send.sendContinuousValue(x - 400,y + 100,z,theta -1,sensor)
     elif Straight_status == 9:  #preturn left
         print('Straight_status =preturn left')
         send.sendContinuousValue(x + 500,y,z,theta + 12,sensor)
@@ -218,7 +219,7 @@ def Move(Straight_status = 0 ,x = -600 ,y = -600 ,z = 0 ,theta = -5  ,sensor = 0
         send.sendContinuousValue(x,y,z,theta + slope_angle,sensor)
 
 
-def Turn_Head(x = -600 ,y = -600 ,z = 0 ,theta = -5  ,sensor = 0 ):
+def Turn_Head(x = -400 ,y = -400 ,z = 0 ,theta = -4  ,sensor = 0 ):
     global R_deep_sum, L_deep_sum, L_Deep, R_Deep
     send.sendContinuousValue(x,y,z,theta,sensor)
     time.sleep(1)
@@ -476,10 +477,11 @@ def Turn_Angle(Turn_angle_status):
     return Angle
 
 def Crawl():
-    global Straight_status ,slopL_flag ,slopR_flag
-    if send.color_mask_subject_YMax[5][0] < 140 or send.color_mask_subject_YMax[5][0] > 150 or 140 <= send.color_mask_subject_YMax[5][0] <= 150:
-        while send.color_mask_subject_YMax[5][0] < 140 or send.color_mask_subject_YMax[5][0] > 150 or 140 <= send.color_mask_subject_YMax[5][0] <= 150:
+    global Straight_status ,slopL_flag ,slopR_flag,crawl_cnt,C_Deep
+    if send.color_mask_subject_YMax[5][0] < 105 or send.color_mask_subject_YMax[5][0] > 115 or 105 <= send.color_mask_subject_YMax[5][0] <= 115:
+        while send.color_mask_subject_YMax[5][0] < 105 or send.color_mask_subject_YMax[5][0] > 115 or 105 <= send.color_mask_subject_YMax[5][0] <= 115:
             print('ccccccccccccccccccccccccccccrrrrrrrrrrrrrrrrrr')
+            print('YYYYYYYYYYYYYYYYYYYYYYYYMMMMMMMMMMMMMMMMMMAAAAAAAAAAAAAXXXXXXXXXX =',send.color_mask_subject_YMax[5][0])
             # if abs(deep.slope) > 0.03 :#and (slopR_flag == False) and (slopL_flag == False):
             #     # while abs(deep.slope) > 0.03 or slopR_flag == False or slopL_flag == False:
             #     while abs(deep.slope) > 0.03 or slope_flag == True:
@@ -503,13 +505,13 @@ def Crawl():
             #         #     slope_cnt = 0
             #         # if slope_cnt > 2 :
             #         #     break
-            if(send.color_mask_subject_YMax[5][0] < 140):
+            if(send.color_mask_subject_YMax[5][0] < 105):
                 Move(Straight_status = 7)
                 print('crawlllllll forwardddddddddd')
-            elif(send.color_mask_subject_YMax[5][0] > 150):
+            elif(send.color_mask_subject_YMax[5][0] > 115):
                 Move(Straight_status = 8)
                 print('crawlllllll backkkkkkkk')
-            elif 140 <= send.color_mask_subject_YMax[5][0] <= 150:
+            elif 105 <= send.color_mask_subject_YMax[5][0] <= 115:
                 # if abs(deep.slope)  > 0.03 and (slopR_flag == False) and (slopL_flag == False):
                 #     # while abs(deep.slope) > 0.03 or slopR_flag == False or slopL_flag == False:
                 #     while abs(deep.slope) > 0.03 or slope_flag == True:
@@ -539,7 +541,44 @@ def Crawl():
                 print('rcnt = ',slope_Rcnt)
                 print('lcnt = ',slope_Lcnt)
                 send.sendBodyAuto(0,0,0,0,1,0)
-                time.sleep(10)
+                time.sleep(1)
+                send.sendBodySector(29)
+                time.sleep(1.5)
+                send.sendBodySector(123)
+                time.sleep(15)
+                time.sleep(1)
+                while crawl_cnt < 3:
+                    send.sendBodySector(456)
+                    time.sleep(3)
+                    time.sleep(0.8)
+                    crawl_cnt += 1
+                send.sendHeadMotor(1,2048,100)
+                send.sendHeadMotor(2,2500,100)
+                time.sleep(1)
+                while crawl_cnt < 10:
+                    Image_Init()
+                    Normal_Obs_Parameter()
+                    print('CCCCCCCCCCCCCCCCCCCCC = ',C_Deep)
+                    if C_Deep > 3:
+                        send.sendBodySector(456)
+                        time.sleep(3)
+                        time.sleep(0.8)
+                        crawl_cnt += 1
+                    else:
+                        break
+                send.sendBodySector(789)
+                time.sleep(13.8)
+                time.sleep(0.5)
+                send.sendBodySector(29)
+                time.sleep(1)
+                send.sendHeadMotor(1,2048,100)
+                send.sendHeadMotor(2,1550,100)
+                time.sleep(0.5)
+                send.sendBodySector(999)
+                time.sleep(1)
+                send.sendBodyAuto(0,0,0,0,1,0)
+                time.sleep(1)
+                break
             # print('CCCCCCCCCCCCCCCCRWAL')
             # send.sendBodyAuto(0,0,0,0,1,0)
             # time.sleep(10)
@@ -629,8 +668,8 @@ if __name__ == '__main__':
                         time.sleep(0.5)
                     elif First_Reddoor == True :
                         # print('DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDYYYYYYYYYYYYYYYYYYYYY = ',Dy)
-                        print('BBBBBBBBBBBBBBBBBBB___LLLLLLLLLLLLLL = ',B_left)
-                        print('BBBBBBBBBBBBBBBBBBB___RRRRRRRRRRRRRR = ',B_right)
+                        # print('BBBBBBBBBBBBBBBBBBB___LLLLLLLLLLLLLL = ',B_left)
+                        # print('BBBBBBBBBBBBBBBBBBB___RRRRRRRRRRRRRR = ',B_right)
                         print('YYYYYYYYYYYYYYYMMMMMMMMMIIIIIIIIINNNNNNNNN = ',send.color_mask_subject_YMax[5][0])
                         print('slope = ',deep.slope)
 
@@ -662,10 +701,10 @@ if __name__ == '__main__':
                             send.sendHeadMotor(2,1700,100)
                             time.sleep(0.5)
                         else :
-                            if (send.color_mask_subject_YMax[5][0] < 140) and (redoor_dis == False) :
+                            if (send.color_mask_subject_YMax[5][0] < 110) and (redoor_dis == False) :
                                 Move(Straight_status = 7)
                                 pass
-                            elif (send.color_mask_subject_YMax[5][0] > 150) and (redoor_dis == False) :
+                            elif (send.color_mask_subject_YMax[5][0] > 120) and (redoor_dis == False) :
                                 Move(Straight_status = 8)
                                 pass
                             else :
@@ -707,9 +746,9 @@ if __name__ == '__main__':
                                         print('move R 11111')
                                         BR_flag = True
                                         BL_flag = False
-                                        if send.color_mask_subject_YMax[5][0] < 140:
+                                        if send.color_mask_subject_YMax[5][0] < 110:
                                             rx = 200
-                                        elif send.color_mask_subject_YMax[5][0] > 150 :
+                                        elif send.color_mask_subject_YMax[5][0] > 120:
                                             rx = -200
                                         else :
                                             rx = 0
@@ -721,9 +760,9 @@ if __name__ == '__main__':
                                         print('move L 11111')
                                         BL_flag = True
                                         BR_flag = False
-                                        if send.color_mask_subject_YMax[5][0] < 140:
+                                        if send.color_mask_subject_YMax[5][0] < 110:
                                             rx = 200
-                                        elif send.color_mask_subject_YMax[5][0] > 150 :
+                                        elif send.color_mask_subject_YMax[5][0] > 120:
                                             rx = -200
                                         else :
                                             rx = 0
@@ -733,9 +772,9 @@ if __name__ == '__main__':
                                         # Move(Straight_status = 4)
                                     else :
                                         if BR_flag == True:
-                                            if send.color_mask_subject_YMax[5][0] < 140:
+                                            if send.color_mask_subject_YMax[5][0] < 110:
                                                 rx = 200
-                                            elif send.color_mask_subject_YMax[5][0] > 150 :
+                                            elif send.color_mask_subject_YMax[5][0] > 120:
                                                 rx = -200
                                             else :
                                                 rx = 0
@@ -745,9 +784,9 @@ if __name__ == '__main__':
                                             # Move(Straight_status = 5)
                                             print('BBBBBBBBBBBBBBRRRRRRRRRRR =',BR_flag)
                                         elif BL_flag == True:
-                                            if send.color_mask_subject_YMax[5][0] < 140:
+                                            if send.color_mask_subject_YMax[5][0] < 110:
                                                 rx = 200
-                                            elif send.color_mask_subject_YMax[5][0] > 150 :
+                                            elif send.color_mask_subject_YMax[5][0] > 120 :
                                                 rx = -200
                                             else :
                                                 rx = 0
@@ -758,9 +797,9 @@ if __name__ == '__main__':
                                             print('BBBBBBBBBBLLLLLLLLLLLLLLLLLLLL = ',BL_flag)
                                 elif R_min < 2 and R_max < 315 : 
                                     print('move L')
-                                    if send.color_mask_subject_YMax[5][0] < 140:
+                                    if send.color_mask_subject_YMax[5][0] < 110:
                                         rx = 200
-                                    elif send.color_mask_subject_YMax[5][0] > 150 :
+                                    elif send.color_mask_subject_YMax[5][0] > 120 :
                                         rx = -200
                                     else :
                                         rx = 0
@@ -770,9 +809,9 @@ if __name__ == '__main__':
                                     # Move(Straight_status = 4)
                                 elif R_min > 2 and R_max > 315 : 
                                     print('move R')
-                                    if send.color_mask_subject_YMax[5][0] < 140:
+                                    if send.color_mask_subject_YMax[5][0] < 110:
                                         rx = 200
-                                    elif send.color_mask_subject_YMax[5][0] > 150 :
+                                    elif send.color_mask_subject_YMax[5][0] > 120 :
                                         rx = -200
                                     else :
                                         rx = 0
