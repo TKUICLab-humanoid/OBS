@@ -177,7 +177,7 @@ def Normal_Obs_Parameter():
 #=============================strategy=============================
 
 #-----------------------------Parameter------------------------------------
-def Move(Straight_status = 0 ,x = -200 ,y = -100 ,z = 0 ,theta = -1  ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -300 ,y = -100 ,z = 0 ,theta = -3  ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
 
     if Straight_status == 0:    #stay
@@ -206,46 +206,46 @@ def Move(Straight_status = 0 ,x = -200 ,y = -100 ,z = 0 ,theta = -1  ,sensor = 0
         print('Straight_status = max speed')
         send.sendContinuousValue(2300 ,y ,z ,-2 ,sensor)  
 
-    elif Straight_status == 15:  #reddoor go
-        print('Straight_status = reddoor forward')
+    elif Straight_status == 15:  # forward
+        print('Straight_status =  forward')
         send.sendContinuousValue(800 ,y ,z ,0 ,sensor)
 
-    elif Straight_status == 16:  #reddoor back
-        print('Straight_status = reddoor back')
+    elif Straight_status == 16:  # back
+        print('Straight_status =  back')
         send.sendContinuousValue(-800 ,-100 ,z ,-3 ,sensor)
 
 #---------------------Turn Head Parameter-------------------------#
     elif Straight_status == 21:  #turn right
         print('Straight_status = turn right')
-        send.sendContinuousValue(-200 ,600 ,z ,-9 ,sensor)
+        send.sendContinuousValue(-200 ,100 ,z ,-9 ,sensor)
 
     elif Straight_status == 22:  #right turn back
         print('Straight_status = right turn back')
-        send.sendContinuousValue(-200 ,-1000 ,z ,12 ,sensor)
+        send.sendContinuousValue(-200 ,-1000 ,z ,10 ,sensor)
 
     elif Straight_status == 23:  #turn left
         print('Straight_status = turn left')
-        send.sendContinuousValue(-200 ,-800 ,z ,12 ,sensor)
+        send.sendContinuousValue(-200 ,-600 ,z ,12 ,sensor)
 
     elif Straight_status == 24:  #left turn back
         print('Straight_status = left turn back')
-        send.sendContinuousValue(-100 ,900 ,z ,-12 ,sensor)
-
+        send.sendContinuousValue(-100 ,700 ,z ,-12 ,sensor)
+#--------------------turn head go straight------------------------#
     elif Straight_status == 25:  #turn right fix left
         print('Straight_status = turn right fix left')
-        send.sendContinuousValue(1800 ,y ,z ,6 ,sensor)
+        send.sendContinuousValue(1800 ,y ,z ,3 ,sensor)
 
     elif Straight_status == 26:  #turn right fix right
         print('Straight_status = turn right fix right')
-        send.sendContinuousValue(1800 ,y ,z ,-1 ,sensor)
+        send.sendContinuousValue(1800 ,y ,z ,-3 ,sensor)
 
     elif Straight_status == 27:  #turn left fix right
         print('Straight_status = turn left fix right')
-        send.sendContinuousValue(1800 ,y ,z ,-2 ,sensor)
+        send.sendContinuousValue(1800 ,y ,z ,-3 ,sensor)
 
     elif Straight_status == 28:  #turn left fix left
         print('Straight_status = turn left fix left')
-        send.sendContinuousValue(1800 ,y ,z ,7 ,sensor) 
+        send.sendContinuousValue(1800 ,y ,z ,3 ,sensor) 
 
 #------------------reddoor slope parameter------------------------#
     elif Straight_status == 31:  #Slope fix
@@ -262,7 +262,7 @@ def Move(Straight_status = 0 ,x = -200 ,y = -100 ,z = 0 ,theta = -1  ,sensor = 0
             rx = 0
         if abs(deep.slope)  > 0.03 or slope_flag == True:
             Slope_fix() 
-        send.sendContinuousValue(-200 + rx , -800 ,0 ,-5 + slope_angle ,0) 
+        send.sendContinuousValue(-200 + rx , -1000 ,0 ,-2 + slope_angle ,0) 
     
     elif Straight_status == 33:  #slope fix left
         print('Straight_status = slope fix left')
@@ -322,8 +322,8 @@ def Turn_Head():
                 Move(Straight_status = 15) 
             print('TTTTTTTTTTTurn Headrrrrrrrr')
         get_IMU()
-        if abs(Yaw_wen) < 75:
-            while abs(Yaw_wen) < 75:
+        if abs(Yaw_wen) < 80:
+            while abs(Yaw_wen) < 80:
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
@@ -382,7 +382,7 @@ def Turn_Head():
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                if abs(Yaw_wen) > 90 :
+                if abs(Yaw_wen) > 85 :
                     Move(Straight_status = 27)
                     print(' Dx = ',Dx)
                 else :
@@ -408,11 +408,11 @@ def Slope_fix():
         elif 1 > deep.slope >= 0.36:
             slope_angle = 11
         elif 0.36 > deep.slope >= 0.17:
-            slope_angle = 9
+            slope_angle = 10
         elif 0.17 > deep.slope >= 0.08:
-            slope_angle = 6
+            slope_angle = 7
         elif 0.08 > deep.slope >= 0.03:
-            slope_angle = 4
+            slope_angle = 5
         elif 0.03 > deep.slope >= 0:
             slope_angle = 0
             slope_Lcnt  += 1
@@ -564,7 +564,7 @@ def Crawl():
                 print('rcnt = ',slope_Rcnt)
                 print('lcnt = ',slope_Lcnt)
                 send.sendBodyAuto(0,0,0,0,1,0)
-                time.sleep(1)
+                time.sleep(1.5)
                 send.sendBodySector(29)
                 time.sleep(1.5)
                 send.sendBodySector(123)
@@ -592,14 +592,14 @@ def Crawl():
                     else:
                         break
                 send.sendBodySector(789)
-                time.sleep(14.5)
+                time.sleep(13)
                 time.sleep(0.5)
                 send.sendBodySector(29)
                 time.sleep(1)
                 send.sendHeadMotor(1,2048,100)
                 send.sendHeadMotor(2,1550,100)
                 time.sleep(0.5)
-                send.sendBodySector(999)
+                send.sendBodySector(15)
                 time.sleep(1)
                 send.sendBodyAuto(0,0,0,0,1,0)
                 time.sleep(1)
@@ -631,7 +631,7 @@ if __name__ == '__main__':
                 if walking == False:
                     send.sendHeadMotor(1,2048,100)
                     send.sendHeadMotor(2,1550,100)
-                    send.sendBodySector(999)#收手
+                    send.sendBodySector(15)#收手
                     # send.sendBodySector(1218)#長腳
                     time.sleep(1.5)
                     send.sendBodyAuto(0,0,0,0,1,0)
