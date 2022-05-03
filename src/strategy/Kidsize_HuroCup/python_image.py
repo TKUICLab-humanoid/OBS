@@ -177,7 +177,7 @@ def Normal_Obs_Parameter():
 #=============================strategy=============================
 
 #-----------------------------Parameter------------------------------------
-def Move(Straight_status = 0 ,x = -300 ,y = -100 ,z = 0 ,theta = -3  ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -300 ,y = 0 ,z = 0 ,theta = -2  ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
 
     if Straight_status == 0:    #stay
@@ -204,24 +204,24 @@ def Move(Straight_status = 0 ,x = -300 ,y = -100 ,z = 0 ,theta = -3  ,sensor = 0
 #============================================================================#       
     elif Straight_status == 14:  #max speed
         print('Straight_status = max speed')
-        send.sendContinuousValue(2300 ,y ,z ,-2 ,sensor)  
+        send.sendContinuousValue(2300 ,100 ,z ,-1 ,sensor)  
 
     elif Straight_status == 15:  # forward
         print('Straight_status =  forward')
-        send.sendContinuousValue(800 ,y ,z ,0 ,sensor)
+        send.sendContinuousValue(800 ,0 ,z ,0 ,sensor)
 
     elif Straight_status == 16:  # back
         print('Straight_status =  back')
-        send.sendContinuousValue(-800 ,-100 ,z ,-3 ,sensor)
+        send.sendContinuousValue(-800 ,100 ,z ,-3 ,sensor)
 
 #---------------------Turn Head Parameter-------------------------#
     elif Straight_status == 21:  #turn right
         print('Straight_status = turn right')
-        send.sendContinuousValue(-200 ,100 ,z ,-9 ,sensor)
+        send.sendContinuousValue(-200 ,800 ,z ,-9 ,sensor)
 
     elif Straight_status == 22:  #right turn back
         print('Straight_status = right turn back')
-        send.sendContinuousValue(-200 ,-1000 ,z ,10 ,sensor)
+        send.sendContinuousValue(-200 ,-1200 ,z ,10 ,sensor)
 
     elif Straight_status == 23:  #turn left
         print('Straight_status = turn left')
@@ -229,7 +229,7 @@ def Move(Straight_status = 0 ,x = -300 ,y = -100 ,z = 0 ,theta = -3  ,sensor = 0
 
     elif Straight_status == 24:  #left turn back
         print('Straight_status = left turn back')
-        send.sendContinuousValue(-100 ,700 ,z ,-12 ,sensor)
+        send.sendContinuousValue(-100 ,900 ,z ,-12 ,sensor)
 #--------------------turn head go straight------------------------#
     elif Straight_status == 25:  #turn right fix left
         print('Straight_status = turn right fix left')
@@ -241,7 +241,7 @@ def Move(Straight_status = 0 ,x = -300 ,y = -100 ,z = 0 ,theta = -3  ,sensor = 0
 
     elif Straight_status == 27:  #turn left fix right
         print('Straight_status = turn left fix right')
-        send.sendContinuousValue(1800 ,y ,z ,-3 ,sensor)
+        send.sendContinuousValue(1800 ,y ,z ,-2 ,sensor)
 
     elif Straight_status == 28:  #turn left fix left
         print('Straight_status = turn left fix left')
@@ -262,7 +262,7 @@ def Move(Straight_status = 0 ,x = -300 ,y = -100 ,z = 0 ,theta = -3  ,sensor = 0
             rx = 0
         if abs(deep.slope)  > 0.03 or slope_flag == True:
             Slope_fix() 
-        send.sendContinuousValue(-200 + rx , -1000 ,0 ,-2 + slope_angle ,0) 
+        send.sendContinuousValue(-400 + rx , -1000 ,0 ,-3 + slope_angle ,0) 
     
     elif Straight_status == 33:  #slope fix left
         print('Straight_status = slope fix left')
@@ -274,7 +274,7 @@ def Move(Straight_status = 0 ,x = -300 ,y = -100 ,z = 0 ,theta = -3  ,sensor = 0
             rx = 0
         if abs(deep.slope)  > 0.03 or slope_flag == True:
             Slope_fix() 
-        send.sendContinuousValue(-400 + rx , 800 ,0 ,4 + slope_angle ,0) 
+        send.sendContinuousValue(-400 + rx , 800 ,0 ,3 + slope_angle ,0) 
 
 #--------------------Preturn Head Parameter-----------------------#
     elif Straight_status == 41:  #preturn left
@@ -338,7 +338,7 @@ def Turn_Head():
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                if abs(Yaw_wen) > 87 :#視步態更動
+                if abs(Yaw_wen) > 88 :#視步態更動
                     Move(Straight_status = 25)
                     print(' Dx = ',Dx)
                 else :
@@ -382,7 +382,7 @@ def Turn_Head():
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                if abs(Yaw_wen) > 85 :
+                if abs(Yaw_wen) > 88 :
                     Move(Straight_status = 27)
                     print(' Dx = ',Dx)
                 else :
@@ -425,11 +425,11 @@ def Slope_fix():
         elif -0.36 >= deep.slope > -1:
             slope_angle = -9
         elif -0.17 >= deep.slope > -0.36:
-            slope_angle = -8
-        elif -0.08 >= deep.slope > -0.17:
             slope_angle = -7
-        elif -0.03 >= deep.slope > -0.08:
+        elif -0.08 >= deep.slope > -0.17:
             slope_angle = -6
+        elif -0.03 >= deep.slope > -0.08:
+            slope_angle = -5
         elif 0 >= deep.slope > -0.03:
             slope_angle = 0
             slope_Rcnt  += 1
@@ -564,9 +564,9 @@ def Crawl():
                 print('rcnt = ',slope_Rcnt)
                 print('lcnt = ',slope_Lcnt)
                 send.sendBodyAuto(0,0,0,0,1,0)
-                time.sleep(1.5)
+                time.sleep(3)
                 send.sendBodySector(29)
-                time.sleep(1.5)
+                time.sleep(3)
                 send.sendBodySector(123)
                 time.sleep(8)
                 time.sleep(0.5)
@@ -639,15 +639,15 @@ if __name__ == '__main__':
                 walking = True
                 if PreTurn_L == True :
                     get_IMU()
-                    if abs(Yaw_wen) < 30:
-                        while abs(Yaw_wen) < 30:
+                    if abs(Yaw_wen) < 83:
+                        while abs(Yaw_wen) < 83:
                             get_IMU()
                             Move(Straight_status = 41)
                     PreTurn_L = False
                 elif PreTurn_R == True : 
                     get_IMU()
-                    if abs(Yaw_wen) < 30:
-                        while abs(Yaw_wen) < 30:
+                    if abs(Yaw_wen) < 80:
+                        while abs(Yaw_wen) < 80:
                             get_IMU()
                             Move(Straight_status = 42)
                     PreTurn_R = False
