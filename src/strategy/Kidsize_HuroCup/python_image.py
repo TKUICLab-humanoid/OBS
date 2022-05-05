@@ -16,6 +16,7 @@ import time
 Filter_Matrix = []
 Xc = 0
 Dy = 24
+Y_Dy = 24
 WR = 0
 WL = 0
 Xb = 0
@@ -39,6 +40,14 @@ L_deep_sum = 0
 L_Deep = 0
 R_Deep = 0
 C_Deep = 0
+
+#----Y_line DeepMatrix---
+Y_Deep_sum = 0
+Y_L_Deep = 0
+Y_R_Deep = 0
+Y_C_Deep = 0
+#----------------------
+
 red_flag = False
 R_min = 0
 R_max = 0
@@ -125,7 +134,7 @@ def Image_Info():
         print('slope_Lcnt = '+ str(slope_Lcnt))
 
 def Normal_Obs_Parameter():
-    global Filter_Matrix, Xc, Dy, WR, WL, Xb, Dx, Xc_count, Xc_num, Deep_sum, R_Deep, L_Deep, C_Deep, red_flag, R_min, R_max, B_min, B_max, B_left, B_right, XMax_one, XMin_one, XMin_two, XMax_two
+    global Filter_Matrix, Xc, Dy,Y_Dy, WR, WL, Xb, Dx, Xc_count, Xc_num, Deep_sum,Y_Deep_sum, R_Deep, L_Deep, C_Deep,Y_R_Deep, Y_L_Deep, Y_C_Deep, red_flag, R_min, R_max, B_min, B_max, B_left, B_right, XMax_one, XMin_one, XMin_two, XMax_two
     if send.color_mask_subject_size[5][0] > 5000 :
         red_flag = True
         R_min = send.color_mask_subject_XMin[5][0] 
@@ -150,7 +159,17 @@ def Normal_Obs_Parameter():
             B_left = XMax_one
     else : 
         red_flag = False
-
+#----------------Y_line_DeepMatrix----------------
+    for j in range (0, 32, 1):
+        # Filter_Matrix.append(0)
+        # Filter_Matrix[j] = Focus_Matrix[j] - deep.ya[j]
+        if deep.ya[j] < Y_Dy:
+            Y_Dy = deep.ya[j]
+        Y_Deep_sum += deep.ya[j]
+        Y_L_Deep = deep.ya[4]
+        Y_R_Deep = deep.ya[28]
+        Y_C_Deep = deep.ya[16]
+#--------------------------------------------------
     for i in range (0, 32, 1):
         Filter_Matrix.append(0)
         Filter_Matrix[i] = Focus_Matrix[i] - deep.aa[i]
@@ -174,6 +193,7 @@ def Normal_Obs_Parameter():
         Xb = 0
     Dx = Xc - Xb
 
+
 #=============================strategy=============================
 
 #-----------------------------Parameter------------------------------------
@@ -193,7 +213,8 @@ def Move(Straight_status = 0 ,x = -300 ,y = 0 ,z = 0 ,theta = -2  ,sensor = 0 ):
         if red_flag == True:
             send.sendContinuousValue(x,y,z,theta + imu_angle,sensor)
         else:
-            send.sendContinuousValue(x + Goal_speed,y,z,theta + imu_angle,sensor)
+            # send.sendContinuousValue(x + Goal_speed,y,z,theta + imu_angle,sensor)
+            send.sendContinuousValue(x ,y,z,theta + imu_angle,sensor)
 
     elif Straight_status == 13:  #speed ++
         print('Straight_status = go straight')
@@ -767,6 +788,25 @@ if __name__ == '__main__':
                             if ( abs(Yaw_wen) > 3 and IMU_ok == False ) and Dx >= 5 :
                                 IMU_Angle()
                                 Move(Straight_status = 12)
+                                Image_Init()
+                                Normal_Obs_Parameter()
+                                Image_Info()
+                            if (abs(Yaw_wen) < 5 and IMU_ok == True):
+                                if  (Y_L_Deep != 24 and C_Deep == 24) or  (Y_R_Deep != 24 and C_Deep == 24) or(Y_L_Deep != 24 and Dy< 5) or  (Y_R_Deep != 24 and Dy <5 ):
+                                    while (Dy < 5 or C_Deep == 24):
+                                        Image_Init()
+                                        Normal_Obs_Parameter()
+                                        Image_Info()
+                                        Move(Straight_status = 16) 
+                                        print('imu fix back')
+                                # if ( Dy < 7 ) and ( abs(Yaw_wen) <= 3 ):
+                                #     print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+                                #     while ( Dy < 7 ):
+                                #         Image_Init()
+                                #         Normal_Obs_Parameter()
+                                #         Image_Info()
+                                #         Move(Straight_status = 16) 
+                                #         print('imu fix back')
                             else:
                                 Turn_Angle(Turn_angle_status = 0)
                                 Move(Straight_status = 11)
@@ -780,6 +820,29 @@ if __name__ == '__main__':
                             if ( abs(Yaw_wen) > 3 and IMU_ok == False ) and Dx <= -7 :
                                 IMU_Angle()
                                 Move(Straight_status = 12)
+                                Image_Init()
+                                Normal_Obs_Parameter()
+                                Image_Info()
+                            if (abs(Yaw_wen) < 5 and IMU_ok == True):
+                                if  (Y_L_Deep != 24 and C_Deep == 24) or  (Y_R_Deep != 24 and C_Deep == 24) or(Y_L_Deep != 24 and Dy< 5) or  (Y_R_Deep != 24 and Dy <5 ):
+                                    while (Dy < 5 or C_Deep == 24):
+                                        Image_Init()
+                                        Normal_Obs_Parameter()
+                                        Image_Info()
+                                        Move(Straight_status = 16) 
+                                        print('imu fix back')
+                            # if ( Dy < 7 ) :
+                            #     flag = True
+                            # else :
+                            #     flag = False
+                            # if (flag == True) and (abs(Yaw_wen) < 3):
+                            #     print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+                            #     while ( Dy < 7 ):
+                            #         Image_Init()
+                            #         Normal_Obs_Parameter()
+                            #         Image_Info()
+                            #         Move(Straight_status = 16) 
+                            #         print('imu fix back')
                             else:
                                 Turn_Angle(Turn_angle_status = 1)
                                 Move(Straight_status = 11)
@@ -792,6 +855,25 @@ if __name__ == '__main__':
                             if ( abs(Yaw_wen) > 3 and IMU_ok == False ) :
                                 IMU_Angle()
                                 Move(Straight_status = 12)
+                                Image_Init()
+                                Normal_Obs_Parameter()
+                                Image_Info()
+                            if (abs(Yaw_wen) < 3 and IMU_ok == True):
+                                if  (Y_L_Deep != 24 and C_Deep == 24) or  (Y_R_Deep != 24 and C_Deep == 24) or(Y_L_Deep != 24 and Dy< 7) or  (Y_R_Deep != 24 and Dy <7 ):
+                                    while (Dy < 7 or C_Deep == 24):
+                                        Image_Init()
+                                        Normal_Obs_Parameter()
+                                        Image_Info()
+                                        Move(Straight_status = 16) 
+                                        print('imu fix back')
+                                # if ( Dy < 7 ) and (abs(Yaw_wen) <= 3):
+                                #     print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+                                #     while ( Dy < 7 ):
+                                #         Image_Init()
+                                #         Normal_Obs_Parameter()
+                                #         Image_Info()
+                                #         Move(Straight_status = 16) 
+                                #         print('imu fix back')
                             if abs(Yaw_wen) < 3 :
                                 IMU_ok = True
                             if abs(Yaw_wen) < 3:
@@ -824,6 +906,7 @@ if __name__ == '__main__':
             # print('LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL ====== ' + str(L_Deep))
             # print('RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ====== ' + str(R_Deep))
             # print('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC ====== ' + str(C_Deep))
+            print('Dy = ' +str(Dy))
             
             if send.is_start == False:
                 print("stop")
@@ -839,4 +922,4 @@ if __name__ == '__main__':
                 IMU_Yaw_ini()
             print('walking ====== ' + str(walking))
     except rospy.ROSInterruptException:
-        pass
+        passL_Deep

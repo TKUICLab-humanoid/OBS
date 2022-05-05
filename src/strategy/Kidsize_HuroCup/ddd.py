@@ -19,6 +19,7 @@ class deep_calculate:
         #self.Deep_Matrix = []
         # rospy.spin()
         self.first_red = True
+        self.ya = 0
         self.aa = 0
         self.x1 = 0
         self.y1 = 0
@@ -30,6 +31,7 @@ class deep_calculate:
         self.slope = 0
         self.degree = 0
         self.red_width = 0
+        self.Y_Dy = 24
 
     def convert(self, imgmsg):
         try:
@@ -38,6 +40,7 @@ class deep_calculate:
             print(e)
         cv_image = cv2.resize(cv_image, (320, 240))
         cv_image_2 = cv2.resize(cv_image, (32, 24))
+        # cv_image_3 = cv2.resize(cv_image, (32, 24))
         # send = Sendmessage()
         # #註解掉ddd有值 python_image有sent error 沒註解掉python_image可跑值為0 ddd值為0
 
@@ -58,6 +61,10 @@ class deep_calculate:
         self.x2 = 1
         self.y2 = 0
         self.cnt = 0
+        self.Y_L_Deep = 0
+        self.Y_R_Deep = 0
+        self.Y_C_Deep = 0
+        self.Y_Deep_sum = 0
 
         for compress_width in range(0, 32, 1):
             self.a = True
@@ -115,6 +122,37 @@ class deep_calculate:
         # cv2.imshow("Image_show",cv_image)
         cv2.waitKey(1)
 
+
+        self.Y_Deep_Matrix = []
+        for compress_width in range(0, 32, 1):
+            self.Y_Deep_Matrix.append(0)
+            for compress_height in range(23, -1, -1):
+                blue = cv_image_2.item(compress_height, compress_width, 0)
+                green = cv_image_2.item(compress_height, compress_width, 1)
+                red = cv_image_2.item(compress_height, compress_width, 2)
+                if (blue == 128 and green == 128 and red == 0) :
+                    self.Y_Deep_Matrix[compress_width] = 23 - compress_height
+                    break
+                if compress_height == 0:
+                    self.Y_Deep_Matrix[compress_width] = 24
+        # print(self.Y_Deep_Matrix)
+        # print(send.color_mask_subject_size[1][0])
+        self.ya = self.Y_Deep_Matrix
+        # for j in range (0, 32, 1):
+        # # Filter_Matrix.append(0)
+        # # Filter_Matrix[j] = Focus_Matrix[j] - deep.ya[j]
+        #     if self.ya[j] < self.Y_Dy:
+        #         self.Y_Dy = self.ya[j]
+        #     self.Y_Deep_sum += self.aa[j]
+        #     self.Y_L_Deep = self.ya[4]
+        #     self.Y_R_Deep = self.ya[28]
+        #     self.Y_C_Deep = self.ya[16]
+        # cv2.imshow("Image_show",cv_image)
+        # print("Y_L_Deep = ",self.Y_L_Deep)
+        # print("Y_C_Deep = ",self.Y_C_Deep)
+        # print("Y_R_Deep = ",self.Y_R_Deep)
+
+        cv2.waitKey(1)
         #================================================================
         # hsv = cv2.cvtColor(cv_image,cv2.COLOR_BGR2HSV)
         # lowera = np.array([78,43,46])
