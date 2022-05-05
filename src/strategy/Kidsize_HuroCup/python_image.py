@@ -204,20 +204,20 @@ def Move(Straight_status = 0 ,x = -300 ,y = 0 ,z = 0 ,theta = -2  ,sensor = 0 ):
 #============================================================================#       
     elif Straight_status == 14:  #max speed
         print('Straight_status = max speed')
-        send.sendContinuousValue(2300 ,100 ,z ,-1 ,sensor)  
+        send.sendContinuousValue(2300 ,300 ,z ,0 ,sensor)  
 
     elif Straight_status == 15:  # forward
         print('Straight_status =  forward')
-        send.sendContinuousValue(800 ,0 ,z ,0 ,sensor)
+        send.sendContinuousValue(800 ,200 ,z ,-1 ,sensor)
 
     elif Straight_status == 16:  # back
         print('Straight_status =  back')
-        send.sendContinuousValue(-800 ,100 ,z ,-3 ,sensor)
+        send.sendContinuousValue(-1200 ,200 ,z ,-2 ,sensor)
 
 #---------------------Turn Head Parameter-------------------------#
     elif Straight_status == 21:  #turn right
         print('Straight_status = turn right')
-        send.sendContinuousValue(-200 ,800 ,z ,-9 ,sensor)
+        send.sendContinuousValue(-200 ,400 ,z ,-9 ,sensor)
 
     elif Straight_status == 22:  #right turn back
         print('Straight_status = right turn back')
@@ -225,11 +225,11 @@ def Move(Straight_status = 0 ,x = -300 ,y = 0 ,z = 0 ,theta = -2  ,sensor = 0 ):
 
     elif Straight_status == 23:  #turn left
         print('Straight_status = turn left')
-        send.sendContinuousValue(-200 ,-600 ,z ,12 ,sensor)
+        send.sendContinuousValue(-200 ,-700 ,z ,12 ,sensor)
 
     elif Straight_status == 24:  #left turn back
         print('Straight_status = left turn back')
-        send.sendContinuousValue(-100 ,900 ,z ,-12 ,sensor)
+        send.sendContinuousValue(-100 ,1100 ,z ,-12 ,sensor)
 #--------------------turn head go straight------------------------#
     elif Straight_status == 25:  #turn right fix left
         print('Straight_status = turn right fix left')
@@ -338,7 +338,7 @@ def Turn_Head():
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                if abs(Yaw_wen) > 88 :#視步態更動
+                if abs(Yaw_wen) > 85 :#視步態更動
                     Move(Straight_status = 25)
                     print(' Dx = ',Dx)
                 else :
@@ -382,7 +382,7 @@ def Turn_Head():
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                if abs(Yaw_wen) > 88 :
+                if abs(Yaw_wen) > 85 :
                     Move(Straight_status = 27)
                     print(' Dx = ',Dx)
                 else :
