@@ -75,6 +75,7 @@ slope_Lcnt = 0
 BR_flag = False
 BL_flag = False
 crawl_cnt = 0
+imu_back = False
 
 #==============================image===============================
 def Image_Init():
@@ -166,8 +167,8 @@ def Normal_Obs_Parameter():
         if deep.ya[j] < Y_Dy:
             Y_Dy = deep.ya[j]
         Y_Deep_sum += deep.ya[j]
-        Y_L_Deep = deep.ya[4]
-        Y_R_Deep = deep.ya[28]
+        Y_L_Deep = deep.ya[2]
+        Y_R_Deep = deep.ya[30]
         Y_C_Deep = deep.ya[16]
 #--------------------------------------------------
     for i in range (0, 32, 1):
@@ -197,7 +198,7 @@ def Normal_Obs_Parameter():
 #=============================strategy=============================
 
 #-----------------------------Parameter------------------------------------
-def Move(Straight_status = 0 ,x = -300 ,y = 0 ,z = 0 ,theta = -2  ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -300 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
 
     if Straight_status == 0:    #stay
@@ -230,6 +231,14 @@ def Move(Straight_status = 0 ,x = -300 ,y = 0 ,z = 0 ,theta = -2  ,sensor = 0 ):
     elif Straight_status == 15:  # forward
         print('Straight_status =  forward')
         send.sendContinuousValue(800 ,200 ,z ,-1 ,sensor)
+
+    elif Straight_status == 155:  # forward+left
+        print('Straight_status =  forward and left')
+        send.sendContinuousValue(800 ,200 ,z , 2 ,sensor)
+
+    elif Straight_status == 156:  # forward+right
+        print('Straight_status =  forward and right')
+        send.sendContinuousValue(800 ,200 ,z , -4 ,sensor)
 
     elif Straight_status == 16:  # back
         print('Straight_status =  back')
@@ -307,7 +316,30 @@ def Move(Straight_status = 0 ,x = -300 ,y = 0 ,z = 0 ,theta = -2  ,sensor = 0 ):
         send.sendContinuousValue(300,y,z,-7,sensor)
     
     
-
+def Y_Line_avoid():
+    global Y_L_Deep,Y_C_Deep,Y_R_Deep
+    if (Y_L_Deep < 6 and Y_R_Deep > 20 and Y_C_Deep > 5):#左轉
+        while (Y_L_Deep < 6 and Y_R_Deep > 20 and Y_C_Deep > 5):
+            Image_Init()
+            Normal_Obs_Parameter()
+            Image_Info()
+            Move(Straight_status = 155) #前進
+            print('close to Yellow Line')
+    elif (Y_L_Deep > 20 and Y_R_Deep < 6 and Y_C_Deep > 5):#右轉
+        while (Y_L_Deep > 20 and Y_R_Deep < 6 and Y_C_Deep > 5):
+            Image_Init()
+            Normal_Obs_Parameter()
+            Image_Info()
+            Move(Straight_status = 156) #前進
+            print('close to Yellow Line')
+    else:
+        # IMU_Angle()
+        # Image_Init()
+        # Normal_Obs_Parameter()
+        # Image_Info()
+        # Move(Straight_status = 12)
+        # print('backbackback')
+        pass
 
 def Turn_Head():
     global R_deep_sum, L_deep_sum, L_Deep, R_Deep
@@ -785,28 +817,31 @@ if __name__ == '__main__':
                         if 14 > Dx > 1 :        #turn right
                             print('right avoid')
                             Straight_Speed()
+                            if (Y_L_Deep != 24 and Dy < 5) or (Y_R_Deep != 24 and Dy < 5):
+                                Y_Line_avoid()
+                            if ( Dy < 6 ) and ( abs(Yaw_wen) <= 3 ) and imu_back == False and abs(Dx) > 3 and C_Deep != 24:
+                                while ( Dy < 6 ):
+                                    print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+                                    Image_Init()
+                                    Normal_Obs_Parameter()
+                                    Image_Info()
+                                    Move(Straight_status = 16) 
+                                    print('imu fix back')
+                                imu_back = True
                             if ( abs(Yaw_wen) > 3 and IMU_ok == False ) and Dx >= 5 :
                                 IMU_Angle()
                                 Move(Straight_status = 12)
                                 Image_Init()
                                 Normal_Obs_Parameter()
                                 Image_Info()
-                            if (abs(Yaw_wen) < 5 and IMU_ok == True):
-                                if  (Y_L_Deep != 24 and C_Deep == 24) or  (Y_R_Deep != 24 and C_Deep == 24) or(Y_L_Deep != 24 and Dy< 5) or  (Y_R_Deep != 24 and Dy <5 ):
-                                    while (Dy < 5 or C_Deep == 24):
-                                        Image_Init()
-                                        Normal_Obs_Parameter()
-                                        Image_Info()
-                                        Move(Straight_status = 16) 
-                                        print('imu fix back')
-                                # if ( Dy < 7 ) and ( abs(Yaw_wen) <= 3 ):
-                                #     print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-                                #     while ( Dy < 7 ):
-                                #         Image_Init()
-                                #         Normal_Obs_Parameter()
-                                #         Image_Info()
-                                #         Move(Straight_status = 16) 
-                                #         print('imu fix back')
+                            # if (abs(Yaw_wen) < 5 and IMU_ok == True):
+                            #     if  (Y_L_Deep != 24 and C_Deep == 24) or  (Y_R_Deep != 24 and C_Deep == 24) or(Y_L_Deep != 24 and Dy< 5) or  (Y_R_Deep != 24 and Dy <5 ):
+                            #         while (Dy < 5 or C_Deep == 24):
+                            #             Image_Init()
+                            #             Normal_Obs_Parameter()
+                            #             Image_Info()
+                            #             Move(Straight_status = 16) 
+                            #             print('imu fix back')
                             else:
                                 Turn_Angle(Turn_angle_status = 0)
                                 Move(Straight_status = 11)
@@ -817,20 +852,31 @@ if __name__ == '__main__':
                         elif -1 > Dx > -14 :     #turn left
                             print('left avoid')
                             Straight_Speed()
+                            if (Y_L_Deep != 24 and Dy < 5) or (Y_R_Deep != 24 and Dy < 5):
+                                Y_Line_avoid()
+                            if ( Dy < 6 ) and ( abs(Yaw_wen) <= 3 ) and imu_back == False and abs(Dx) > 3 and C_Deep != 24:
+                                while ( Dy < 6 ):
+                                    print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+                                    Image_Init()
+                                    Normal_Obs_Parameter()
+                                    Image_Info()
+                                    Move(Straight_status = 16) 
+                                    print('imu fix back')
+                                imu_back = True
                             if ( abs(Yaw_wen) > 3 and IMU_ok == False ) and Dx <= -7 :
                                 IMU_Angle()
                                 Move(Straight_status = 12)
                                 Image_Init()
                                 Normal_Obs_Parameter()
                                 Image_Info()
-                            if (abs(Yaw_wen) < 5 and IMU_ok == True):
-                                if  (Y_L_Deep != 24 and C_Deep == 24) or  (Y_R_Deep != 24 and C_Deep == 24) or(Y_L_Deep != 24 and Dy< 5) or  (Y_R_Deep != 24 and Dy <5 ):
-                                    while (Dy < 5 or C_Deep == 24):
-                                        Image_Init()
-                                        Normal_Obs_Parameter()
-                                        Image_Info()
-                                        Move(Straight_status = 16) 
-                                        print('imu fix back')
+                            # if (abs(Yaw_wen) < 5 and IMU_ok == True):
+                            #     if  (Y_L_Deep != 24 and C_Deep == 24) or  (Y_R_Deep != 24 and C_Deep == 24) or(Y_L_Deep != 24 and Dy< 5) or  (Y_R_Deep != 24 and Dy <5 ):
+                            #         while (Dy < 5 or C_Deep == 24):
+                            #             Image_Init()
+                            #             Normal_Obs_Parameter()
+                            #             Image_Info()
+                            #             Move(Straight_status = 16) 
+                            #             print('imu fix back')
                             # if ( Dy < 7 ) :
                             #     flag = True
                             # else :
@@ -852,20 +898,31 @@ if __name__ == '__main__':
                             # Turn(Turn_status = 1)
                         elif (Dx < 17 and Dx >= 14) or (Dx <= -14 and Dx > -17) :
                             IMU_Angle()
+                            if (Y_L_Deep != 24 and Dy < 5) or (Y_R_Deep != 24 and Dy < 5):
+                                Y_Line_avoid()
+                            if ( Dy < 6 ) and ( abs(Yaw_wen) <= 3 ) and imu_back == False and abs(Dx) > 3 and C_Deep != 24:
+                                while ( Dy < 6 ):
+                                    print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+                                    Image_Init()
+                                    Normal_Obs_Parameter()
+                                    Image_Info()
+                                    Move(Straight_status = 16) 
+                                    print('imu fix back')
+                                imu_back = True
                             if ( abs(Yaw_wen) > 3 and IMU_ok == False ) :
                                 IMU_Angle()
                                 Move(Straight_status = 12)
                                 Image_Init()
                                 Normal_Obs_Parameter()
                                 Image_Info()
-                            if (abs(Yaw_wen) < 3 and IMU_ok == True):
-                                if  (Y_L_Deep != 24 and C_Deep == 24) or  (Y_R_Deep != 24 and C_Deep == 24) or(Y_L_Deep != 24 and Dy< 7) or  (Y_R_Deep != 24 and Dy <7 ):
-                                    while (Dy < 7 or C_Deep == 24):
-                                        Image_Init()
-                                        Normal_Obs_Parameter()
-                                        Image_Info()
-                                        Move(Straight_status = 16) 
-                                        print('imu fix back')
+                            # if (abs(Yaw_wen) < 3 and IMU_ok == True):
+                            #     if  (Y_L_Deep != 24 and C_Deep == 24) or  (Y_R_Deep != 24 and C_Deep == 24) or(Y_L_Deep != 24 and Dy< 7) or  (Y_R_Deep != 24 and Dy <7 ):
+                            #         while (Dy < 7 or C_Deep == 24):
+                            #             Image_Init()
+                            #             Normal_Obs_Parameter()
+                            #             Image_Info()
+                            #             Move(Straight_status = 16) 
+                            #             print('imu fix back')
                                 # if ( Dy < 7 ) and (abs(Yaw_wen) <= 3):
                                 #     print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
                                 #     while ( Dy < 7 ):
@@ -895,6 +952,7 @@ if __name__ == '__main__':
                             Move(Straight_status = 14)
                             if Dx == 0 :
                                 IMU_ok = False
+                                imu_back = False
                     elif Dy == 24:
                         print('go straight')
                         Straight_Speed()
@@ -922,4 +980,4 @@ if __name__ == '__main__':
                 IMU_Yaw_ini()
             print('walking ====== ' + str(walking))
     except rospy.ROSInterruptException:
-        passL_Deep
+        pass
