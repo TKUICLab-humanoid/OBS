@@ -203,7 +203,7 @@ def Normal_Obs_Parameter():
 #=============================strategy=============================
 
 #-----------------------------Parameter------------------------------------
-def Move(Straight_status = 0 ,x = -300 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -400 ,y = -100 ,z = 0 ,theta = 1  ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
 
     if Straight_status == 0:    #stay
@@ -234,36 +234,36 @@ def Move(Straight_status = 0 ,x = -300 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
 #============================================================================#       
     elif Straight_status == 14:  #max speed
         print('Straight_status = max speed')
-        send.sendContinuousValue(2300 ,300 ,z ,0 ,sensor)  
+        send.sendContinuousValue(2300 ,300 ,z ,2 ,sensor)  
 
     elif Straight_status == 15:  # forward
         print('Straight_status =  forward')
-        send.sendContinuousValue(800 ,200 ,z ,-1 ,sensor)
+        send.sendContinuousValue(1000 ,0 ,z ,1 ,sensor)
 
-    elif Straight_status == 155:  # forward+left
+    elif Straight_status == 155:  # turn left yellow
         print('Straight_status =  forward and left')
-        send.sendContinuousValue(800 ,200 ,z , 2 ,sensor)
+        send.sendContinuousValue(x ,y ,z , 10 ,sensor)
 
-    elif Straight_status == 156:  # forward+right
+    elif Straight_status == 156:  # turn right yellow
         print('Straight_status =  forward and right')
-        send.sendContinuousValue(800 ,200 ,z , -8 ,sensor)
+        send.sendContinuousValue(x ,y ,z , -12 ,sensor)
 
     elif Straight_status == 16:  # back
         print('Straight_status =  back')
-        send.sendContinuousValue(-1200 ,200 ,z ,-2 ,sensor)
+        send.sendContinuousValue(-1200 ,200 ,z ,2 ,sensor)
 
 #---------------------Turn Head Parameter-------------------------#
     elif Straight_status == 21:  #turn right
         print('Straight_status = turn right')
-        send.sendContinuousValue(-200 ,400 ,z ,-9 ,sensor)
+        send.sendContinuousValue(-200 ,600 ,z ,-11 ,sensor)
 
     elif Straight_status == 22:  #right turn back
         print('Straight_status = right turn back')
-        send.sendContinuousValue(-200 ,-1200 ,z ,10 ,sensor)
+        send.sendContinuousValue(-200 ,-800 ,z ,10 ,sensor)
 
     elif Straight_status == 23:  #turn left
         print('Straight_status = turn left')
-        send.sendContinuousValue(-200 ,-700 ,z ,12 ,sensor)
+        send.sendContinuousValue(-200 ,-1300 ,z ,12 ,sensor)
 
     elif Straight_status == 24:  #left turn back
         print('Straight_status = left turn back')
@@ -327,22 +327,44 @@ def Move(Straight_status = 0 ,x = -300 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
 def Y_Line_avoid():
     global Y_L_Deep,Y_C_Deep,Y_R_Deep,Yavoid_flag,imu_back
     print('cccccccccccccccccccccsssssssssssssssssssssssssss')
-    if (Y_L_Deep > 6 and Y_C_Deep > 5):#左轉
+    if Y_L_Deep != 24 and Y_C_Deep > 5:#左轉 (Y_L_Deep > 3 and Y_R_Deep >= 20 and Y_C_Deep > 5)
         imu_back = True
-        while (Y_L_Deep > 6 and Y_C_Deep > 5):
-            Image_Init()
-            Normal_Obs_Parameter()
-            Image_Info()
-            Move(Straight_status = 155) #前進
-            print('close to Yellow Line LLLLLLL')
-    elif (Y_R_Deep > 3 and Y_C_Deep > 5):#右轉
+        # while (Y_L_Deep > 3 and Y_C_Deep > 5):
+        while ( Y_C_Deep > 1):
+            if Yaw_wen <= 85:
+                while Yaw_wen <= 85:
+                    get_IMU()
+                    Image_Init()
+                    Normal_Obs_Parameter()
+                    Image_Info()
+                    Move(Straight_status = 155) 
+                    print('turn to Yellow Line LLLLLLLLL')
+            elif Yaw_wen > 85:
+                get_IMU()
+                Image_Init()
+                Normal_Obs_Parameter()
+                Image_Info()
+                Move(Straight_status = 15) #前進
+                print('close to Yellow Line LLLLLLLLLLLOOOOOOOOOOOO')
+    elif Y_R_Deep != 24 and Y_C_Deep > 5:#右轉 (Y_R_Deep > 3 and Y_L_Deep >= 20 and Y_C_Deep > 5)
         imu_back = True
-        while (Y_R_Deep > 3 and Y_C_Deep > 5):
-            Image_Init()
-            Normal_Obs_Parameter()
-            Image_Info()
-            Move(Straight_status = 156) #前進
-            print('close to Yellow Line RRRRRRRRRR')
+        # while (Y_R_Deep > 3 and Y_C_Deep > 5):
+        while (Y_C_Deep > 1):
+            if Yaw_wen >= -85:
+                while Yaw_wen >= -85:
+                    get_IMU()
+                    Image_Init()
+                    Normal_Obs_Parameter()
+                    Image_Info()
+                    Move(Straight_status = 156) 
+                    print('turn to Yellow Line RRRRRRRRRR')
+            elif Yaw_wen < -85:
+                get_IMU()
+                Image_Init()
+                Normal_Obs_Parameter()
+                Image_Info()
+                Move(Straight_status = 15) #前進
+                print('close to Yellow Line RRRRRRRRRROOOOOOOOOOOO')
     else:
         # Yavoid_flag = False
         get_IMU()
@@ -358,14 +380,17 @@ def Y_Line_avoid():
         # else:
         pass
     get_IMU()
-    if abs(Yaw_wen) > 3 :
-        while abs(Yaw_wen) > 3 :
+    if abs(Yaw_wen) > 5 :
+        while abs(Yaw_wen) > 5 :
             get_IMU()
             IMU_Angle()
             Image_Init()
             Normal_Obs_Parameter()
             Image_Info()
-            Move(Straight_status = 12)
+            if Yaw_wen > 0:
+                Move(Straight_status = 24)
+            elif Yaw_wen <= 0:
+                Move(Straight_status = 22)
             print('iiiiiiiiiiiiii__________FFFFFFFFFFIIIIIIIXXXXXXX')
     else :
         pass
@@ -436,7 +461,7 @@ def Turn_Head():
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                if abs(Yaw_wen) > 85 :#視步態更動
+                if abs(Yaw_wen) > 87 :#視步態更動
                     Move(Straight_status = 25)
                     print(' Dx = ',Dx)
                 else :
@@ -464,8 +489,8 @@ def Turn_Head():
                 Move(Straight_status = 15) 
             print('TTTTTTTTTTTurn Headlllllllllll')
         get_IMU()
-        if abs(Yaw_wen) < 75:
-            while abs(Yaw_wen) < 75:
+        if abs(Yaw_wen) < 80:
+            while abs(Yaw_wen) < 80:
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
@@ -569,15 +594,15 @@ def IMU_Angle():
             imu_angle = 0
     elif Yaw_wen <= 0: #fix to l
         if -90 >= Yaw_wen:
-            imu_angle = 22
-        elif -60 >= Yaw_wen > -90:
             imu_angle = 20
+        elif -60 >= Yaw_wen > -90:
+            imu_angle = 18
         elif -45 >= Yaw_wen > -60:
-            imu_angle = 17
+            imu_angle = 16
         elif -20 >= Yaw_wen > -45:
-            imu_angle = 15
+            imu_angle = 14
         elif -10 >= Yaw_wen > -20:
-            imu_angle = 13
+            imu_angle = 12
         elif -5 >= Yaw_wen > -10:
             imu_angle = 10
         elif -2 >= Yaw_wen > -5:
@@ -862,7 +887,8 @@ if __name__ == '__main__':
                         if 14 > Dx > 1 :        #turn right
                             print('right avoid')
                             Straight_Speed()
-                            if (Y_L_Deep != 24 and Dy < 5 and Yavoid_flag == False) or (Y_R_Deep != 24 and Dy < 5 and Yavoid_flag == False):
+                            # if (Y_L_Deep != 24 and Dy < 5 and Yavoid_flag == False) or (Y_R_Deep != 24 and Dy < 5 and Yavoid_flag == False):
+                            if (Y_L_Deep != 24 and R_Deep != 24  and C_Deep > 8 and Yavoid_flag == False) or (Y_R_Deep != 24 and L_Deep != 24  and C_Deep > 8 and Yavoid_flag == False) or(Y_L_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False) or (Y_R_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False):
                                 Yavoid_flag = True
                                 Y_Line_avoid()
                             if ( Dy < 6 ) and ( abs(Yaw_wen) <= 3 ) and imu_back == False and abs(Dx) > 3 and C_Deep != 24:
@@ -898,7 +924,8 @@ if __name__ == '__main__':
                         elif -1 > Dx > -14 :     #turn left
                             print('left avoid')
                             Straight_Speed()
-                            if (Y_L_Deep != 24 and Dy < 5 and Yavoid_flag == False) or (Y_R_Deep != 24 and Dy < 5 and Yavoid_flag == False):
+                            # if (Y_L_Deep != 24 and Dy < 5 and Yavoid_flag == False) or (Y_R_Deep != 24 and Dy < 5 and Yavoid_flag == False):
+                            if (Y_L_Deep != 24 and R_Deep != 24  and C_Deep > 8 and Yavoid_flag == False) or (Y_R_Deep != 24 and L_Deep != 24  and C_Deep > 8 and Yavoid_flag == False) or(Y_L_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False) or (Y_R_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False):
                                 Yavoid_flag = True
                                 Y_Line_avoid()
                             if ( Dy < 6 ) and ( abs(Yaw_wen) <= 3 ) and imu_back == False and abs(Dx) > 3 and C_Deep != 24:
@@ -945,7 +972,8 @@ if __name__ == '__main__':
                             # Turn(Turn_status = 1)
                         elif (Dx < 17 and Dx >= 14) or (Dx <= -14 and Dx > -17) :
                             IMU_Angle()
-                            if (Y_L_Deep != 24 and Dy < 5 and Yavoid_flag == False) or (Y_R_Deep != 24 and Dy < 5 and Yavoid_flag == False):
+                            # if (Y_L_Deep != 24 and Dy < 5 and Yavoid_flag == False) or (Y_R_Deep != 24 and Dy < 5 and Yavoid_flag == False):
+                            if (Y_L_Deep != 24 and R_Deep != 24  and C_Deep > 8 and Yavoid_flag == False) or (Y_R_Deep != 24 and L_Deep != 24  and C_Deep > 8 and Yavoid_flag == False) or (Y_L_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False) or (Y_R_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False):
                                 Yavoid_flag = True
                                 Y_Line_avoid()
                             if ( Dy < 6 ) and ( abs(Yaw_wen) <= 3 ) and imu_back == False and abs(Dx) > 3 and C_Deep != 24:
@@ -1010,8 +1038,8 @@ if __name__ == '__main__':
             # print('BBBBBBBBBBBBBBBBBBB___LLLLLLLLLLLLLL = ',B_left)
             # print('BBBBBBBBBBBBBBBBBBB___RRRRRRRRRRRRRR = ',B_right)
             # print('LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL ====== ' + str(L_Deep))
-            # print('RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ====== ' + str(R_Deep))
-            # print('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC ====== ' + str(C_Deep))
+            print('RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ====== ' + str(R_Deep))
+            print('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC ====== ' + str(C_Deep))
             print('Dy = ' +str(Dy))
             
             if send.is_start == False:
