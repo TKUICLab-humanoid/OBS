@@ -153,6 +153,23 @@ class deep_calculate:
         # print("Y_R_Deep = ",self.Y_R_Deep)
 
         cv2.waitKey(1)
+
+        self.B_Deep_Matrix = []
+        for compress_width in range(0, 32, 1):
+            self.B_Deep_Matrix.append(0)
+            for compress_height in range(23, -1, -1):
+                blue = cv_image_2.item(compress_height, compress_width, 0)
+                green = cv_image_2.item(compress_height, compress_width, 1)
+                red = cv_image_2.item(compress_height, compress_width, 2)
+                if (blue == 128 and green == 0 and red == 128):
+                    self.B_Deep_Matrix[compress_width] = 23 - compress_height
+                    break
+                if compress_height == 0:
+                    self.B_Deep_Matrix[compress_width] = 24
+        # print(self.Deep_Matrix)
+        self.ba = self.B_Deep_Matrix
+        # cv2.imshow("Image_show",cv_image)
+        cv2.waitKey(1)
         #================================================================
         # hsv = cv2.cvtColor(cv_image,cv2.COLOR_BGR2HSV)
         # lowera = np.array([78,43,46])

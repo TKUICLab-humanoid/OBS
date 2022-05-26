@@ -17,6 +17,7 @@ Filter_Matrix = []
 Xc = 0
 Dy = 24
 Y_Dy = 24
+B_Dy = 24
 WR = 0
 WL = 0
 Xb = 0
@@ -40,7 +41,12 @@ L_deep_sum = 0
 L_Deep = 0
 R_Deep = 0
 C_Deep = 0
-
+#----BLUE_DeepMatrix---
+B_Deep_sum = 0
+B_L_Deep = 0
+B_R_Deep = 0
+B_C_Deep = 0
+#----------------------
 #----Y_line DeepMatrix---
 Y_Deep_sum = 0
 Y_L_Deep = 0
@@ -124,10 +130,10 @@ def Image_Info():
         # print('Xc = '+ str(Xc))
         print('Dx = '+ str(Dx))
         print('Dy = '+ str(Dy))
-        print('Yavoid_flag = ',Yavoid_flag)
-        print('Y_L_Deep = ',Y_L_Deep)
-        print('Y_R_Deep = ',Y_R_Deep)
-        print('Y_C_Deep = ',Y_C_Deep)
+        # print('Yavoid_flag = ',Yavoid_flag)
+        # print('Y_L_Deep = ',Y_L_Deep)
+        # print('Y_R_Deep = ',Y_R_Deep)
+        # print('Y_C_Deep = ',Y_C_Deep)
     else :
         print('red_flag = '+ str(red_flag))
         print('R_min = '+ str(R_min))
@@ -142,7 +148,7 @@ def Image_Info():
         print('slope_Lcnt = '+ str(slope_Lcnt))
 
 def Normal_Obs_Parameter():
-    global Filter_Matrix, Xc, Dy,Y_Dy, WR, WL, Xb, Dx, Xc_count, Xc_num, Deep_sum,Y_Deep_sum, R_Deep, L_Deep, C_Deep,Y_R_Deep, Y_L_Deep, Y_C_Deep, red_flag, R_min, R_max, B_min, B_max, B_left, B_right, XMax_one, XMin_one, XMin_two, XMax_two
+    global Filter_Matrix, Xc, Dy,Y_Dy,B_Dy, WR, WL, Xb, Dx, Xc_count, Xc_num, Deep_sum,Y_Deep_sum,B_Deep_sum, R_Deep, L_Deep, C_Deep,Y_R_Deep, Y_L_Deep, Y_C_Deep,B_R_Deep,B_L_Deep,B_C_Deep, red_flag, R_min, R_max, B_min, B_max, B_left, B_right, XMax_one, XMin_one, XMin_two, XMax_two
     if send.color_mask_subject_size[5][0] > 5000 :
         red_flag = True
         R_min = send.color_mask_subject_XMin[5][0] 
@@ -167,6 +173,16 @@ def Normal_Obs_Parameter():
             B_left = XMax_one
     else : 
         red_flag = False
+#----------------Blue_DeepMatrix----------------
+    for j in range (0, 32, 1):
+        # Filter_Matrix.append(0)
+        # Filter_Matrix[j] = Focus_Matrix[j] - deep.ya[j]
+        if deep.ba[j] < B_Dy:
+            B_Dy = deep.ba[j]
+        B_Deep_sum += deep.ba[j]
+        B_L_Deep = deep.ba[2]
+        B_R_Deep = deep.ba[30]
+        B_C_Deep = deep.ba[16]
 #----------------Y_line_DeepMatrix----------------
     for j in range (0, 32, 1):
         # Filter_Matrix.append(0)
@@ -205,7 +221,7 @@ def Normal_Obs_Parameter():
 #=============================strategy=============================
 
 #-----------------------------Parameter------------------------------------
-def Move(Straight_status = 0 ,x = -500 ,y = -400 ,z = 0 ,theta = 1  ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -600 ,y = -400 ,z = 0 ,theta = 3  ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
 
     if Straight_status == 0:    #stay
@@ -240,7 +256,7 @@ def Move(Straight_status = 0 ,x = -500 ,y = -400 ,z = 0 ,theta = 1  ,sensor = 0 
 
     elif Straight_status == 15:  # forward
         print('Straight_status =  forward')
-        send.sendContinuousValue(1000 ,-200 ,z ,0 ,sensor)
+        send.sendContinuousValue(1000 ,-200 ,z ,2 ,sensor)
 
     elif Straight_status == 155:  # turn left yellow
         print('Straight_status =  forward and left')
@@ -261,7 +277,7 @@ def Move(Straight_status = 0 ,x = -500 ,y = -400 ,z = 0 ,theta = 1  ,sensor = 0 
 
     elif Straight_status == 22:  #right turn back
         print('Straight_status = right turn back')
-        send.sendContinuousValue(-200 ,-800 ,z ,10 ,sensor)
+        send.sendContinuousValue(-200 ,-600 ,z ,8 ,sensor)
 
     elif Straight_status == 23:  #turn left
         print('Straight_status = turn left')
@@ -269,7 +285,7 @@ def Move(Straight_status = 0 ,x = -500 ,y = -400 ,z = 0 ,theta = 1  ,sensor = 0 
 
     elif Straight_status == 24:  #left turn back
         print('Straight_status = left turn back')
-        send.sendContinuousValue(-100 ,1100 ,z ,-10 ,sensor)
+        send.sendContinuousValue(-100 ,1100 ,z ,-8 ,sensor)
 #--------------------turn head go straight------------------------#
     elif Straight_status == 25:  #turn right fix left
         print('Straight_status = turn right fix left')
@@ -327,8 +343,10 @@ def Move(Straight_status = 0 ,x = -500 ,y = -400 ,z = 0 ,theta = 1  ,sensor = 0 
     
     
 def Y_Line_avoid():
-    global Y_L_Deep,Y_C_Deep,Y_R_Deep,Yavoid_flag,imu_back,Y_L_flag,Y_R_flag
+    global Y_L_Deep,Y_C_Deep,Y_R_Deep,Yavoid_flag,imu_back,Y_L_flag,Y_R_flag,B_C_Deep,B_L_Deep,B_R_Deep
     print('cccccccccccccccccccccsssssssssssssssssssssssssss')
+    # if Y_L_Deep != 24 and Y_C_Deep > 20 and Y_R_Deep != 24:
+        
     if Y_L_Deep != 24 and Y_C_Deep > 5 and Y_L_Deep < Y_R_Deep:#左轉 (Y_L_Deep > 3 and Y_R_Deep >= 20 and Y_C_Deep > 5)
         imu_back = True
         # while (Y_L_Deep > 3 and Y_C_Deep > 5):
@@ -349,7 +367,7 @@ def Y_Line_avoid():
                 Move(Straight_status = 15) #前進
                 print('close to Yellow Line LLLLLLLLLLLOOOOOOOOOOOO')
         Yavoid_flag = False
-    elif Y_R_Deep != 24 and Y_C_Deep > 5 and  Y_R_Deep < Y_L_Deep:#右轉 (Y_R_Deep > 3 and Y_L_Deep >= 20 and Y_C_Deep > 5)
+    elif Y_R_Deep != 24 and Y_C_Deep > 5 and Y_R_Deep < Y_L_Deep:#右轉 (Y_R_Deep > 3 and Y_L_Deep >= 20 and Y_C_Deep > 5)
         imu_back = True
         # while (Y_R_Deep > 3 and Y_C_Deep > 5):
         while (Y_C_Deep > 1):
@@ -416,8 +434,83 @@ def Y_Line_avoid():
     else :
         Yavoid_flag = False
         pass
-    
-        
+
+def YY_avoid():
+    global Y_L_Deep,Y_C_Deep,Y_R_Deep,Yavoid_flag,imu_back,Y_L_flag,Y_R_flag,B_C_Deep,B_L_Deep,B_R_Deep
+    get_IMU()
+    if(Yaw_wen > 5):#左轉
+        while ( Y_C_Deep > 1):
+            print('YYYY Turn L')
+            if Yaw_wen <= 85:
+                while Yaw_wen <= 85:
+                    get_IMU()
+                    Image_Init()
+                    Normal_Obs_Parameter()
+                    Image_Info()
+                    Move(Straight_status = 155) 
+                    print('turn to YYY Line LLLLLLLLL')
+            elif Yaw_wen > 85:
+                get_IMU()
+                Image_Init()
+                Normal_Obs_Parameter()
+                Image_Info()
+                Move(Straight_status = 15) #前進
+                print('close to YYYYY Line LLLLLLLLLLLOOOOOOOOOOOO')
+    if(Yaw_wen < -5):#右轉
+        while (Y_C_Deep > 1):
+            print('YYYY Turn R')
+            if Yaw_wen >= -85:
+                while Yaw_wen >= -85:
+                    get_IMU()
+                    Image_Init()
+                    Normal_Obs_Parameter()
+                    Image_Info()
+                    Move(Straight_status = 156) 
+                    print('turn to YYY Line RRRRRRRRRR')
+            elif Yaw_wen < -85:
+                get_IMU()
+                Image_Init()
+                Normal_Obs_Parameter()
+                Image_Info()
+                Move(Straight_status = 15) #前進
+                print('close to Yellow Line RRRRRRRRRROOOOOOOOOOOO')
+    if(-5<=Yaw_wen<=5):
+        pass
+    else :
+        pass
+    get_IMU()
+    if abs(Yaw_wen) > 5 :
+        while abs(Yaw_wen) > 5 :
+            get_IMU()
+            IMU_Angle()
+            Image_Init()
+            Normal_Obs_Parameter()
+            Image_Info()
+            if Yaw_wen > 0:
+                Move(Straight_status = 24)
+            elif Yaw_wen <= 0:
+                Move(Straight_status = 22)
+            print('iiiiiiiMMMMuuuuFFFFFFFFFFIIIIIIIXXXXXXX')
+        # Yavoid_flag = False
+    else :
+        pass
+    Image_Init()
+    Normal_Obs_Parameter()
+    Image_Info()
+    if C_Deep > 12 :
+        while C_Deep > 12 :
+            get_IMU()
+            IMU_Angle()
+            Image_Init()
+            Normal_Obs_Parameter()
+            Image_Info()
+            Move(Straight_status = 122)
+            print('GGO')
+            print('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC ====== ' + str(C_Deep))
+        # Yavoid_flag = False
+    else :
+        # Yavoid_flag = False
+        pass
 
 def Turn_Head():
     global R_deep_sum, L_deep_sum, L_Deep, R_Deep
@@ -634,9 +727,9 @@ def Straight_Speed():
         Goal_speed = 1000
     elif 8 <= Dy < 12:
         Goal_speed = 700
-    elif 4 <= Dy < 6:
+    elif 3 <= Dy < 6:
         Goal_speed = 300
-    elif 0 <= Dy < 4:
+    elif 0 <= Dy < 3:
         Goal_speed = 0
     print( 'Goal_speed = ' + str(Goal_speed))
     return Goal_speed
@@ -646,31 +739,31 @@ def Turn_Angle(Turn_angle_status):
     if Turn_angle_status == 0: #R
         print('turn right')
         if 17 > Dx >= 12:
-            Angle = -7
+            Angle = -11
         elif 12 > Dx >= 8:
-            Angle = -7
+            Angle = -10
         elif 8 > Dx >= 6:
-            Angle = -7
+            Angle = -9
         elif 6 > Dx >= 4:
-            Angle = -6
+            Angle = -8
         elif 4 > Dx >= 2:
-            Angle = -5
+            Angle = -7
         elif 2 > Dx >= 0:
             Angle = 0
     elif Turn_angle_status == 1: #L
         print('turn left')
         if -12 >= Dx > -17:
-            Angle = 16
-        elif -8 >= Dx > -12:
-            Angle = 15
-        elif -6 >= Dx > -8:
-            Angle = 14
-        elif -4 >= Dx > -6:
-            Angle = 13
-        elif -3 >= Dx > -4:
-            Angle = 12
-        elif -2 >= Dx > -3:
             Angle = 11
+        elif -8 >= Dx > -12:
+            Angle = 10
+        elif -6 >= Dx > -8:
+            Angle = 9
+        elif -4 >= Dx > -6:
+            Angle = 8
+        elif -3 >= Dx > -4:
+            Angle = 7
+        elif -2 >= Dx > -3:
+            Angle = 6
         elif 0 >= Dx > -2:
             Angle = 0
     else: 
@@ -754,7 +847,7 @@ if __name__ == '__main__':
             # if send.Web == False:
                 #==============================image===============================
                 # Focus_Matrix = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
-                Focus_Matrix = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]
+                Focus_Matrix = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]#6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6
                 Image_Init()
                 Normal_Obs_Parameter()
                 Image_Info()
@@ -897,9 +990,11 @@ if __name__ == '__main__':
                             Straight_Speed()
                             # if (Y_L_Deep != 24 and Dy < 5 and Yavoid_flag == False) or (Y_R_Deep != 24 and Dy < 5 and Yavoid_flag == False):
                             # if (Y_L_Deep != 24 and R_Deep != 24  and C_Deep > 8 and Yavoid_flag == False) or (Y_R_Deep != 24 and L_Deep != 24  and C_Deep > 8 and Yavoid_flag == False) or(Y_L_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False) or (Y_R_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False):
-                            if (Y_L_Deep != 24 and R_Deep != 24  and C_Deep > 8 and Yavoid_flag == False) or (Y_R_Deep != 24 and L_Deep != 24  and C_Deep > 8 and Yavoid_flag == False) or(Y_L_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False) or (Y_R_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False):
+                            if (Y_L_Deep != 24 and B_R_Deep != 24 and C_Deep > 8 and Yavoid_flag == False) or (Y_R_Deep != 24 and B_L_Deep != 24 and C_Deep > 8 and Yavoid_flag == False):# or (Y_L_Deep != 24 and Y_C_Deep < 18 and Yavoid_flag == False) or (Y_R_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False):
                                 Yavoid_flag = True
                                 Y_Line_avoid()
+                            if (Y_L_Deep != 24 and Y_R_Deep != 24):
+                                YY_avoid()
                             if ( Dy < 6 ) and ( abs(Yaw_wen) <= 3 ) and imu_back == False and abs(Dx) > 3 and C_Deep != 24:
                                 while ( Dy < 6 ):
                                     print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
@@ -934,9 +1029,11 @@ if __name__ == '__main__':
                             print('left avoid')
                             Straight_Speed()
                             # if (Y_L_Deep != 24 and Dy < 5 and Yavoid_flag == False) or (Y_R_Deep != 24 and Dy < 5 and Yavoid_flag == False):
-                            if (Y_L_Deep != 24 and R_Deep != 24  and C_Deep > 8 and Yavoid_flag == False) or (Y_R_Deep != 24 and L_Deep != 24  and C_Deep > 8 and Yavoid_flag == False) or(Y_L_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False) or (Y_R_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False):
+                            if (Y_L_Deep != 24 and B_R_Deep != 24 and C_Deep > 8 and Yavoid_flag == False) or (Y_R_Deep != 24 and B_L_Deep != 24  and C_Deep > 8 and Yavoid_flag == False):# or (Y_L_Deep != 24 and Y_C_Deep < 18 and Yavoid_flag == False) or (Y_R_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False):
                                 Yavoid_flag = True
                                 Y_Line_avoid()
+                            if (Y_L_Deep != 24 and Y_R_Deep != 24):
+                                YY_avoid()
                             if ( Dy < 6 ) and ( abs(Yaw_wen) <= 3 ) and imu_back == False and abs(Dx) > 3 and C_Deep != 24:
                                 while ( Dy < 6 ):
                                     print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
@@ -982,9 +1079,11 @@ if __name__ == '__main__':
                         elif (Dx < 17 and Dx >= 14) or (Dx <= -14 and Dx > -17) :
                             IMU_Angle()
                             # if (Y_L_Deep != 24 and Dy < 5 and Yavoid_flag == False) or (Y_R_Deep != 24 and Dy < 5 and Yavoid_flag == False):
-                            if (Y_L_Deep != 24 and R_Deep != 24  and C_Deep > 8 and Yavoid_flag == False) or (Y_R_Deep != 24 and L_Deep != 24  and C_Deep > 8 and Yavoid_flag == False) or (Y_L_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False) or (Y_R_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False):
+                            if (Y_L_Deep != 24 and B_R_Deep != 24 and C_Deep > 8 and Yavoid_flag == False) or (Y_R_Deep != 24 and B_L_Deep != 24  and C_Deep > 8 and Yavoid_flag == False):# or (Y_L_Deep != 24 and Y_C_Deep < 18 and Yavoid_flag == False) or (Y_R_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False):
                                 Yavoid_flag = True
                                 Y_Line_avoid()
+                            if (Y_L_Deep != 24 and Y_R_Deep != 24):
+                                YY_avoid()
                             if ( Dy < 6 ) and ( abs(Yaw_wen) <= 3 ) and imu_back == False and abs(Dx) > 3 and C_Deep != 24:
                                 while ( Dy < 6 ):
                                     print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
@@ -1047,8 +1146,8 @@ if __name__ == '__main__':
             # print('BBBBBBBBBBBBBBBBBBB___LLLLLLLLLLLLLL = ',B_left)
             # print('BBBBBBBBBBBBBBBBBBB___RRRRRRRRRRRRRR = ',B_right)
             # print('LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL ====== ' + str(L_Deep))
-            print('RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ====== ' + str(R_Deep))
-            print('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC ====== ' + str(C_Deep))
+            # print('RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ====== ' + str(R_Deep))
+            # print('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC ====== ' + str(C_Deep))
             print('Dy = ' +str(Dy))
             
             if send.is_start == False:
