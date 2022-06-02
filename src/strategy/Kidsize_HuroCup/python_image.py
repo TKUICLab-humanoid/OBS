@@ -221,7 +221,7 @@ def Normal_Obs_Parameter():
 #=============================strategy=============================
 
 #-----------------------------Parameter------------------------------------
-def Move(Straight_status = 0 ,x = -600 ,y = -300 ,z = 0 ,theta = 2  ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -500 ,y = -200 ,z = 0 ,theta = 2  ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
 
     if Straight_status == 0:    #stay
@@ -261,24 +261,24 @@ def Move(Straight_status = 0 ,x = -600 ,y = -300 ,z = 0 ,theta = 2  ,sensor = 0 
 #============================================================================#       
     elif Straight_status == 14:  #max speed
         print('Straight_status = max speed')
-        send.sendContinuousValue(2300 ,-200 ,z ,1 ,sensor)  
+        send.sendContinuousValue(2300 ,-100 ,z ,3 ,sensor)  
 
     elif Straight_status == 15:  # forward
         print('Straight_status =  forward')
-        send.sendContinuousValue(1000 ,-200 ,z ,1 ,sensor)
+        send.sendContinuousValue(1000 ,-100 ,z ,2 ,sensor)
 
     elif Straight_status == 16:  # back
         print('Straight_status =  back')
-        send.sendContinuousValue(-1200 ,-200 ,z ,1 ,sensor)
+        send.sendContinuousValue(-1200 ,-100 ,z ,1 ,sensor)
 
 #---------------------Turn Head Parameter-------------------------#
     elif Straight_status == 21:  #turn right
         print('Straight_status = turn right')
-        send.sendContinuousValue(-200 ,300 ,z ,-11 ,sensor)
+        send.sendContinuousValue(-200 ,200 ,z ,-11 ,sensor)
 
     elif Straight_status == 22:  #right turn back
         print('Straight_status = right turn back')
-        send.sendContinuousValue(-200 ,-500 ,z ,12 ,sensor)
+        send.sendContinuousValue(-200 ,-700 ,z ,12 ,sensor)
 
     elif Straight_status == 23:  #turn left
         print('Straight_status = turn left')
@@ -347,7 +347,7 @@ def Y_Line_avoid():
     global Y_L_Deep,Y_C_Deep,Y_R_Deep,Yavoid_flag,imu_back,Y_L_flag,Y_R_flag,B_C_Deep,B_L_Deep,B_R_Deep
     print('cccccccccccccccccccccsssssssssssssssssssssssssss')
     # if Y_L_Deep != 24 and Y_C_Deep > 20 and Y_R_Deep != 24:
-    if (Y_L_Deep != 24 and Y_R_Deep != 24):#黃黃
+    if (Y_L_Deep != 24 and Y_R_Deep != 24 and send.color_mask_subject_cnts[1] == 2):#黃黃 
         print('go to YY straight')
         YY_avoid()
     elif Y_L_Deep != 24 and Y_C_Deep > 5 :#and Y_L_Deep < Y_R_Deep:#左轉 (Y_L_Deep > 3 and Y_R_Deep >= 20 and Y_C_Deep > 5)
@@ -614,8 +614,8 @@ def Turn_Head():
         time.sleep(1)
         Image_Init()
         Normal_Obs_Parameter()
-        if  abs(Dx) >= 2 : #L_Deep > 12 or R_Deep > 12 / R_Deep < 12  #R_Deep < 12
-            while  abs(Dx) >= 2 : #L_Deep > 12 or R_Deep > 12 / R_Deep < 12
+        if  abs(Dx) >= 4 : #L_Deep > 12 or R_Deep > 12 / R_Deep < 12  #R_Deep < 12
+            while  abs(Dx) >= 4 : #L_Deep > 12 or R_Deep > 12 / R_Deep < 12
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
@@ -699,11 +699,11 @@ def IMU_Angle():
         elif 45 > Yaw_wen >= 20:
             imu_angle = -10
         elif 20 > Yaw_wen >= 10:
-            imu_angle = -7
+            imu_angle = -8
         elif 10 > Yaw_wen >= 5:
-            imu_angle = -5
+            imu_angle = -6
         elif 5 > Yaw_wen >= 2:
-            imu_angle = -3
+            imu_angle = -4
         elif 2 > Yaw_wen >= 0:
             imu_angle = 0
     elif Yaw_wen <= 0: #fix to l
@@ -1003,7 +1003,7 @@ if __name__ == '__main__':
                             Straight_Speed()
                             # if (Y_L_Deep != 24 and Dy < 5 and Yavoid_flag == False) or (Y_R_Deep != 24 and Dy < 5 and Yavoid_flag == False):
                             # if (Y_L_Deep != 24 and R_Deep != 24  and C_Deep > 8 and Yavoid_flag == False) or (Y_R_Deep != 24 and L_Deep != 24  and C_Deep > 8 and Yavoid_flag == False) or(Y_L_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False) or (Y_R_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False):
-                            if (Y_L_Deep != 24 and R_Deep != 24 and C_Deep > 8 and Yavoid_flag == False) or (Y_R_Deep != 24 and L_Deep != 24 and C_Deep > 8 and Yavoid_flag == False) or (Y_L_Deep != 24 and Y_C_Deep < 18 and Yavoid_flag == False) or (Y_R_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False):
+                            if (Y_L_Deep != 24 and R_Deep != 24 and C_Deep > 20 and Yavoid_flag == False) or (Y_R_Deep != 24 and L_Deep != 24 and C_Deep > 20 and Yavoid_flag == False) or (Y_L_Deep != 24 and Y_C_Deep < 18 and Yavoid_flag == False) or (Y_R_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False):
                                 Yavoid_flag = True
                                 Y_Line_avoid()
                             # if (Y_L_Deep != 24 and Y_R_Deep != 24):
@@ -1042,7 +1042,7 @@ if __name__ == '__main__':
                             print('left avoid')
                             Straight_Speed()
                             # if (Y_L_Deep != 24 and Dy < 5 and Yavoid_flag == False) or (Y_R_Deep != 24 and Dy < 5 and Yavoid_flag == False):
-                            if (Y_L_Deep != 24 and R_Deep != 24 and C_Deep > 8 and Yavoid_flag == False) or (Y_R_Deep != 24 and L_Deep != 24  and C_Deep > 8 and Yavoid_flag == False) or (Y_L_Deep != 24 and Y_C_Deep < 18 and Yavoid_flag == False) or (Y_R_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False):
+                            if (Y_L_Deep != 24 and R_Deep != 24 and C_Deep > 20 and Yavoid_flag == False) or (Y_R_Deep != 24 and L_Deep != 24  and C_Deep > 20 and Yavoid_flag == False) or (Y_L_Deep != 24 and Y_C_Deep < 18 and Yavoid_flag == False) or (Y_R_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False):
                                 Yavoid_flag = True
                                 Y_Line_avoid()
                             # if (Y_L_Deep != 24 and Y_R_Deep != 24):
@@ -1092,7 +1092,7 @@ if __name__ == '__main__':
                         elif (Dx < 17 and Dx >= 14) or (Dx <= -14 and Dx > -17) :
                             IMU_Angle()
                             # if (Y_L_Deep != 24 and Dy < 5 and Yavoid_flag == False) or (Y_R_Deep != 24 and Dy < 5 and Yavoid_flag == False):
-                            if (Y_L_Deep != 24 and R_Deep != 24 and C_Deep > 8 and Yavoid_flag == False) or (Y_R_Deep != 24 and L_Deep != 24  and C_Deep > 8 and Yavoid_flag == False) or (Y_L_Deep != 24 and Y_C_Deep < 18 and Yavoid_flag == False) or (Y_R_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False):
+                            if (Y_L_Deep != 24 and R_Deep != 24 and C_Deep > 20 and Yavoid_flag == False) or (Y_R_Deep != 24 and L_Deep != 24  and C_Deep > 20 and Yavoid_flag == False) or (Y_L_Deep != 24 and Y_C_Deep < 18 and Yavoid_flag == False) or (Y_R_Deep != 24  and Y_C_Deep < 18 and Yavoid_flag == False):
                                 Yavoid_flag = True
                                 Y_Line_avoid()
                             # if (Y_L_Deep != 24 and Y_R_Deep != 24):
@@ -1162,6 +1162,8 @@ if __name__ == '__main__':
             # print('RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ====== ' + str(R_Deep))
             # print('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC ====== ' + str(C_Deep))
             print('Dy = ' +str(Dy))
+            print('zdrjyghfhgerthhjsrhbsruusrvugu = ' +str(send.color_mask_subject_size[1]))
+            
             
             if send.is_start == False:
                 print("stop")
