@@ -112,12 +112,36 @@ class deep_calculate:
                 blue = cv_image_2.item(compress_height, compress_width, 0)
                 green = cv_image_2.item(compress_height, compress_width, 1)
                 red = cv_image_2.item(compress_height, compress_width, 2)
+
+                blue_241 = cv_image_2.item(23, 0, 0)
+                green_241 = cv_image_2.item(23, 0, 1)
+                red_241 = cv_image_2.item(23, 0, 2)
+
+                blue_242 = cv_image_2.item(23, 31, 0)
+                green_242 = cv_image_2.item(23, 31, 1)
+                red_242 = cv_image_2.item(23, 31, 2)
+
+                a0 = 0
+                if compress_height == 24:
+                    if blue == 128 and green == 128 and red == 0:
+                        a0+=1
+                elif compress_height == 23:
+                    if blue == 128 and green == 128 and red == 0:
+                        a1+=1
+
                 if (blue == 128 and green == 0 and red == 128) or (blue == 128 and green == 128 and red == 0) :
                     self.Deep_Matrix[compress_width] = 23 - compress_height
                     break
                 if compress_height == 0:
                     self.Deep_Matrix[compress_width] = 24
         # print(self.Deep_Matrix)
+
+        if (blue_241 != 128 and green_241 != 128 and red_241 != 0) and (blue_242 != 128 and green_242 != 128 and red_242 != 0) and ((a0+a1+a2+a3+a4) < 15):
+            line_flag = True
+        else :
+            line_flag = False
+
+
         self.aa = self.Deep_Matrix
         # cv2.imshow("Image_show",cv_image)
         cv2.waitKey(1)
