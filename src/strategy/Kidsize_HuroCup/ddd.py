@@ -65,6 +65,12 @@ class deep_calculate:
         self.Y_R_Deep = 0
         self.Y_C_Deep = 0
         self.Y_Deep_sum = 0
+        self.a0 = 0
+        self.a1 = 0
+        self.a2 = 0
+        self.a3 = 0
+        self.a4 = 0
+        self.line_flag = False
 
         for compress_width in range(0, 32, 1):
             self.a = True
@@ -72,6 +78,32 @@ class deep_calculate:
                 blue = cv_image_2.item(compress_height, compress_width, 0)
                 green = cv_image_2.item(compress_height, compress_width, 1)
                 red = cv_image_2.item(compress_height, compress_width, 2)
+
+                if compress_height == 6:            #計算黃色像素格
+                    if (blue == 128 and green == 128 and red == 0):
+                        self.a0+=1
+                elif compress_height == 7:
+                    if (blue == 128 and green == 128 and red == 0):
+                        self.a1+=1
+                elif compress_height == 8:
+                    if (blue == 128 and green == 128 and red == 0):
+                        self.a2+=1
+                elif compress_height == 9:
+                    if (blue == 128 and green == 128 and red == 0):
+                        self.a3+=1
+                elif compress_height == 10:
+                    if (blue == 128 and green == 128 and red == 0):
+                        self.a4+=1
+
+                if compress_width == 0 and compress_height == 0:        #計算左邊有無黃色
+                    blue1 = blue
+                    green1 = green
+                    red1 = red
+                if compress_width == 31 and compress_height == 0:       #計算右邊有無黃色
+                    blue2 = blue
+                    green2 = green
+                    red2 = red
+
                 if (blue == 255 and green == 255 and red == 0) :
                     if self.a == True :
                         self.cnt += 1
@@ -84,6 +116,18 @@ class deep_calculate:
                     self.b = False
                     self.x2 = compress_width
                     self.y2 = 23 - compress_height 
+        
+        # print('a0 = ',self.a0)
+        # print('----------')
+        # print('a1 = ',self.a1)
+        # print('----------')
+        # print('a2 = ',self.a2)
+        # print('----------')
+        # print('a3 = ',self.a3)
+        # print('----------')
+        # print('a4 = ',self.a4)
+        # print('----------')
+
         if (self.x2 - self.x1) == 0:
             self.first_red = True
             self.b = True
@@ -95,6 +139,11 @@ class deep_calculate:
             self.slope =  (self.y2 - self.y1) / (self.x2 - self.x1) 
             self.degree = int(math.degrees(self.slope))
         
+        if (blue1 != 128 or green1 != 128 or red1 != 0) and (blue2 != 128 or green2 != 128 or red2 != 0) and (0 < (self.a0 + self.a1 + self.a2 + self.a3 + self.a4) <= 15):
+            self.line_flag  = True#開flag
+
+        # print('Flag = ',line_flag)
+
         # print('=======================================')
         # print('x1 = ',self.x1)
         # print('y1 = ',self.y1)
@@ -113,22 +162,6 @@ class deep_calculate:
                 green = cv_image_2.item(compress_height, compress_width, 1)
                 red = cv_image_2.item(compress_height, compress_width, 2)
 
-                blue_241 = cv_image_2.item(23, 0, 0)
-                green_241 = cv_image_2.item(23, 0, 1)
-                red_241 = cv_image_2.item(23, 0, 2)
-
-                blue_242 = cv_image_2.item(23, 31, 0)
-                green_242 = cv_image_2.item(23, 31, 1)
-                red_242 = cv_image_2.item(23, 31, 2)
-
-                a0 = 0
-                if compress_height == 24:
-                    if blue == 128 and green == 128 and red == 0:
-                        a0+=1
-                elif compress_height == 23:
-                    if blue == 128 and green == 128 and red == 0:
-                        a1+=1
-
                 if (blue == 128 and green == 0 and red == 128) or (blue == 128 and green == 128 and red == 0) :
                     self.Deep_Matrix[compress_width] = 23 - compress_height
                     break
@@ -136,10 +169,6 @@ class deep_calculate:
                     self.Deep_Matrix[compress_width] = 24
         # print(self.Deep_Matrix)
 
-        if (blue_241 != 128 and green_241 != 128 and red_241 != 0) and (blue_242 != 128 and green_242 != 128 and red_242 != 0) and ((a0+a1+a2+a3+a4) < 15):
-            line_flag = True
-        else :
-            line_flag = False
 
 
         self.aa = self.Deep_Matrix
