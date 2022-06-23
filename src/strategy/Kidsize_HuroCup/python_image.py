@@ -221,7 +221,7 @@ def Normal_Obs_Parameter():
 #=============================strategy=============================
 
 #-----------------------------Parameter------------------------------------
-def Move(Straight_status = 0 ,x = -400 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -500 ,y = -200 ,z = 0 ,theta = -3  ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
 
     if Straight_status == 0:    #stayprint('YYYYYYMAXXXXXXX = ',send.color_mask_subject_YMax[1][0])
@@ -261,15 +261,17 @@ def Move(Straight_status = 0 ,x = -400 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
 #============================================================================#       
     elif Straight_status == 14:  #max speed
         print('Straight_status = max speed')
-        send.sendContinuousValue(2300 ,200 ,z ,-4 ,sensor)  
+        send.sendContinuousValue(2300 ,0 ,z ,-1 ,sensor)  
 
     elif Straight_status == 15:  # forward
         print('Straight_status =  forward')
-        send.sendContinuousValue(1000 ,-100 ,z ,-4 ,sensor)
+        Slope_fix()
+        send.sendContinuousValue(1000 ,-100 ,z ,-1 + slope_angle,sensor)
 
     elif Straight_status == 16:  # back
         print('Straight_status =  back')
-        send.sendContinuousValue(-1200 ,0  ,z ,-3 ,sensor)
+        Slope_fix()
+        send.sendContinuousValue(-1200 ,-100  ,z ,-3 + slope_angle ,sensor)
 
 #---------------------Turn Head Parameter-------------------------#
     elif Straight_status == 21:  #turn right
@@ -319,7 +321,7 @@ def Move(Straight_status = 0 ,x = -400 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
             rx = 0
         if abs(deep.slope)  > 0.03 or slope_flag == True:
             Slope_fix() 
-        send.sendContinuousValue(-400 + rx , -1000 ,0 ,-6 + slope_angle ,0) 
+        send.sendContinuousValue(-500 + rx , -1000 ,0 ,-3 + slope_angle ,0) 
     
     elif Straight_status == 33:  #slope fix left
         print('Straight_status = slope fix left')
@@ -331,7 +333,7 @@ def Move(Straight_status = 0 ,x = -400 ,y = 0 ,z = 0 ,theta = -4  ,sensor = 0 ):
             rx = 0
         if abs(deep.slope)  > 0.03 or slope_flag == True:
             Slope_fix() 
-        send.sendContinuousValue(-500 + rx , 900 ,0 ,5 + slope_angle ,0) 
+        send.sendContinuousValue(-500 + rx , 900 ,0 ,6 + slope_angle ,0) 
 
 #--------------------Preturn Head Parameter-----------------------#
     elif Straight_status == 41:  #preturn left
@@ -350,7 +352,7 @@ def Y_Line_avoid():
     if (Y_L_Deep != 24 and Y_R_Deep != 24 and send.color_mask_subject_cnts[1] == 2):#黃黃 
         print('go to YY straight')
         YY_avoid()
-    elif Y_L_Deep < Y_R_Deep :#and Y_L_Deep < Y_R_Deep:#左轉 (Y_L_Deep > 3 and Y_R_Deep >= 20 and Y_C_Deep > 5)
+    elif Yaw_wen > 0:#and Y_L_Deep < Y_R_Deep:#左轉 (Y_L_Deep > 3 and Y_R_Deep >= 20 and Y_C_Deep > 5)
         imu_back = True
         # while (Y_L_Deep > 3 and Y_C_Deep > 5):
         while ( Y_C_Deep > 1):
@@ -370,7 +372,7 @@ def Y_Line_avoid():
                 Move(Straight_status = 15) #前進
                 print('close to Yellow Line LLLLLLLLLLLOOOOOOOOOOOO')
         Yavoid_flag = False
-    elif Y_R_Deep < Y_L_Deep:#and Y_R_Deep < Y_L_Deep:#右轉 (Y_R_Deep > 3 and Y_L_Deep >= 20 and Y_C_Deep > 5)
+    elif Yaw_wen <= 0:#and Y_R_Deep < Y_L_Deep:#右轉 (Y_R_Deep > 3 and Y_L_Deep >= 20 and Y_C_Deep > 5)
         imu_back = True
         # while (Y_R_Deep > 3 and Y_C_Deep > 5):
         while (Y_C_Deep > 1):
@@ -636,6 +638,12 @@ def Turn_Head():        #90度時 左邊IMU較小
         send.sendHeadMotor(1,2048,100)
         send.sendHeadMotor(2,1550,100) 
         time.sleep(1)
+        Image_Init()
+        Normal_Obs_Parameter()
+        if ((deep.line_flag == True) and (send.color_mask_subject_YMin[1][0] <= 10)) or ((send.color_mask_subject_cnts[1] == 2) and (Y_L_Deep <= 7) and (Y_R_Deep <= 7)) or ((send.color_mask_subject_XMax[1][0] >= 310) and (send.color_mask_subject_XMin[1][0] <= 10) and (send.color_mask_subject_cnts[1] == 1)):
+            print('YYYline___right')
+            # Yavoid_flag = True
+            Y_Line_avoid()
         get_IMU()
         if abs(Yaw_wen) > 40:
             while abs(Yaw_wen) > 40:
@@ -677,9 +685,22 @@ def Turn_Head():        #90度時 左邊IMU較小
                 else :
                     Move(Straight_status = 28) 
                     print(' Dx = ',Dx)
+                if ((deep.line_flag == True) and (send.color_mask_subject_YMin[1][0] <= 10)) or ((send.color_mask_subject_cnts[1] == 2) and (Y_L_Deep <= 7) and (Y_R_Deep <= 7)) or ((send.color_mask_subject_XMax[1][0] >= 310) and (send.color_mask_subject_XMin[1][0] <= 10) and (send.color_mask_subject_cnts[1] == 1)):
+                    print('YYYline___right')
+                    send.sendHeadMotor(1,2048,100)
+                    send.sendHeadMotor(2,1550,100) 
+                    time.sleep(1)
+                    # Yavoid_flag = True
+                    Y_Line_avoid()
         send.sendHeadMotor(1,2048,100)
         send.sendHeadMotor(2,1550,100) 
         time.sleep(1)
+        Image_Init()
+        Normal_Obs_Parameter()
+        if ((deep.line_flag == True) and (send.color_mask_subject_YMin[1][0] <= 10)) or ((send.color_mask_subject_cnts[1] == 2) and (Y_L_Deep <= 7) and (Y_R_Deep <= 7)) or ((send.color_mask_subject_XMax[1][0] >= 310) and (send.color_mask_subject_XMin[1][0] <= 10) and (send.color_mask_subject_cnts[1] == 1)):
+            print('YYYline___right')
+            # Yavoid_flag = True
+            Y_Line_avoid()
         get_IMU()
         if abs(Yaw_wen) > 40:
             while abs(Yaw_wen) > 40:    
@@ -694,14 +715,18 @@ def Slope_fix():
     if deep.slope > 0: #fix to l
         if deep.slope >= 1:
             slope_angle = 14
-        elif 1 > deep.slope >= 0.36:
+        elif 1 > deep.slope >= 0.3:
+            slope_angle = 13
+        elif 0.3 > deep.slope >= 0.2:
             slope_angle = 12
-        elif 0.36 > deep.slope >= 0.17:
+        elif 0.2 > deep.slope >= 0.15:
             slope_angle = 11
-        elif 0.17 > deep.slope >= 0.08:
+        elif 0.15 > deep.slope >= 0.1:
+            slope_angle = 10
+        elif 0.1 > deep.slope >= 0.05:
             slope_angle = 9
-        elif 0.08 > deep.slope >= 0.03:
-            slope_angle = 7
+        elif 0.05 > deep.slope >= 0.03:
+            slope_angle = 8
         elif 0.03 > deep.slope >= 0:
             slope_angle = 0
             slope_Lcnt  += 1
@@ -710,15 +735,19 @@ def Slope_fix():
         #     print('llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll')
     elif deep.slope <= 0: #fix to r
         if -1 >= deep.slope:
-            slope_angle = -10
-        elif -0.36 >= deep.slope > -1:
-            slope_angle = -9
-        elif -0.17 >= deep.slope > -0.36:
+            slope_angle = -8
+        elif -0.3 >= deep.slope > -1:
             slope_angle = -7
-        elif -0.08 >= deep.slope > -0.17:
+        elif -0.2 >= deep.slope > -0.3:
             slope_angle = -6
-        elif -0.03 >= deep.slope > -0.08:
+        elif -0.15 >= deep.slope > -0.2:
             slope_angle = -5
+        elif -0.1 >= deep.slope > -0.15:
+            slope_angle = -4
+        elif -0.05 >= deep.slope > -0.1:
+            slope_angle = -3
+        elif -0.03 >= deep.slope > -0.05:
+            slope_angle = -2
         elif 0 >= deep.slope > -0.03:
             slope_angle = 0
             slope_Rcnt  += 1
@@ -843,15 +872,19 @@ def Crawl():
             print('ccccccccccccccccccccccccccccrrrrrrrrrrrrrrrrrr')
             print('YYYYYYYYYYYYYYYYYYYYYYYYMMMMMMMMMMMMMMMMMMAAAAAAAAAAAAAXXXXXXXXXX =',send.color_mask_subject_YMax[5][0])
             if(send.color_mask_subject_YMax[5][0] < 65):
+                Slope_fix()
                 Move(Straight_status = 15)
                 print('crawlllllll forwardddddddddd')
             elif(send.color_mask_subject_YMax[5][0] > 75):
+                Slope_fix()
                 Move(Straight_status = 16)
                 print('crawlllllll backkkkkkkk')
             elif 65 <= send.color_mask_subject_YMax[5][0] <= 75:
                 print('CCCCCCCCCCCCCCCCRWAL')
                 print('rcnt = ',slope_Rcnt)
                 print('lcnt = ',slope_Lcnt)
+                send.sendContinuousValue(0, 0 , 0 , 0 , 0) 
+                time.sleep(1)
                 send.sendBodyAuto(0,0,0,0,1,0)
                 time.sleep(2)
                 send.sendBodySector(29)
@@ -878,7 +911,7 @@ def Crawl():
                     # print('RRRRRRRRRRRRRRRRRRRRR = ',R_Deep)
                     print('send.color_mask_subject_YMax[2][0] = ',send.color_mask_subject_YMax[2][0])
                     print('send.color_mask_subject_YMax[1][0] = ',send.color_mask_subject_YMax[1][0])
-                    if send.color_mask_subject_YMax[2][0] >= 85 or send.color_mask_subject_YMax[1][0] >= 85:
+                    if (send.color_mask_subject_YMax[2][0] >= 85 and send.color_mask_subject_size[2][0] > 5000) or (send.color_mask_subject_YMax[1][0] >= 85 and send.color_mask_subject_size[1][0] > 5000):
                         break
                     else:
                         send.sendBodySector(456)
@@ -963,14 +996,14 @@ if __name__ == '__main__':
                         print('YYYYYYYYYYYYYYYMMMMMMMMMIIIIIIIIINNNNNNNNN = ',send.color_mask_subject_YMax[5][0])
                         print('slope = ',deep.slope)
 
-                        if abs(deep.slope) > 0.08 and (slope_flag == True):
+                        if abs(deep.slope) > 0.03 and (slope_flag == True):
                             # send.sendHeadMotor(1,2048,100)
                             # send.sendHeadMotor(2,1800,100)
                             # time.sleep(0.5)
                             # while abs(deep.slope) > 0.03 or slopR_flag == False or slopL_flag == False:
                             # while slopR_flag == False or slopL_flag == False:
                             # while abs(deep.slope) > 0.03 and (slope_flag == True):
-                            while abs(deep.slope) > 0.08 or slope_flag == True:
+                            while abs(deep.slope) > 0.03 or slope_flag == True:
                                 Slope_fix()
                                 Move(Straight_status = 31)
                                 Image_Info()
@@ -992,9 +1025,11 @@ if __name__ == '__main__':
                             time.sleep(0.5)
                         else :
                             if (send.color_mask_subject_YMax[5][0] < 65) and (redoor_dis == False) :
+                                Slope_fix()
                                 Move(Straight_status = 15)
                                 pass
                             elif (send.color_mask_subject_YMax[5][0] > 75) and (redoor_dis == False) :
+                                Slope_fix()
                                 Move(Straight_status = 16)
                                 pass
                             else :

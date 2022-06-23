@@ -45,8 +45,10 @@ class deep_calculate:
         # #註解掉ddd有值 python_image有sent error 沒註解掉python_image可跑值為0 ddd值為0
 
         self.red_width = 0
+        self.R_Deep_Matrix = []
         for compress_width in range(0, 32, 1):
             self.r = True
+            self.R_Deep_Matrix.append(0)
             for compress_height in range(23, -1, -1):
                 blue = cv_image_2.item(compress_height, compress_width, 0)
                 green = cv_image_2.item(compress_height, compress_width, 1)
@@ -54,6 +56,11 @@ class deep_calculate:
                 if (blue == 255 and green == 255 and red == 0) and (self.r == True) :
                     self.red_width += 1
                     self.r = False
+                if (blue == 255 and green == 255 and red == 0):
+                    self.R_Deep_Matrix[compress_width] = 23 - compress_height
+                    break
+                if compress_height == 0:
+                    self.R_Deep_Matrix[compress_width] = 24
         # print('red_width = ',self.red_width)
 
         self.x1 = 0
@@ -71,6 +78,11 @@ class deep_calculate:
         self.a3 = 0
         self.a4 = 0
         self.line_flag = False
+        self.Xa = 0
+        self.Ya = 0
+        self.Xmin = 0
+        self.Ymin = 0
+        flag = True
 
         for compress_width in range(0, 32, 1):
             self.a = True
@@ -106,6 +118,8 @@ class deep_calculate:
 
                 if (blue == 255 and green == 255 and red == 0) :
                     if self.a == True :
+                        self.Xa = compress_width
+                        self.Ya = 23 - compress_height
                         self.cnt += 1
                         self.a = False
                 if (blue == 255 and green == 255 and red == 0) and self.first_red == True:
@@ -116,6 +130,15 @@ class deep_calculate:
                     self.b = False
                     self.x2 = compress_width
                     self.y2 = 23 - compress_height 
+                if self.Ya == min(self.R_Deep_Matrix) :
+                    if self.y1 > self.y2 :
+                        if flag == True:
+                            self.Xmin = self.Xa
+                            self.Ymin = self.Ya
+                            flag = False
+                    elif self.y2 >= self.y1 :
+                        self.Xmin = self.Xa
+                        self.Ymin = self.Ya
         
         # print('a0 = ',self.a0)
         # print('----------')
@@ -128,19 +151,34 @@ class deep_calculate:
         # print('a4 = ',self.a4)
         # print('----------')
 
-        if (self.x2 - self.x1) == 0:
-            self.first_red = True
-            self.b = True
-            self.degree = 0
-            self.slope = 0
-        else:
-            self.first_red = True
-            self.b = True
-            self.slope =  (self.y2 - self.y1) / (self.x2 - self.x1) 
-            self.degree = int(math.degrees(self.slope))
+        if (self.x2 - self.Xmin) == 0 or (self.Xmin - self.x1) == 0:
+            if abs(self.Xmin - self.x1) <= abs(self.Xmin - self.x2):
+                self.slope =  (self.y2 - self.Ymin) / 0.00001
+            elif abs(self.Xmin - self.x1) > abs(self.Xmin - self.x2):
+                self.slope =  (self.Ymin - self.y1) / 0.00001
+        elif abs(self.Xmin - self.x1) <= abs(self.Xmin - self.x2):
+            self.slope =  (self.y2 - self.Ymin) / (self.x2 - self.Xmin)
+        elif abs(self.Xmin - self.x1) > abs(self.Xmin - self.x2):
+            self.slope =  (self.Ymin - self.y1) / (self.Xmin - self.x1)
+        self.degree = int(math.degrees(self.slope))
+        self.first_red = True
+        self.b = True
+    #舊的斜率
+        # if (self.x2 - self.x1) == 0:
+        #     self.first_red = True
+        #     self.b = True
+        #     self.degree = 0
+        #     self.slope = 0
+        # else:
+        #     self.first_red = True
+        #     self.b = True
+        #     self.slope =  (self.y2 - self.y1) / (self.x2 - self.x1) 
+        #     self.degree = int(math.degrees(self.slope))
         
-        if (blue1 != 128 or green1 != 128 or red1 != 0) and (blue2 != 128 or green2 != 128 or red2 != 0) and (0 < (self.a0 + self.a1 + self.a2 + self.a3 + self.a4) <= 15):
-            self.line_flag  = True#開flag
+        # if (blue1 != 128 or green1 != 128 or red1 != 0) and (blue2 != 128 or green2 != 128 or red2 != 0) and (0 < (self.a0 + self.a1 + self.a2 + self.a3 + self.a4) <= 15):
+        #     self.line_flag  = True#開flag
+
+    #舊的斜率
 
         # print('Flag = ',line_flag)
 
