@@ -1142,20 +1142,22 @@ if __name__ == '__main__':
                                     if send.color_mask_subject_YMax[2][0] >0 :
                                         break
                                 imu_back = True
-                            if ( abs(Yaw_wen) > 5 and IMU_ok == False ) :                   #IMU修正
-                                while ( abs(Yaw_wen) > 5 or IMU_ok == False) :
+                            if ( abs(Yaw_wen) > 3 and IMU_ok == False ) :                   #IMU修正
+                                while ( abs(Yaw_wen) > 3 or IMU_ok == False) :
+                                    print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxx')
                                     IMU_Angle()
                                     get_IMU()
                                     Move(Straight_status = 12)
                                     Image_Init()
                                     Normal_Obs_Parameter()
                                     Image_Info()
-                                    if abs(Yaw_wen) < 5:        #轉頭策略
+                                    if abs(Yaw_wen) < 3:        #轉頭策略
                                         if ( L_Deep < 15 ) and ( R_Deep < 15 ) and ( C_Deep < 20 ):
                                             Turn_Head()
                                             IMU_ok == True
                                             break
                                         else :
+                                            break
                                             if Dx > 0 :
                                                 Move(Straight_status = 11)
                                             elif Dx < 0 :
@@ -1163,7 +1165,8 @@ if __name__ == '__main__':
                                     else:
                                         print('IMU NOT OK')
                                         pass
-                            elif (abs(Yaw_wen) < 5 and IMU_ok == True):
+                            elif (abs(Yaw_wen) < 3 and IMU_ok == True):
+                                print('OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO')
                                 IMU_Angle()
                                 get_IMU()
                                 Move(Straight_status = 12)
