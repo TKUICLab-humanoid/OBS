@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 cmake_minimum_required(VERSION 2.8.3)
 project(strategy)
 
@@ -57,4 +55,3 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
->>>>>>> fe7cd2ea0138cc84d479ad976daf3e96386cc708
