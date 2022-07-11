@@ -201,7 +201,7 @@ def Normal_Obs_Parameter():
     Dx = Xc - Xb
 
 #-----------------------------Parameter------------------------------------
-def Move(Straight_status = 0 ,x = -500 ,y = -200 ,z = 0 ,theta = -2  ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -400 ,y = 0 ,z = 0 ,theta = -2  ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
 
     if Straight_status == 0:            #stay
@@ -221,7 +221,7 @@ def Move(Straight_status = 0 ,x = -500 ,y = -200 ,z = 0 ,theta = -2  ,sensor = 0
             send.sendContinuousValue(x ,y,z,theta + imu_angle,sensor)
     elif Straight_status == 122:        #YLine straight
         print('Straight_status = imu fix and Speed')
-        send.sendContinuousValue(2800,y ,z,theta + imu_angle,sensor)
+        send.sendContinuousValue(3000,y ,z,theta + imu_angle,sensor)
 
     elif Straight_status == 13:         #speed ++
         print('Straight_status = go straight')
@@ -230,17 +230,17 @@ def Move(Straight_status = 0 ,x = -500 ,y = -200 ,z = 0 ,theta = -2  ,sensor = 0
 #============================================================================#       
     elif Straight_status == 14:  #max speed
         print('Straight_status = max speed')
-        send.sendContinuousValue(2800 ,-200 ,z ,0 ,sensor)
+        send.sendContinuousValue(3000 ,100 ,z ,-1 ,sensor)
 
     elif Straight_status == 15:  # small forward
         print('Straight_status =  small forward')
         Slope_fix()
-        send.sendContinuousValue(1000 ,-100 ,z ,0 + slope_angle,sensor)
+        send.sendContinuousValue(1000 ,0 ,z ,-2 + slope_angle,sensor)
 
     elif Straight_status == 16:  #small back
         print('Straight_status =  small back')
         Slope_fix()
-        send.sendContinuousValue(-1200 ,0    ,z ,-1 + slope_angle ,sensor)
+        send.sendContinuousValue(-1200 ,0 ,z ,-2 + slope_angle ,sensor)
 
 #---------------------Turn Head Parameter-------------------------#
     elif Straight_status == 21:  #turn right
@@ -249,15 +249,15 @@ def Move(Straight_status = 0 ,x = -500 ,y = -200 ,z = 0 ,theta = -2  ,sensor = 0
 
     elif Straight_status == 22:  #right turn back
         print('Straight_status = right turn back')
-        send.sendContinuousValue(-700 ,-1000 ,z ,12 ,sensor)
+        send.sendContinuousValue(-500 ,-1000 ,z ,12 ,sensor)
 
     elif Straight_status == 23:  #turn left
         print('Straight_status = turn left')
-        send.sendContinuousValue(-500 ,800 ,z ,14 ,sensor)
+        send.sendContinuousValue(-500 ,-900 ,z ,15 ,sensor)
 
     elif Straight_status == 24:  #left turn back
         print('Straight_status = left turn back')
-        send.sendContinuousValue(-500 ,400 ,z ,-11 ,sensor)
+        send.sendContinuousValue(-500 ,1100 ,z ,-11 ,sensor)
 
 #--------------------turn head go straight------------------------#
     elif Straight_status == 25:  #turn right fix left
@@ -307,7 +307,7 @@ def Move(Straight_status = 0 ,x = -500 ,y = -200 ,z = 0 ,theta = -2  ,sensor = 0
             Slope_fix() 
         if send.color_mask_subject_size[5][0] ==0 :           #黃線出障礙物的平移
             rx = 0
-        send.sendContinuousValue(-500 + rx , 1000 ,0 ,-3 + slope_angle ,0) 
+        send.sendContinuousValue(-500 + rx , 1000 ,0 ,-1 + slope_angle ,0) 
 
 #--------------------Preturn Head Parameter-----------------------#
     elif Straight_status == 41:  #preturn left
@@ -631,8 +631,8 @@ def Turn_Head():
                 Move(Straight_status = 16) 
         print('TTTTTTTTTTTurn Headrrrrrrrr')
         get_IMU()
-        if abs(Yaw_wen) < 73:                   #靠近後右旋轉至90度
-            while abs(Yaw_wen) < 73:
+        if abs(Yaw_wen) < 70:                   #靠近後右旋轉至90度
+            while abs(Yaw_wen) < 70:
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
@@ -692,8 +692,8 @@ def Turn_Head():
                 Move(Straight_status = 16) 
         print('TTTTTTTTTTTurn Headlllllllllll')
         get_IMU()
-        if abs(Yaw_wen) < 70:                           #靠近後轉至90度
-            while abs(Yaw_wen) < 70:
+        if abs(Yaw_wen) < 68:                           #靠近後轉至90度
+            while abs(Yaw_wen) < 68:
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
@@ -962,7 +962,8 @@ if __name__ == '__main__':
         while not rospy.is_shutdown():
             if send.is_start == True:
                 #==============================image===============================
-                Focus_Matrix = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]#6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6
+                Focus_Matrix = [9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 9, 9, 9, 9]
+                # Focus_Matrix = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]#6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6
                 Image_Init()
                 Normal_Obs_Parameter()
                 Image_Info()
@@ -984,8 +985,8 @@ if __name__ == '__main__':
                 walking = True
                 if PreTurn_L == True :                      #指定初始向左旋轉
                     get_IMU()
-                    if abs(Yaw_wen) < 83:
-                        while abs(Yaw_wen) < 83:
+                    if abs(Yaw_wen) < 45:
+                        while abs(Yaw_wen) < 45:
                             get_IMU()
                             Move(Straight_status = 41)
                     PreTurn_L = False
@@ -1158,10 +1159,6 @@ if __name__ == '__main__':
                                             break
                                         else :
                                             break
-                                            if Dx > 0 :
-                                                Move(Straight_status = 11)
-                                            elif Dx < 0 :
-                                                Move(Straight_status = 11)
                                     else:
                                         print('IMU NOT OK')
                                         pass
@@ -1210,4 +1207,4 @@ if __name__ == '__main__':
                 IMU_Yaw_ini()
             print('walking ====== ' + str(walking))
     except rospy.ROSInterruptException:
-        pass
+        pass14
