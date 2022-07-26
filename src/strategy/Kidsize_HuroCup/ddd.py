@@ -135,18 +135,35 @@ class deep_calculate:
                         self.Xmin = self.Xa
                         self.Ymin = self.Ya
 
-        if (self.x2 - self.Xmin) == 0 or (self.Xmin - self.x1) == 0:    #斜率計算公式（利用最低點與某一邊做判斷）
-            if abs(self.Xmin - self.x1) <= abs(self.Xmin - self.x2):
-                self.slope =  (self.y2 - self.Ymin) / 0.00001
-            elif abs(self.Xmin - self.x1) > abs(self.Xmin - self.x2):
-                self.slope =  (self.Ymin - self.y1) / 0.00001
-        elif abs(self.Xmin - self.x1) <= abs(self.Xmin - self.x2):
+        
+        if abs(self.Xmin - self.x1) <= abs(self.Xmin - self.x2):
             self.slope =  (self.y2 - self.Ymin) / (self.x2 - self.Xmin)
         elif abs(self.Xmin - self.x1) > abs(self.Xmin - self.x2):
             self.slope =  (self.Ymin - self.y1) / (self.Xmin - self.x1)
+        # elif (self.x2 - self.Xmin) == 0 or (self.Xmin - self.x1) == 0:    #斜率計算公式（利用最低點與某一邊做判斷）
+        #     if abs(self.Xmin - self.x1) <= abs(self.Xmin - self.x2):
+        #         self.slope =  (self.y2 - self.Ymin) / 0.00001
+        #         print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+        #     elif abs(self.Xmin - self.x1) > abs(self.Xmin - self.x2):
+        #         self.slope =  (self.Ymin - self.y1) / 0.00001
+        #         print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
         self.degree = int(math.degrees(self.slope))
         self.first_red = True
         self.b = True
+        # print('slope = ',self.slope)
+        # print('============================================')
+        # print('x1 = ',self.x1)
+        # print('============================================')
+        # print('x2 = ',self.x2)
+        # print('============================================')
+        # print('xmin = ',self.Xmin)
+        # print('============================================')
+        # print('Ymin = ',self.Ymin)
+        # print('============================================')
+        # print('Y1 = ',self.y1)
+        # print('============================================')
+        # print('Y2 = ',self.y2)
+        # print('============================================')
 #----------------------------------------------------------------------#藍黃深度（最常用）
         self.Deep_Matrix = []
         for compress_width in range(0, 32, 1):
