@@ -4,6 +4,7 @@
 from calendar import TUESDAY
 from curses.ascii import CR
 from re import L
+from select import select
 import rospy
 import numpy as np
 from hello1 import Sendmessage
@@ -213,7 +214,7 @@ def Normal_Obs_Parameter():
     Dx = Xc - Xb
 
 #-----------------------------Parameter------------------------------------
-def Move(Straight_status = 0 ,x = -400 ,y = 0 ,z = 0 ,theta = 4  ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -400 ,y = 200 ,z = 0 ,theta = 3  ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
 
     if Straight_status == 0:            #stay
@@ -234,10 +235,10 @@ def Move(Straight_status = 0 ,x = -400 ,y = 0 ,z = 0 ,theta = 4  ,sensor = 0 ):
         else:
             # send.sendContinuousValue(x + Goal_speed,y,z,theta + imu_angle,sensor)
             if Yaw_wen > 0: #9
-                send.sendContinuousValue(x,y -300,z,theta + imu_angle,sensor)
+                send.sendContinuousValue(x,y -700,z,theta + imu_angle,sensor)
                 print('imu fix rightttttttttttttttt')
             elif Yaw_wen <= 0: #-14
-                send.sendContinuousValue(x,y +400 ,z,theta + imu_angle,sensor)
+                send.sendContinuousValue(x,y +500 ,z,theta + imu_angle,sensor)
                 print('imu fix lefttttttttttttttttttt')
     elif Straight_status == 122:        #YLine straight
         print('Straight_status = imu fix and Speed')
@@ -250,22 +251,22 @@ def Move(Straight_status = 0 ,x = -400 ,y = 0 ,z = 0 ,theta = 4  ,sensor = 0 ):
 #============================================================================#       
     elif Straight_status == 14:  #max speed
         print('Straight_status = max speed')
-        send.sendContinuousValue(3000 ,0 ,z ,3 ,sensor)
+        send.sendContinuousValue(3000 ,200 ,z ,2 ,sensor)
 
     elif Straight_status == 15:  # small forward
         print('Straight_status =  small forward')
         Slope_fix()
-        send.sendContinuousValue(1000 ,-100 ,z ,4 + slope_angle,sensor)
+        send.sendContinuousValue(1000 ,200 ,z ,2 + slope_angle,sensor)
 
     elif Straight_status == 16:  #small back
         print('Straight_status =  small back')
         Slope_fix()
-        send.sendContinuousValue(-1300 ,-100 ,z ,5 + slope_angle ,sensor)
+        send.sendContinuousValue(-1300 ,100 ,z ,4 + slope_angle ,sensor)
 
 #---------------------Turn Head Parameter-------------------------#
     elif Straight_status == 21:  #turn right
         print('Straight_status = turn right')
-        send.sendContinuousValue(-500 ,700 ,z ,-12 ,sensor)
+        send.sendContinuousValue(-500 ,700 ,z ,-13 ,sensor)
 
     elif Straight_status == 22:  #right turn back
         print('Straight_status = right turn back')
@@ -277,7 +278,7 @@ def Move(Straight_status = 0 ,x = -400 ,y = 0 ,z = 0 ,theta = 4  ,sensor = 0 ):
 
     elif Straight_status == 24:  #left turn back
         print('Straight_status = left turn back')
-        send.sendContinuousValue(-500 ,100 ,z ,-11 ,sensor)
+        send.sendContinuousValue(-500 ,800 ,z ,-12 ,sensor)
 
 #--------------------turn head go straight------------------------#
     elif Straight_status == 25:  #turn right fix left
@@ -313,7 +314,7 @@ def Move(Straight_status = 0 ,x = -400 ,y = 0 ,z = 0 ,theta = 4  ,sensor = 0 ):
             Slope_fix() 
         if send.color_mask_subject_size[5][0] ==0 :           #黃線出障礙物的平移
             rx = 0
-        send.sendContinuousValue(-300 + rx , -1000 ,0 ,4 + slope_angle ,0) 
+        send.sendContinuousValue(-400 + rx , -1000 ,0 ,3 + slope_angle ,0) 
     
     elif Straight_status == 33:  #slope fix left
         print('Straight_status = slope fix left')
@@ -327,7 +328,7 @@ def Move(Straight_status = 0 ,x = -400 ,y = 0 ,z = 0 ,theta = 4  ,sensor = 0 ):
             Slope_fix() 
         if send.color_mask_subject_size[5][0] ==0 :           #黃線出障礙物的平移
             rx = 0
-        send.sendContinuousValue(-400 + rx , 800 ,0 ,5 + slope_angle ,0) 
+        send.sendContinuousValue(-400 + rx , 700 ,0 ,4 + slope_angle ,0) 
 
 #--------------------Preturn Head Parameter-----------------------#
     elif Straight_status == 41:  #preturn left
@@ -346,7 +347,7 @@ def Y_Line_avoid():
     elif Yaw_wen > 0:           #左轉
         imu_back = True
         L_line = True
-        while Yaw_wen <= 85: #左轉至80
+        while Yaw_wen <= 80: #左轉至80
             get_IMU()
             Image_Init()
             Normal_Obs_Parameter()
@@ -363,7 +364,7 @@ def Y_Line_avoid():
     elif Yaw_wen <= 0:          #右轉
         imu_back = True
         R_line = True
-        while Yaw_wen >= -85: #右轉至85
+        while Yaw_wen >= -80: #右轉至85
             get_IMU()
             Image_Init()
             Normal_Obs_Parameter()
@@ -461,7 +462,7 @@ def YY_avoid():                 #黃色通道
     if(Yaw_wen > 5):        #左轉
         imu_back = True
         L_line = True
-        while Yaw_wen <= 85:                   #向左旋轉  
+        while Yaw_wen <= 80:                   #向左旋轉  
             get_IMU()
             Image_Init()
             Normal_Obs_Parameter()
@@ -478,7 +479,7 @@ def YY_avoid():                 #黃色通道
     elif(Yaw_wen < -5):     #右轉
         imu_back = True
         R_line = True
-        while Yaw_wen >= -85:                   #向右旋轉
+        while Yaw_wen >= -80:                   #向右旋轉
             get_IMU()
             Image_Init()
             Normal_Obs_Parameter()
@@ -497,8 +498,8 @@ def YY_avoid():                 #黃色通道
             imu_back = True
             L_line = True
             while ( Y_C_Deep > YYDS):
-                if Yaw_wen <= 85:
-                    while Yaw_wen <= 85:
+                if Yaw_wen <= 80:
+                    while Yaw_wen <= 80:
                         get_IMU()
                         Image_Init()
                         Normal_Obs_Parameter()
@@ -516,8 +517,8 @@ def YY_avoid():                 #黃色通道
             imu_back = True
             R_line = True
             while (Y_C_Deep > YYDS):
-                if Yaw_wen >= -85:
-                    while Yaw_wen >= -85:
+                if Yaw_wen >= -80:
+                    while Yaw_wen >= -80:
                         get_IMU()
                         Image_Init()
                         Normal_Obs_Parameter()
@@ -661,6 +662,7 @@ def Turn_Head():
         get_IMU()
         if abs(Yaw_wen) < 70:                   #靠近後右旋轉至90度
             while abs(Yaw_wen) < 70:
+                print('L_line = ',L_line)
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
@@ -830,19 +832,19 @@ def IMU_Angle():
     global imu_angle
     if Yaw_wen > 0:         #fix to r
         if Yaw_wen >= 90:
-            imu_angle = -18
-        elif 90 > Yaw_wen >= 60:
-            imu_angle = -17
-        elif 60 > Yaw_wen >= 45:
             imu_angle = -16
-        elif 45 > Yaw_wen >= 20:
+        elif 90 > Yaw_wen >= 60:
             imu_angle = -15
-        elif 20 > Yaw_wen >= 10:
+        elif 60 > Yaw_wen >= 45:
             imu_angle = -14
-        elif 10 > Yaw_wen >= 5:
+        elif 45 > Yaw_wen >= 20:
             imu_angle = -13
-        elif 5 > Yaw_wen >= 2:
+        elif 20 > Yaw_wen >= 10:
             imu_angle = -12
+        elif 10 > Yaw_wen >= 5:
+            imu_angle = -11
+        elif 5 > Yaw_wen >= 2:
+            imu_angle = -10
         elif 2 > Yaw_wen >= 0:
             imu_angle = 0
     elif Yaw_wen <= 0:      #fix to l
@@ -973,8 +975,8 @@ def Crawl():
                         #time.sleep(0.1)
                         crawl_cnt += 1
                 send.sendBodySector(1113)
-                time.sleep(14.5)
-                time.sleep(0.5)
+                time.sleep(13.4)
+                time.sleep(1)
                 send.sendBodySector(29)
                 time.sleep(1.5)
                 send.sendHeadMotor(1,2048,100)
@@ -996,9 +998,9 @@ if __name__ == '__main__':
                 #==============================image===============================
                 # Focus_Matrix = [8, 8, 8, 8, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 8, 8, 8, 8]
                 Focus_Matrix = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]#6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6
-                YYDS = 1 #Y_Line_Deep 1 7
-                CRMax = 35 #R_Max  55 35
-                CRMin = 25 #R_MIn  45 25
+                YYDS = 7 #Y_Line_Deep 2 7
+                CRMax = 55 #R_Max  55 35
+                CRMin = 45 #R_MIn  45 25
 
                 Image_Init()
                 Normal_Obs_Parameter()
@@ -1279,4 +1281,4 @@ if __name__ == '__main__':
                 IMU_Yaw_ini()
             print('walking ====== ' + str(walking))
     except rospy.ROSInterruptException:
-        pass14
+        pass
