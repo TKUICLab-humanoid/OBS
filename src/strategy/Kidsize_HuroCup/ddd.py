@@ -78,6 +78,7 @@ class deep_calculate:
         self.Xmin = 0
         self.Ymin = 0
         flag = True
+        self.redsize = False
 
         for compress_width in range(0, 32, 1):                      #黃線黃障分離＆紅門斜率計算
             self.a = True
@@ -112,6 +113,7 @@ class deep_calculate:
                     red2 = red
 
                 if (blue == 255 and green == 255 and red == 0) :
+                    self.redsize = True
                     if self.a == True :
                         self.Xa = compress_width                        #紅門最低點的x值
                         self.Ya = 23 - compress_height                  #紅門最低點的y值
@@ -135,18 +137,42 @@ class deep_calculate:
                         self.Xmin = self.Xa
                         self.Ymin = self.Ya
 
-        if (self.x2 - self.Xmin) == 0 or (self.Xmin - self.x1) == 0:    #斜率計算公式（利用最低點與某一邊做判斷）
+        
+        if abs(self.x1 - self.x2) < 1 :                             #若紅色面積過小則不判斷斜率直接給0
+            # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+            self.slope = 0
+            self.degree = 0
+        else : 
+            # print('rrrrrrrrrrrrrrrrrrrrrrrrrrr')
             if abs(self.Xmin - self.x1) <= abs(self.Xmin - self.x2):
-                self.slope =  (self.y2 - self.Ymin) / 0.00001
+                self.slope =  (self.y2 - self.Ymin) / (self.x2 - self.Xmin)
             elif abs(self.Xmin - self.x1) > abs(self.Xmin - self.x2):
-                self.slope =  (self.Ymin - self.y1) / 0.00001
-        elif abs(self.Xmin - self.x1) <= abs(self.Xmin - self.x2):
-            self.slope =  (self.y2 - self.Ymin) / (self.x2 - self.Xmin)
-        elif abs(self.Xmin - self.x1) > abs(self.Xmin - self.x2):
-            self.slope =  (self.Ymin - self.y1) / (self.Xmin - self.x1)
-        self.degree = int(math.degrees(self.slope))
+                self.slope =  (self.Ymin - self.y1) / (self.Xmin - self.x1)
+            # elif (self.x2 - self.Xmin) == 0 or (self.Xmin - self.x1) == 0:    #斜率計算公式（利用最低點與某一邊做判斷）
+            #     if abs(self.Xmin - self.x1) <= abs(self.Xmin - self.x2):
+            #         self.slope =  (self.y2 - self.Ymin) / 0.00001
+            #         print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+            #     elif abs(self.Xmin - self.x1) > abs(self.Xmin - self.x2):
+            #         self.slope =  (self.Ymin - self.y1) / 0.00001
+            #         print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+            self.degree = int(math.degrees(self.slope))
+        
         self.first_red = True
         self.b = True
+        # print('slope = ',self.slope)
+        # print('============================================')
+        # print('x1 = ',self.x1)
+        # print('============================================')
+        # print('x2 = ',self.x2)
+        # print('============================================')
+        # print('xmin = ',self.Xmin)
+        # print('============================================')
+        # print('Ymin = ',self.Ymin)
+        # print('============================================')
+        # print('Y1 = ',self.y1)
+        # print('============================================')
+        # print('Y2 = ',self.y2)
+        # print('============================================')
 #----------------------------------------------------------------------#藍黃深度（最常用）
         self.Deep_Matrix = []
         for compress_width in range(0, 32, 1):
