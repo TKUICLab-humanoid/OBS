@@ -210,7 +210,7 @@ def Normal_Obs_Parameter():
     Dx = Xc - Xb
 
 #-----------------------------Parameter------------------------------------
-def Move(Straight_status = 0 ,x = -200 ,y = 100 ,z = 0 ,theta = 1  ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -500 ,y = -200 ,z = 0 ,theta = 2  ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
 
     if Straight_status == 0:            #stay
@@ -231,10 +231,10 @@ def Move(Straight_status = 0 ,x = -200 ,y = 100 ,z = 0 ,theta = 1  ,sensor = 0 )
         else:
             # send.sendContinuousValue(x + Goal_speed,y,z,theta + imu_angle,sensor)
             if Yaw_wen > 0: #-13修右 -8
-                send.sendContinuousValue(x,y +400,z,theta + imu_angle,sensor)
+                send.sendContinuousValue(x,y +700,z,theta + imu_angle,sensor)
                 print('imu fix rightttttttttttttttt')
             elif Yaw_wen <= 0: #8修左 
-                send.sendContinuousValue(x,y -900 ,z,theta + imu_angle,sensor)
+                send.sendContinuousValue(x-100,y -1100 ,z,theta + imu_angle,sensor)
                 print('imu fix lefttttttttttttttttttt')
     elif Straight_status == 122:        #YLine straight
         print('Straight_status = imu fix and Speed')
@@ -252,29 +252,29 @@ def Move(Straight_status = 0 ,x = -200 ,y = 100 ,z = 0 ,theta = 1  ,sensor = 0 )
     elif Straight_status == 15:  # small forward
         print('Straight_status =  small forward')
         Slope_fix()
-        send.sendContinuousValue(1000 ,0 ,z ,2 + slope_angle,sensor)
+        send.sendContinuousValue(1000 ,-200 ,z ,3 + slope_angle,sensor)
 
     elif Straight_status == 16:  #small back
         print('Straight_status =  small back')
         Slope_fix()
-        send.sendContinuousValue(-1300 ,0 ,z ,1 + slope_angle ,sensor)
+        send.sendContinuousValue(-1300 ,-200 ,z ,2 + slope_angle ,sensor)
 
 #---------------------Turn Head Parameter-------------------------#
     elif Straight_status == 21:  #turn right
         print('Straight_status = turn right')
-        send.sendContinuousValue(-500 ,600 ,z ,-10 ,sensor)
+        send.sendContinuousValue(-500 ,600 ,z ,-9 ,sensor)
 
     elif Straight_status == 22:  #right turn back
         print('Straight_status = right turn back')
-        send.sendContinuousValue(-300 ,-900 ,z ,9 ,sensor)
+        send.sendContinuousValue(-300 ,-1000 ,z ,9 ,sensor)
 
     elif Straight_status == 23:  #turn left
         print('Straight_status = turn left')
-        send.sendContinuousValue(-500 ,-800 ,z ,9 ,sensor)
+        send.sendContinuousValue(-500 ,-1000 ,z ,9 ,sensor)
 
     elif Straight_status == 24:  #left turn back
         print('Straight_status = left turn back')
-        send.sendContinuousValue(-200 ,800 ,z ,-7 ,sensor)
+        send.sendContinuousValue(-500 ,400 ,z ,-7 ,sensor)
 
 #--------------------turn head go straight------------------------#
     elif Straight_status == 25:  #turn right fix left
@@ -314,7 +314,7 @@ def Move(Straight_status = 0 ,x = -200 ,y = 100 ,z = 0 ,theta = 1  ,sensor = 0 )
             Slope_fix() 
         if send.color_mask_subject_size[5][0] ==0 :           #黃線出障礙物的平移
             rx = 0
-        send.sendContinuousValue(-300 + rx , -1000 ,0 ,0 + slope_angle ,0) 
+        send.sendContinuousValue(-400 + rx , -1000 ,0 ,2 + slope_angle ,0) 
     
     elif Straight_status == 33:  #slope fix left
         print('Straight_status = slope fix left')
@@ -328,7 +328,7 @@ def Move(Straight_status = 0 ,x = -200 ,y = 100 ,z = 0 ,theta = 1  ,sensor = 0 )
             Slope_fix() 
         if send.color_mask_subject_size[5][0] ==0 :           #黃線出障礙物的平移
             rx = 0
-        send.sendContinuousValue(-200 + rx , 500 ,0 ,2 + slope_angle ,0) 
+        send.sendContinuousValue(-500 + rx , 800 ,0 ,3 + slope_angle ,0) 
 
 #--------------------Preturn Head Parameter-----------------------#
     elif Straight_status == 41:  #preturn left
@@ -403,6 +403,7 @@ def Y_Line_avoid():
     Image_Init()
     Normal_Obs_Parameter()
     Image_Info()
+    send.sendContinuousValue(0, 0 , 0 , 0 , 0)
     if L_line == True :
         if C_Deep > 10 :                    #直走至靠近障礙物 線在左邊
             while C_Deep > 10 :
@@ -550,6 +551,7 @@ def YY_avoid():                 #黃色通道
     Image_Init()
     Normal_Obs_Parameter()
     Image_Info()
+    send.sendContinuousValue(0, 0 , 0 , 0 , 0)
     if L_line == True :
         if C_Deep > 10 :                    #直走至靠近障礙物 線在左邊
             while C_Deep > 10 :
@@ -672,6 +674,7 @@ def Turn_Head():
         time.sleep(1)
         Image_Init()
         Normal_Obs_Parameter()
+        send.sendContinuousValue(0, 0 , 0 , 0 , 0)
         if abs(Dx) >=1  :               #直走且imu修正
             while abs(Dx) >= 1 : 
                 Image_Init()
@@ -688,7 +691,7 @@ def Turn_Head():
                 else :
                     Move(Straight_status = 26)
                     print(' Dx = ',Dx)
-                # if C_Deep == 24 and R_Deep == 24:
+                # if C_Deep == 24 and R_Deep == 24:# MRT
                 #     Move(Straight_status = 15)
                 #     time.sleep(1)
                 #     break
@@ -702,8 +705,8 @@ def Turn_Head():
             print('YYYline___right')
             Y_Line_avoid()
         get_IMU()
-        if abs(Yaw_wen) > 40:             #右轉回正
-            while abs(Yaw_wen) > 40:
+        if abs(Yaw_wen) > 60:             #右轉回正
+            while abs(Yaw_wen) > 60:
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
@@ -739,6 +742,7 @@ def Turn_Head():
         time.sleep(1)
         Image_Init()
         Normal_Obs_Parameter()
+        send.sendContinuousValue(0, 0 , 0 , 0 , 0)
         if  abs(Dx) >= 1 :                          #直走且imu修正
             while  abs(Dx) >= 1 :
                 print('DDDDeep = ',L_Deep)
@@ -764,7 +768,7 @@ def Turn_Head():
                 else :
                     Move(Straight_status = 28) 
                     print(' Dx = ',Dx)
-                # if C_Deep == 24 and L_Deep == 24:
+                # if C_Deep == 24 and L_Deep == 24:#MRT
                 #     Move(Straight_status = 15)
                 #     time.sleep(1)
                 #     break
@@ -887,7 +891,7 @@ def IMU_Angle():
 def Straight_Speed():
     global Goal_speed 
     if Dy ==24:
-        Goal_speed = 2500
+        Goal_speed = 2700
     elif 20 <= Dy < 24:
         Goal_speed = 2000
     elif 16 <= Dy < 20:
@@ -1035,9 +1039,9 @@ if __name__ == '__main__':
                 #==============================image===============================
                 Focus_Matrix = [6, 7, 8, 8, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 8, 8, 7, 6]
                 # Focus_Matrix = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]#6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6
-                YYDS = 2   #Y_Line_Deep 2  4
-                CRMax = 55 #R_Max       65 35
-                CRMin = 45 #R_MIn       55 25
+                YYDS =  4   #Y_Line_Deep 2  4
+                CRMax = 55 #R_Max       65 55
+                CRMin = 45 #R_MIn       55 45
 
                 Image_Init()
                 Normal_Obs_Parameter()
@@ -1082,10 +1086,18 @@ if __name__ == '__main__':
                         send.sendHeadMotor(1,2048,100)
                         send.sendHeadMotor(2,1800,100)
                         time.sleep(0.5)
+                        send.sendContinuousValue(0, 0 , 0 , 0 , 0)
+                   
                     elif First_Reddoor == True :
-                        print('YYYYYYYYYYYYYYYMMMMMMMMMIIIIIIIIINNNNNNNNN = ',send.color_mask_subject_YMax[5][0])
-                        print('slope = ',deep.slope)
 
+                        print('YYYYYYYYYYYYYYYMMMMMMMMMIIIIIIIIINNNNNNNNN = ',send.color_mask_subject_YMax[5][0])
+                        if send.color_mask_subject_YMax[5][0] > 235:
+                            while send.color_mask_subject_YMax[5][0] > 235:
+                                Image_Init()
+                                Normal_Obs_Parameter()
+                                Image_Info()
+                                Move(Straight_status = 16)
+                        print('slope = ',deep.slope)
                         if abs(deep.slope) > 0.03 and (slope_flag == True):                     #不平行紅門時修斜率
                             while abs(deep.slope) > 0.03 or slope_flag == True:
                                 Slope_fix()
