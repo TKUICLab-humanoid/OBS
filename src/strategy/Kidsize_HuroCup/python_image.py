@@ -210,7 +210,7 @@ def Normal_Obs_Parameter():
     Dx = Xc - Xb
 
 #-----------------------------Parameter------------------------------------
-def Move(Straight_status = 0 ,x = -500 ,y = -200 ,z = 0 ,theta = 2  ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -300 ,y = -100 ,z = 0 ,theta = 2  ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
 
     if Straight_status == 0:            #stay
@@ -231,10 +231,10 @@ def Move(Straight_status = 0 ,x = -500 ,y = -200 ,z = 0 ,theta = 2  ,sensor = 0 
         else:
             # send.sendContinuousValue(x + Goal_speed,y,z,theta + imu_angle,sensor)
             if Yaw_wen > 0: #-13修右 -8
-                send.sendContinuousValue(x,y +700,z,theta + imu_angle,sensor)
+                send.sendContinuousValue(x,y +600,z,theta + imu_angle,sensor)
                 print('imu fix rightttttttttttttttt')
             elif Yaw_wen <= 0: #8修左 
-                send.sendContinuousValue(x-100,y -1100 ,z,theta + imu_angle,sensor)
+                send.sendContinuousValue(x-100,y -900 ,z,theta + imu_angle,sensor)
                 print('imu fix lefttttttttttttttttttt')
     elif Straight_status == 122:        #YLine straight
         print('Straight_status = imu fix and Speed')
@@ -247,17 +247,17 @@ def Move(Straight_status = 0 ,x = -500 ,y = -200 ,z = 0 ,theta = 2  ,sensor = 0 
 #============================================================================#       
     elif Straight_status == 14:  #max speed
         print('Straight_status = max speed')
-        send.sendContinuousValue(2700 ,-200 ,z , 2,sensor)
+        send.sendContinuousValue(2700 ,-400 ,z , 1,sensor)
 
     elif Straight_status == 15:  # small forward
         print('Straight_status =  small forward')
         Slope_fix()
-        send.sendContinuousValue(1000 ,-200 ,z ,3 + slope_angle,sensor)
+        send.sendContinuousValue(1000 ,-300 ,z ,2 + slope_angle,sensor)
 
     elif Straight_status == 16:  #small back
         print('Straight_status =  small back')
         Slope_fix()
-        send.sendContinuousValue(-1300 ,-200 ,z ,2 + slope_angle ,sensor)
+        send.sendContinuousValue(-1300 ,-300 ,z ,2 + slope_angle ,sensor)
 
 #---------------------Turn Head Parameter-------------------------#
     elif Straight_status == 21:  #turn right
@@ -266,7 +266,7 @@ def Move(Straight_status = 0 ,x = -500 ,y = -200 ,z = 0 ,theta = 2  ,sensor = 0 
 
     elif Straight_status == 22:  #right turn back
         print('Straight_status = right turn back')
-        send.sendContinuousValue(-300 ,-1000 ,z ,9 ,sensor)
+        send.sendContinuousValue(-500 ,-1200 ,z ,9 ,sensor)
 
     elif Straight_status == 23:  #turn left
         print('Straight_status = turn left')
@@ -274,7 +274,7 @@ def Move(Straight_status = 0 ,x = -500 ,y = -200 ,z = 0 ,theta = 2  ,sensor = 0 
 
     elif Straight_status == 24:  #left turn back
         print('Straight_status = left turn back')
-        send.sendContinuousValue(-500 ,400 ,z ,-7 ,sensor)
+        send.sendContinuousValue(-500 ,600 ,z ,-7 ,sensor)
 
 #--------------------turn head go straight------------------------#
     elif Straight_status == 25:  #turn right fix left
@@ -314,7 +314,7 @@ def Move(Straight_status = 0 ,x = -500 ,y = -200 ,z = 0 ,theta = 2  ,sensor = 0 
             Slope_fix() 
         if send.color_mask_subject_size[5][0] ==0 :           #黃線出障礙物的平移
             rx = 0
-        send.sendContinuousValue(-400 + rx , -1000 ,0 ,2 + slope_angle ,0) 
+        send.sendContinuousValue(-400 + rx , -1000 ,0 ,1 + slope_angle ,0) 
     
     elif Straight_status == 33:  #slope fix left
         print('Straight_status = slope fix left')
@@ -328,7 +328,7 @@ def Move(Straight_status = 0 ,x = -500 ,y = -200 ,z = 0 ,theta = 2  ,sensor = 0 
             Slope_fix() 
         if send.color_mask_subject_size[5][0] ==0 :           #黃線出障礙物的平移
             rx = 0
-        send.sendContinuousValue(-500 + rx , 800 ,0 ,3 + slope_angle ,0) 
+        send.sendContinuousValue(-400 + rx , 700 ,0 ,3 + slope_angle ,0) 
 
 #--------------------Preturn Head Parameter-----------------------#
     elif Straight_status == 41:  #preturn left
@@ -1037,11 +1037,11 @@ if __name__ == '__main__':
         while not rospy.is_shutdown():
             if send.is_start == True:
                 #==============================image===============================
-                Focus_Matrix = [6, 7, 8, 8, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 8, 8, 7, 6]
-                # Focus_Matrix = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]#6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6
+                # Focus_Matrix = [6, 7, 8, 8, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 8, 8, 7, 6]
+                Focus_Matrix = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]#6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6
                 YYDS =  4   #Y_Line_Deep 2  4
-                CRMax = 55 #R_Max       65 55
-                CRMin = 45 #R_MIn       55 45
+                CRMax = 65 #R_Max       65 55
+                CRMin = 55 #R_MIn       55 45
 
                 Image_Init()
                 Normal_Obs_Parameter()
