@@ -988,37 +988,38 @@ def Crawl():
                 time.sleep(2)
                 send.sendBodySector(299)    #基礎站姿29！！！！！！！！！！！！！！！！！！
                 time.sleep(4)
-                send.sendBodySector(123)
-                time.sleep(9)
-                time.sleep(0.5)
-                while crawl_cnt < 3:                #避免門下建模有問題 固定爬三次才抬頭
-                    send.sendBodySector(456)
-                    time.sleep(2.8)
-                    # time.sleep(0.3)
-                    crawl_cnt += 1
-                send.color_mask_subject_YMax[1][0] = 0
-                send.color_mask_subject_YMax[2][0] = 0
-                send.sendHeadMotor(1,2048,100)
-                send.sendHeadMotor(2,2500,100)
-                time.sleep(1)
-                while crawl_cnt < 8:                   #邊爬邊判斷是否離障礙物太近
-                    Image_Init()
-                    Normal_Obs_Parameter()
-                    time.sleep(0.1)
-                    print('send.color_mask_subject_YMax[2][0] = ',send.color_mask_subject_YMax[2][0])
-                    print('send.color_mask_subject_YMax[1][0] = ',send.color_mask_subject_YMax[1][0])
-                    if (send.color_mask_subject_YMax[2][0] >= 85 and send.color_mask_subject_size[2][0] > 5000) or (send.color_mask_subject_YMax[1][0] >= 60 and send.color_mask_subject_size[1][0] > 5000):
-                        break
-                    else:
-                        send.sendBodySector(456)
-                        time.sleep(2.8)
-                        #time.sleep(0.1)
-                        crawl_cnt += 1
-                send.sendBodySector(1113)
-                time.sleep(14.4)
-                time.sleep(1.5)
-                send.sendBodySector(299)    #基礎站姿29！！！！！！！！！！！！！！！！！！
-                time.sleep(1.5)
+                time.sleep(20)
+                # send.sendBodySector(123)
+                # time.sleep(9)
+                # time.sleep(0.5)
+                # while crawl_cnt < 3:                #避免門下建模有問題 固定爬三次才抬頭
+                #     send.sendBodySector(456)
+                #     time.sleep(2.8)
+                #     # time.sleep(0.3)
+                #     crawl_cnt += 1
+                # send.color_mask_subject_YMax[1][0] = 0
+                # send.color_mask_subject_YMax[2][0] = 0
+                # send.sendHeadMotor(1,2048,100)
+                # send.sendHeadMotor(2,2500,100)
+                # time.sleep(1)
+                # while crawl_cnt < 8:                   #邊爬邊判斷是否離障礙物太近
+                #     Image_Init()
+                #     Normal_Obs_Parameter()
+                #     time.sleep(0.1)
+                #     print('send.color_mask_subject_YMax[2][0] = ',send.color_mask_subject_YMax[2][0])
+                #     print('send.color_mask_subject_YMax[1][0] = ',send.color_mask_subject_YMax[1][0])
+                #     if (send.color_mask_subject_YMax[2][0] >= 85 and send.color_mask_subject_size[2][0] > 5000) or (send.color_mask_subject_YMax[1][0] >= 60 and send.color_mask_subject_size[1][0] > 5000):
+                #         break
+                #     else:
+                #         send.sendBodySector(456)
+                #         time.sleep(2.8)
+                #         #time.sleep(0.1)
+                #         crawl_cnt += 1
+                # send.sendBodySector(1113)
+                # time.sleep(14.4)
+                # time.sleep(1.5)
+                # send.sendBodySector(299)    #基礎站姿29！！！！！！！！！！！！！！！！！！
+                # time.sleep(1.5)
                 send.sendHeadMotor(1,2048,100)
                 send.sendHeadMotor(2,1550,100)
                 time.sleep(0.5)
@@ -1097,9 +1098,11 @@ if __name__ == '__main__':
                                 Normal_Obs_Parameter()
                                 Image_Info()
                                 Move(Straight_status = 16)
+
                         print('slope = ',deep.slope)
                         if abs(deep.slope) > 0.03 and (slope_flag == True):                     #不平行紅門時修斜率
                             while abs(deep.slope) > 0.03 or slope_flag == True:
+                                print('YYYYYYYYYYYYYYYMMMMMMMMMIIIIIIIIINNNNNNNNN = ',send.color_mask_subject_YMax[5][0])
                                 Slope_fix()
                                 Move(Straight_status = 31)
                                 Image_Info()
@@ -1109,7 +1112,7 @@ if __name__ == '__main__':
                             slope_Lcnt = 0
                             slope_Rcnt = 0
                             send.sendHeadMotor(1,2048,100)
-                            send.sendHeadMotor(2,1700,100)
+                            send.sendHeadMotor(2,1800,100)
                             time.sleep(0.5)
                         else :
                             if (send.color_mask_subject_YMax[5][0] < 150) and (redoor_dis == False) :     #前後距離修正（值越大離門越近） 55/65   離紅門太遠時前進
@@ -1324,6 +1327,7 @@ if __name__ == '__main__':
                         Move(Straight_status = 13)
                     print('IMU_ok ====== ' + str(IMU_ok))
             print('imuokkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk = ',IMU_ok)
+            print('YYYYYYYYYYYYYYYMMMMMMMMMIIIIIIIIINNNNNNNNN = ',send.color_mask_subject_YMax[5][0])
             if send.is_start == False:
                 print("stop")
                 if walking == True:
