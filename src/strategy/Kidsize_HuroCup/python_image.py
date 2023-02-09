@@ -257,7 +257,7 @@ def Move(Straight_status = 0 ,x = 200 ,y = 200 ,z = 0 ,theta = 0  ,sensor = 0 ):
     elif Straight_status == 16:  #small back
         print('Straight_status =  small back')
         Slope_fix()
-        send.sendContinuousValue(-500 ,100 ,z ,0 + slope_angle ,sensor)
+        send.sendContinuousValue(-500 ,300 ,z ,-1 + slope_angle ,sensor)
 
 #---------------------Turn Head Parameter-------------------------#
     elif Straight_status == 21:  #turn right
@@ -274,7 +274,7 @@ def Move(Straight_status = 0 ,x = 200 ,y = 200 ,z = 0 ,theta = 0  ,sensor = 0 ):
 
     elif Straight_status == 24:  #left turn back
         print('Straight_status = left turn back')
-        send.sendContinuousValue(100 ,400 ,z ,-4 ,sensor)
+        send.sendContinuousValue(-100 ,400 ,z ,-3 ,sensor)
 
 #--------------------turn head go straight------------------------#
     elif Straight_status == 25:  #turn right fix left
@@ -287,7 +287,7 @@ def Move(Straight_status = 0 ,x = 200 ,y = 200 ,z = 0 ,theta = 0  ,sensor = 0 ):
 
     elif Straight_status == 27:  #turn left fix right
         print('Straight_status = turn left fix right')
-        send.sendContinuousValue(1800 ,y + y_move ,z ,-2 ,sensor)
+        send.sendContinuousValue(1800 ,y + y_move ,z ,-1 ,sensor)
 
     # elif Straight_status == 277:  #turn left fix right move
     #     print('Straight_status = turn left fix right move')
@@ -295,7 +295,7 @@ def Move(Straight_status = 0 ,x = 200 ,y = 200 ,z = 0 ,theta = 0  ,sensor = 0 ):
 
     elif Straight_status == 28:  #turn left fix left
         print('Straight_status = turn left fix left')
-        send.sendContinuousValue(1800 ,y + y_move ,z ,3 ,sensor) 
+        send.sendContinuousValue(1800 ,y + y_move ,z ,4 ,sensor) 
 
 #------------------reddoor slope parameter------------------------#
     elif Straight_status == 31:  #Slope fix
@@ -682,9 +682,9 @@ def Turn_Head():
                 get_IMU()
                 print('DDDDeep = ',R_Deep)
                 if (R_Deep != 24) and (R_Deep <= 14) :                  #轉頭後直走 平移修正
-                    y_move = -800
+                    y_move = -700
                 elif (R_Deep != 24) and (R_Deep > 14) :
-                    y_move = 600
+                    y_move = 800
                 if abs(Yaw_wen) > 87 :          #視步態更動
                     Move(Straight_status = 25)
                     print(' Dx = ',Dx)
@@ -1256,7 +1256,7 @@ if __name__ == '__main__':
 
                         if abs(Yaw_wen) <= 5 :
                             IMU_ok = True
-                    elif (Dx < 17 and Dx >= 14) or (Dx <= -14 and Dx > -17) :
+                    elif (Dx < 17 and Dx >= 13) or (Dx <= -13 and Dx > -17) :
                         IMU_Angle()
                         if ((deep.line_flag == True) and (send.color_mask_subject_YMin[1][0] <= 10)) or ((send.color_mask_subject_cnts[1] == 2) and (Y_L_Deep <= 7) and (Y_R_Deep <= 7)) or ((send.color_mask_subject_XMax[1][0] >= 310) and (send.color_mask_subject_XMin[1][0] <= 10) and (send.color_mask_subject_cnts[1] == 1)):
                             Y_Line_avoid()      #黃線策略
