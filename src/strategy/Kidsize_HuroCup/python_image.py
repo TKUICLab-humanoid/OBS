@@ -70,6 +70,14 @@ XMin_two = 0
 XMax_two = 0
 B_min = 0
 B_max = 0
+Y_left = 0
+Y_right = 0
+Y_XMax_one = 0
+Y_XMin_one = 0
+Y_XMin_two = 0
+Y_XMax_two = 0
+Y_min = 0
+Y_max = 0
 First_Reddoor = False
 redoor_dis = False
 imu_flag = True
@@ -90,7 +98,7 @@ y_move = 0
 
 #==============================image===============================
 def Image_Init():
-    global Filter_Matrix, Xc, Dy, WR, WL, Xb, Dx, Xc_count, Xc_num, Deep_sum,Y_Deep_sum,Y_Deep_sum1,Y_Deep_sum2, L_Deep, R_Deep, R_min, R_max, B_min, B_max, B_left, B_right, XMax_one, XMin_one, XMin_two, XMax_two, y_move
+    global Filter_Matrix, Xc, Dy, WR, WL, Xb, Dx, Xc_count, Xc_num, Deep_sum,Y_Deep_sum,Y_Deep_sum1,Y_Deep_sum2, L_Deep, R_Deep, R_min, R_max, B_min, B_max, B_left, B_right, XMax_one, XMin_one, XMin_two, XMax_two, y_move,Y_min, Y_max, Y_left, Y_right, Y_XMax_one, Y_XMin_one, Y_XMin_two, Y_XMax_two
     Filter_Matrix = []
     Xc = 0
     Dy = 24
@@ -117,6 +125,14 @@ def Image_Init():
     XMax_two = 0
     B_min = 0
     B_max = 0
+    Y_left = 0
+    Y_right = 0
+    Y_XMax_one = 0
+    Y_XMin_one = 0
+    Y_XMin_two = 0
+    Y_XMax_two = 0
+    Y_min = 0
+    Y_max = 0
     y_move = 0
     
 
@@ -140,7 +156,7 @@ def Image_Info():
         print('slope_Lcnt = '+ str(slope_Lcnt))
 
 def Normal_Obs_Parameter():
-    global Filter_Matrix, Xc, Dy,Y_Dy,B_Dy, WR, WL, Xb, Dx, Xc_count, Xc_num, Deep_sum,Y_Deep_sum,Y_Deep_sum1,Y_Deep_sum2,B_Deep_sum, R_Deep, L_Deep, C_Deep,Y_R_Deep, Y_L_Deep, Y_C_Deep,B_R_Deep,B_L_Deep,B_C_Deep, red_flag, R_min, R_max, B_min, B_max, B_left, B_right, XMax_one, XMin_one, XMin_two, XMax_two
+    global Filter_Matrix, Xc, Dy,Y_Dy,B_Dy, WR, WL, Xb, Dx, Xc_count, Xc_num, Deep_sum,Y_Deep_sum,Y_Deep_sum1,Y_Deep_sum2,B_Deep_sum, R_Deep, L_Deep, C_Deep,Y_R_Deep, Y_L_Deep, Y_C_Deep,B_R_Deep,B_L_Deep,B_C_Deep, red_flag, R_min, R_max, B_min, B_max, B_left, B_right, XMax_one, XMin_one, XMin_two, XMax_two,Y_min, Y_max, Y_left, Y_right, Y_XMax_one, Y_XMin_one, Y_XMin_two, Y_XMax_two
     if send.color_mask_subject_size[5][0] > 5000 :                      #有紅時計算紅門資訊
         red_flag = True
         R_min = send.color_mask_subject_XMin[5][0] 
@@ -186,6 +202,24 @@ def Normal_Obs_Parameter():
     for l in range (16, 32, 1):                 #黃色深度R
         Y_Deep_sum2 += deep.ya[l]
 #--------------------------------------------------
+    if send.color_mask_subject_cnts[1] == 1 :
+        Y_min = send.color_mask_subject_XMin[1][0]
+        Y_max = send.color_mask_subject_XMax[1][0]
+    elif send.color_mask_subject_cnts[1] == 2 :
+        Y_XMax_one = send.color_mask_subject_XMax[1][0]
+        Y_XMin_one = send.color_mask_subject_XMin[1][0]
+        Y_XMin_two = send.color_mask_subject_XMin[1][1]
+        Y_XMax_two = send.color_mask_subject_XMax[1][1]
+
+    # if Y_XMin_one > Y_XMin_two	:				
+    #     Y_right = Y_XMin_one
+    # elif Y_XMin_one < Y_XMin_two :
+    #     Y_right = Y_XMin_two
+    # if Y_XMax_one > Y_XMax_two : 
+    #     Y_left = Y_XMax_two
+    # elif Y_XMax_one < Y_XMax_two :
+    #     Y_left = Y_XMax_one
+#--------------------------------------------------
     for i in range (0, 32, 1):                      #濾波矩陣
         Filter_Matrix.append(0)
         Filter_Matrix[i] = Focus_Matrix[i] - deep.aa[i]
@@ -209,7 +243,7 @@ def Normal_Obs_Parameter():
         Xb = 0
     if (send.color_mask_subject_cnts[1] == 2) and (send.color_mask_subject_YMax[1][0] >= 220) and (send.color_mask_subject_YMax[1][1] >= 220):
         Dx = 0
-    else:
+    else :
         Dx = Xc - Xb
 
 #-----------------------------Parameter------------------------------------
@@ -1057,7 +1091,7 @@ if __name__ == '__main__':
                     PreTurn_R = False
                     # PreTurn_R = True
                     send.sendHeadMotor(1,2048,100)
-                    send.sendHeadMotor(2,2700,100)
+                    send.sendHeadMotor(2,2680,100)
                     #send.sendBodySector(15)     #收手 小白
                     #send.sendBodySector(16)     #收手 小黑
                     # send.sendBodySector(1218)   #長腳
@@ -1081,6 +1115,26 @@ if __name__ == '__main__':
                             Move(Straight_status = 42)
                             # PreTurn_R = False
                     PreTurn_R = False
+                # if (send.color_mask_subject_cnts[1] == 2) and (send.color_mask_subject_YMax[1][0] >= 220) and (send.color_mask_subject_YMax[1][1] >= 220):#and (send.color_mask_subject_YMin[1][0] < 150)
+                #     if B_C_Deep >=9:
+                #         while B_C_Deep >=9:
+                #             if Y_XMax_two > 260 :
+                #                 while Y_XMax_two > 260 :
+                #                     Move(Straight_status = 14)
+                #                     if  Y_XMax_two < 260 or  send.color_mask_subject_cnts[1] == 1:
+                #                         break
+                #             if (abs(Yaw_wen) > 5) :             
+                #                 while abs(Yaw_wen) > 5:
+                #                     print("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
+                #                     Image_Init()
+                #                     Normal_Obs_Parameter()
+                #                     get_IMU()
+                #                     Move(Straight_status = 12)
+                #             if B_C_Deep >= 9 :
+                #                 Move(Straight_status = 14)
+                #             else :
+                #                 break
+                #Dx = 0
                     #if red_flag == True:                    #若有紅門
                 #     print('In Reddoor')
                 #     if First_Reddoor == False :
@@ -1171,6 +1225,8 @@ if __name__ == '__main__':
                 #                     Move(Straight_status = 32)
                 #else :
                 get_IMU()
+                print('ooooooooooooooooooooooooooooooooooooooo = ',send.color_mask_subject_size[1][0])
+                #print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx = ',Y_left)
                 if Dy < 24:
                     # if R_line == True or L_line == True:
                     #     while R_line ==True or L_line == True:
