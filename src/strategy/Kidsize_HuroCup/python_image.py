@@ -247,7 +247,7 @@ def Normal_Obs_Parameter():
         Dx = Xc - Xb
 
 #-----------------------------Parameter------------------------------------
-def Move(Straight_status = 0 ,x = -1000 ,y = 100 ,z = 0 ,theta = 0  ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -600 ,y = 100 ,z = 0 ,theta = 0  ,sensor = 0 ):
     print('Straight_status = ' + str(Straight_status))
 
     if Straight_status == 0:            #stay
@@ -284,34 +284,34 @@ def Move(Straight_status = 0 ,x = -1000 ,y = 100 ,z = 0 ,theta = 0  ,sensor = 0 
 #============================================================================#       
     elif Straight_status == 14:  #max speed
         print('Straight_status = max speed')
-        send.sendContinuousValue(2500 ,0 ,z , 0,sensor)
+        send.sendContinuousValue(3300 ,0 ,z , 0,sensor)
 
     elif Straight_status == 15:  # small forward
         print('Straight_status =  small forward')
         Slope_fix()
-        send.sendContinuousValue(1500 ,0 ,z ,0 + slope_angle,sensor)
+        send.sendContinuousValue(1500 ,300 ,z ,0 + slope_angle,sensor)
 
     elif Straight_status == 16:  #small back
         print('Straight_status =  small back')
         Slope_fix()
-        send.sendContinuousValue(-2300 ,0 ,z ,0 + slope_angle ,sensor)
+        send.sendContinuousValue(-2300 ,200 ,z ,-1 + slope_angle ,sensor)
 
 #---------------------Turn Head Parameter-------------------------#
     elif Straight_status == 21:  #turn right
         print('Straight_status = turn right')
-        send.sendContinuousValue(-1200 ,1200 ,z ,-6 ,sensor)
+        send.sendContinuousValue(-900 ,1600 ,z ,-6 ,sensor)
 
     elif Straight_status == 22:  #right turn back
         print('Straight_status = right turn back')
-        send.sendContinuousValue(-1100 ,-1300 ,z ,7 ,sensor)
+        send.sendContinuousValue(-1300 ,-1600 ,z ,7 ,sensor)
 
     elif Straight_status == 23:  #turn left
         print('Straight_status = turn left')
-        send.sendContinuousValue(-1500 ,-800 ,z ,6 ,sensor)
+        send.sendContinuousValue(-1300 ,-1900 ,z ,7 ,sensor)
 
     elif Straight_status == 24:  #left turn back
         print('Straight_status = left turn back')
-        send.sendContinuousValue(-1100 ,1400 ,z ,-6 ,sensor)
+        send.sendContinuousValue(-1000 ,1400 ,z ,-6 ,sensor)
 
 #--------------------turn head go straight------------------------#
     elif Straight_status == 25:  #turn right fix left
@@ -928,19 +928,19 @@ def IMU_Angle():
 def Straight_Speed():
     global Goal_speed 
     if Dy ==24:
-        Goal_speed = 2700
+        Goal_speed = 3300
     elif 20 <= Dy < 24:
-        Goal_speed = 2200
+        Goal_speed = 2800
     elif 16 <= Dy < 20:
-        Goal_speed = 1800
+        Goal_speed = 2000
     elif 14 <= Dy < 16:
-        Goal_speed = 1400
+        Goal_speed = 1200
     elif 12 <= Dy < 14:
-        Goal_speed = 1000
+        Goal_speed = 800
     elif 8 <= Dy < 12:
-        Goal_speed = 700
+        Goal_speed = 400
     elif 6 <= Dy < 8:
-        Goal_speed = 500
+        Goal_speed = 300
     elif 3 <= Dy < 6:
         Goal_speed = 200
     elif 0 <= Dy < 3:
@@ -973,11 +973,11 @@ def Turn_Angle(Turn_angle_status):
         elif -6 >= Dx > -8:
             Angle = 7
         elif -4 >= Dx > -6:
-            Angle = 6
-        elif -3 >= Dx > -4:
             Angle = 5
-        elif -2 >= Dx > -3:
+        elif -3 >= Dx > -4:
             Angle = 4
+        elif -2 >= Dx > -3:
+            Angle = 3
         elif 0 >= Dx > -2:
             Angle = 0
     else: 
@@ -1075,7 +1075,7 @@ if __name__ == '__main__':
             if send.is_start == True:
                 #==============================image===============================
                 # Focus_Matrix = [6, 7, 8, 8, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 8, 8, 7, 6]
-                Focus_Matrix = [0, 1, 2, 4, 5, 5, 6, 6, 6, 6, 7, 7, 7, 8, 8, 9, 9, 8, 8, 7, 7, 7, 6, 6, 6, 6, 5, 5, 4, 2, 1, 0]#6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6
+                Focus_Matrix = [0, 0, 0, 2, 4, 4, 5, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 5, 4, 4, 2, 0, 0, 0]#0, 1, 2, 4, 5, 5, 6, 6, 6, 6, 7, 7, 7, 8, 8, 9, 9, 8, 8, 7, 7, 7, 6, 6, 6, 6, 5, 5, 4, 2, 1, 0
                 YYDS =  2   #Y_Line_Deep 2  4
                 CRMax = 65 #R_Max       65 55
                 CRMin = 55 #R_MIn       55 45
@@ -1086,9 +1086,9 @@ if __name__ == '__main__':
                 #=============================strategy=============================
                 if walking == False:                        #指撥後初始動作
                     PreTurn_L = False
-                    # PreTurn_L = True
+                    #PreTurn_L = True
                     PreTurn_R = False
-                    # PreTurn_R = True
+                    #PreTurn_R = True
                     send.sendHeadMotor(1,2048,100)
                     send.sendHeadMotor(2,2680,100)
                     #send.sendBodySector(15)     #收手 小白
@@ -1100,16 +1100,16 @@ if __name__ == '__main__':
                 walking = True
                 if PreTurn_L == True :                      #指定初始向左旋轉
                     get_IMU()
-                    if abs(Yaw_wen) < 45:
-                        while abs(Yaw_wen) < 40:
+                    if abs(Yaw_wen) < 35:
+                        while abs(Yaw_wen) < 35:
                             get_IMU()
                             Move(Straight_status = 41)
                             # PreTurn_L = False
                     PreTurn_L = False
                 elif PreTurn_R == True :                        #指定初始向右旋轉 70
                     get_IMU()
-                    if abs(Yaw_wen) < 60:
-                        while abs(Yaw_wen) < 60:
+                    if abs(Yaw_wen) < 20:
+                        while abs(Yaw_wen) < 20:
                             get_IMU()
                             Move(Straight_status = 42)
                             # PreTurn_R = False
@@ -1255,7 +1255,7 @@ if __name__ == '__main__':
                             #     R_line = True
                             # else :
                             #     R_line = False
-                    if 13 > Dx > 5 :        #turn right
+                    if 13 > Dx > 6 :        #turn right
                         print('right avoid')
                         Straight_Speed()
                         #if ((deep.line_flag == True) and (send.color_mask_subject_YMin[1][0] <= 10)) or ((send.color_mask_subject_cnts[1] == 2) and (Y_L_Deep <= 7) and (Y_R_Deep <= 7)) or ((send.color_mask_subject_XMax[1][0] >= 310) and (send.color_mask_subject_XMin[1][0] <= 10) and (send.color_mask_subject_cnts[1] == 1)):
@@ -1283,7 +1283,7 @@ if __name__ == '__main__':
 
                         if abs(Yaw_wen) <= 5 :
                             IMU_ok = True
-                    elif -5 > Dx > -13 :     #turn left
+                    elif -6 > Dx > -13 :     #turn left
                         print('left avoid')
                         Straight_Speed()
                         #if ((deep.line_flag == True) and (send.color_mask_subject_YMin[1][0] <= 10)) or ((send.color_mask_subject_cnts[1] == 2) and (Y_L_Deep <= 7) and (Y_R_Deep <= 7)) or ((send.color_mask_subject_XMax[1][0] >= 310) and (send.color_mask_subject_XMin[1][0] <= 10) and (send.color_mask_subject_cnts[1] == 1)):
@@ -1333,26 +1333,33 @@ if __name__ == '__main__':
                                 Image_Init()
                                 Normal_Obs_Parameter()
                                 Image_Info()
-                                print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 
                                 if abs(Yaw_wen) < 2:        #轉頭策略
+                                    Image_Init()
+                                    Normal_Obs_Parameter()
+                                    Image_Info()
+
+                                    if (abs(Dx) < 15):
+                                        break
                                     if ( B_L_Deep < 12 ) and ( B_R_Deep < 12 ) and ( B_C_Deep < 12 ):
                                         Turn_Head()
                                         IMU_ok = True
                                         break
-                                    elif (L_Deep >= R_Deep):
+                                    elif (Dx <= 0):#L_Deep < R_Deep
                                         while(abs(Yaw_wen) < 30):
                                             get_IMU()
                                             Move(Straight_status = 23)
+                                            print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
                                         IMU_ok = True
                                         # if Dx > 0 :
                                         #     Move(Straight_status = 11)
                                         # elif Dx < 0 :
                                         break
-                                    elif (L_Deep < R_Deep):
+                                    elif (Dx > 0): #L_Deep < R_Deep
                                         while(abs(Yaw_wen) < 30):
                                             get_IMU()
                                             Move(Straight_status = 21)
+                                            print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
                                         IMU_ok = True
                                         break
                                 else:
@@ -1381,7 +1388,7 @@ if __name__ == '__main__':
                             #     pass
 
 
-                    elif (5 >= Dx >= -5) or abs(Dx) >= 17:                  #最高速直走
+                    elif (6 >= Dx >= -6) or abs(Dx) >= 17:                  #最高速直走
                         # send.sendContinuousValue(0,0,0,0,0)
                         IMU_Angle()
                         get_IMU()
