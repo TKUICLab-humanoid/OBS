@@ -19,6 +19,7 @@ from std_msgs.msg import String
 
 # YYDS = 0
 #----walking & else----
+TurnHead_Flag = False
 status = ""
 Turn_angle_status = Turn_status = Straight_status = Goal_speed = 0
 Yaw_wen = imu_angle = slope_angle = y_move = 0
@@ -42,7 +43,7 @@ Dx = Turn_value = Speed_value = 0
 red_flag = False
 CRMin = CRMax = crawl_cnt = 0
 R_min = R_max = 0
-# B_left = B_right = B_min = B_max = XMax_one = XMin_one = XMin_two = XMax_two = 0
+B_left = B_right = B_min = B_max = XMax_one = XMin_one = XMin_two = XMax_two = 0
 First_Reddoor = redoor_dis = False
 imu_flag = slope_flag = True
 BR_flag = BL_flag = False
@@ -184,6 +185,10 @@ def Normal_Obs_Parameter():
         WL += (i+1) * Filter_Matrix[i]
         if deep.aa[i] < Dy1:
             Dy1 = deep.aa[i]
+        Deep_sum += deep.aa[i]
+        L_Deep = deep.aa[4]
+        R_Deep = deep.aa[28]
+        C_Deep = deep.aa[16]
     if WL > WR:
         Xb = 31
     elif WL <= WR:
@@ -331,7 +336,7 @@ def Move(Straight_status = 0 ,x = -300 ,y = -200 ,z = 0 ,theta = -1  ,sensor = 0
     # time.sleep(0.5)
     # return status
 def update_values():#更新數值
-    global Turn_value,Speed_value,red_flag,slope_angle,Straight_status,status,Dx1,Dy1,L_line,R_line,Yaw_wen,Y_Deep_sum1,Y_Deep_sum2,B_min,B_max,B_left, B_right,crawl_cnt,R_deep_sum,L_deep_sum
+    global Deep_sum,Turn_value,Speed_value,red_flag,slope_angle,Straight_status,status,Dx1,Dy1,L_line,R_line,Yaw_wen,Y_Deep_sum1,Y_Deep_sum2,B_min,B_max,B_left, B_right,crawl_cnt,R_deep_sum,L_deep_sum
     # 移動光標到終端機的第一行
     # print("\033[H", end="")
     sys.stdout.write("\033[H")
@@ -350,14 +355,14 @@ def update_values():#更新數值
     else:
         print("crawl_cnt : Finish\n=====================================")
     print("\033[1;31;40mY_Line Flag\033[0m\nR_line : {}\t\tR_Y_Deep : {}\nL_Line : {}\t\tL_Y_Deep : {}\n=====================================".format(R_line,Y_Deep_sum2,L_line,Y_Deep_sum1))
-
+    print("Deep_sum: {}".format(Deep_sum))
     print("Rdeep: {}".format(R_deep_sum))
     print("Ldeep: {}".format(L_deep_sum))
 
     
     
 def Turn_Head():
-    global R_deep_sum, L_deep_sum, L_Deep, R_Deep, y_move
+    global R_deep_sum, L_deep_sum, L_Deep, R_Deep, y_move,TurnHead_Flag
     Move(Straight_status = 0)
     if R_line == False and L_line == False : 
         time.sleep(1)
@@ -389,9 +394,9 @@ def Turn_Head():
     else :
         R_deep_sum = 0
         L_deep_sum = 0
-    print("RDeep",R_deep_sum)
-    print("LDeep",L_deep_sum)
+
     if (R_deep_sum > L_deep_sum) or (L_line == True):        #右轉
+        
         Init_Normal_Fuzzy()
         while ( send.color_mask_subject_YMax[2][0] < 190 ):#靠近障礙物
             Init_Normal_Fuzzy()
@@ -464,17 +469,18 @@ def Turn_Head():
                 Move(Straight_status = 28) 
             if C_Deep == 24 and L_Deep ==24:#MRT
                 Move(Straight_status = 15) 
-                # time.sleep(1)
+                time.sleep(1)
                 break
         send.sendHeadMotor(1,2048,100)
         send.sendHeadMotor(2,1550,100) 
-        # time.sleep(1)
+        time.sleep(1)
         Init_Normal_Fuzzy()
         get_IMU()             
         while abs(Yaw_wen) > 50:#左轉回正    
             Init_Normal_Fuzzy()
             get_IMU()
             Move(Straight_status = 24)
+    TurnHead_Flag = False
     update_values()
     # time.sleep(0.5)
 
@@ -749,8 +755,10 @@ if __name__ == '__main__':
                         if R_line == True :
                             if YL_Deep_sum > YR_Deep_sum :
                                 R_line = True
+                                # pass
                             elif (YL_Deep_sum < YR_Deep_sum) or (YR_Deep_sum > 350) :
                                 R_line = False
+                                # pass
                         elif L_line == True :
                             if YL_Deep_sum < YR_Deep_sum :
                                 L_line = True
@@ -810,8 +818,9 @@ if __name__ == '__main__':
                                 Init_Normal_Fuzzy()
                                 if abs(Yaw_wen) < 3:        #轉頭策略
                                     if ( B_L_Deep < 15 ) and ( B_R_Deep < 15 ) and ( B_C_Deep < 20 ):
+                                        TurnHead_Flag = True
                                         Turn_Head()
-                                        IMU_ok == True
+                                        IMU_ok = True
                                         break
                                     else :
                                         break
