@@ -69,14 +69,14 @@ def Fuzzy():
     Dx = ctrl.Antecedent(np.arange(-16, 17, 1), 'Dx')
     Turn = ctrl.Consequent(np.arange(-13, 14, 1), 'Turn')
     Dx['R_Full'] = fuzz.trimf(Dx.universe, [-16, -16, -8])
-    Dx['R_O'] = fuzz.trimf(Dx.universe, [-14, -12, -3])
-    Dx['No'] = fuzz.trimf(Dx.universe, [-8, 0, 8])
-    Dx['L_O'] = fuzz.trimf(Dx.universe, [3, 12, 14])
+    Dx['R_O'] = fuzz.trimf(Dx.universe, [-14, -12, -2])
+    Dx['No'] = fuzz.trimf(Dx.universe, [-3, 0, 3])
+    Dx['L_O'] = fuzz.trimf(Dx.universe, [2, 12, 14])
     Dx['L_Full'] = fuzz.trimf(Dx.universe, [8, 16, 16])
     Turn['T_Right'] = fuzz.trimf(Turn.universe, [-13, -13, -7])
-    Turn['T_R'] = fuzz.trimf(Turn.universe, [-9, -9, -2])
-    Turn['NoTurn'] = fuzz.trimf(Turn.universe, [-4, 0, 4])
-    Turn['T_L'] = fuzz.trimf(Turn.universe, [2, 9, 9])
+    Turn['T_R'] = fuzz.trimf(Turn.universe, [-8, -8, -2])
+    Turn['NoTurn'] = fuzz.trimf(Turn.universe, [-3, 0, 3])
+    Turn['T_L'] = fuzz.trimf(Turn.universe, [2, 8, 8])
     Turn['T_Left'] = fuzz.trimf(Turn.universe, [7, 13, 13])
     rule1 = ctrl.Rule(Dx['L_Full'], Turn['T_Right'])
     rule2 = ctrl.Rule(Dx['L_O'], Turn['T_R'])
@@ -222,9 +222,9 @@ def Move(Straight_status = 0 ,x = -300 ,y = -200 ,z = 0 ,theta = -1  ,sensor = 0
     elif Straight_status == 11:
         status = "11_Turn"         #speed + turn  14 -9
         if Y_C_Deep < 12: 
-            send.sendContinuousValue(x + (Goal_speed*2),y,z,theta + Turn_value,sensor)
+            send.sendContinuousValue(x + (Speed_value*2),y,z,theta + Turn_value,sensor)
         else:
-            send.sendContinuousValue(x + Goal_speed,y,z,theta + Turn_value,sensor)
+            send.sendContinuousValue(x + Speed_value,y,z,theta + Turn_value,sensor)
     elif Straight_status == 12:        #speed + imu
         status = "12_Imu_Fix"
         if red_flag == True:
@@ -240,7 +240,7 @@ def Move(Straight_status = 0 ,x = -300 ,y = -200 ,z = 0 ,theta = -1  ,sensor = 0
         send.sendContinuousValue(2700,y-200 ,z,theta + imu_angle,sensor)
     elif Straight_status == 13:         #speed ++
         status = "13_Go_Straight"
-        send.sendContinuousValue(x + Goal_speed,y,z,-2,sensor)
+        send.sendContinuousValue(x + Speed_value,y,z,-2,sensor)
 #============================================================================#       
     elif Straight_status == 14:  #max speed
         status = "14_Max_Speed"
@@ -362,7 +362,7 @@ def update_values():#更新數值
     
     
 def Turn_Head():
-    global R_deep_sum, L_deep_sum, L_Deep, R_Deep, y_move,TurnHead_Flag
+    global R_deep_sum, L_deep_sum, L_Deep, R_Deep, y_move,TurnHead_Flag,B_C_Deep
     Move(Straight_status = 0)
     if R_line == False and L_line == False : 
         time.sleep(1)
@@ -398,10 +398,10 @@ def Turn_Head():
     if (R_deep_sum > L_deep_sum) or (L_line == True):        #右轉
         
         Init_Normal_Fuzzy()
-        while ( send.color_mask_subject_YMax[2][0] < 190 ):#靠近障礙物
+        while ( B_C_Deep > 3 ):#靠近障礙物
             Init_Normal_Fuzzy()
             Move(Straight_status = 15) 
-        while ( send.color_mask_subject_YMax[2][0] > 200 ):#遠離障礙物
+        while ( B_C_Deep < 5 ):#遠離障礙物
             Init_Normal_Fuzzy()
             Move(Straight_status = 16) 
         get_IMU()                
@@ -440,10 +440,10 @@ def Turn_Head():
             Move(Straight_status = 22)
     elif (L_deep_sum > R_deep_sum) or (R_line == True):         #左轉
         Init_Normal_Fuzzy()                 
-        while ( send.color_mask_subject_YMax[2][0] < 190 ):#靠近障礙物
+        while ( B_C_Deep  > 3 ):#靠近障礙物
             Init_Normal_Fuzzy()
             Move(Straight_status = 15)                
-        while ( send.color_mask_subject_YMax[2][0] > 200 ):#遠離障礙物
+        while ( B_C_Deep < 5 ):#遠離障礙物
             Init_Normal_Fuzzy()
             Move(Straight_status = 16) 
         get_IMU()              
@@ -667,7 +667,7 @@ if __name__ == '__main__':
 
                     time.sleep(0.5)
                     send.sendHeadMotor(1,2048,100)
-                    send.sendHeadMotor(2,1450,100)
+                    send.sendHeadMotor(2,1500,100)
                     time.sleep(0.2)
                     #send.sendBodySector(15)     #收手 小白
                     # send.sendBodySector(16)     #收手 小黑
@@ -765,7 +765,7 @@ if __name__ == '__main__':
                             elif (YL_Deep_sum > YR_Deep_sum) or (YL_Deep_sum > 350) :
                                 L_line = False
                                 
-                        if 14 > Dx1 > 3 :        #turn right
+                        if 14 > Dx1 > 2 :        #turn right
                             # if (send.color_mask_subject_YMax[2][0] >= 170) and ( abs(Yaw_wen) <= 5 ) and imu_back == False and abs(Dx1) > 3 and C_Deep != 24:        #離障礙物太近-->後退
                             #     while (send.color_mask_subject_YMax[2][0] >= 170):
                             #         Init_Normal_Fuzzy()
@@ -783,7 +783,7 @@ if __name__ == '__main__':
 
                             if abs(Yaw_wen) <= 5 :
                                 IMU_ok = True
-                        elif -3 > Dx1 > -14 :     #turn left
+                        elif -2 > Dx1 > -14 :     #turn left
                             # if (send.color_mask_subject_YMax[2][0] >= 170) and ( abs(Yaw_wen) <= 5 ) and imu_back == False and abs(Dx1) > 3 and C_Deep != 24:        #離障礙物太近-->後退
                             #     while (send.color_mask_subject_YMax[2][0] >= 170):
                             #         Init_Normal_Fuzzy()
