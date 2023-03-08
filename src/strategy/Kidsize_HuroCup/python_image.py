@@ -214,7 +214,7 @@ def Init_Normal():
     Image_Init()
     Normal_Obs_Parameter()
 #------Walking_status------
-def Move(Straight_status = 0 ,x = -300 ,y = -200 ,z = 0 ,theta = -1  ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -100 ,y = -200 ,z = 0 ,theta = 0  ,sensor = 0 ):
     global status
     if Straight_status == 0:            #stay
         send.sendContinuousValue(x,y,z,theta,sensor)
@@ -244,21 +244,21 @@ def Move(Straight_status = 0 ,x = -300 ,y = -200 ,z = 0 ,theta = -1  ,sensor = 0
 #============================================================================#       
     elif Straight_status == 14:  #max speed
         status = "14_Max_Speed"
-        send.sendContinuousValue(3000 ,-100 ,z ,-1 ,sensor)
+        send.sendContinuousValue(3000 ,-100 ,z ,0 ,sensor)
 
     elif Straight_status == 15:  # small forward
         status = "15_Small_Forward"
         Slope_fix()
-        send.sendContinuousValue(1000 ,-100 ,z ,-1 + slope_angle,sensor)
+        send.sendContinuousValue(1000 ,-100 ,z ,0 + slope_angle,sensor)
 
     elif Straight_status == 16:  #small back
         status = "16_Small_Back"
         Slope_fix()
-        send.sendContinuousValue(-1200 ,0 ,z ,-1 + slope_angle ,sensor)
+        send.sendContinuousValue(-1200 ,0 ,z ,0 + slope_angle ,sensor)
 #---------------------Turn Head Parameter-------------------------#
     elif Straight_status == 21:  #turn right
         status = "21_Turn_Right"
-        send.sendContinuousValue(-300 ,700 ,z ,-11 ,sensor)
+        send.sendContinuousValue(-300 ,700 ,z ,-9 ,sensor)
 
     elif Straight_status == 22:  #right turn back
         status = "22_Turn_Right_Back"
@@ -401,11 +401,11 @@ def Turn_Head():
         while ( B_C_Deep > 3 ):#靠近障礙物
             Init_Normal_Fuzzy()
             Move(Straight_status = 15) 
-        while ( B_C_Deep < 5 ):#遠離障礙物
+        while ( B_C_Deep < 4 ):#遠離障礙物
             Init_Normal_Fuzzy()
             Move(Straight_status = 16) 
         get_IMU()                
-        while abs(Yaw_wen) < 70:#靠近後右旋轉至90度
+        while abs(Yaw_wen) < 65:#靠近後右旋轉至90度
             Init_Normal()
             get_IMU()
             Move(Straight_status = 21)
@@ -421,7 +421,7 @@ def Turn_Head():
                 y_move = -800
             elif (R_Deep != 24) and (R_Deep > 14) :
                 y_move = 600
-            if abs(Yaw_wen) > 87 :          #視步態更動
+            if abs(Yaw_wen) > 80 :          #視步態更動
                 Move(Straight_status = 25)
             else :
                 Move(Straight_status = 26)
@@ -443,7 +443,7 @@ def Turn_Head():
         while ( B_C_Deep  > 3 ):#靠近障礙物
             Init_Normal_Fuzzy()
             Move(Straight_status = 15)                
-        while ( B_C_Deep < 5 ):#遠離障礙物
+        while ( B_C_Deep < 4 ):#遠離障礙物
             Init_Normal_Fuzzy()
             Move(Straight_status = 16) 
         get_IMU()              
@@ -490,16 +490,16 @@ def Crawl():
         if(send.color_mask_subject_YMax[5][0] < CRMin):            #前進修正
             Slope_fix()
             Move(Straight_status = 15)
-            print('crawlllllll forwardddddddddd')
+            # print('crawlllllll forwardddddddddd')
         elif(send.color_mask_subject_YMax[5][0] > CRMax):          #後退修正
             Slope_fix()
             Move(Straight_status = 16)
-            print('crawlllllll backkkkkkkk')
+            # print('crawlllllll backkkkkkkk')
         elif CRMin <= send.color_mask_subject_YMax[5][0] <= CRMax:    #爬                              
             while abs(deep.slope) > 0.03:#不平行紅門時修斜率
                 Slope_fix()
                 Move(Straight_status = 31)
-            print('CCCCCCCCCCCCCCCCRWAL')
+            # print('CCCCCCCCCCCCCCCCRWAL')
             send.sendContinuousValue(0, 0 , 0 , 0 , 0) 
             time.sleep(2000)
             # send.sendBodyAuto(0,0,0,0,1,0)
@@ -671,8 +671,10 @@ if __name__ == '__main__':
                     time.sleep(0.2)
                     #send.sendBodySector(15)     #收手 小白
                     # send.sendBodySector(16)     #收手 小黑
-                    # send.sendBodySector(1218)   #長腳
-                    # time.sleep(2.5)
+                    send.sendBodySector(5555)   #長腳
+                    time.sleep(6.5)
+                    send.sendBodySector(1218)   #長腳
+                    time.sleep(2.5)
                     send.sendBodyAuto(0,0,0,0,1,0)
                     time.sleep(1.5) 
                 walking = True
@@ -689,7 +691,7 @@ if __name__ == '__main__':
                         Move(Straight_status = 42)
                     PreTurn_R = False
                 if red_flag == True:                    #若有紅門
-                    print('In Reddoor')
+                    # print('In Reddoor')
                     if First_Reddoor == False :
                         First_Reddoor = True
                         send.sendHeadMotor(1,2048,100)
@@ -724,27 +726,27 @@ if __name__ == '__main__':
                                         Move(Straight_status = 31)
                                     Crawl()
                                 elif (B_min < 2 and B_max > 20):
-                                    print('move R 11111')
+                                    # print('move R 11111')
                                     BR_flag = True
                                     BL_flag = False
                                     Move(Straight_status = 32)
                                 elif (B_max > 315 and B_min < 300):
-                                    print('move L 11111')
+                                    # print('move L 11111')
                                     BL_flag = True
                                     BR_flag = False
                                     Move(Straight_status = 33)
                                 else :
                                     if BR_flag == True:
                                         Move(Straight_status = 32)
-                                        print('BBBBBBBBBBBBBBRRRRRRRRRRR =',BR_flag)
+                                        # print('BBBBBBBBBBBBBBRRRRRRRRRRR =',BR_flag)
                                     elif BL_flag == True:
                                         Move(Straight_status = 33)
-                                        print('BBBBBBBBBBLLLLLLLLLLLLLLLLLLLL = ',BL_flag)
+                                        # print('BBBBBBBBBBLLLLLLLLLLLLLLLLLLLL = ',BL_flag)
                             elif R_min < 2 and R_max < 315 : 
-                                print('move L')
+                                # print('move L')
                                 Move(Straight_status = 33)
                             elif R_min > 2 and R_max > 315 : 
-                                print('move R')
+                                # print('move R')
                                 Move(Straight_status = 32)
                 else :
                     get_IMU()
@@ -859,10 +861,15 @@ if __name__ == '__main__':
                     send.sendContinuousValue(0,0,0,0,0)
                     time.sleep(1.5) 
                     send.sendBodyAuto(0,0,0,0,1,0)
-                    # time.sleep(1)
+                    time.sleep(1)
+                    send.sendBodySector(6666)
+                    time.sleep(6.5)
                     # send.sendBodySector(299)
+                    send.sendBodySector(1812)
                     walking = False
                     update_values() 
                     IMU_Yaw_ini()
+            Init_Normal_Fuzzy()        
+            update_values() 
     except rospy.ROSInterruptException:
         pass
