@@ -1075,7 +1075,7 @@ if __name__ == '__main__':
                     PreTurn_L = False
                     #PreTurn_L = True
                     PreTurn_R = False
-                    PreTurn_R = True
+                    #PreTurn_R = True
                     time.sleep(0.5)
                     send.sendHeadMotor(1,2048,100)
                     send.sendHeadMotor(2,head_height,100)
