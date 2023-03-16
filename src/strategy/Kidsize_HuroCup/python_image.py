@@ -1226,7 +1226,7 @@ if __name__ == '__main__':
                             #     R_line = True
                             # else :
                             #     R_line = False
-                    if 14 > Dx > 3 :        #turn right
+                    if 13 > Dx > 3 :        #turn right
                         print('right avoid')
                         Straight_Speed()
                         #if ((deep.line_flag == True) and (send.color_mask_subject_YMin[1][0] <= 10)) or ((send.color_mask_subject_cnts[1] == 2) and (Y_L_Deep <= 7) and (Y_R_Deep <= 7)) or ((send.color_mask_subject_XMax[1][0] >= 310) and (send.color_mask_subject_XMin[1][0] <= 10) and (send.color_mask_subject_cnts[1] == 1)):
@@ -1254,7 +1254,7 @@ if __name__ == '__main__':
 
                         if abs(Yaw_wen) <= 5 :
                             IMU_ok = True
-                    elif -3 > Dx > -14 :     #turn left
+                    elif -3 > Dx > -13 :     #turn left
                         print('left avoid')
                         Straight_Speed()
                         #if ((deep.line_flag == True) and (send.color_mask_subject_YMin[1][0] <= 10)) or ((send.color_mask_subject_cnts[1] == 2) and (Y_L_Deep <= 7) and (Y_R_Deep <= 7)) or ((send.color_mask_subject_XMax[1][0] >= 310) and (send.color_mask_subject_XMin[1][0] <= 10) and (send.color_mask_subject_cnts[1] == 1)):
@@ -1353,7 +1353,7 @@ if __name__ == '__main__':
                 elif Dy == 24:
                     print('go straight')
                     Straight_Speed()
-                    Move(Straight_status = 13)
+                    Move(Straight_status = 14)
                     #L_line = False
                     #R_line = False
                 print('IMU_ok ====== ' + str(IMU_ok))
