@@ -1567,7 +1567,7 @@ if __name__ == '__main__':
                     # send.sendContinuousValue(0,0,0,0,0)
                     print('go straight')
                     Straight_Speed()
-                    Move(Straight_status = 13)
+                    Move(Straight_status = 14)
                 print('IMU_ok ====== ' + str(IMU_ok))
             if send.is_start == False:
                 print("stop")
