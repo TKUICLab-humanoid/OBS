@@ -227,11 +227,8 @@ def Normal_Obs_Parameter():
     
 
 #-----------------------------Parameter------------------------------------
-<<<<<<< HEAD
-def Move(Straight_status = 0 ,x = 200 ,y = 400 ,z = 0 ,theta = -1  ,sensor = 0 ):
-=======
 def Move(Straight_status = 0 ,x = -300 ,y = -200 ,z = 0 ,theta = -1  ,sensor = 0 ):
->>>>>>> ff5a722829cea9f72c16c4ee20a98c391cd977b6
+
     print('Straight_status = ' + str(Straight_status))
 
     if Straight_status == 0:            #stay
@@ -251,19 +248,11 @@ def Move(Straight_status = 0 ,x = -300 ,y = -200 ,z = 0 ,theta = -1  ,sensor = 0
             send.sendContinuousValue(x,y,z,theta + imu_angle,sensor)
         else:
             # send.sendContinuousValue(x + Goal_speed,y,z,theta + imu_angle,sensor)
-<<<<<<< HEAD
-            if Yaw_wen > 0: #-13修右 -8
-                send.sendContinuousValue(-100,1300,z,theta + imu_angle,sensor)
-                print('imu fix rightttttttttttttttt')
-            elif Yaw_wen <= 0: #8修左 
-                send.sendContinuousValue(100,-300 ,z,theta + imu_angle,sensor)
-=======
             if Yaw_wen > 0: #-13修右-11
                 send.sendContinuousValue(x-100,y +700,z,theta + imu_angle,sensor)
                 print('imu fix rightttttttttttttttt')
             elif Yaw_wen <= 0: #9修左
                 send.sendContinuousValue(x-100,y -1000 ,z,theta + imu_angle,sensor)
->>>>>>> ff5a722829cea9f72c16c4ee20a98c391cd977b6
                 print('imu fix lefttttttttttttttttttt')
     elif Straight_status == 122:        #YLine straight
         print('Straight_status = imu fix and Speed')
@@ -276,48 +265,21 @@ def Move(Straight_status = 0 ,x = -300 ,y = -200 ,z = 0 ,theta = -1  ,sensor = 0
 #============================================================================#       
     elif Straight_status == 14:  #max speed
         print('Straight_status = max speed')
-<<<<<<< HEAD
-        send.sendContinuousValue(2500 ,400 ,z , 0,sensor)
-=======
         send.sendContinuousValue(3000 ,-100 ,z ,-1 ,sensor)
->>>>>>> ff5a722829cea9f72c16c4ee20a98c391cd977b6
 
     elif Straight_status == 15:  # small forward
         print('Straight_status =  small forward')
         Slope_fix()
-<<<<<<< HEAD
-        send.sendContinuousValue(1500 ,400 ,z ,-1 + slope_angle,sensor)
-=======
         send.sendContinuousValue(1000 ,-100 ,z ,-1 + slope_angle,sensor)
->>>>>>> ff5a722829cea9f72c16c4ee20a98c391cd977b6
 
     elif Straight_status == 16:  #small back
         print('Straight_status =  small back')
         Slope_fix()
-<<<<<<< HEAD
-        send.sendContinuousValue(-1000 ,300 ,z ,-1 + slope_angle ,sensor)
-=======
         send.sendContinuousValue(-1200 ,0 ,z ,-1 + slope_angle ,sensor)
->>>>>>> ff5a722829cea9f72c16c4ee20a98c391cd977b6
 
 #---------------------Turn Head Parameter-------------------------#
     elif Straight_status == 21:  #turn right
         print('Straight_status = turn right')
-<<<<<<< HEAD
-        send.sendContinuousValue(100 ,1100 ,z ,-5 ,sensor)
-
-    elif Straight_status == 22:  #right turn back
-        print('Straight_status = right turn back')
-        send.sendContinuousValue(100 ,-300 ,z ,5 ,sensor)
-
-    elif Straight_status == 23:  #turn left
-        print('Straight_status = turn left')
-        send.sendContinuousValue(100 ,-300 ,z ,5 ,sensor)
-
-    elif Straight_status == 24:  #left turn back
-        print('Straight_status = left turn back')
-        send.sendContinuousValue(-100 ,1300 ,z ,-5 ,sensor)
-=======
         send.sendContinuousValue(-300 ,700 ,z ,-11 ,sensor)
 
     elif Straight_status == 22:  #right turn back
@@ -332,7 +294,6 @@ def Move(Straight_status = 0 ,x = -300 ,y = -200 ,z = 0 ,theta = -1  ,sensor = 0
         print('Straight_status = left turn back')
         send.sendContinuousValue(-300 ,600 ,z ,-10 ,sensor)
         # send.sendContinuousValue(-500 ,900 ,z ,-11 ,sensor)
->>>>>>> ff5a722829cea9f72c16c4ee20a98c391cd977b6
 
 #--------------------turn head go straight------------------------#
     elif Straight_status == 25:  #turn right fix left
@@ -341,11 +302,7 @@ def Move(Straight_status = 0 ,x = -300 ,y = -200 ,z = 0 ,theta = -1  ,sensor = 0
 
     elif Straight_status == 26:  #turn right fix right
         print('Straight_status = turn right fix right')
-<<<<<<< HEAD
-        send.sendContinuousValue(1800 ,y + y_move ,z ,-2 ,sensor)
-=======
         send.sendContinuousValue(1800 ,y + y_move ,z ,-8 ,sensor)
->>>>>>> ff5a722829cea9f72c16c4ee20a98c391cd977b6
 
     elif Straight_status == 27:  #turn left fix right
         print('Straight_status = turn left fix right')
@@ -357,11 +314,8 @@ def Move(Straight_status = 0 ,x = -300 ,y = -200 ,z = 0 ,theta = -1  ,sensor = 0
 
     elif Straight_status == 28:  #turn left fix left
         print('Straight_status = turn left fix left')
-<<<<<<< HEAD
-        send.sendContinuousValue(1800 ,y + y_move ,z ,2 ,sensor) 
-=======
         send.sendContinuousValue(1800 ,y + y_move ,z ,6 ,sensor) 
->>>>>>> ff5a722829cea9f72c16c4ee20a98c391cd977b6
+
 
 #------------------reddoor slope parameter------------------------#
     elif Straight_status == 31:  #Slope fix
@@ -380,11 +334,7 @@ def Move(Straight_status = 0 ,x = -300 ,y = -200 ,z = 0 ,theta = -1  ,sensor = 0
             Slope_fix() 
         if send.color_mask_subject_size[5][0] ==0 :           #黃線出障礙物的平移
             rx = 0
-<<<<<<< HEAD
-        send.sendContinuousValue(-400 + rx , -1000 ,0 ,1 + slope_angle ,0) 
-=======
         send.sendContinuousValue(-300 + rx , -1000 ,0 ,-3 + slope_angle ,0) 
->>>>>>> ff5a722829cea9f72c16c4ee20a98c391cd977b6
     
     elif Straight_status == 33:  #slope fix left
         print('Straight_status = slope fix left')
@@ -398,11 +348,7 @@ def Move(Straight_status = 0 ,x = -300 ,y = -200 ,z = 0 ,theta = -1  ,sensor = 0
             Slope_fix() 
         if send.color_mask_subject_size[5][0] ==0 :           #黃線出障礙物的平移
             rx = 0
-<<<<<<< HEAD
-        send.sendContinuousValue(-400 + rx , 700 ,0 ,3 + slope_angle ,0) 
-=======
         send.sendContinuousValue(-400 + rx , 800 ,0 ,1 + slope_angle ,0) 
->>>>>>> ff5a722829cea9f72c16c4ee20a98c391cd977b6
 
 #--------------------Preturn Head Parameter-----------------------#
     elif Straight_status == 41:  #preturn left
@@ -477,11 +423,7 @@ def Y_Line_avoid():
     Image_Init()
     Normal_Obs_Parameter()
     Image_Info()
-<<<<<<< HEAD
-    send.sendContinuousValue(0, 0 , 0 , 0 , 0)
-=======
     send.sendContinuousValue(0,0,0,0,0)
->>>>>>> ff5a722829cea9f72c16c4ee20a98c391cd977b6
     if L_line == True :
         if C_Deep > 10 :                    #直走至靠近障礙物 線在左邊
             while C_Deep > 10 :
@@ -629,11 +571,7 @@ def YY_avoid():                 #黃色通道
     Image_Init()
     Normal_Obs_Parameter()
     Image_Info()
-<<<<<<< HEAD
-    send.sendContinuousValue(0, 0 , 0 , 0 , 0)
-=======
     send.sendContinuousValue(0,0,0,0,0)
->>>>>>> ff5a722829cea9f72c16c4ee20a98c391cd977b6
     if L_line == True :
         if C_Deep > 10 :                    #直走至靠近障礙物 線在左邊
             while C_Deep > 10 :
@@ -730,26 +668,14 @@ def Turn_Head():
         Image_Init()
         Normal_Obs_Parameter()
         Image_Info()
-<<<<<<< HEAD
-        ##if ( send.color_mask_subject_YMax[2][0] < 220 ):                #靠近障礙物
-        ##    while ( send.color_mask_subject_YMax[2][0] < 220 ):
-        if (B_C_Deep > 3):                   #靠近障礙物
-            while ( B_C_Deep > 3 ):
-=======
         if ( send.color_mask_subject_YMax[2][0] < 190 ):                #靠近障礙物
             while ( send.color_mask_subject_YMax[2][0] < 190 ):
->>>>>>> ff5a722829cea9f72c16c4ee20a98c391cd977b6
                 Image_Init()
                 Normal_Obs_Parameter()
                 Image_Info()
                 Move(Straight_status = 15) 
-<<<<<<< HEAD
-        elif ( B_C_Deep < 2 ):                #遠離障礙物
-            while ( B_C_Deep < 2 ):
-=======
         elif ( send.color_mask_subject_YMax[2][0] > 200):                #遠離障礙物
             while ( send.color_mask_subject_YMax[2][0] > 200 ):
->>>>>>> ff5a722829cea9f72c16c4ee20a98c391cd977b6
                 Image_Init()
                 Normal_Obs_Parameter()
                 Image_Info()
