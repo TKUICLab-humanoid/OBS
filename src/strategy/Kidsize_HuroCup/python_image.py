@@ -21,6 +21,7 @@ from std_msgs.msg import String
 #----walking & else----
 TurnHead_Flag = False
 status = ""
+status2 = ""
 Turn_angle_status = Turn_status = Straight_status = Goal_speed = 0
 Yaw_wen = imu_angle = slope_angle = y_move = 0
 walking = IMU_ok = False
@@ -649,11 +650,23 @@ if __name__ == '__main__':
         deep = deep_calculate()
         send = Sendmessage() 
         while not rospy.is_shutdown():
+            send.drawImageFunction(1,0,0,40,170,170,255,0,0)
+            send.drawImageFunction(2,0,40,100,160,160,255,0,0)
+            send.drawImageFunction(3,0,100,220,150,150,255,0,0)
+            send.drawImageFunction(4,0,220,280,160,160,255,0,0)
+            send.drawImageFunction(5,0,280,320,170,170,255,0,0)
+
+            send.drawImageFunction(6,0,40,40,170,160,255,0,0)
+            send.drawImageFunction(7,0,100,100,160,150,255,0,0)
+            send.drawImageFunction(8,0,220,220,160,150,255,0,0)
+            send.drawImageFunction(9,0,280,280,170,160,255,0,0)
+            # send.drawImageFunction(5,0,160,160,0,240,255,0,0)
             if send.is_start == True:
                 #==============================image===============================
                 # Focus_Matrix = [6, 7, 8, 8, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 8, 8, 7, 6]
                 Focus_Matrix = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]#6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6
-                # YYDS = 1   #Y_Line_Deep 1  4
+                
+                YYDS = 1   #Y_Line_Deep 1  4
                 CRMax = 25 #R_Max       50 25
                 CRMin = 15 #R_MIn       40 15
                 Init_Normal_Fuzzy()
@@ -827,7 +840,7 @@ if __name__ == '__main__':
                                     else :
                                         break
                                 else:
-                                    print('IMU NOT OK')
+                                    # print('IMU NOT OK')
                                     pass
                             if (abs(Yaw_wen) < 3 and IMU_ok == True):
                                 IMU_Angle()
@@ -843,7 +856,7 @@ if __name__ == '__main__':
                                         elif Dx1 < 0 :
                                             Move(Straight_status = 11)
                                 else:
-                                    print('IMU NOT OK')
+                                    # print('IMU NOT OK')
                                     pass
                         elif (1 >= Dx1 >= -1) or abs(Dx1) >= 17:                  #最高速直走
                             IMU_Angle()
