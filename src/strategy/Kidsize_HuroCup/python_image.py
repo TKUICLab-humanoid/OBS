@@ -1422,9 +1422,9 @@ if __name__ == '__main__':
                     # time.sleep(2)
                     #send.sendBodySector(299)    #基礎站姿29！！！！！！！！！！！！！！！！！！
                     walking = False
-                #IMU_Yaw_ini()
-                #Image_Init()
-                #Normal_Obs_Parameter()
+                IMU_Yaw_ini()
+                Image_Init()
+                Normal_Obs_Parameter()
                 
             # print('walking ====== ' + str(walking))
             # print("-----------------------------------L_line=" + str(L_line))
