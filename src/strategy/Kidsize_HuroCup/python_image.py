@@ -88,7 +88,8 @@ L_line = False
 R_line = False
 y_move = 0
 head_height = 1550
-
+move_status = ""
+strategy_status = ""
 #==============================image===============================
 def Image_Init():
     global Filter_Matrix, Xc, Dy, WR, WL, Xb, Dx, Xc_count, Xc_num, Deep_sum,Y_Deep_sum,Y_Deep_sum1,Y_Deep_sum2, L_Deep, R_Deep, R_min, R_max, B_min, B_max, B_left, B_right, XMax_one, XMin_one, XMin_two, XMax_two, y_move
@@ -121,23 +122,29 @@ def Image_Init():
     y_move = 0
     
 def update_values():#更新數值
-    global  R_min,R_max,First_Reddoor,slope_flag,BR_flag,BL_flag,B_min,B_max
+    global  R_min,R_max,First_Reddoor,slope_flag,BR_flag,BL_flag,B_min,B_max,move_status,strategy_status
     # 移動光標到終端機的第一行
     # print("\033[H", end="")
     sys.stdout.write("\033[H")
     sys.stdout.write("\033[J")
-    print("Red: {}".format(send.color_mask_subject_size[5][0]))
-    print("R_min: {}".format(R_min))
-    print("R_max: {}".format(R_max))
-    print("B_min: {}".format(B_min))
-    print("B_max: {}".format(B_max))
-    print("slope: {}".format(deep.slope))
-    print("RF: {}".format(red_flag))
-    print("FRD: {}".format(First_Reddoor))
-    print("SR: {}".format(slope_flag))
-    print("Ymax: {}".format(send.color_mask_subject_YMax[5][0]))
-    print("BR_FLAG: {}".format(BR_flag))
-    print("BL_FLAG: {}".format(BL_flag))
+    # print("Red: {}".format(send.color_mask_subject_size[5][0]))
+    # print("R_min: {}".format(R_min))
+    # print("R_max: {}".format(R_max))
+    # print("B_min: {}".format(B_min))
+    # print("B_max: {}".format(B_max))
+    # print("slope: {}".format(deep.slope))
+    # print("RF: {}".format(red_flag))
+    # print("FRD: {}".format(First_Reddoor))
+    # print("SR: {}".format(slope_flag))
+    print("right_Ymax: {}".format(send.color_mask_subject_YMax[1][0]))
+    print("left_Ymax: {}".format(send.color_mask_subject_YMax[1][1]))
+    print("黃色個數: {}".format(send.color_mask_subject_cnts[1]))
+    # print("BR_FLAG: {}".format(BR_flag))
+    # print("BL_FLAG: {}".format(BL_flag))
+    print("Dx: {}".format(Dx))
+    print("move_status: {}".format(move_status))
+    print("strategy_status: {}".format(strategy_status))
+
 def Image_Info():
     # print('==============================================================')
     # if red_flag == False:
@@ -248,69 +255,79 @@ def Normal_Obs_Parameter():
 
 #-----------------------------Parameter------------------------------------
 def Move(Straight_status = 0 ,x = -200 ,y = 300 ,z = 0 ,theta = 0  ,sensor = 0 ):
-    print('Straight_status = ' + str(Straight_status))
+    global move_status
+    #print('Straight_status = ' + str(Straight_status))
 
     if Straight_status == 0:            #stay
-        print('Straight_status = stay')
+        #print('Straight_status = stay')
         send.sendContinuousValue(x,y,z,theta,sensor)
-
+        move_status = "stay"
     elif Straight_status == 11:         #speed + turn  14 -9
-        print('Straight_status = turn')
+        #print('Straight_status = turn')
+        move_status = "turn"
         if Y_C_Deep < 12: 
             send.sendContinuousValue(x + (Goal_speed*2),y,z,theta + Angle,sensor)
         else:
             send.sendContinuousValue(x + Goal_speed,y,z,theta + Angle,sensor)
-
+        
     elif Straight_status == 12:         #speed + imu
-        print('Straight_status = imu fix')
+        #print('Straight_status = imu fix')
+        move_status = "imu fix"
         if red_flag == True:
             send.sendContinuousValue(x,y,z,theta + imu_angle,sensor)
         else:
             # send.sendContinuousValue(x + Goal_speed,y,z,theta + imu_angle,sensor)
             if Yaw_wen > 0: #-13修右 -8
                 send.sendContinuousValue(-200,1100,z,theta + imu_angle,sensor)
-                print('imu fix rightttttttttttttttt')
+            #    print('imu fix rightttttttttttttttt')
             elif Yaw_wen <= 0: #8修左 
                 send.sendContinuousValue(-200,-300 ,z,theta + imu_angle,sensor)
-                print('imu fix lefttttttttttttttttttt')
+            #    print('imu fix lefttttttttttttttttttt')
     elif Straight_status == 122:        #YLine straight
-        print('Straight_status = imu fix and Speed')
+        #print('Straight_status = imu fix and Speed')
         send.sendContinuousValue(2500,y +100,z,theta + imu_angle,sensor)
 
     elif Straight_status == 13:         #speed ++
-        print('Straight_status = go straight')
+        #print('Straight_status = go straight')
         send.sendContinuousValue(x + Goal_speed,y,z,-2,sensor)
 
 #============================================================================#       
     elif Straight_status == 14:  #max speed
-        print('Straight_status = max speed')
+        #print('Straight_status = max speed')
+        move_status = "max speed"
         send.sendContinuousValue(2500 ,400 ,z , 0,sensor)
 
     elif Straight_status == 15:  # small forward
-        print('Straight_status =  small forward')
+        #print('Straight_status =  small forward')
+        move_status = "small forward"
         Slope_fix()
         send.sendContinuousValue(1500 ,400 ,z ,0 + slope_angle,sensor)
 
     elif Straight_status == 16:  #small back
-        print('Straight_status =  small back')
+        #print('Straight_status =  small back')
+        move_status = "small back"
         Slope_fix()
         send.sendContinuousValue(-1500 ,400 ,z ,-1 + slope_angle ,sensor)
 
 #---------------------Turn Head Parameter-------------------------#
     elif Straight_status == 21:  #turn right
-        print('Straight_status = turn right')
+        #print('Straight_status = turn right')
+        move_status = "turn right"
         send.sendContinuousValue(-300 ,900 ,z ,-5 ,sensor)
 
     elif Straight_status == 22:  #right turn back
-        print('Straight_status = right turn back')
+        #print('Straight_status = right turn back')
+        move_status = "right turn back"
         send.sendContinuousValue(-200 ,-300 ,z ,5 ,sensor)
 
     elif Straight_status == 23:  #turn left
-        print('Straight_status = turn left')
+        #print('Straight_status = turn left')
+        move_status = "turn left"
         send.sendContinuousValue(-300 ,-300 ,z ,5 ,sensor)
 
     elif Straight_status == 24:  #left turn back
-        print('Straight_status = left turn back')
+        #print('Straight_status = left turn back')
+        move_status = "left turn back"
         send.sendContinuousValue(-200 ,1100 ,z ,-5 ,sensor)
 
 #--------------------turn head go straight------------------------#
@@ -644,7 +661,7 @@ def YY_avoid():                 #黃色通道
 
 
 def Turn_Head():
-    global R_deep_sum, L_deep_sum, L_Deep, R_Deep, y_move,R_line,L_line
+    global R_deep_sum, L_deep_sum, L_Deep, R_Deep, y_move,R_line,L_line,strategy_status
     Move(Straight_status = 0)
     if R_line == False and L_line == False : 
         time.sleep(2)
@@ -682,6 +699,10 @@ def Turn_Head():
         L_deep_sum = 0
 
     if (R_deep_sum > L_deep_sum) or (L_line == True):        #右轉
+        if(L_line == True):
+            strategy_status = "黃線轉頭"
+        elif(L_line == False and R_line == False):
+            strategy_status = "一般轉頭"
         Image_Init()
         Normal_Obs_Parameter()
         Image_Info()
@@ -751,6 +772,10 @@ def Turn_Head():
                 get_IMU()
                 Move(Straight_status = 22)
     elif (L_deep_sum > R_deep_sum) or (R_line == True):         #左轉
+        if(R_line == True):
+            strategy_status = "黃線轉頭"
+        elif(L_line == False and R_line == False):
+            strategy_status = "一般轉頭"
         Image_Init()
         Normal_Obs_Parameter()
         Image_Info()
@@ -1100,10 +1125,10 @@ if __name__ == '__main__':
                     send.sendHeadMotor(1,2048,100)
                     send.sendHeadMotor(2,head_height,100)
                     time.sleep(0.2)
-                    send.sendBodySector(5555)
-                    time.sleep(5)
-                    send.sendBodySector(1218)
-                    time.sleep(2.5)
+                    # send.sendBodySector(5555)
+                    # time.sleep(5)
+                    # send.sendBodySector(1218)
+                    # time.sleep(2.5)
                     #send.sendBodySector(15)     #收手 小白
                     #send.sendBodySector(16)     #收手 小黑
                     # send.sendBodySector(1218)   #長腳
@@ -1382,8 +1407,8 @@ if __name__ == '__main__':
                     #L_line = False
                     #R_line = False
                 print('IMU_ok ====== ' + str(IMU_ok))
-            print('imuokkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk = ',IMU_ok)
-            print('YYYYYYYYYYYYYYYMMMMMMMMMIIIIIIIIINNNNNNNNN = ',send.color_mask_subject_YMax[5][0])
+            #print('imuokkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk = ',IMU_ok)
+            #print('YYYYYYYYYYYYYYYMMMMMMMMMIIIIIIIIINNNNNNNNN = ',send.color_mask_subject_YMax[5][0])
             if send.is_start == False:
                 print("stop")
                 if walking == True:
@@ -1391,15 +1416,15 @@ if __name__ == '__main__':
                     time.sleep(1.5) 
                     send.sendBodyAuto(0,0,0,0,1,0)
                     time.sleep(1)
-                    send.sendBodySector(6666)
-                    time.sleep(6)
-                    send.sendBodySector(1812)
-                    time.sleep(2)
+                    # send.sendBodySector(6666)
+                    # time.sleep(6)
+                    # send.sendBodySector(1812)
+                    # time.sleep(2)
                     #send.sendBodySector(299)    #基礎站姿29！！！！！！！！！！！！！！！！！！
                     walking = False
-                IMU_Yaw_ini()
-                Image_Init()
-                Normal_Obs_Parameter()
+                #IMU_Yaw_ini()
+                #Image_Init()
+                #Normal_Obs_Parameter()
                 
             # print('walking ====== ' + str(walking))
             # print("-----------------------------------L_line=" + str(L_line))
