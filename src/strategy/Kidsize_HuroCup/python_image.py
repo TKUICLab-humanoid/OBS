@@ -87,7 +87,7 @@ Y_R_flag = False
 L_line = False
 R_line = False
 y_move = 0
-head_height = 1550
+head_height = 1650
 move_status = ""
 strategy_status = ""
 #==============================image===============================
@@ -131,13 +131,16 @@ def update_values():#更新數值
     print("Red_YMAX: {}".format(send.color_mask_subject_YMax[5][0]))
     print("R_min: {}".format(R_min))
     print("R_max: {}".format(R_max))
-    print("B_min: {}".format(B_min))
-    print("B_max: {}".format(B_max))
+    print("B_Xmin: {}".format(B_min))
+    print("B_Xmax: {}".format(B_max))
+    print("B_left: {}".format(B_left))
+    print("B_right: {}".format(B_right))
     print("slope: {}".format(deep.slope))
     # print("RF: {}".format(red_flag))
     # print("FRD: {}".format(First_Reddoor))
     # print("SR: {}".format(slope_flag))
-    print("right_bmax: {}".format(send.color_mask_subject_YMax[2][0]))
+    print("B_Ymax: {}".format(send.color_mask_subject_YMax[2][0]))
+    print("B_size: {}".format(send.color_mask_subject_size[2][0]))
     # print("left_Ymax: {}".format(send.color_mask_subject_YMax[1][1]))
     # print("黃色個數: {}".format(send.color_mask_subject_cnts[1]))
     # print("BR_FLAG: {}".format(BR_flag))
@@ -255,7 +258,7 @@ def Normal_Obs_Parameter():
     
 
 #-----------------------------Parameter------------------------------------
-def Move(Straight_status = 0 ,x = -200 ,y = 200 ,z = 0 ,theta = 0  ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -300 ,y = 200 ,z = 0 ,theta = 0  ,sensor = 0 ):
     global move_status
     #print('Straight_status = ' + str(Straight_status))
 
@@ -308,7 +311,7 @@ def Move(Straight_status = 0 ,x = -200 ,y = 200 ,z = 0 ,theta = 0  ,sensor = 0 )
         #print('Straight_status =  small back')
         move_status = "small back"
         Slope_fix()
-        send.sendContinuousValue(-1500 ,400 ,z ,-1 + slope_angle ,sensor)
+        send.sendContinuousValue(-1500 ,200 ,z ,-1 + slope_angle ,sensor)
 
 #---------------------Turn Head Parameter-------------------------#
     elif Straight_status == 21:  #turn right
@@ -361,9 +364,9 @@ def Move(Straight_status = 0 ,x = -200 ,y = 200 ,z = 0 ,theta = 0  ,sensor = 0 )
     elif Straight_status == 32:  #slope fix right
         move_status = ("slope fix right")
         # print('Straight_status = slope fix right')
-        if send.color_mask_subject_YMax[5][0] < 60:
+        if send.color_mask_subject_YMax[5][0] < CRMin:
             rx = 200
-        elif send.color_mask_subject_YMax[5][0] > 70:
+        elif send.color_mask_subject_YMax[5][0] > CRMax:
             rx = -200
         else :
             rx = 0
@@ -371,14 +374,14 @@ def Move(Straight_status = 0 ,x = -200 ,y = 200 ,z = 0 ,theta = 0  ,sensor = 0 )
             Slope_fix() 
         if send.color_mask_subject_size[5][0] ==0 :           #黃線出障礙物的平移
             rx = 0
-        send.sendContinuousValue(-200 + rx , -600 ,0 ,-2 + slope_angle ,0) 
+        send.sendContinuousValue(-600 + rx , -600 ,0 ,-1 + slope_angle ,0) 
     
     elif Straight_status == 33:  #slope fix left
         move_status = ("slope fix left")
         # print('Straight_status = slope fix left')
-        if send.color_mask_subject_YMax[5][0] < 60:
+        if send.color_mask_subject_YMax[5][0] < CRMin:
             rx = 200
-        elif send.color_mask_subject_YMax[5][0] > 70:
+        elif send.color_mask_subject_YMax[5][0] > CRMax:
             rx = -200
         else :
             rx = 0
@@ -386,7 +389,7 @@ def Move(Straight_status = 0 ,x = -200 ,y = 200 ,z = 0 ,theta = 0  ,sensor = 0 )
             Slope_fix() 
         if send.color_mask_subject_size[5][0] ==0 :           #黃線出障礙物的平移
             rx = 0
-        send.sendContinuousValue(-200 + rx , 700 ,0 ,1 + slope_angle ,0) 
+        send.sendContinuousValue(-400 + rx , 800 ,0 ,1 + slope_angle ,0) 
 
 #--------------------Preturn Head Parameter-----------------------#
     elif Straight_status == 41:  #preturn left
@@ -1024,8 +1027,8 @@ def Crawl():
     global Straight_status,crawl_cnt,C_Deep,L_Deep,R_Deep,CRMax,CRMin,B_min,B_max,B_left,B_right,slope_Rcnt,slope_Lcnt
     slope_Rcnt = 0
     slope_Lcnt = 0
-    if send.color_mask_subject_YMax[5][0] < CRMin or send.color_mask_subject_YMax[5][0] > CRMax or CRMin <= send.color_mask_subject_YMax[5][0] <= CRMax:
-        while send.color_mask_subject_YMax[5][0] < CRMin or send.color_mask_subject_YMax[5][0] > CRMax or CRMin <= send.color_mask_subject_YMax[5][0] <= CRMax:
+    if send.color_mask_subject_YMax[5][0] < CRMin or send.color_mask_subject_YMax[5][0] > CRMax :
+        while send.color_mask_subject_YMax[5][0] < CRMin or send.color_mask_subject_YMax[5][0] > CRMax :
             # print('min = ',B_min)
             # print('max = ',B_max)
             # print('Left = ',B_left)
@@ -1040,6 +1043,9 @@ def Crawl():
                 Slope_fix()
                 Move(Straight_status = 16)
                 print('crawlllllll backkkkkkkk')
+            else:
+                break
+        while CRMin < send.color_mask_subject_YMax[5][0] < CRMax :
             if CRMin <= send.color_mask_subject_YMax[5][0] <= CRMax:    #爬
                 if abs(deep.slope) > 0.1:                                #不平行紅門時修斜率
                     while abs(deep.slope) > 0.1:
@@ -1062,46 +1068,46 @@ def Crawl():
                 time.sleep(2)
                 send.sendBodySector(6666)    #基礎站姿29！！！！！！！！！！！！！！！！！！
 
-                time.sleep(5)
+                time.sleep(6)
                 send.sendBodySector(7777)
-                time.sleep(20)
-                # while crawl_cnt < 3:                #避免門下建模有問題 固定爬三次才抬頭
-                #     send.sendBodySector(9999)
-                #     time.sleep(2.8)
-                #     # time.sleep(0.3)
-                #     crawl_cnt += 1
-                # send.color_mask_subject_YMax[1][0] = 0
-                # send.color_mask_subject_YMax[2][0] = 0
-                # send.sendHeadMotor(1,2048,100)
-                # send.sendHeadMotor(2,2500,100)
-                # time.sleep(1)
-                # while crawl_cnt < 8:                   #邊爬邊判斷是否離障礙物太近
-                #     Image_Init()
-                #     Normal_Obs_Parameter()
-                #     time.sleep(0.1)
-                #     print('send.color_mask_subject_YMax[2][0] = ',send.color_mask_subject_YMax[2][0])
-                #     print('send.color_mask_subject_YMax[1][0] = ',send.color_mask_subject_YMax[1][0])
-                #     if (send.color_mask_subject_YMax[2][0] >= 85 and send.color_mask_subject_size[2][0] > 5000) or (send.color_mask_subject_YMax[1][0] >= 60 and send.color_mask_subject_size[1][0] > 5000):
-                #         break
-                #     else:
-                #         send.sendBodySector(456)
-                #         time.sleep(2.8)
-                #         #time.sleep(0.1)
-                #         crawl_cnt += 1
-                # send.sendBodySector(1113)
-                # time.sleep(14.4)
-                # time.sleep(1.5)
-                # send.sendBodySector(299)    #基礎站姿29！！！！！！！！！！！！！！！！！！
-                # time.sleep(1.5)
-                # send.sendHeadMotor(1,2048,100)
-                # send.sendHeadMotor(2,1550,100)
-                # time.sleep(0.5)
-                # #send.sendBodySector(15)#小白
-                # #send.sendBodySector(16)#小黑
-                # time.sleep(2.5)
-                # send.sendBodyAuto(0,0,0,0,1,0)
-                # time.sleep(1)
-                break
+                time.sleep(14.5)
+                while crawl_cnt < 3:                #避免門下建模有問題 固定爬三次才抬頭
+                    send.sendBodySector(9999)
+                    time.sleep(7)
+                    # time.sleep(0.3)
+                    crawl_cnt += 1
+                send.color_mask_subject_YMax[1][0] = 0
+                send.color_mask_subject_YMax[2][0] = 0
+                send.sendHeadMotor(1,2048,100)
+                send.sendHeadMotor(2,2500,100)
+                time.sleep(1)
+                while crawl_cnt < 8:                   #邊爬邊判斷是否離障礙物太近
+                    Image_Init()
+                    Normal_Obs_Parameter()
+                    time.sleep(0.1)
+                    # print('send.color_mask_subject_YMax[2][0] = ',send.color_mask_subject_YMax[2][0])
+                    # print('send.color_mask_subject_YMax[1][0] = ',send.color_mask_subject_YMax[1][0])
+                    if (send.color_mask_subject_YMax[2][0] >= 110 and send.color_mask_subject_size[2][0] > 5000) or (send.color_mask_subject_YMax[1][0] >= 110 and send.color_mask_subject_size[1][0] > 5000):
+                        break
+                    else:
+                        send.sendBodySector(9999)
+                        time.sleep(7)
+                        #time.sleep(0.1)
+                        crawl_cnt += 1
+                send.sendBodySector(8888)
+                time.sleep(16)
+                send.sendBodySector(29)    #基礎站姿29！！！！！！！！！！！！！！！！！！
+                time.sleep(1.5)
+                send.sendHeadMotor(1,2048,100)
+                send.sendHeadMotor(2,head_height,100)
+                #send.sendBodySector(15)#小白
+                #send.sendBodySector(16)#小黑
+                time.sleep(2)
+                send.sendBodySector(5555)
+                time.sleep(6)
+                send.sendBodyAuto(0,0,0,0,1,0)
+
+                break 
 
 if __name__ == '__main__':
     try:
@@ -1114,8 +1120,8 @@ if __name__ == '__main__':
                 # Focus_Matrix = [6, 7, 8, 8, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 8, 8, 7, 6]
                 #Focus_Matrix = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]#6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6
                 YYDS =  4   #Y_Line_Deep 2  4
-                CRMax = 70 #R_Max       65 55
-                CRMin = 100 #R_MIn       55 45
+                CRMax = 80 #R_Max       65 55
+                CRMin = 70 #R_MIn       55 45
 
                 Image_Init()
                 Normal_Obs_Parameter()
@@ -1161,7 +1167,7 @@ if __name__ == '__main__':
                     if First_Reddoor == False :
                         First_Reddoor = True
                         send.sendHeadMotor(1,2048,100)
-                        send.sendHeadMotor(2,head_height,100)
+                        send.sendHeadMotor(2,head_height+100,100)
                         time.sleep(0.5)
                         send.sendContinuousValue(0, 0 , 0 , 0 , 0)
                     
@@ -1189,16 +1195,16 @@ if __name__ == '__main__':
                             slope_Lcnt = 0
                             slope_Rcnt = 0
                             send.sendHeadMotor(1,2048,100)
-                            send.sendHeadMotor(2,1550,100)
+                            send.sendHeadMotor(2,head_height+100,100)
                             time.sleep(0.5)
                         else :
                             Normal_Obs_Parameter()
-                            if (send.color_mask_subject_YMax[5][0] < 60) and (redoor_dis == False) :     #前後距離修正（值越大離門越近） 55/65   離紅門太遠時前進
+                            if (send.color_mask_subject_YMax[5][0] < CRMin) and (redoor_dis == False) :     #前後距離修正（值越大離門越近） 55/65   離紅門太遠時前進
                                 Slope_fix()
                                 Move(Straight_status = 15)
                                 print("11111111111111111")
                                 # pass
-                            elif (send.color_mask_subject_YMax[5][0] > 70) and (redoor_dis == False) :   #前後距離修正（值越大離門越近） 55/65   離紅門太近時候退
+                            elif (send.color_mask_subject_YMax[5][0] > CRMax) and (redoor_dis == False) :   #前後距離修正（值越大離門越近） 55/65   離紅門太近時候退
                                 Slope_fix()
                                 Move(Straight_status = 16)
                                 print("121212121212121212")
@@ -1211,7 +1217,7 @@ if __name__ == '__main__':
                                     # print('red center')
                                     # print('BBBBBBBRRRRRRRRRRRRFFFFFFLLLLLLLAAAAAAAGGGGG = ',BR_flag)
                                     # print('BBBLLLLLLLLLLLLLLLLFFFFFFFFFFFFFFFF = ',BL_flag)
-                                    if (B_max == 0 and B_min == 0 and B_left <= 35 and BR_flag == True) or (B_max == 0 and B_min == 0 and B_right > 275 and BL_flag == True) or (B_max == 0 and B_min == 0 and B_right == 0 and B_left == 0):
+                                    if (B_max == 0 and B_min == 0 and B_left <= 25 and BR_flag == True) or (B_max == 0 and B_min == 0 and B_right > 295 and BL_flag == True) or (B_max == 0 and B_min == 0 and B_right == 0 and B_left == 0):
                                         if abs(deep.slope)  > 0.05 or slope_flag == True:
                                             while abs(deep.slope) > 0.05 or slope_flag == True:
                                                 # print('min = ',B_min)
