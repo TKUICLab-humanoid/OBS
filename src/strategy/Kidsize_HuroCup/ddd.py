@@ -11,6 +11,7 @@ import cv2
 import sys
 import time
 import math
+import curses
 
 class deep_calculate:
     def __init__(self):
@@ -29,7 +30,7 @@ class deep_calculate:
         self.b = True
         self.slope = 0
         self.degree = 0
-        self.red_width = 0
+        # self.red_width = 0
         self.Y_Dy = 24
 
     def convert(self, imgmsg):
@@ -37,27 +38,48 @@ class deep_calculate:
             cv_image = self.bridge.imgmsg_to_cv2(imgmsg, "bgr8") #將ROS圖像消息轉換為OpenCV圖像
         except CvBridgeError as e:
             print(e)
-        cv_image = cv2.resize(cv_image, (320, 240))
-        cv_image_2 = cv2.resize(cv_image, (32, 24))
+        cv_image_1 = cv2.resize(cv_image, (320, 240))
+        # cv_image_2 = cv2.resize(cv_image, (32, 24))
+        cv_image_2 = cv2.resize(cv_image_1, (32, 24),interpolation = cv2.INTER_NEAREST)
 
-        self.red_width = 0
-        self.R_Deep_Matrix = []
+        # self.red_width = 0
+        self.Deep_Matrix = []
         for compress_width in range(0, 32, 1):                      #紅色深度
             self.r = True
-            self.R_Deep_Matrix.append(0)
+            self.Deep_Matrix.append(0)
             for compress_height in range(23, -1, -1):
                 blue = cv_image_2.item(compress_height, compress_width, 0)
                 green = cv_image_2.item(compress_height, compress_width, 1)
                 red = cv_image_2.item(compress_height, compress_width, 2)
-                if (blue == 255 and green == 255 and red == 0) and (self.r == True) :
-                    self.red_width += 1
-                    self.r = False
+                # if (blue == 255 and green == 255 and red == 0) and (self.r == True) :
+                #     self.red_width += 1
+                #     self.r = False
+                # if (blue == 255 and green == 255 and red == 0):
+                #     self.R_Deep_Matrix[compress_width] = 23 - compress_height
+                #     break
+                # if compress_height == 0:
+                #     self.R_Deep_Matrix[compress_width] = 24
+                # if blue != 0 or green != 0 or red != 0:
+                    # print("cnt",compress_width)
+                    # print("B",blue)
+                    # print("G",green)
+                    # print("R",red)
+                    # print("=================")
+                    # time.sleep(1)
+                    # break
+                if (blue == 128 and green == 0 and red == 128) or (blue == 128 and green == 128 and red == 0):
+                    self.Deep_Matrix[compress_width] = 24 - compress_height
+                    break
                 if (blue == 255 and green == 255 and red == 0):
-                    self.R_Deep_Matrix[compress_width] = 23 - compress_height
+                    self.Deep_Matrix[compress_width] = 19 - compress_height
+                    if self.Deep_Matrix[compress_width] < 0:
+                        self.Deep_Matrix[compress_width] = 0
                     break
                 if compress_height == 0:
-                    self.R_Deep_Matrix[compress_width] = 24
-
+                    self.Deep_Matrix[compress_width] = 24
+                    break
+        self.aa = self.Deep_Matrix
+        # print(self.R_Deep_Matrix)       
         self.x1 = 0
         self.y1 = 0
         self.x2 = 1
@@ -80,38 +102,15 @@ class deep_calculate:
         flag = True
         self.redsize = False
 
+        self.red_width = 0
+        self.R_Deep_Matrix = []
         for compress_width in range(0, 32, 1):                      #黃線黃障分離＆紅門斜率計算
+            self.R_Deep_Matrix.append(0)
             self.a = True
             for compress_height in range(23, -1, -1):
                 blue = cv_image_2.item(compress_height, compress_width, 0)
                 green = cv_image_2.item(compress_height, compress_width, 1)
                 red = cv_image_2.item(compress_height, compress_width, 2)
-
-                if compress_height == 6:            #計算黃色像素格
-                    if (blue == 128 and green == 128 and red == 0):
-                        self.a0+=1
-                elif compress_height == 7:
-                    if (blue == 128 and green == 128 and red == 0):
-                        self.a1+=1
-                elif compress_height == 8:
-                    if (blue == 128 and green == 128 and red == 0):
-                        self.a2+=1
-                elif compress_height == 9:
-                    if (blue == 128 and green == 128 and red == 0):
-                        self.a3+=1
-                elif compress_height == 10:
-                    if (blue == 128 and green == 128 and red == 0):
-                        self.a4+=1
-
-                if compress_width == 0 and compress_height == 0:        #計算左邊有無黃色
-                    blue1 = blue
-                    green1 = green
-                    red1 = red
-                if compress_width == 31 and compress_height == 0:       #計算右邊有無黃色
-                    blue2 = blue
-                    green2 = green
-                    red2 = red
-
                 if (blue == 255 and green == 255 and red == 0) :
                     self.redsize = True
                     if self.a == True :
@@ -139,11 +138,11 @@ class deep_calculate:
 
         
         if abs(self.x1 - self.x2) < 1 :                             #若紅色面積過小則不判斷斜率直接給0
-            # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+            print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
             self.slope = 0
             self.degree = 0
         else : 
-            # print('rrrrrrrrrrrrrrrrrrrrrrrrrrr')
+            print('rrrrrrrrrrrrrrrrrrrrrrrrrrr')
             if abs(self.Xmin - self.x1) <= abs(self.Xmin - self.x2):
                 self.slope =  (self.y2 - self.Ymin) / (self.x2 - self.Xmin)
             elif abs(self.Xmin - self.x1) > abs(self.Xmin - self.x2):
@@ -151,15 +150,15 @@ class deep_calculate:
             # elif (self.x2 - self.Xmin) == 0 or (self.Xmin - self.x1) == 0:    #斜率計算公式（利用最低點與某一邊做判斷）
             #     if abs(self.Xmin - self.x1) <= abs(self.Xmin - self.x2):
             #         self.slope =  (self.y2 - self.Ymin) / 0.00001
-            #         print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+            # #         print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
             #     elif abs(self.Xmin - self.x1) > abs(self.Xmin - self.x2):
             #         self.slope =  (self.Ymin - self.y1) / 0.00001
-            #         print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-            self.degree = int(math.degrees(self.slope))
+            # #         print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+            # self.degree = int(math.degrees(self.slope))
         
         self.first_red = True
         self.b = True
-        # print('slope = ',self.slope)
+        print('slope = ',self.slope)
         # print('============================================')
         # print('x1 = ',self.x1)
         # print('============================================')
@@ -174,23 +173,26 @@ class deep_calculate:
         # print('Y2 = ',self.y2)
         # print('============================================')
 #----------------------------------------------------------------------#藍黃深度（最常用）
-        self.Deep_Matrix = []
-        for compress_width in range(0, 32, 1):
-            self.Deep_Matrix.append(0)
-            for compress_height in range(23, -1, -1):
-                blue = cv_image_2.item(compress_height, compress_width, 0)
-                green = cv_image_2.item(compress_height, compress_width, 1)
-                red = cv_image_2.item(compress_height, compress_width, 2)
+        # self.Deep_Matrix = []
+        # for compress_width in range(0, 32, 1):
+        #     self.Deep_Matrix.append(0)
+        #     for compress_height in range(23, -1, -1):
+        #         blue = cv_image_2.item(compress_height, compress_width, 0)
+        #         green = cv_image_2.item(compress_height, compress_width, 1)
+        #         red = cv_image_2.item(compress_height, compress_width, 2)
+                
+        #         if (blue == 128 and green == 0 and red == 128) or (blue == 128 and green == 128 and red == 0) :
+        #             self.Deep_Matrix[compress_width] = 23 - compress_height
+        #             break
+        #         if compress_height == 0:
+        #             self.Deep_Matrix[compress_width] = 24
 
-                if (blue == 128 and green == 0 and red == 128) or (blue == 128 and green == 128 and red == 0) or (blue == 255 and green == 255 and red == 0):
-                    self.Deep_Matrix[compress_width] = 23 - compress_height
-                    break
-                if compress_height == 0:
-                    self.Deep_Matrix[compress_width] = 24
+        # self.aa = self.Deep_Matrix
+        # # print(self.aa)
+        # # cv2.imshow("Image_show",cv_image)
+        # cv2.waitKey(1)
 
-        self.aa = self.Deep_Matrix
-        # cv2.imshow("Image_show",cv_image)
-        cv2.waitKey(1)
+        
 #----------------------------------------------------------------------#黃色深度
         self.Y_Deep_Matrix = []
         for compress_width in range(0, 32, 1):                          
@@ -225,29 +227,163 @@ class deep_calculate:
         # cv2.imshow("Image_show",cv_image)
         cv2.waitKey(1)
 #----------------------------------------------------------------------#紅色深度
-        self.R_Deep_Matrix = []
-        for compress_width in range(0, 32, 1):
-            self.R_Deep_Matrix.append(0)
-            for compress_height in range(23, -1, -1):
-                blue = cv_image_2.item(compress_height, compress_width, 0)
-                green = cv_image_2.item(compress_height, compress_width, 1)
-                red = cv_image_2.item(compress_height, compress_width, 2)
-                if (blue == 255 and green == 255 and red == 0):
-                    self.R_Deep_Matrix[compress_width] = 23 - compress_height
-                    break
-                if compress_height == 0:
-                    self.R_Deep_Matrix[compress_width] = 24
-        self.ra = self.R_Deep_Matrix
+        # self.R_Deep_Matrix = []
+        # for compress_width in range(0, 32, 1):
+        #     self.R_Deep_Matrix.append(0)
+        #     for compress_height in range(23, -1, -1):
+        #         blue = cv_image_2.item(compress_height, compress_width, 0)
+        #         green = cv_image_2.item(compress_height, compress_width, 1)
+        #         red = cv_image_2.item(compress_height, compress_width, 2)
+        #         if (blue == 255 and green == 255 and red == 0):
+        #             self.R_Deep_Matrix[compress_width] = 23 - compress_height
+        #             break
+        #         if compress_height == 0:
+        #             self.R_Deep_Matrix[compress_width] = 24
+        # self.ra = self.R_Deep_Matrix
+        # # print(self.ra)
+        
+        # # cv2.imshow("Image_show",cv_image)
+        
+        # # self.BL_Deep_Matrix = []
+        # # for compress_width in range(0, 32, 1):                          
+        # #     self.BL_Deep_Matrix.append(0)
+        # #     for compress_height in range(23, -1, -1):
+        # #         blue = cv_image_2.item(compress_height, compress_width, 0)
+        # #         green = cv_image_2.item(compress_height, compress_width, 1)
+        # #         red = cv_image_2.item(compress_height, compress_width, 2)
+        # #         if (blue != 0 or green != 0 or red != 0) :
+        # #             self.BL_Deep_Matrix[compress_width] = 23 - compress_height
+        # #             print("x = ",compress_width)
+        # #             print("B = ",blue)
+        # #             print("G = ",green)
+        # #             print("R = ", red)
+        # #             print("幹，就你在稿",self.BL_Deep_Matrix[compress_width])
+        # #             print("================")
+        # #             time.sleep(1)
+        # #             break
+        # #         if compress_height == 0:
+        # #             self.BL_Deep_Matrix[compress_width] = 24
+        # # self.BLa = self.BL_Deep_Matrix
+        # # cv2.imshow("Image_show",cv_image)
 
+        # # cv2.waitKey(1)
+        # cv2.waitKey(1)
+        # self.Deep_Matrix = []
+        # self.Deep_Matrix11 = []
+        # for compress_width in range(0, 32, 1):
+        #     self.Deep_Matrix.append(0)
+        #     self.red_cnt = 0
+        #     self.blue_cnt = 0
+        #     self.yell_cnt = 0
+        #     # self.red_F = False
+        #     # self.blue_F = False
+        #     # self.yell_F = False
+        #     for compress_width2 in range(0, 10, 1):
+        #         self.Deep_Matrix11.append(0)
+        #         for compress_height2 in range(239, -1, -1):
+        #             blue = cv_image.item(compress_height2, compress_width*10 + compress_width2, 0)
+        #             green = cv_image.item(compress_height2, compress_width*10 + compress_width2, 1)
+        #             red = cv_image.item(compress_height2, compress_width*10 + compress_width2, 2)
+        #             if (blue == 255 and green == 255 and red == 0):
+        #                 self.Deep_Matrix11[compress_width*10 + compress_width2] = 179 - compress_height2
+        #                 if self.Deep_Matrix11[compress_width*10 + compress_width2] < 0:
+        #                     self.Deep_Matrix11[compress_width*10 + compress_width2] = 0
+        #                 # break
+        #                 self.red_cnt += 1
+        #                 self.Fa =self.Deep_Matrix11[compress_width*10 + compress_width2]
+        #                 break
+        #             elif (blue == 128 and green == 0 and red == 128) or(blue == 128 and green == 128 and red == 0):
+        #                 self.Deep_Matrix11[compress_width*10 + compress_width2] = 239 - compress_height2
+        #                 self.blue_cnt += 1
+        #                 self.Fb = self.Deep_Matrix11[compress_width*10 + compress_width2]
+        #                 break
+        #             # elif(blue == 0 and green == 0 and red == 0):
+        #             #     self.Deep_Matrix11[compress_width*10 + compress_width2] = 240
+        #             #     break
+        #             # elif (blue == 128 and green == 128 and red == 0):
+        #             #     self.yell_cnt += 1
+        #             #     break
+        #     # if (self.red_cnt > self.blue_cnt):
+
+        #     # if max(self.red_cnt,self.blue_cnt,self.yell_cnt) == self.red_cnt:
+        #     #     self.red_F = True
+        #     # elif max(self.red_cnt,self.blue_cnt,self.yell_cnt) == self.blue_cnt:
+        #     #     self.blue_F = True
+        #     # elif max(self.red_cnt,self.blue_cnt,self.yell_cnt) == self.yell_cnt:
+        #     #     self.yell_F = True
+        #     # if self.red_cnt
+        #     # print("r",self.red_cnt)
+        #     # print("b",self.blue_cnt)
+        #     # print("y",self.yell_cnt)
+        #     # print("loop = ",compress_width)
+        #     # time.sleep(0.5)
+        #     for compress_height in range(239, -1, -1):
+        #         # blue = cv_image.item(compress_height, compress_width, 0)
+        #         # green = cv_image.item(compress_height, compress_width, 1)
+        #         # red = cv_image.item(compress_height, compress_width, 2)
+        #             # if max(self.red_cnt,self.blue_cnt,self.yell_cnt) == self.red_cnt:
+        #         if self.red_cnt != 0 and(self.red_cnt >= self.blue_cnt):
+        #             self.Deep_Matrix[compress_width] = int(self.Fa/10)
+        #             # print("rrrrrrrrrrrrrrr",compress_width)
+        #             # if compress_height == 0:
+        #             #     self.Deep_Matrix[compress_width] = 24
+        #                 # print("xxxxxxxxxxxxx :",compress_width)
+        #             # time.sleep(2)
+        #             # print()
+        #             # self.red_F == False
+                    
+        #         # elif max(self.red_cnt,self.blue_cnt,self.yell_cnt) == self.blue_cnt:
+        #         # elif (self.blue_cnt > self.red_cnt) and (self.blue_cnt > self.yell_cnt):
+        #         #     self.Deep_Matrix[compress_width] = 179 - compress_height2
+        #         #     print("bbbbbbbbbbbbbb",compress_width)
+        #         #     # if self.Deep_Matrix[compress_width] < 0:
+        #         #         # self.Deep_Matrix[compress_width] = 0
+        #         #         # self.blue_F == True    
+        #         #     break
+        #         # # elif max(self.red_cnt,self.blue_cnt,self.yell_cnt) == self.yell_cnt:
+        #         # elif (self.yell_cnt > self.red_cnt) and (self.yell_cnt > self.blue_cnt):
+        #         #     self.Deep_Matrix[compress_width] = 179 - compress_height2
+        #         #     print("yyyyyyyyyyyyyy",compress_width)
+        #         #     # if self.Deep_Matrix[compress_width] < 0:
+        #         #         # self.Deep_Matrix[compress_width] = 0
+        #         #         # self.yell_F == True
+        #             break
+        #         elif (self.red_cnt < self.blue_cnt):
+        #             self.Deep_Matrix[compress_width] = int(self.Fb/10)
+        #             # print("bbbbbbbbbbbbbb",compress_width)
+                    
+        #                 # print("xxxxxxxxxxxxx :",compress_width)
+        #             # time.sleep(2)
+        #             break
+        #         if compress_height == 0:
+        #             self.Deep_Matrix[compress_width] = 24
+
+        # self.aaa= self.Deep_Matrix
+        # print(self.aaa)
+ 
+        # print("=========================")
+        # time.sleep(2)
+        # print("=========================")
+        # print("=========================")
         # cv2.imshow("Image_show",cv_image)
         cv2.waitKey(1)
+    # def update_values(self):#更新數值
+        # global Deep_Matrix,R_Deep_Matrix
+        # print("BY_Deep: {}".format(self.aa))
+        # print("BY_Deep: {}".format(self.ra))
+        pass
 if __name__ == '__main__':
     try:
         while not rospy.is_shutdown():
+            
             send = Sendmessage()
-            if send.Web == True:
+            # send.drawImageFunction(1,0,30,30,0,240,0,0,0)
+            # send.drawImageFunction(2,0,40,40,0,240,0,0,0)
+            if send.is_start == True:
                 pass
-            if send.Web == False:
+            if send.is_start == False:
+                # send.drawImageFunction(1,1,30,30,0,240,0,0,0)
+                # send.drawImageFunction(2,,40,40,0,240,0,0,0)
                 deep_calculate()
                 rospy.spin()
     except rospy.ROSInterruptException:

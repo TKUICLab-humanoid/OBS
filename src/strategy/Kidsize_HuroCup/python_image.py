@@ -171,7 +171,7 @@ def update_values():#更新數值
     send.color_mask_subject_XMin[2][0]
     print("\033[1;31;40mY_Line Flag\033[0m\nR_line : {}\t\tR_Y_Deep : {}\nL_Line : {}\t\tL_Y_Deep : {}\n=====================================".format(R_line,Y_Deep_sum2,L_line,Y_Deep_sum1))
     print("Deep_sum: {}".format(Deep_sum))
-    print("喔！ {}".format(function))
+    # print("喔！ {}".format(function))
     print("==================================")
     print("C_Deep: {}".format(C_Deep))
     print("B_LC_Deep: {}".format(B_LC_Deep))
@@ -182,9 +182,11 @@ def update_values():#更新數值
     print("BLDeep: {}".format(B_L_Deep))
     print("BRDeep: {}".format(B_R_Deep))
     print("==================================")
-    print("L_line: {}".format(L_line))
-    print("R_line: {}".format(R_line))
-    print("==================================")
+    print("IMU_ok Flags: {}".format(IMU_ok))
+
+    # print("L_line: {}".format(L_line))
+    # print("R_line: {}".format(R_line))
+    # print("==================================")
     # print("Y1: {}".format(send.color_mask_subject_YMax[1][0]))
     # print("Y2: {}".format(send.color_mask_subject_YMax[1][1]))
     # print("Y : {}".format(send.color_mask_subject_cnts[1]))
@@ -261,8 +263,8 @@ def Normal_Obs_Parameter():
         B_Deep_sum1 += deep.ya[o]
     for p in range (16, 32, 1):                 #黃色深度R
         B_Deep_sum2 += deep.ya[p]
-    R_L_Deep = deep.ra[2]                       #紅色深度L
-    R_R_Deep = deep.ra[30]                      #紅色深度R
+    # R_L_Deep = deep.ra[2]                       #紅色深度L
+    # R_R_Deep = deep.ra[30]                      #紅色深度R
 #----------------Y_line_DeepMatrix----------------
     for j in range (0, 32, 1):                  #黃色深度
         if deep.ya[j] < Y_Dy:
@@ -324,17 +326,17 @@ def Normal_Obs_Parameter():
         Dx = Xc - Xb
     update_values()
 #-----------------------------Parameter------------------------------------
-def Move(Straight_status = 0 ,x = -2100 ,y = -300 ,z = 0 ,theta = 0  ,sensor = 0 ):
+def Move(Straight_status = 0 ,x = -1000 ,y = -100 ,z = 0 ,theta = 0  ,sensor = 0 ):
     # print('Straight_status = ' + str(Straight_status))
     global status, turn_right_x, turn_right_y, turn_left_x, turn_left_y, right_turn_back_x, right_turn_back_y, left_turn_back_x, left_turn_back_y
-    turn_right_x = -1400 #21 theta = -6
-    turn_right_y = 800
-    right_turn_back_x = -1500 #22 theta = 7
-    right_turn_back_y = -1700
-    turn_left_x = -1500 #23 theta = 7
-    turn_left_y = -1700
-    left_turn_back_x = -1400 #24 theta = -6
-    left_turn_back_y = 1800
+    turn_right_x = -400 #21 theta = -6
+    turn_right_y = 1100
+    right_turn_back_x = -1100 #22 theta = 7
+    right_turn_back_y = -1500
+    turn_left_x = -1100 #23 theta = 7
+    turn_left_y = -1800
+    left_turn_back_x = -1000 #24 theta = -6
+    left_turn_back_y = 1100
     
     if Straight_status == 0:            #stay
         # print('Straight_status = stay')
@@ -379,19 +381,19 @@ def Move(Straight_status = 0 ,x = -2100 ,y = -300 ,z = 0 ,theta = 0  ,sensor = 0
     elif Straight_status == 14:  #max speed
         # print('Straight_status = max speed')
         status = "14_Max_Speed"
-        send.sendContinuousValue(3300 ,-200 ,z , 0,sensor)
+        send.sendContinuousValue(3300 ,-200 ,z , -1,sensor)
 
     elif Straight_status == 15:  # small forward
         # print('Straight_status =  small forward')
         status = "15_Small_Forward"
         Slope_fix()
-        send.sendContinuousValue(1500 ,-100 ,z ,0 + slope_angle,sensor)
+        send.sendContinuousValue(1500 ,200 ,z ,0 + slope_angle,sensor)
 
     elif Straight_status == 16:  #small back
         # print('Straight_status =  small back')
         status = "16_Small_Back"
         Slope_fix()
-        send.sendContinuousValue(-2500 ,-300 ,z ,0 + slope_angle ,sensor)
+        send.sendContinuousValue(-2500 ,-100 ,z ,-1 + slope_angle ,sensor)
 
 #---------------------Turn Head Parameter-------------------------#
     elif Straight_status == 21:  #turn right
@@ -489,7 +491,7 @@ def Move(Straight_status = 0 ,x = -2100 ,y = -300 ,z = 0 ,theta = 0  ,sensor = 0
     elif Straight_status == 999:        #Y axis move right
         # print('Straight_status = imu fix and Speed')
         status = "Y axis move right"
-        send.sendContinuousValue(-1200 + x_move,-2400,z,0 + imu_angle,sensor) #y_move_turn slope_angle
+        send.sendContinuousValue(-800 + x_move,-2400,z, + imu_angle,sensor) #y_move_turn slope_angle
 
     elif Straight_status == 888:        #Y axis move left
         print('Straight_status = imu fix and Speed')
