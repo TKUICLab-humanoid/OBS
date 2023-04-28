@@ -173,7 +173,7 @@ def update_values():#更新數值
     print("Deep_sum: {}".format(Deep_sum))
     # print("喔！ {}".format(function))
     print("==================================")
-    print("C_Deep: {}".format(C_Deep))
+    print("slope: {}".format(deep.slope))
     print("B_LC_Deep: {}".format(B_LC_Deep))
     print("B_RC_Deep: {}".format(B_RC_Deep))
     print("Y_L_Deep: {}".format(Y_L_Deep))
@@ -310,12 +310,12 @@ def Normal_Obs_Parameter():
         #     WL += ((i+1) * Filter_Matrix[i]) + (23 - deep.aa[31])
         WR += ((32-i) * Filter_Matrix[i])
         WL += ((i+1) * Filter_Matrix[i])
-        if deep.aa[i] < Dy:
-            Dy = deep.aa[i]
-        Deep_sum += deep.aa[i]
-        L_Deep = deep.aa[0]
-        R_Deep = deep.aa[31]
-        C_Deep = deep.aa[16]
+        if deep.adult[i] < Dy:
+            Dy = deep.adult[i]
+        Deep_sum += deep.adult[i]
+        L_Deep = deep.adult[0]
+        R_Deep = deep.adult[31]
+        C_Deep = deep.adult[16]
     if WL > WR:
         Xb = 31
     elif WL <= WR:
