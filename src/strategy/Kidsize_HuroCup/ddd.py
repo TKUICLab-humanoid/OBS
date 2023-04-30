@@ -159,7 +159,7 @@ class deep_calculate:
         
         self.first_red = True
         self.b = True
-        print('slope = ',self.slope)
+        # print('slope = ',self.slope)
         # print('============================================')
         # print('x1 = ',self.x1)
         # print('============================================')
@@ -188,7 +188,7 @@ class deep_calculate:
                 if compress_height == 0:
                     self.Deep_Matrix[compress_width] = 24
 
-        self.aa = self.Deep_Matrix
+        # self.aa = self.Deep_Matrix
         # cv2.imshow("Image_show",cv_image)
         cv2.waitKey(1)
 #----------------------------------------------------------------------#黃色深度
