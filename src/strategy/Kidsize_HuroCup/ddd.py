@@ -244,7 +244,7 @@ class Deep_Calculate:
                     self.adult_Deep_Matrix[compress_width] = 24 - compress_height
                     break
                 if (blue == 255 and green == 255 and red == 0):
-                    self.adult_Deep_Matrix[compress_width] = 19 - compress_height
+                    self.adult_Deep_Matrix[compress_width] = 21 - compress_height
                     if self.adult_Deep_Matrix[compress_width] < 0:
                         self.adult_Deep_Matrix[compress_width] = 0
                     break
