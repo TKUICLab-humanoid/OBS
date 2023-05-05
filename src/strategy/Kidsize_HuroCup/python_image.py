@@ -87,8 +87,9 @@ Y_R_flag = False
 L_line = False
 R_line = False
 y_move = 0
-head_height = 1550
-
+head_height = 1650
+move_status = ""
+strategy_status = ""
 #==============================image===============================
 def Image_Init():
     global Filter_Matrix, Xc, Dy, WR, WL, Xb, Dx, Xc_count, Xc_num, Deep_sum,Y_Deep_sum,Y_Deep_sum1,Y_Deep_sum2, L_Deep, R_Deep, R_min, R_max, B_min, B_max, B_left, B_right, XMax_one, XMin_one, XMin_two, XMax_two, y_move
@@ -118,30 +119,73 @@ def Image_Init():
     XMax_two = 0
     B_min = 0
     B_max = 0
-    y_move = 0
+    y_move = -100
     
+def update_values():#更新數值
+    global  R_min,R_max,First_Reddoor,slope_flag,BR_flag,BL_flag,B_min,B_max,move_status,strategy_status
+    # 移動光標到終端機的第一行
+    # print("\033[H", end="")
+    # sys.stdout.write("\033[H")
+    # sys.stdout.write("\033[J")
+    # print("Red: {}".format(send.color_mask_subject_size[5][0]))
+    # print("Red_YMAX: {}".format(send.color_mask_subject_YMax[5][0]))
+    # print("R_min: {}".format(R_min))
+    # print("R_max: {}".format(R_max))
+    # print("B_Xmin: {}".format(B_min))
+    # print("B_Xmax: {}".format(B_max))
+    # print("B_left: {}".format(B_left))
+    # print("B_right: {}".format(B_right))
+    # print("slope: {}".format(deep.slope))
+    # print("RF: {}".format(red_flag))
+    # print("FRD: {}".format(First_Reddoor))
+    # print("SR: {}".format(slope_flag))
+    # print("B_Ymax: {}".format(send.color_mask_subject_YMax[2][0]))
+    # print("B_size: {}".format(send.color_mask_subject_size[2][0]))
+    # print("left_Ymax: {}".format(send.color_mask_subject_YMax[1][1]))
+    # print("黃色個數: {}".format(send.color_mask_subject_cnts[1]))
+    # print("BR_FLAG: {}".format(BR_flag))
+    # print("BL_FLAG: {}".format(BL_flag))
+    # print("Dx: {}".format(Dx))
+    # print("move_status: {}".format(move_status))
+    # print("strategy_status: {}".format(strategy_status))
+    # rospy.loginfo(f'Red = {send.color_mask_subject_size[5][0]}')
+    # rospy.loginfo(f'Red_Ymax = {send.color_mask_subject_YMax[5][0]}')
+    # rospy.loginfo(f'R_min = {R_min}')
+    # rospy.loginfo(f'R_max = {R_max}')
+    # rospy.loginfo(f'B_Xmin = {B_min}')
+    # rospy.loginfo(f'B_Xmax = {B_max}')
+    # rospy.loginfo(f'B-left = {B_left}')
+    # rospy.loginfo(f'B_right = {B_right}')
+    rospy.loginfo(f'slope = {deep.slope}')
+    # rospy.loginfo(f'B_Ymax = {send.color_mask_subject_YMax[2][0]}')
+    # rospy.loginfo(f'B_size = {send.color_mask_subject_size[2][0]}')
+    # rospy.loginfo(f'Dx = {Dx}')
+    rospy.loginfo(f'move_status = {move_status}')
+
 
 def Image_Info():
-    print('==============================================================')
-    if red_flag == False:
-        print('Dx = '+ str(Dx))
-        print('Dy = '+ str(Dy))
-        print('Y_L_Deep = ',Y_L_Deep)
-        print('Y_R_Deep = ',Y_R_Deep)
-        # print('Y_C_Deep = ',Y_C_Deep)
-    else :
-        print('red_flag = '+ str(red_flag))
-        print('R_min = '+ str(R_min))
-        print('R_max = '+ str(R_max))
-        print('B_min = '+ str(B_min))
-        print('B_max = '+ str(B_max))
-        print('B_left = '+ str(B_left))
-        print('B_right = '+ str(B_right))
-        print('slope_Rcnt = '+ str(slope_Rcnt))
-        print('slope_Lcnt = '+ str(slope_Lcnt))
+    # print('==============================================================')
+    # if red_flag == False:
+    #     print('Dx = '+ str(Dx))
+    #     print('Dy = '+ str(Dy))
+    #     print('Y_L_Deep = ',Y_L_Deep)
+    #     print('Y_R_Deep = ',Y_R_Deep)
+    #     # print('Y_C_Deep = ',Y_C_Deep)
+    # else :
+    #     print('red_flag = '+ str(red_flag))
+    #     print('R_min = '+ str(R_min))
+    #     print('R_max = '+ str(R_max))
+    #     print('B_min = '+ str(B_min))
+    #     print('B_max = '+ str(B_max))
+    #     print('B_left = '+ str(B_left))
+    #     print('B_right = '+ str(B_right))
+    #     print('slope_Rcnt = '+ str(slope_Rcnt))
+    #     print('slope_Lcnt = '+ str(slope_Lcnt))
+    pass
 
 def Normal_Obs_Parameter():
     global Filter_Matrix, R_line, L_line, Xc, Dy,Y_Dy,B_Dy, WR, WL, Xb, Dx, Xc_count, Xc_num, Deep_sum,Y_Deep_sum,Y_Deep_sum1,Y_Deep_sum2,B_Deep_sum, R_Deep, L_Deep, C_Deep,Y_R_Deep, Y_L_Deep, Y_C_Deep,B_R_Deep,B_L_Deep,B_C_Deep, red_flag, R_min, R_max, B_min, B_max, B_left, B_right, XMax_one, XMin_one, XMin_two, XMax_two
+    Focus_Matrix = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]
     if send.color_mask_subject_size[5][0] > 5000 :                      #有紅時計算紅門資訊
         red_flag = True
         R_min = send.color_mask_subject_XMin[5][0] 
@@ -214,96 +258,111 @@ def Normal_Obs_Parameter():
         ##if send.color_mask_subject_YMin[1][0] < send.color_mask_subject_YMin[1][1]:
             R_line = False
             L_line = True
-            print("L_line====",L_line)
-            print("R_line====",R_line)
+            rospy.loginfo(f'L_line = {L_line}')
+            rospy.loginfo(f'R_line = {R_line}')
+            
         elif Y_Deep_sum1 > Y_Deep_sum2:
         ##elif send.color_mask_subject_YMin[1][0] > send.color_mask_subject_YMin[1][1]:
             R_line = True
             L_line = False
-            print("L_line====",L_line)
-            print("R_line====",R_line)
+            rospy.loginfo(f'L_line = {L_line}')
+            rospy.loginfo(f'R_line = {R_line}')
     else:    
         Dx = Xc - Xb
+    update_values()
     
 
 #-----------------------------Parameter------------------------------------
-def Move(Straight_status = 0 ,x = 200 ,y = 400 ,z = 0 ,theta = -1  ,sensor = 0 ):
-    print('Straight_status = ' + str(Straight_status))
+def Move(Straight_status = 0 ,x = -100 ,y = 200 ,z = 0 ,theta = 0  ,sensor = 0 ):
+    global move_status
+    #print('Straight_status = ' + str(Straight_status))
 
     if Straight_status == 0:            #stay
-        print('Straight_status = stay')
+        #print('Straight_status = stay')
         send.sendContinuousValue(x,y,z,theta,sensor)
-
+        move_status = "stay"
     elif Straight_status == 11:         #speed + turn  14 -9
-        print('Straight_status = turn')
+        #print('Straight_status = turn')
+        move_status = "turn"
         if Y_C_Deep < 12: 
             send.sendContinuousValue(x + (Goal_speed*2),y,z,theta + Angle,sensor)
         else:
             send.sendContinuousValue(x + Goal_speed,y,z,theta + Angle,sensor)
-
+        
     elif Straight_status == 12:         #speed + imu
-        print('Straight_status = imu fix')
+        #print('Straight_status = imu fix')
+        move_status = "imu fix"
         if red_flag == True:
             send.sendContinuousValue(x,y,z,theta + imu_angle,sensor)
         else:
             # send.sendContinuousValue(x + Goal_speed,y,z,theta + imu_angle,sensor)
             if Yaw_wen > 0: #-13修右 -8
-                send.sendContinuousValue(-100,1300,z,theta + imu_angle,sensor)
-                print('imu fix rightttttttttttttttt')
+                send.sendContinuousValue(-200,1100,z,theta + imu_angle,sensor)
+            #    print('imu fix rightttttttttttttttt')
             elif Yaw_wen <= 0: #8修左 
-                send.sendContinuousValue(100,-300 ,z,theta + imu_angle,sensor)
-                print('imu fix lefttttttttttttttttttt')
+                send.sendContinuousValue(-200,-300 ,z,theta + imu_angle,sensor)
+            #    print('imu fix lefttttttttttttttttttt')
     elif Straight_status == 122:        #YLine straight
-        print('Straight_status = imu fix and Speed')
+        #print('Straight_status = imu fix and Speed')
         send.sendContinuousValue(2500,y +100,z,theta + imu_angle,sensor)
 
     elif Straight_status == 13:         #speed ++
-        print('Straight_status = go straight')
+        #print('Straight_status = go straight')
         send.sendContinuousValue(x + Goal_speed,y,z,-2,sensor)
 
 #============================================================================#       
     elif Straight_status == 14:  #max speed
-        print('Straight_status = max speed')
-        send.sendContinuousValue(2500 ,400 ,z , 0,sensor)
+        #print('Straight_status = max speed')
+        move_status = "max speed"
+        send.sendContinuousValue(2700 ,100 ,z , -1,sensor)
 
     elif Straight_status == 15:  # small forward
-        print('Straight_status =  small forward')
+        #print('Straight_status =  small forward')
+        move_status = "small forward"
         Slope_fix()
-        send.sendContinuousValue(1500 ,400 ,z ,-1 + slope_angle,sensor)
+        send.sendContinuousValue(1500 ,300 ,z ,-1 + slope_angle,sensor)
 
     elif Straight_status == 16:  #small back
-        print('Straight_status =  small back')
+        #print('Straight_status =  small back')
+        move_status = "small back"
         Slope_fix()
-        send.sendContinuousValue(-1000 ,300 ,z ,-1 + slope_angle ,sensor)
+        send.sendContinuousValue(-1500 ,200 ,z ,-1 + slope_angle ,sensor)
 
 #---------------------Turn Head Parameter-------------------------#
     elif Straight_status == 21:  #turn right
-        print('Straight_status = turn right')
-        send.sendContinuousValue(100 ,1100 ,z ,-5 ,sensor)
+        #print('Straight_status = turn right')
+        move_status = "turn right"
+        send.sendContinuousValue(-500 ,1300 ,z ,-7,sensor)
 
     elif Straight_status == 22:  #right turn back
-        print('Straight_status = right turn back')
-        send.sendContinuousValue(100 ,-300 ,z ,5 ,sensor)
+        #print('Straight_status = right turn back')
+        move_status = "right turn back"
+        send.sendContinuousValue(-200 ,-800 ,z ,7 ,sensor)
 
     elif Straight_status == 23:  #turn left
-        print('Straight_status = turn left')
-        send.sendContinuousValue(100 ,-300 ,z ,5 ,sensor)
+        #print('Straight_status = turn left')
+        move_status = "turn left"
+        send.sendContinuousValue(-200 ,-900 ,z ,7 ,sensor)
 
     elif Straight_status == 24:  #left turn back
-        print('Straight_status = left turn back')
-        send.sendContinuousValue(-100 ,1300 ,z ,-5 ,sensor)
+        #print('Straight_status = left turn back')
+        move_status = "left turn back"
+        send.sendContinuousValue(-500 ,1400 ,z ,-7 ,sensor)
 
 #--------------------turn head go straight------------------------#
     elif Straight_status == 25:  #turn right fix left
-        print('Straight_status = turn right fix left')
+        rospy.loginfo(f'turn right fix left')
+        #print('Straight_status = turn right fix left')
         send.sendContinuousValue(1800 ,y + y_move ,z ,2 ,sensor)
 
     elif Straight_status == 26:  #turn right fix right
-        print('Straight_status = turn right fix right')
+        rospy.loginfo(f'turn right fix right')
+        #print('Straight_status = turn right fix right')
         send.sendContinuousValue(1800 ,y + y_move ,z ,-2 ,sensor)
 
     elif Straight_status == 27:  #turn left fix right
-        print('Straight_status = turn left fix right')
+        rospy.loginfo(f'turn left fix right')
+        #print('Straight_status = turn left fix right')
         send.sendContinuousValue(1800 ,y + y_move ,z ,-2 ,sensor)
 
     # elif Straight_status == 277:  #turn left fix right move
@@ -311,320 +370,60 @@ def Move(Straight_status = 0 ,x = 200 ,y = 400 ,z = 0 ,theta = -1  ,sensor = 0 )
     #     send.sendContinuousValue(x ,y + y_move ,z ,-3 ,sensor)
 
     elif Straight_status == 28:  #turn left fix left
-        print('Straight_status = turn left fix left')
+        rospy.loginfo(f'turn left fix left')
+        #print('Straight_status = turn left fix left')
         send.sendContinuousValue(1800 ,y + y_move ,z ,2 ,sensor) 
 
 #------------------reddoor slope parameter------------------------#
     elif Straight_status == 31:  #Slope fix
-        print('Straight_status = Slope fix')
+        move_status = ("slope fix")
+        # print('Straight_status = Slope fix')
         send.sendContinuousValue(x,y,z,theta + slope_angle,sensor)
 
     elif Straight_status == 32:  #slope fix right
-        print('Straight_status = slope fix right')
-        if send.color_mask_subject_YMax[5][0] < 150:
+        move_status = ("slope fix right")
+        # print('Straight_status = slope fix right')
+        if send.color_mask_subject_YMax[5][0] < CRMin:
             rx = 200
-        elif send.color_mask_subject_YMax[5][0] > 160:
+        elif send.color_mask_subject_YMax[5][0] > CRMax:
             rx = -200
         else :
             rx = 0
-        if abs(deep.slope)  > 0.03 or slope_flag == True:
+        if abs(deep.slope)  > 0.05 or slope_flag == True:
             Slope_fix() 
         if send.color_mask_subject_size[5][0] ==0 :           #黃線出障礙物的平移
             rx = 0
-        send.sendContinuousValue(-400 + rx , -1000 ,0 ,1 + slope_angle ,0) 
+        send.sendContinuousValue(-200 + rx , -600 ,0 ,-1 + slope_angle ,0) 
     
     elif Straight_status == 33:  #slope fix left
-        print('Straight_status = slope fix left')
-        if send.color_mask_subject_YMax[5][0] < 150:
+        move_status = ("slope fix left")
+        # print('Straight_status = slope fix left')
+        if send.color_mask_subject_YMax[5][0] < CRMin:
             rx = 200
-        elif send.color_mask_subject_YMax[5][0] > 160:
+        elif send.color_mask_subject_YMax[5][0] > CRMax:
             rx = -200
         else :
             rx = 0
-        if abs(deep.slope)  > 0.03 or slope_flag == True:
+        if abs(deep.slope)  > -0.05 or slope_flag == True:
             Slope_fix() 
         if send.color_mask_subject_size[5][0] ==0 :           #黃線出障礙物的平移
             rx = 0
-        send.sendContinuousValue(-400 + rx , 700 ,0 ,3 + slope_angle ,0) 
+        send.sendContinuousValue(-100 + rx , 800 ,0 ,0 + slope_angle ,0) 
 
 #--------------------Preturn Head Parameter-----------------------#
     elif Straight_status == 41:  #preturn left
-        print('Straight_status =preturn left')
-        send.sendContinuousValue(300,y,z,2,sensor)
+        move_status = ("preturn left")
+        #print('Straight_status =preturn left')
+        send.sendContinuousValue(-300,-300,z,5,sensor)
 
     elif Straight_status == 42:  #preturn right
-        print('Straight_status = preturn right')
-        send.sendContinuousValue(300,y,z,-2,sensor)
-    
-    
-def Y_Line_avoid():
-    global Y_L_Deep,Y_C_Deep,Y_R_Deep,imu_back,Y_L_flag,Y_R_flag,B_C_Deep,B_L_Deep,B_R_Deep, IMU_ok, L_line, R_line,YYDS
-    if (Y_L_Deep != 24 and Y_R_Deep != 24 and send.color_mask_subject_cnts[1] == 2):    #進黃黃避障 
-        YY_avoid()
-    elif Yaw_wen > 0:           #左轉
-        imu_back = True
-        ##L_line = True
-        while Yaw_wen <= 75: #左轉至80
-            get_IMU()
-            Image_Init()
-            Normal_Obs_Parameter()
-            Image_Info()
-            Move(Straight_status = 23) 
-            print('turn to Yellow Line LLLLLLLLL')
-        while ( Y_C_Deep > YYDS):
-            get_IMU()
-            Image_Init()
-            Normal_Obs_Parameter()
-            Image_Info()
-            Move(Straight_status = 15)      #前進
-            print('close to Yellow Line LLLLLLLLLLLOOOOOOOOOOOO')
-    elif Yaw_wen <= 0:          #右轉
-        imu_back = True
-        ##R_line = True
-        while Yaw_wen >= -85: #右轉至85
-            get_IMU()
-            Image_Init()
-            Normal_Obs_Parameter()
-            Image_Info()
-            Move(Straight_status = 21) 
-            print('turn to Yellow Line RRRRRRRRRR')
-        while (Y_C_Deep > YYDS):    #前進至靠近黃線                 
-            get_IMU()
-            Image_Init()
-            Normal_Obs_Parameter()
-            Image_Info()
-            Move(Straight_status = 15)      #前進
-            print('close to Yellow Line RRRRRRRRRROOOOOOOOOOOO')
-    else:
-        get_IMU()
-        IMU_Angle()
-        Image_Init()
-        Normal_Obs_Parameter()
-        Image_Info()
-        pass
-    get_IMU()
-    if abs(Yaw_wen) > 5 :                       #回正
-        while abs(Yaw_wen) > 5 :
-            get_IMU()
-            IMU_Angle()
-            Image_Init()
-            Normal_Obs_Parameter()
-            Image_Info()
-            if Yaw_wen > 0:
-                Move(Straight_status = 24)
-            elif Yaw_wen <= 0:
-                Move(Straight_status = 22)
-            print('iiiiiiiiiiiiii__________FFFFFFFFFFIIIIIIIXXXXXXX')
-    else :
-        pass
-    Image_Init()
-    Normal_Obs_Parameter()
-    Image_Info()
-    send.sendContinuousValue(0, 0 , 0 , 0 , 0)
-    if L_line == True :
-        if C_Deep > 10 :                    #直走至靠近障礙物 線在左邊
-            while C_Deep > 10 :
-                print('C_Deep = ',C_Deep)
-                get_IMU()
-                IMU_Angle()
-                Image_Init()
-                Normal_Obs_Parameter()
-                Image_Info()
-                Move(Straight_status = 122)
-                print('GGGGGGGGOOOOOOOOOO LLLLLLLLLline')
-                if C_Deep < 10 :
-                    break
-        # if abs(Dx) != 0 :                  #若下一步為轉頭 先右平移遠離黃線
-        #     if send.color_mask_subject_YMax[1][0] > 230 :
-        #         while send.color_mask_subject_YMax[1][0] > 230 :
-        #             print('LLLLLLLLL MOVE')
-        #             Image_Init()
-        #             Normal_Obs_Parameter()
-        #             Image_Info()
-        #             Move(Straight_status = 32)
-    elif R_line == True :
-        if C_Deep > 10 :                    #直走至靠近障礙物 線在右邊
-            while C_Deep > 10 :
-                print('imuokkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk = ',IMU_ok)
-                print('C_Deep = ',C_Deep)
-                get_IMU()
-                IMU_Angle()
-                Image_Init()
-                Normal_Obs_Parameter()
-                Image_Info()
-                Move(Straight_status = 122)
-                print('GGGGGGGGGOOOOOOOOO RRRRRRRRRRRline')
-                if C_Deep < 10 :
-                    break
-        # if abs(Dx) != 0 :                  #若下一步為轉頭 先左平移遠離黃線
-        #     if send.color_mask_subject_YMax[1][0] > 230 :
-        #         while send.color_mask_subject_YMax[1][0] > 230 :
-        #             print('RRRRRRRR MOVE')
-        #             Image_Init()
-        #             Normal_Obs_Parameter()
-        #             Image_Info()
-        #             Move(Straight_status = 33)
-    get_IMU()
-    IMU_Angle()
-    Image_Init()
-    Normal_Obs_Parameter()
-    Image_Info()
-    IMU_ok = False 
-    # L_line = False
-    # R_line = False
-
-def YY_avoid():                 #黃色通道
-    global Y_L_Deep,Y_C_Deep,Y_R_Deep,imu_back,Y_L_flag,Y_R_flag,B_C_Deep,B_L_Deep,B_R_Deep, IMU_ok, L_line, R_line,YYDS
-    get_IMU()
-    Image_Info()
-    if(Yaw_wen > 5):        #左轉
-        imu_back = True
-        L_line = True
-        while Yaw_wen <= 75:                   #向左旋轉  
-            get_IMU()
-            Image_Init()
-            Normal_Obs_Parameter()
-            Image_Info()
-            Move(Straight_status = 23) 
-            print('turn to YYY Line LLLLLLLLL')
-        while ( Y_C_Deep > YYDS):                   #直走至靠近黃線
-            get_IMU()
-            Image_Init()
-            Normal_Obs_Parameter()
-            Image_Info()
-            Move(Straight_status = 15)      #前進
-            print('close to YYYYY Line LLLLLLLLLLLOOOOOOOOOOOO')
-    elif(Yaw_wen < -5):     #右轉
-        imu_back = True
-        R_line = True
-        while Yaw_wen >= -85:                   #向右旋轉
-            get_IMU()
-            Image_Init()
-            Normal_Obs_Parameter()
-            Image_Info()
-            Move(Straight_status = 21) 
-            print('turn to YYY Line RRRRRRRRRR')
-        while (Y_C_Deep > YYDS):                  #直走至靠近黃線
-            get_IMU()
-            Image_Init()
-            Normal_Obs_Parameter()
-            Image_Info()
-            Move(Straight_status = 15)      #前進
-            print('close to Yellow Line RRRRRRRRRROOOOOOOOOOOO')
-    elif(-5<=Yaw_wen<=5):                 #避免晃動時imu有問題 用深度值加強判斷
-        if Y_L_Deep < Y_R_Deep :          #左轉
-            imu_back = True
-            L_line = True
-            while ( Y_C_Deep > YYDS):
-                if Yaw_wen <= 80:
-                    while Yaw_wen <= 80:
-                        get_IMU()
-                        Image_Init()
-                        Normal_Obs_Parameter()
-                        Image_Info()
-                        Move(Straight_status = 23) 
-                        print('turn to Yellow Line LLLLLLLLL')
-                elif Yaw_wen > 85:
-                    get_IMU()
-                    Image_Init()
-                    Normal_Obs_Parameter()
-                    Image_Info()
-                    Move(Straight_status = 15)  #前進
-                    print('close to Yellow Line LLLLLLLLLLLOOOOOOOOOOOO')
-        elif Y_R_Deep < Y_L_Deep:          #右轉
-            imu_back = True
-            R_line = True
-            while (Y_C_Deep > YYDS):
-                if Yaw_wen >= -80:
-                    while Yaw_wen >= -80:
-                        get_IMU()
-                        Image_Init()
-                        Normal_Obs_Parameter()
-                        Image_Info()
-                        Move(Straight_status = 21) 
-                        print('turn to Yellow Line RRRRRRRRRR')
-                elif Yaw_wen < -85:
-                    get_IMU()
-                    Image_Init()
-                    Normal_Obs_Parameter()
-                    Image_Info()
-                    Move(Straight_status = 15)  #前進
-                    print('close to Yellow Line RRRRRRRRRROOOOOOOOOOOO')
-    get_IMU()
-    if abs(Yaw_wen) > 8 :                   #回正
-        while abs(Yaw_wen) > 8 :
-            get_IMU()
-            IMU_Angle()
-            Image_Init()
-            Normal_Obs_Parameter()
-            Image_Info()
-            if Yaw_wen > 0:
-                Move(Straight_status = 24)
-            elif Yaw_wen <= 0:
-                Move(Straight_status = 22)
-            print('iiiiiiiMMMMuuuuFFFFFFFFFFIIIIIIIXXXXXXX')
-    else :
-        pass
-    Image_Init()
-    Normal_Obs_Parameter()
-    Image_Info()
-    send.sendContinuousValue(0, 0 , 0 , 0 , 0)
-    if L_line == True :
-        if C_Deep > 10 :                    #直走至靠近障礙物 線在左邊
-            while C_Deep > 10 :
-                get_IMU()
-                IMU_Angle()
-                Image_Init()
-                Normal_Obs_Parameter()
-                Image_Info()
-                if abs(Yaw_wen) < 2 :
-                    Move(Straight_status = 14)
-                else:
-                    Move(Straight_status = 122)
-                print('GGO Lline')
-                if C_Deep < 10 :
-                    break
-        # if abs(Dx) != 0 :                  #若下一步為轉頭 先右平移遠離黃線
-        #     if send.color_mask_subject_YMax[1][0] > 230 :
-        #         while send.color_mask_subject_YMax[1][0] > 230 :
-        #             Image_Init()
-        #             Normal_Obs_Parameter()
-        #             Image_Info()
-        #             Move(Straight_status = 32)
-    elif R_line == True : 
-        if C_Deep > 10 :                    #直走至靠近障礙物 線在右邊
-            while C_Deep > 10 :
-                get_IMU()
-                IMU_Angle()
-                Image_Init()
-                Normal_Obs_Parameter()
-                Image_Info()
-                if abs(Yaw_wen) < 2 :
-                    Move(Straight_status = 14)
-                else:
-                    Move(Straight_status = 122)
-                print('GGO Rline')
-                if C_Deep < 10 :
-                    break
-        # if abs(Dx) != 0 :                  #若下一步為轉頭 先左平移遠離黃線
-        #     if send.color_mask_subject_YMax[1][0] > 230 :
-        #         while send.color_mask_subject_YMax[1][0] > 230 :
-        #             Image_Init()
-        #             Normal_Obs_Parameter()
-        #             Image_Info()
-        #             Move(Straight_status = 33)
-    get_IMU()
-    IMU_Angle()
-    Image_Init()
-    Normal_Obs_Parameter()
-    Image_Info()
-    IMU_ok = False 
-    # L_line = False
-    # R_line = False
-
+        move_status = ("preturn right")
+        #print('Straight_status = preturn right')
+        send.sendContinuousValue(-300,900,z,-5,sensor)
+    update_values()
 
 def Turn_Head():
-    global R_deep_sum, L_deep_sum, L_Deep, R_Deep, y_move,R_line,L_line
+    global R_deep_sum, L_deep_sum, L_Deep, R_Deep, y_move,R_line,L_line,strategy_status
     Move(Straight_status = 0)
     if R_line == False and L_line == False : 
         time.sleep(2)
@@ -639,29 +438,33 @@ def Turn_Head():
         Normal_Obs_Parameter()
         R_deep_sum = Deep_sum
         send.sendHeadMotor(1,2599,100)
-        send.sendHeadMotor(2,head_height+100,100)
+        send.sendHeadMotor(2,head_height,100)
         send.sendHeadMotor(1,2599,100)
-        send.sendHeadMotor(2,head_height+100,100)
+        send.sendHeadMotor(2,head_height,100)
         send.sendHeadMotor(1,2599,100)
-        send.sendHeadMotor(2,head_height+100,100)
+        send.sendHeadMotor(2,head_height,100)
         time.sleep(1.8)
         Image_Init()
         Normal_Obs_Parameter()
         L_deep_sum = Deep_sum
         send.sendHeadMotor(1,2048,100)
-        send.sendHeadMotor(2,head_height+100,100)
+        send.sendHeadMotor(2,head_height,100)
         send.sendHeadMotor(1,2048,100)
-        send.sendHeadMotor(2,head_height+100,100)
+        send.sendHeadMotor(2,head_height,100)
         send.sendHeadMotor(1,2048,100)
-        send.sendHeadMotor(2,head_height+100,100)
+        send.sendHeadMotor(2,head_height,100)
         time.sleep(1)
-        print('R_deep_sum = ',R_deep_sum)
-        print('L_deep_sum = ',L_deep_sum)
+        rospy.loginfo(f'R_deep_sum = {R_deep_sum}')
+        rospy.loginfo(f'L_deep_sum = {L_deep_sum}')
     else :
         R_deep_sum = 0
         L_deep_sum = 0
 
     if (R_deep_sum > L_deep_sum) or (L_line == True):        #右轉
+        if(L_line == True):
+            strategy_status = "黃線轉頭"
+        elif(L_line == False and R_line == False):
+            strategy_status = "一般轉頭"
         Image_Init()
         Normal_Obs_Parameter()
         Image_Info()
@@ -679,11 +482,11 @@ def Turn_Head():
                 Normal_Obs_Parameter()
                 Image_Info()
                 Move(Straight_status = 16) 
-        print('TTTTTTTTTTTurn Headrrrrrrrr')
+        #print('TTTTTTTTTTTurn Headrrrrrrrr')
         get_IMU()
         if abs(Yaw_wen) < 70:                   #靠近後右旋轉至90度
             while abs(Yaw_wen) < 70:
-                print('L_line = ',L_line)
+                rospy.loginfo(f'L_line = {L_line}')
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
@@ -699,17 +502,17 @@ def Turn_Head():
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
-                print('DDDDeep = ',R_Deep)
+                rospy.loginfo(f'R_Deep = {R_Deep}')
                 if (R_Deep != 24) and (R_Deep <= 12) :                  #轉頭後直走 平移修正
                     y_move = -700
                 elif (R_Deep != 24) and (R_Deep > 12) :
                     y_move = 500
                 if abs(Yaw_wen) > 87 :          #視步態更動
                     Move(Straight_status = 25)
-                    print(' Dx = ',Dx)
+                    rospy.loginfo(f'Dx = {Dx}')
                 else :
                     Move(Straight_status = 26)
-                    print(' Dx = ',Dx)
+                    rospy.loginfo(f'Dx = {Dx}')
                 # if C_Deep == 24 and R_Deep == 24:# MRT
                 #     Move(Straight_status = 15)
                 #     time.sleep(1)
@@ -721,8 +524,9 @@ def Turn_Head():
         Normal_Obs_Parameter()
         #----看到黃線
         if ((deep.line_flag == True) and (send.color_mask_subject_YMin[1][0] <= 10)) or ((send.color_mask_subject_cnts[1] == 2) and (Y_L_Deep <= 7) and (Y_R_Deep <= 7)) or ((send.color_mask_subject_XMax[1][0] >= 310) and (send.color_mask_subject_XMin[1][0] <= 10) and (send.color_mask_subject_cnts[1] == 1)):
-            print('YYYline___right')
+            #print('YYYline___right')
             ##Y_Line_avoid()
+            pass
         get_IMU()
         if abs(Yaw_wen) > 60:             #右轉回正
             while abs(Yaw_wen) > 60:
@@ -731,6 +535,10 @@ def Turn_Head():
                 get_IMU()
                 Move(Straight_status = 22)
     elif (L_deep_sum > R_deep_sum) or (R_line == True):         #左轉
+        if(R_line == True):
+            strategy_status = "黃線轉頭"
+        elif(L_line == False and R_line == False):
+            strategy_status = "一般轉頭"
         Image_Init()
         Normal_Obs_Parameter()
         Image_Info()
@@ -738,7 +546,8 @@ def Turn_Head():
         ##    while ( send.color_mask_subject_YMax[2][0] < 200 ):
         if (B_C_Deep > 3):                   #靠近障礙物
             while ( B_C_Deep > 3 ):
-                print('send.color_mask_subject_YMax = ',send.color_mask_subject_YMax[2][0])
+                rospy.loginfo(f'send.color_mask_subject_YMax = {send.color_mask_subject_YMax[2][0]}')
+                #print('send.color_mask_subject_YMax = ',send.color_mask_subject_YMax[2][0])
                 Image_Init()
                 Normal_Obs_Parameter()
                 Image_Info()
@@ -747,12 +556,12 @@ def Turn_Head():
         ##    while ( send.color_mask_subject_YMax[2][0] > 210 ):
         elif ( B_C_Deep < 2 ):                #遠離障礙物
             while ( B_C_Deep < 2 ):
-                print('send.color_mask_subject_YMax = ',send.color_mask_subject_YMax[2][0])
+                rospy.loginfo(f'B_YMax = {send.color_mask_subject_YMax[2][0]}')
                 Image_Init()
                 Normal_Obs_Parameter()
                 Image_Info()
                 Move(Straight_status = 16) 
-        print('TTTTTTTTTTTurn Headlllllllllll')
+        #print('TTTTTTTTTTTurn Headlllllllllll')
         get_IMU()
         if abs(Yaw_wen) < 65:                           #靠近後轉至90度
             while abs(Yaw_wen) < 65:
@@ -768,7 +577,8 @@ def Turn_Head():
         send.sendContinuousValue(0, 0 , 0 , 0 , 0)
         if  abs(Dx) >= 1 :                          #直走且imu修正
             while  abs(Dx) >= 1 :
-                print('DDDDeep = ',L_Deep)
+                rospy.loginfo(f'L_Deep = {L_Deep}')
+                #print('DDDDeep = ',L_Deep)
                 Image_Init()
                 Normal_Obs_Parameter()
                 get_IMU()
@@ -787,10 +597,12 @@ def Turn_Head():
                     #         Move(Straight_status = 277)
                 if abs(Yaw_wen) > 85 :          #視步態更動
                     Move(Straight_status = 27)
-                    print(' Dx = ',Dx)
+                    rospy.loginfo(f'Dx = {Dx}')
+                    #print(' Dx = ',Dx)
                 else :
                     Move(Straight_status = 28) 
-                    print(' Dx = ',Dx)
+                    rospy.loginfo(f'Dx = {Dx}')
+                    #print(' Dx = ',Dx)
                 # if C_Deep == 24 and L_Deep == 24:#MRT
                 #     Move(Straight_status = 15)
                 #     time.sleep(1)
@@ -802,7 +614,7 @@ def Turn_Head():
         Normal_Obs_Parameter()
         #----看到黃線
         if ((deep.line_flag == True) and (send.color_mask_subject_YMin[1][0] <= 10)) or ((send.color_mask_subject_cnts[1] == 2) and (Y_L_Deep <= 7) and (Y_R_Deep <= 7)) or ((send.color_mask_subject_XMax[1][0] >= 310) and (send.color_mask_subject_XMin[1][0] <= 10) and (send.color_mask_subject_cnts[1] == 1)):
-            print('YYYline___left')
+            rospy.loginfo(f'Turn Head Y line')
             ##Y_Line_avoid()
         get_IMU()
         if abs(Yaw_wen) > 50:               #左轉回正
@@ -814,8 +626,10 @@ def Turn_Head():
 
 def Slope_fix():
     global slope_angle ,slope_Rcnt,slope_Lcnt
-    print('slope = ',deep.slope)
-    print('degree = ',deep.degree)
+    rospy.loginfo(f'slope = {deep.slope}')
+    rospy.loginfo(f' = {deep.degree}')
+    # print('slope = ',deep.slope)
+    # print('degree = ',deep.degree)
     if deep.slope > 0:          #fix to l
         if  deep.slope >= 2:
             slope_angle = 0
@@ -828,11 +642,11 @@ def Slope_fix():
         elif 0.2 > deep.slope >= 0.15:
             slope_angle = 3
         elif 0.15 > deep.slope >= 0.1:
-            slope_angle = 2
+            slope_angle = 3
         elif 0.1 > deep.slope >= 0.05:
             slope_angle = 2
         elif 0.05 > deep.slope >= 0.03:
-            slope_angle = 1
+            slope_angle = 2
         elif 0.03 > deep.slope >= 0:
             slope_angle = 0
             slope_Lcnt  += 1
@@ -840,9 +654,9 @@ def Slope_fix():
         if  deep.slope <= -2:
             slope_angle = 0
         elif -1 >= deep.slope:
-            slope_angle = -6
-        elif -0.3 >= deep.slope > -1:
             slope_angle = -5
+        elif -0.3 >= deep.slope > -1:
+            slope_angle = -4
         elif -0.2 >= deep.slope > -0.3:
             slope_angle = -4
         elif -0.15 >= deep.slope > -0.2:
@@ -858,8 +672,8 @@ def Slope_fix():
             slope_Rcnt  += 1
     if send.color_mask_subject_size[5][0] ==0 :
         slope_angle = 0
-
-    print( 'slope_angle = ' + str(slope_angle))
+    rospy.loginfo(f'slope_angle = {slope_angle}')
+    #print( 'slope_angle = ' + str(slope_angle))
     return slope_angle
 
 def IMU_Yaw_ini():
@@ -869,52 +683,54 @@ def IMU_Yaw_ini():
 def get_IMU():
     global Yaw_wen
     Yaw_wen = send.imu_value_Yaw
-    print('Yaw = ' + str(Yaw_wen))
+    rospy.loginfo(f'Yaw = {Yaw_wen}')
+    #print('Yaw = ' + str(Yaw_wen))
     return Yaw_wen
 
 def IMU_Angle():
     global imu_angle
     if Yaw_wen > 0:         #fix to r
         if Yaw_wen >= 90:
-            imu_angle = -5
+            imu_angle = -7
         elif 90 > Yaw_wen >= 60:
-            imu_angle = -4
+            imu_angle = -6
         elif 60 > Yaw_wen >= 45:
-            imu_angle = -4
+            imu_angle = -6
         elif 45 > Yaw_wen >= 20:
-            imu_angle = -3
+            imu_angle = -5
         elif 20 > Yaw_wen >= 10:
-            imu_angle = -2
+            imu_angle = -4
         elif 10 > Yaw_wen >= 5:
-            imu_angle = -1
+            imu_angle = -3
         elif 5 > Yaw_wen >= 2:
-            imu_angle = -1
+            imu_angle = -3
         elif 2 > Yaw_wen >= 0:
             imu_angle = 0
     elif Yaw_wen <= 0:      #fix to l
         if -90 >= Yaw_wen:
-            imu_angle = 6
+            imu_angle = 7
         elif -60 >= Yaw_wen > -90:
-            imu_angle = 5
+            imu_angle = 6
         elif -45 >= Yaw_wen > -60:
-            imu_angle = 4
+            imu_angle = 5
         elif -20 >= Yaw_wen > -45:
-            imu_angle = 4
+            imu_angle = 5
         elif -10 >= Yaw_wen > -20:
-            imu_angle = 3
+            imu_angle = 4
         elif -5 >= Yaw_wen > -10:
-            imu_angle = 3
+            imu_angle = 4
         elif -2 >= Yaw_wen > -5:
-            imu_angle = 3
+            imu_angle = 4
         elif 0 >= Yaw_wen > -2:
             imu_angle = 0
-    print( 'imu_angle = ' + str(imu_angle))
+    rospy.loginfo(f'imu_angle = {imu_angle}')
+    #print( 'imu_angle = ' + str(imu_angle))
     return imu_angle
 
 def Straight_Speed():
     global Goal_speed 
     if Dy ==24:
-        Goal_speed = 2500
+        Goal_speed = 2700
     elif 20 <= Dy < 24:
         Goal_speed = 2200
     elif 16 <= Dy < 20:
@@ -931,13 +747,14 @@ def Straight_Speed():
         Goal_speed = 300
     elif 0 <= Dy < 3:
         Goal_speed = 0
-    print( 'Goal_speed = ' + str(Goal_speed))
+    rospy.loginfo(f'Goal_speed = {Goal_speed}')
+    #print( 'Goal_speed = ' + str(Goal_speed))
     return Goal_speed
 
 def Turn_Angle(Turn_angle_status):
     global Angle
     if Turn_angle_status == 0:      #R
-        print('turn right')
+        #print('turn right')
         if 17 > Dx >= 12:
             Angle = -6
         elif 12 > Dx >= 8:
@@ -951,7 +768,7 @@ def Turn_Angle(Turn_angle_status):
         elif 2 > Dx >= 0:
             Angle = 0
     elif Turn_angle_status == 1:    #L
-        print('turn left')
+        #print('turn left')
         if -12 >= Dx > -17:
             Angle = 6
         elif -8 >= Dx > -12:
@@ -968,104 +785,110 @@ def Turn_Angle(Turn_angle_status):
             Angle = 0
     else: 
         Angle = 0
-    print( 'Angle = ' + str(Angle))
+    #print( 'Angle = ' + str(Angle))
     return Angle
 
 def Crawl():
     global Straight_status,crawl_cnt,C_Deep,L_Deep,R_Deep,CRMax,CRMin,B_min,B_max,B_left,B_right,slope_Rcnt,slope_Lcnt
     slope_Rcnt = 0
     slope_Lcnt = 0
-    if send.color_mask_subject_YMax[5][0] < CRMin or send.color_mask_subject_YMax[5][0] > CRMax or CRMin <= send.color_mask_subject_YMax[5][0] <= CRMax:
-        while send.color_mask_subject_YMax[5][0] < CRMin or send.color_mask_subject_YMax[5][0] > CRMax or CRMin <= send.color_mask_subject_YMax[5][0] <= CRMax:
-            print('min = ',B_min)
-            print('max = ',B_max)
-            print('Left = ',B_left)
-            print('Right = ',B_right)
-            print('YYYYYYYYYYYYYYYYYYYYYYYYMMMMMMMMMMMMMMMMMMAAAAAAAAAAAAAXXXXXXXXXX =',send.color_mask_subject_YMax[5][0])
+    if send.color_mask_subject_YMax[5][0] < CRMin or send.color_mask_subject_YMax[5][0] > CRMax :
+        while send.color_mask_subject_YMax[5][0] < CRMin or send.color_mask_subject_YMax[5][0] > CRMax :
+            # print('min = ',B_min)
+            # print('max = ',B_max)
+            # print('Left = ',B_left)
+            # print('Right = ',B_right)
+            # print('YYYYYYYYYYYYYYYYYYYYYYYYMMMMMMMMMMMMMMMMMMAAAAAAAAAAAAAXXXXXXXXXX =',send.color_mask_subject_YMax[5][0])
 
             if(send.color_mask_subject_YMax[5][0] < CRMin):            #前進修正
                 Slope_fix()
                 Move(Straight_status = 15)
-                print('crawlllllll forwardddddddddd')
+                rospy.loginfo(f'crawl forward')
+               # print('crawlllllll forwardddddddddd')
             elif(send.color_mask_subject_YMax[5][0] > CRMax):          #後退修正
                 Slope_fix()
                 Move(Straight_status = 16)
-                print('crawlllllll backkkkkkkk')
-            elif CRMin <= send.color_mask_subject_YMax[5][0] <= CRMax:    #爬
-                if abs(deep.slope) > 0.03:                                #不平行紅門時修斜率
-                    while abs(deep.slope) > 0.03:
+                rospy.loginfo(f'crawl back')
+            else:
+                break
+        while CRMin < send.color_mask_subject_YMax[5][0] < CRMax :
+            if CRMin <= send.color_mask_subject_YMax[5][0] <= CRMax:    #爬
+                if abs(deep.slope) > 0.09:                                #不平行紅門時修斜率
+                    while abs(deep.slope) > 0.09:
                         Slope_fix()
                         Move(Straight_status = 31)
                         Image_Info()
-                        print('rcnt = ',slope_Rcnt)
-                        print('lcnt = ',slope_Lcnt)
-                        if slope_Rcnt > 400 or slope_Lcnt > 400:
-                            break
+                        # print('rcnt = ',slope_Rcnt)
+                        # print('lcnt = ',slope_Lcnt)
+                        # if slope_Rcnt > 400 or slope_Lcnt > 400:
+                        #     break
                     # slope_flag = False
                     # slope_Lcnt = 0
                     # slope_Rcnt = 0
-                print('CCCCCCCCCCCCCCCCRWAL')
+                #print('CCCCCCCCCCCCCCCCRWAL')
+                # else:
+                #     # pass
                 send.sendContinuousValue(0, 0 , 0 , 0 , 0) 
                 time.sleep(1)
                 send.sendBodyAuto(0,0,0,0,1,0)
                 time.sleep(2)
-                #send.sendBodySector(299)    #基礎站姿29！！！！！！！！！！！！！！！！！！
-                time.sleep(4)
-                time.sleep(20)
-                # send.sendBodySector(123)
-                # time.sleep(9)
-                # time.sleep(0.5)
-                # while crawl_cnt < 3:                #避免門下建模有問題 固定爬三次才抬頭
-                #     send.sendBodySector(456)
-                #     time.sleep(2.8)
-                #     # time.sleep(0.3)
-                #     crawl_cnt += 1
-                # send.color_mask_subject_YMax[1][0] = 0
-                # send.color_mask_subject_YMax[2][0] = 0
-                # send.sendHeadMotor(1,2048,100)
-                # send.sendHeadMotor(2,2500,100)
-                # time.sleep(1)
-                # while crawl_cnt < 8:                   #邊爬邊判斷是否離障礙物太近
-                #     Image_Init()
-                #     Normal_Obs_Parameter()
-                #     time.sleep(0.1)
-                #     print('send.color_mask_subject_YMax[2][0] = ',send.color_mask_subject_YMax[2][0])
-                #     print('send.color_mask_subject_YMax[1][0] = ',send.color_mask_subject_YMax[1][0])
-                #     if (send.color_mask_subject_YMax[2][0] >= 85 and send.color_mask_subject_size[2][0] > 5000) or (send.color_mask_subject_YMax[1][0] >= 60 and send.color_mask_subject_size[1][0] > 5000):
-                #         break
-                #     else:
-                #         send.sendBodySector(456)
-                #         time.sleep(2.8)
-                #         #time.sleep(0.1)
-                #         crawl_cnt += 1
-                # send.sendBodySector(1113)
-                # time.sleep(14.4)
-                # time.sleep(1.5)
-                # send.sendBodySector(299)    #基礎站姿29！！！！！！！！！！！！！！！！！！
-                # time.sleep(1.5)
+                send.sendBodySector(6666)    #基礎站姿29！！！！！！！！！！！！！！！！！！
+
+                time.sleep(1.2)
+                send.sendBodySector(7777)
+                time.sleep(6)
+                while crawl_cnt < 3:                #避免門下建模有問題 固定爬三次才抬頭
+                    send.sendBodySector(9999)
+                    time.sleep(3.3)
+                    # time.sleep(0.3)
+                    crawl_cnt += 1
+                send.color_mask_subject_YMax[1][0] = 0
+                send.color_mask_subject_YMax[2][0] = 0
                 send.sendHeadMotor(1,2048,100)
-                send.sendHeadMotor(2,1550,100)
+                send.sendHeadMotor(2,2500,100)
+                time.sleep(1)
+                while crawl_cnt < 8:                   #邊爬邊判斷是否離障礙物太近
+                    Image_Init()
+                    Normal_Obs_Parameter()
+                    time.sleep(0.1)
+                    # print('send.color_mask_subject_YMax[2][0] = ',send.color_mask_subject_YMax[2][0])
+                    # print('send.color_mask_subject_YMax[1][0] = ',send.color_mask_subject_YMax[1][0])
+                    if (send.color_mask_subject_YMax[2][0] >= 60 and send.color_mask_subject_size[2][0] > 5000) or (send.color_mask_subject_YMax[1][0] >= 60 and send.color_mask_subject_size[1][0] > 5000):
+                        break
+                    else:
+                        send.sendBodySector(9999)
+                        time.sleep(3.3)
+                        #time.sleep(0.1)
+                        crawl_cnt += 1
+                send.sendBodySector(8888)
+                time.sleep(12.5)
+                send.sendBodySector(29)    #基礎站姿29！！！！！！！！！！！！！！！！！！
                 time.sleep(0.5)
+                send.sendHeadMotor(1,2048,100)
+                send.sendHeadMotor(2,head_height,100)
                 #send.sendBodySector(15)#小白
                 #send.sendBodySector(16)#小黑
-                time.sleep(2.5)
+                time.sleep(0.5)
+                send.sendBodySector(5555)
+                time.sleep(2.0)
                 send.sendBodyAuto(0,0,0,0,1,0)
-                time.sleep(1)
-                break
+
+                break 
 
 if __name__ == '__main__':
     try:
-        print("try main")
+        rospy.loginfo(f'try main')
+        #print("try main")
         deep = deep_calculate()
         send = Sendmessage()
         while not rospy.is_shutdown():
             if send.is_start == True:
                 #==============================image===============================
                 # Focus_Matrix = [6, 7, 8, 8, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 8, 8, 7, 6]
-                Focus_Matrix = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]#6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6
+                #Focus_Matrix = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]#6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6
                 YYDS =  4   #Y_Line_Deep 2  4
-                CRMax = 65 #R_Max       65 55
-                CRMin = 55 #R_MIn       55 45
+                CRMax = 80 #R_Max       65 55
+                CRMin = 70 #R_MIn       55 45
 
                 Image_Init()
                 Normal_Obs_Parameter()
@@ -1080,10 +903,10 @@ if __name__ == '__main__':
                     send.sendHeadMotor(1,2048,100)
                     send.sendHeadMotor(2,head_height,100)
                     time.sleep(0.2)
-                    send.sendBodySector(5555)
-                    time.sleep(5)
-                    send.sendBodySector(1218)
-                    time.sleep(2.5)
+                    # send.sendBodySector(5555)
+                    # time.sleep(5)
+                    # send.sendBodySector(1218)
+                    # time.sleep(2.5)
                     #send.sendBodySector(15)     #收手 小白
                     #send.sendBodySector(16)     #收手 小黑
                     # send.sendBodySector(1218)   #長腳
@@ -1092,289 +915,305 @@ if __name__ == '__main__':
                 walking = True
                 if PreTurn_L == True :                      #指定初始向左旋轉
                     get_IMU()
-                    if abs(Yaw_wen) < 50:
-                        while abs(Yaw_wen) < 50:
+                    if abs(Yaw_wen) < 35:
+                        while abs(Yaw_wen) < 35:
                             get_IMU()
                             Move(Straight_status = 41)
                             # PreTurn_L = False
                     PreTurn_L = False
                 elif PreTurn_R == True :                        #指定初始向右旋轉 70
                     get_IMU()
-                    if abs(Yaw_wen) < 45:
-                        while abs(Yaw_wen) < 45:
+                    if abs(Yaw_wen) < 15:
+                        while abs(Yaw_wen) < 15:
                             get_IMU()
                             Move(Straight_status = 42)
                             # PreTurn_R = False
                     PreTurn_R = False
-                    #if red_flag == True:                    #若有紅門
-                #     print('In Reddoor')
-                #     if First_Reddoor == False :
-                #         First_Reddoor = True
-                #         send.sendHeadMotor(1,2048,100)
-                #         send.sendHeadMotor(2,1800,100)
-                #         time.sleep(0.5)
-                #         send.sendContinuousValue(0, 0 , 0 , 0 , 0)
-                   
-                #     elif First_Reddoor == True :
-
-                #         print('YYYYYYYYYYYYYYYMMMMMMMMMIIIIIIIIINNNNNNNNN = ',send.color_mask_subject_YMax[5][0])
-                #         if send.color_mask_subject_YMax[5][0] > 235:
-                #             while send.color_mask_subject_YMax[5][0] > 235:
-                #                 Image_Init()
-                #                 Normal_Obs_Parameter()
-                #                 Image_Info()
-                #                 Move(Straight_status = 16)
-
-                #         print('slope = ',deep.slope)
-                #         if abs(deep.slope) > 0.03 and (slope_flag == True):                     #不平行紅門時修斜率
-                #             while abs(deep.slope) > 0.03 or slope_flag == True:
-                #                 print('YYYYYYYYYYYYYYYMMMMMMMMMIIIIIIIIINNNNNNNNN = ',send.color_mask_subject_YMax[5][0])
-                #                 Slope_fix()
-                #                 Move(Straight_status = 31)
-                #                 Image_Info()
-                #                 if slope_Rcnt > 400 or slope_Lcnt > 400:
-                #                     break
-                #             slope_flag = False
-                #             slope_Lcnt = 0
-                #             slope_Rcnt = 0
-                #             send.sendHeadMotor(1,2048,100)
-                #             send.sendHeadMotor(2,1800,100)
-                #             time.sleep(0.5)
-                #         else :
-                #             if (send.color_mask_subject_YMax[5][0] < 150) and (redoor_dis == False) :     #前後距離修正（值越大離門越近） 55/65   離紅門太遠時前進
-                #                 Slope_fix()
-                #                 Move(Straight_status = 15)
-                #                 pass
-                #             elif (send.color_mask_subject_YMax[5][0] > 160) and (redoor_dis == False) :   #前後距離修正（值越大離門越近） 55/65   離紅門太近時候退
-                #                 Slope_fix()
-                #                 Move(Straight_status = 16)
-                #                 pass
-                #             else :                          #判斷須左移或右移 都不需則進爬
-                #                 redoor_dis = True
-                #                 if R_min < 2 and R_max > 315 :
-                #                     print('red center')
-                #                     print('BBBBBBBRRRRRRRRRRRRFFFFFFLLLLLLLAAAAAAAGGGGG = ',BR_flag)
-                #                     print('BBBLLLLLLLLLLLLLLLLFFFFFFFFFFFFFFFF = ',BL_flag)
-                #                     if (B_max == 0 and B_min == 0 and B_left <= 35 and BR_flag == True) or (B_max == 0 and B_min == 0 and B_right > 275 and BL_flag == True) or (B_max == 0 and B_min == 0 and B_right == 0 and B_left == 0):
-                #                         if abs(deep.slope)  > 0.03 or slope_flag == True:
-                #                             while abs(deep.slope) > 0.03 or slope_flag == True:
-                #                                 print('min = ',B_min)
-                #                                 print('max = ',B_max)
-                #                                 print('Left = ',B_left)
-                #                                 print('Right = ',B_right)
-                #                                 print('ddddddddddddddddddddddd = ',send.color_mask_subject_YMax[5][0])
-                #                                 Slope_fix()
-                #                                 Move(Straight_status = 31)
-                #                                 print('crawl22222222222222222222222222222222')
-                #                                 Image_Info()
-                #                                 if slope_Rcnt > 400 or slope_Lcnt > 400:
-                #                                     break
-                #                         else :
-                #                             Crawl()
-                #                     elif (B_min < 2 and B_max > 20):
-                #                         print('move R 11111')
-                #                         BR_flag = True
-                #                         BL_flag = False
-                #                         Move(Straight_status = 32)
-                #                     elif (B_max > 315 and B_min < 300):
-                #                         print('move L 11111')
-                #                         BL_flag = True
-                #                         BR_flag = False
-                #                         Move(Straight_status = 33)
-                #                     else :
-                #                         if BR_flag == True:
-                #                             Move(Straight_status = 32)
-                #                             print('BBBBBBBBBBBBBBRRRRRRRRRRR =',BR_flag)
-                #                         elif BL_flag == True:
-                #                             Move(Straight_status = 33)
-                #                             print('BBBBBBBBBBLLLLLLLLLLLLLLLLLLLL = ',BL_flag)
-                #                 elif R_min < 2 and R_max < 315 : 
-                #                     print('move L')
-                #                     Move(Straight_status = 33)
-                #                 elif R_min > 2 and R_max > 315 : 
-                #                     print('move R')
-                #                     Move(Straight_status = 32)
-                #else :
-                get_IMU()
-                if Dy < 24:
-                    # if R_line == True or L_line == True:
-                    #     while R_line ==True or L_line == True:
-                    #         Image_Init()
-                    #         Normal_Obs_Parameter()
-                    #         YL_Deep_sum = Y_Deep_sum1
-                    #         YR_Deep_sum = Y_Deep_sum2
-                    #         print('RRRRRRR',YR_Deep_sum)
-                    #         print('LLLLLLL',YL_Deep_sum)
-                    Image_Init()
-                    Normal_Obs_Parameter()
-                    YL_Deep_sum = Y_Deep_sum1
-                    YR_Deep_sum = Y_Deep_sum2
-                    if R_line == True :
-                        if YL_Deep_sum > YR_Deep_sum :
-                            R_line = True
-                        elif (YL_Deep_sum < YR_Deep_sum) or (YR_Deep_sum > 350) :
-                            R_line = False
-                    elif L_line == True :
-                        if YL_Deep_sum < YR_Deep_sum :
-                            L_line = True
-                        elif (YL_Deep_sum > YR_Deep_sum) or (YL_Deep_sum > 350) :
-                            L_line = False
-                            
-
+                if red_flag == True:                    #若有紅門
+                    rospy.loginfo(f'in red door')
+                    #print('In Reddoor')
+                    if First_Reddoor == False :
+                        First_Reddoor = True
+                        send.sendHeadMotor(1,2048,100)
+                        send.sendHeadMotor(2,head_height+100,100)
+                        time.sleep(0.5)
+                        send.sendContinuousValue(0, 0 , 0 , 0 , 0)
                     
-                            # if YR_Deep_sum > 100:#待更改
-                            #     R_line = True
-                            # else :
-                            #     R_line = False
-                    if 13 > Dx > 3 :        #turn right
-                        print('right avoid')
-                        Straight_Speed()
-                        #if ((deep.line_flag == True) and (send.color_mask_subject_YMin[1][0] <= 10)) or ((send.color_mask_subject_cnts[1] == 2) and (Y_L_Deep <= 7) and (Y_R_Deep <= 7)) or ((send.color_mask_subject_XMax[1][0] >= 310) and (send.color_mask_subject_XMin[1][0] <= 10) and (send.color_mask_subject_cnts[1] == 1)):
-                        #    Y_Line_avoid()      #黃線策略
-                        if (send.color_mask_subject_YMax[2][0] >= 170) and ( abs(Yaw_wen) <= 5 ) and imu_back == False and abs(Dx) > 3 and C_Deep != 24:        #離障礙物太近-->後退
-                            while (send.color_mask_subject_YMax[2][0] >= 170):
-                                Image_Init()
-                                Normal_Obs_Parameter()
-                                Image_Info()
-                                Move(Straight_status = 16) 
-                                print('imu fix back')
-                                if send.color_mask_subject_YMax[2][0] >0 :
-                                    break
-                            imu_back = True
-                        if ( abs(Yaw_wen) > 5 and IMU_ok == False ) and Dx >= 5 :       #IMU修正
-                            get_IMU()
-                            IMU_Angle()
-                            Move(Straight_status = 12)
-                            Image_Init()
-                            Normal_Obs_Parameter()
-                            Image_Info()
-                        else:
-                            Turn_Angle(Turn_angle_status = 0)
-                            Move(Straight_status = 11)
+                    elif First_Reddoor == True :
 
-                        if abs(Yaw_wen) <= 5 :
-                            IMU_ok = True
-                    elif -3 > Dx > -13 :     #turn left
-                        print('left avoid')
-                        Straight_Speed()
-                        #if ((deep.line_flag == True) and (send.color_mask_subject_YMin[1][0] <= 10)) or ((send.color_mask_subject_cnts[1] == 2) and (Y_L_Deep <= 7) and (Y_R_Deep <= 7)) or ((send.color_mask_subject_XMax[1][0] >= 310) and (send.color_mask_subject_XMin[1][0] <= 10) and (send.color_mask_subject_cnts[1] == 1)):
-                        #    Y_Line_avoid()      #黃線策略
-                        if (send.color_mask_subject_YMax[2][0] >= 170) and ( abs(Yaw_wen) <= 5 ) and imu_back == False and abs(Dx) > 3 and C_Deep != 24:        #離障礙物太近-->後退
-                            while (send.color_mask_subject_YMax[2][0] >= 170):
-                                Image_Init()
-                                Normal_Obs_Parameter()
-                                Image_Info()
-                                Move(Straight_status = 16) 
-                                print('imu fix back')
-                                if send.color_mask_subject_YMax[2][0] > 0 :
-                                    break
-                            imu_back = True
-                        if ( abs(Yaw_wen) > 5 and IMU_ok == False ) and Dx <= -7 :      #IMU修正
-                            get_IMU()
-                            IMU_Angle()
-                            Move(Straight_status = 12)
-                            Image_Init()
-                            Normal_Obs_Parameter()
-                            Image_Info()
-                        else:
-                            Turn_Angle(Turn_angle_status = 1)
-                            Move(Straight_status = 11)
+                        # #print('YYYYYYYYYYYYYYYMMMMMMMMMIIIIIIIIINNNNNNNNN = ',send.color_mask_subject_YMax[5][0])
+                        # if send.color_mask_subject_YMax[5][0] > 220:
+                        #     while send.color_mask_subject_YMax[5][0] > 220:
+                        #         Image_Init()
+                        #         Normal_Obs_Parameter()
+                        #         Image_Info()
+                        #         Move(Straight_status = 16)
 
-                        if abs(Yaw_wen) <= 5 :
-                            IMU_ok = True
-                    elif (Dx < 17 and Dx >= 13) or (Dx <= -13 and Dx > -17) :
-                        IMU_Angle()
-                        #if ((deep.line_flag == True) and (send.color_mask_subject_YMin[1][0] <= 10)) or ((send.color_mask_subject_cnts[1] == 2) and (Y_L_Deep <= 7) and (Y_R_Deep <= 7)) or ((send.color_mask_subject_XMax[1][0] >= 310) and (send.color_mask_subject_XMin[1][0] <= 10) and (send.color_mask_subject_cnts[1] == 1)):
-                        #    Y_Line_avoid()      #黃線策略
-                        if (send.color_mask_subject_YMax[2][0] >= 170) and ( abs(Yaw_wen) <= 5 ) and imu_back == False and abs(Dx) > 3 and C_Deep != 24:        #離障礙物太近-->後退
-                            while (send.color_mask_subject_YMax[2][0] >= 170):
+                        # #print('slope = ',deep.slope)
+                        if abs(deep.slope) > 0.09 and (slope_flag == True):                     #不平行紅門時修斜率
+                            while abs(deep.slope) > 0.09 and slope_flag == True:
+                                #print('YYYYYYYYYYYYYYYMMMMMMMMMIIIIIIIIINNNNNNNNN = ',send.color_mask_subject_YMax[5][0])
+                                Slope_fix()
+
+                                Move(Straight_status = 31)
+                                # Image_Info()
+                                Normal_Obs_Parameter()
+                                # if slope_Rcnt > 400 or slope_Lcnt > 400:
+                                #     break
+                            slope_flag = False
+                            # slope_Lcnt = 0
+                            # slope_Rcnt = 0
+                            send.sendHeadMotor(1,2048,100)
+                            send.sendHeadMotor(2,head_height+100,100)
+                            time.sleep(0.5)
+                        else :
+                            Normal_Obs_Parameter()
+                            if (send.color_mask_subject_YMax[5][0] < CRMin) and (redoor_dis == False) :     #前後距離修正（值越大離門越近） 55/65   離紅門太遠時前進
+                                Slope_fix()
+                                Move(Straight_status = 15)
+                                #print("11111111111111111")
+                                # pass
+                            elif (send.color_mask_subject_YMax[5][0] > CRMax) and (redoor_dis == False) :   #前後距離修正（值越大離門越近） 55/65   離紅門太近時候退
+                                Slope_fix()
+                                Move(Straight_status = 16)
+                                #print("121212121212121212")
+                                #print("YMAX = ", send.color_mask_subject_YMax[5][0])
+                                # pass
+                            else :  
+                                Normal_Obs_Parameter()                        #判斷須左移或右移 都不需則進爬
+                                redoor_dis = True
+                                if R_min < 2 and R_max > 315 :
+                                    # print('red center')
+                                    # print('BBBBBBBRRRRRRRRRRRRFFFFFFLLLLLLLAAAAAAAGGGGG = ',BR_flag)
+                                    # print('BBBLLLLLLLLLLLLLLLLFFFFFFFFFFFFFFFF = ',BL_flag)
+                                    if (B_max == 0 and B_min == 0 and B_left <= 25 and BR_flag == True) or (B_max == 0 and B_min == 0 and B_right > 295 and BL_flag == True) or (B_max == 0 and B_min == 0 and B_right == 0 and B_left == 0):
+                                        if abs(deep.slope)  > 0.09 or slope_flag == True:
+                                            while abs(deep.slope) > 0.09 or slope_flag == True:
+                                                # print('min = ',B_min)
+                                                # prinst('max = ',B_max)
+                                                # print('Left = ',B_left)
+                                                # print('Right = ',B_right)
+                                                # print('ddddddddddddddddddddddd = ',send.color_mask_subject_YMax[5][0])
+                                                Slope_fix()
+                                                Move(Straight_status = 31)
+                                                #print("22222222222222222222")
+                                                #print('crawl22222222222222222222222222222222')
+                                                Image_Info()
+                                                if slope_Rcnt > 400 or slope_Lcnt > 400:
+                                                    break
+                                        else :
+                                            Crawl()
+                                            Move(Straight_status=0)
+                                            time.sleep(5)
+                                    elif (B_min < 2 and B_max > 20):
+                                        #print('move R 11111')
+                                        BR_flag = True
+                                        BL_flag = False
+                                        Move(Straight_status = 32)
+                                    elif (B_max > 315 and B_min < 300):
+                                        #print('move L 11111')
+                                        BL_flag = True
+                                        BR_flag = False
+                                        Move(Straight_status = 33)
+                                    else :
+                                        if BR_flag == True:
+                                            Move(Straight_status = 32)
+                                        #    print('BBBBBBBBBBBBBBRRRRRRRRRRR =',BR_flag)
+                                        elif BL_flag == True:
+                                            Move(Straight_status = 33)
+                                        #    print('BBBBBBBBBBLLLLLLLLLLLLLLLLLLLL = ',BL_flag)
+                                elif R_min < 2 and R_max < 315 : 
+                                    #print('move L')
+                                    rospy.loginfo(f'move L')
+                                    Move(Straight_status = 33)
+                                elif R_min > 2 and R_max > 315 : 
+                                    #print('move R')
+                                    rospy.loginfo(f'move R')
+                                    Move(Straight_status = 32)
+                else :
+                    #    get_IMU()
+                    if Dy < 24:
+                        # if R_line == True or L_line == True:
+                        #     while R_line ==True or L_line == True:
+                        #         Image_Init()
+                        #         Normal_Obs_Parameter()
+                        #         YL_Deep_sum = Y_Deep_sum1
+                        #         YR_Deep_sum = Y_Deep_sum2
+                        #         print('RRRRRRR',YR_Deep_sum)
+                        #         print('LLLLLLL',YL_Deep_sum)
+                        Image_Init()
+                        Normal_Obs_Parameter()
+                        YL_Deep_sum = Y_Deep_sum1
+                        YR_Deep_sum = Y_Deep_sum2
+                        if R_line == True :
+                            if YL_Deep_sum > YR_Deep_sum :
+                                R_line = True
+                            elif (YL_Deep_sum < YR_Deep_sum) or (YR_Deep_sum > 350) :
+                                R_line = False
+                        elif L_line == True :
+                            if YL_Deep_sum < YR_Deep_sum :
+                                L_line = True
+                            elif (YL_Deep_sum > YR_Deep_sum) or (YL_Deep_sum > 350) :
+                                L_line = False
+                                
+
+                        
+                                # if YR_Deep_sum > 100:#待更改
+                                #     R_line = True
+                                # else :
+                                #     R_line = False
+                        if 13 > Dx > 3 :        #turn right
+                            #print('right avoid')
+                            Straight_Speed()
+                            #if ((deep.line_flag == True) and (send.color_mask_subject_YMin[1][0] <= 10)) or ((send.color_mask_subject_cnts[1] == 2) and (Y_L_Deep <= 7) and (Y_R_Deep <= 7)) or ((send.color_mask_subject_XMax[1][0] >= 310) and (send.color_mask_subject_XMin[1][0] <= 10) and (send.color_mask_subject_cnts[1] == 1)):
+                            #    Y_Line_avoid()      #黃線策略
+                            if (send.color_mask_subject_YMax[2][0] >= 170) and ( abs(Yaw_wen) <= 5 ) and imu_back == False and abs(Dx) > 3 and C_Deep != 24:        #離障礙物太近-->後退
+                                while (send.color_mask_subject_YMax[2][0] >= 170):
+                                    Image_Init()
+                                    Normal_Obs_Parameter()
+                                    Image_Info()
+                                    Move(Straight_status = 16) 
+                                    #print('imu fix back')
+                                    if send.color_mask_subject_YMax[2][0] >0 :
+                                        break
+                                imu_back = True
+                            if ( abs(Yaw_wen) > 5 and IMU_ok == False ) and Dx >= 5 :       #IMU修正
+                                get_IMU()
+                                IMU_Angle()
+                                Move(Straight_status = 12)
                                 Image_Init()
                                 Normal_Obs_Parameter()
                                 Image_Info()
-                                Move(Straight_status = 16) 
-                                print('imu fix back')
-                                if send.color_mask_subject_YMax[2][0] >0 :
-                                    break
-                            imu_back = True
-                        if ( abs(Yaw_wen) > 5 and IMU_ok == False ) :                   #IMU修正
-                            while ( abs(Yaw_wen) > 5 or IMU_ok == False) :
-                                print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxx')
+                            else:
+                                Turn_Angle(Turn_angle_status = 0)
+                                Move(Straight_status = 11)
+
+                            if abs(Yaw_wen) <= 5 :
+                                IMU_ok = True
+                        elif -3 > Dx > -13 :     #turn left
+                            #print('left avoid')
+                            Straight_Speed()
+                            #if ((deep.line_flag == True) and (send.color_mask_subject_YMin[1][0] <= 10)) or ((send.color_mask_subject_cnts[1] == 2) and (Y_L_Deep <= 7) and (Y_R_Deep <= 7)) or ((send.color_mask_subject_XMax[1][0] >= 310) and (send.color_mask_subject_XMin[1][0] <= 10) and (send.color_mask_subject_cnts[1] == 1)):
+                            #    Y_Line_avoid()      #黃線策略
+                            if (send.color_mask_subject_YMax[2][0] >= 170) and ( abs(Yaw_wen) <= 5 ) and imu_back == False and abs(Dx) > 3 and C_Deep != 24:        #離障礙物太近-->後退
+                                while (send.color_mask_subject_YMax[2][0] >= 170):
+                                    Image_Init()
+                                    Normal_Obs_Parameter()
+                                    Image_Info()
+                                    Move(Straight_status = 16) 
+                                    #print('imu fix back')
+                                    if send.color_mask_subject_YMax[2][0] > 0 :
+                                        break
+                                imu_back = True
+                            if ( abs(Yaw_wen) > 5 and IMU_ok == False ) and Dx <= -7 :      #IMU修正
+                                get_IMU()
+                                IMU_Angle()
+                                Move(Straight_status = 12)
+                                Image_Init()
+                                Normal_Obs_Parameter()
+                                Image_Info()
+                            else:
+                                Turn_Angle(Turn_angle_status = 1)
+                                Move(Straight_status = 11)
+
+                            if abs(Yaw_wen) <= 5 :
+                                IMU_ok = True
+                        elif (Dx < 17 and Dx >= 13) or (Dx <= -13 and Dx > -17) :
+                            IMU_Angle()
+                            #if ((deep.line_flag == True) and (send.color_mask_subject_YMin[1][0] <= 10)) or ((send.color_mask_subject_cnts[1] == 2) and (Y_L_Deep <= 7) and (Y_R_Deep <= 7)) or ((send.color_mask_subject_XMax[1][0] >= 310) and (send.color_mask_subject_XMin[1][0] <= 10) and (send.color_mask_subject_cnts[1] == 1)):
+                            #    Y_Line_avoid()      #黃線策略
+                            if (send.color_mask_subject_YMax[2][0] >= 170) and ( abs(Yaw_wen) <= 5 ) and imu_back == False and abs(Dx) > 3 and C_Deep != 24:        #離障礙物太近-->後退
+                                while (send.color_mask_subject_YMax[2][0] >= 170):
+                                    Image_Init()
+                                    Normal_Obs_Parameter()
+                                    Image_Info()
+                                    Move(Straight_status = 16) 
+                                    #print('imu fix back')
+                                    if send.color_mask_subject_YMax[2][0] >0 :
+                                        break
+                                imu_back = True
+                            if ( abs(Yaw_wen) > 5 and IMU_ok == False ) :                   #IMU修正
+                                while ( abs(Yaw_wen) > 5 or IMU_ok == False) :
+                                    #print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxx')
+                                    IMU_Angle()
+                                    get_IMU()
+                                    Move(Straight_status = 12)
+                                    Image_Init()
+                                    Normal_Obs_Parameter()
+                                    Image_Info()
+                                    if abs(Yaw_wen) < 5:        #轉頭策略
+                                        if ( B_L_Deep < 15 ) and ( B_R_Deep < 15 ) and ( B_C_Deep < 20 ):
+                                            Turn_Head()
+                                            IMU_ok == True
+                                            break
+                                        else :
+                                            break
+                                    else:
+                                        #print('IMU NOT OK')
+                                        pass
+                            elif (abs(Yaw_wen) < 5 and IMU_ok == True):
+                                #print('OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO')
                                 IMU_Angle()
                                 get_IMU()
                                 Move(Straight_status = 12)
                                 Image_Init()
                                 Normal_Obs_Parameter()
                                 Image_Info()
-                                if abs(Yaw_wen) < 5:        #轉頭策略
-                                    if ( B_L_Deep < 15 ) and ( B_R_Deep < 15 ) and ( B_C_Deep < 20 ):
+                                
+
+                                if abs(Yaw_wen) < 5: 
+                                    if ( B_L_Deep < 13 ) and ( B_R_Deep < 13 ) and ( B_C_Deep < 18 ):
                                         Turn_Head()
-                                        IMU_ok == True
-                                        break
                                     else :
-                                        break
+                                        if Dx > 0 :
+                                            Move(Straight_status = 11)
+                                        elif Dx < 0 :
+                                            Move(Straight_status = 11)
                                 else:
-                                    print('IMU NOT OK')
+                                    #print('IMU NOT OK')
                                     pass
-                        elif (abs(Yaw_wen) < 5 and IMU_ok == True):
-                            print('OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO')
+
+
+                        elif (3 >= Dx >= -3) or abs(Dx) >= 17:                  #最高速直走
                             IMU_Angle()
                             get_IMU()
-                            Move(Straight_status = 12)
                             Image_Init()
                             Normal_Obs_Parameter()
                             Image_Info()
-                            
-
-                            if abs(Yaw_wen) < 5: 
-                                if ( B_L_Deep < 13 ) and ( B_R_Deep < 13 ) and ( B_C_Deep < 18 ):
-                                    Turn_Head()
-                                else :
-                                    if Dx > 0 :
-                                        Move(Straight_status = 11)
-                                    elif Dx < 0 :
-                                        Move(Straight_status = 11)
-                            else:
-                                print('IMU NOT OK')
-                                pass
-
-
-                    elif (3 >= Dx >= -3) or abs(Dx) >= 17:                  #最高速直走
-                        IMU_Angle()
-                        get_IMU()
-                        Image_Init()
-                        Normal_Obs_Parameter()
-                        Image_Info()
-                        print('no avoid')
+                            #print('no avoid')
+                            Move(Straight_status = 14)
+                            if Dx == 0 :
+                                IMU_ok = False
+                                imu_back = False
+                                
+                    elif Dy == 24:
+                        #print('go straight')
+                        Straight_Speed()
                         Move(Straight_status = 14)
-                        if Dx == 0 :
-                            IMU_ok = False
-                            imu_back = False
-                            
-                elif Dy == 24:
-                    print('go straight')
-                    Straight_Speed()
-                    Move(Straight_status = 14)
-                    #L_line = False
-                    #R_line = False
-                print('IMU_ok ====== ' + str(IMU_ok))
-            print('imuokkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk = ',IMU_ok)
-            print('YYYYYYYYYYYYYYYMMMMMMMMMIIIIIIIIINNNNNNNNN = ',send.color_mask_subject_YMax[5][0])
+                        #L_line = False
+                        #R_line = False
+                    #print('IMU_ok ====== ' + str(IMU_ok))
+                #print('imuokkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk = ',IMU_ok)
+                #print('YYYYYYYYYYYYYYYMMMMMMMMMIIIIIIIIINNNNNNNNN = ',send.color_mask_subject_YMax[5][0])
             if send.is_start == False:
-                print("stop")
+                #rospy.loginfo(f'stop')
                 if walking == True:
                     send.sendContinuousValue(0,0,0,0,0)
                     time.sleep(1.5) 
                     send.sendBodyAuto(0,0,0,0,1,0)
                     time.sleep(1)
-                    send.sendBodySector(6666)
-                    time.sleep(6)
-                    send.sendBodySector(1812)
-                    time.sleep(2)
+                    # send.sendBodySector(6666)
+                    # time.sleep(6)
+                    # send.sendBodySector(1812)
+                    # time.sleep(2)
                     #send.sendBodySector(299)    #基礎站姿29！！！！！！！！！！！！！！！！！！
                     walking = False
                 IMU_Yaw_ini()
-            print('walking ====== ' + str(walking))
-            print("-----------------------------------L_line=" + str(L_line))
-            print("-----------------------------------R_line=" + str(R_line))
+                Image_Init()
+                Normal_Obs_Parameter()
+                
+            # print('walking ====== ' + str(walking))
+            # print("-----------------------------------L_line=" + str(L_line))
+            # print("-----------------------------------R_line=" + str(R_line))
     except rospy.ROSInterruptException:
         pass
