@@ -42,7 +42,7 @@ class Sendmessage:
         self.DIOValue = 0x00
         self.is_start = False
         self.time = 0
-        aaaa = rospy.init_node('talker', anonymous=True)
+        aaaa = rospy.init_node('talker', anonymous=True, log_level=rospy.DEBUG)
         object_list_sub = rospy.Subscriber("/Object/List",ObjectList, self.getObject)
         label_model_sub = rospy.Subscriber("/LabelModel/List",LabelModelObjectList, self.getLabelModel)
         #compress_image_sub = rospy.Subscriber("compress_image",Image, self.catchImage)
