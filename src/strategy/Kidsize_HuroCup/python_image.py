@@ -23,15 +23,15 @@ deep            = Deep_Calculate()
 send            = Sendmessage()
 HEAD_HEIGHT     = 2680
 FOCUS_MATRIX    = [2, 2, 2, 2, 6, 6, 7, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 7, 6, 6, 2, 2, 2, 2]
-MAX_FORWARD_X         =  4000
-MAX_FORWARD_Y         =  -600
-MAX_FORWARD_THETA     =     1 
+MAX_FORWARD_X         =  6000
+MAX_FORWARD_Y         =  0
+MAX_FORWARD_THETA     =     -1 
 TURN_RIGHT_X            = -1300
 TURN_RIGHT_Y            =   1200
 TURN_RIGHT_THETA        =    -8
-TURN_LEFT_X             = -1600
-TURN_LEFT_Y             = -2300
-TURN_LEFT_THETA         =     9
+TURN_LEFT_X             = -1500
+TURN_LEFT_Y             = -1500
+TURN_LEFT_THETA         =     8
 # REDDOOR_MOVE_RIGHT      = -2400
 # REDDOOR_MOVE_LEFT       =  2400                                                     
 
@@ -47,13 +47,13 @@ class Walk():
         right_straight_y        = -400 if self.image.center_deep  <  5 else  400 if (self.image.center_deep > 3) and  (self.image.center_deep != 24) else 0                  
         left_straight_y         = 200 if self.image.center_deep <  5 else  -400 if (self.image.center_deep > 3) and  (self.image.center_deep != 24)  else 0                  
         straight_90degree_fix   =  -3   if ((self.get_imu() < 0 and abs(self.get_imu()) < 87) or (self.get_imu() > 0 and abs(self.get_imu()) > 87)) else 3             
-        turn_x                  =   self.straight_speed()*2 if self.image.yellow_center_deep < 12 else self.straight_speed()
+        turn_x                  =   self.straight_speed() + 2000 if self.image.y_deep_y < 10 else self.straight_speed()
         # turn_direction_x        =   TURN_RIGHT_X if self.get_imu() > 0 else TURN_LEFT_X  # fix_angle for turn_x
         # turn_direction_y        =   TURN_RIGHT_X if self.get_imu() > 0 else TURN_LEFT_X  # fix_angle for turn_x
-        actions             = { 'stay'                  : {'x':  -1500,                  'y':   -600,                 'theta': 1                },
+        actions             = { 'stay'                  : {'x':  -1100,                  'y':   0,                 'theta': 0                },
                                 'max_speed'             : {'x':  MAX_FORWARD_X,         'y':   MAX_FORWARD_Y,        'theta': MAX_FORWARD_THETA },
-                                'small_back'            : {'x': -2500,                  'y':   -500,                 'theta':  0                },
-                                'small_forward'         : {'x': 2000,                   'y':  -600,                    'theta': 1 },
+                                'small_back'            : {'x': -3500,                  'y':   0,                 'theta':  1                },
+                                'small_forward'         : {'x': 2500,                   'y':  0,                    'theta': 1 },
                                 'turn'                  : {'x': turn_x,  'y': TURN_RIGHT_Y if self.image.deep_x > 0 else TURN_LEFT_Y, 'theta': self.turn_angle() },
                                 'imu_fix'               : {'x': TURN_RIGHT_X if self.get_imu() > 0 else TURN_LEFT_X,  'y': TURN_RIGHT_Y if self.get_imu() > 0 else TURN_LEFT_Y, 'theta': self.imu_angle()  },
                                 'slope_fix'             : {'x': TURN_LEFT_X if deep.slope > 0 else TURN_RIGHT_X,      'y': TURN_LEFT_Y if deep.slope > 0 else TURN_RIGHT_Y,     'theta': self.slope()      },
@@ -69,8 +69,8 @@ class Walk():
                                 # 'left_left'           : {'x': SMALL_FORWARD_X,        'y':  SMALL_FORWARD_Y + straight_y_fix,     'theta': SMALL_FORWARD_THETA + straight_90degree_fix    },
                                 'preturn_left'          : {'x': TURN_LEFT_X,            'y':  TURN_LEFT_Y,          'theta': TURN_LEFT_THETA   },
                                 'preturn_right'         : {'x': TURN_RIGHT_X,           'y':  TURN_RIGHT_Y,         'theta': TURN_RIGHT_THETA  },
-                                'reddoor_right_move'    : {'x': -1500 + reddoor_x_fix,  'y':  -2400,   'theta': 0 + self.imu_angle()  },
-                                'reddoor_left_move'     : {'x': -1400 + reddoor_x_fix,  'y':  2400,    'theta': 0 + self.imu_angle()  }}
+                                'reddoor_right_move'    : {'x': -1500 + reddoor_x_fix,  'y':  -2500,   'theta': 0 + self.imu_angle()  },
+                                'reddoor_left_move'     : {'x': -1600 + reddoor_x_fix,  'y':  2500,    'theta': 1 + self.imu_angle()  }}
         action              = actions.get(action_id,None)
         if action is not None:
             x              = action['x']
@@ -164,15 +164,15 @@ class Walk():
 
     def straight_speed(self):
         self.image.calculate()
-        speed_ranges = [(24,    4000), 
-                        (20,    3000), 
-                        (16,    2500), 
-                        (14,    1600), 
-                        (12,    1100), 
-                        (8,      800), 
-                        (6,      700), 
-                        (3,      500), 
-                        (0,      200)]
+        speed_ranges = [(24,    6000), 
+                        (20,    5000), 
+                        (16,    4000), 
+                        (14,    3000), 
+                        (12,    2600), 
+                        (8,      2000), 
+                        (6,      1500), 
+                        (3,      800), 
+                        (0,      600)]
         for speed_range in speed_ranges:
             if self.image.deep_y >= speed_range[0]:
                 return speed_range[1]
@@ -498,9 +498,9 @@ class Obs:
                     self.red_door()
                     self.first_reddoor = False
                 #一般往右避障
-                if 13 > self.image.deep_x > 8 :        
+                if 13 > self.image.deep_x > 7 :        
                     self.walk.straight_speed()
-                    if ((abs(self.walk.get_imu()) > 5) and (not self.imu_ok)) and (self.image.deep_x >= 12) :       #IMU修正
+                    if ((abs(self.walk.get_imu()) > 5) and (not self.imu_ok)) and (self.image.deep_x >= 9) :       #IMU修正
                         self.walk.move('imu_fix')
                     else:
                         self.walk.move('turn')
@@ -508,9 +508,9 @@ class Obs:
                     if abs(self.walk.get_imu()) <= 8 :
                         self.imu_ok = True
                 #一般往左避障
-                elif -8 > self.image.deep_x > -13 :   
+                elif -7 > self.image.deep_x > -13 :   
                     self.walk.straight_speed()
-                    if ((abs(self.walk.get_imu()) > 5) and (not self.imu_ok)) and (self.image.deep_x <= -12) :      #IMU修正
+                    if ((abs(self.walk.get_imu()) > 5) and (not self.imu_ok)) and (self.image.deep_x <= -9) :      #IMU修正
                         self.walk.move('imu_fix')
                     else:
                         self.walk.move('turn')
@@ -571,7 +571,7 @@ class Obs:
                         #     # self.imu_ok = True
                             
                 #不須避障
-                elif (8 >= self.image.deep_x >= -8) or (abs(self.image.deep_x) >= 17) :                  #最高速直走
+                elif (7 >= self.image.deep_x >= -7) or (abs(self.image.deep_x) >= 17) :                  #最高速直走
                     self.walk.move('max_speed')
                     if self.image.line_at_left or self.image.line_at_right:
                         self.imu_ok = True
@@ -585,7 +585,6 @@ class Obs:
                     
         if not send.is_start :
             if self.start_walking :
-                rospy.loginfo(f'saaaaaaaaaa')
                 send.sendContinuousValue(0,0,0,0,0)
                 send.sendBodyAuto(0,0,0,0,1,0)
                 time.sleep(0.5)
