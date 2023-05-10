@@ -25,9 +25,9 @@ HEAD_HEIGHT     = 2680
 FOCUS_MATRIX    = [2, 2, 2, 2, 6, 6, 7, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 7, 6, 6, 2, 2, 2, 2]
 MAX_FORWARD_X         =  6000
 MAX_FORWARD_Y         =  0
-MAX_FORWARD_THETA     =     -1 
-TURN_RIGHT_X            = -1300
-TURN_RIGHT_Y            =   1200
+MAX_FORWARD_THETA     =     0 
+TURN_RIGHT_X            = -2500
+TURN_RIGHT_Y            =   1700
 TURN_RIGHT_THETA        =    -8
 TURN_LEFT_X             = -1500
 TURN_LEFT_Y             = -1500
@@ -50,10 +50,10 @@ class Walk():
         turn_x                  =   self.straight_speed() + 2000 if self.image.y_deep_y < 10 else self.straight_speed()
         # turn_direction_x        =   TURN_RIGHT_X if self.get_imu() > 0 else TURN_LEFT_X  # fix_angle for turn_x
         # turn_direction_y        =   TURN_RIGHT_X if self.get_imu() > 0 else TURN_LEFT_X  # fix_angle for turn_x
-        actions             = { 'stay'                  : {'x':  -1100,                  'y':   0,                 'theta': 0                },
+        actions             = { 'stay'                  : {'x':  -1300,                  'y':   -100,                 'theta': 0                },
                                 'max_speed'             : {'x':  MAX_FORWARD_X,         'y':   MAX_FORWARD_Y,        'theta': MAX_FORWARD_THETA },
-                                'small_back'            : {'x': -3500,                  'y':   0,                 'theta':  1                },
-                                'small_forward'         : {'x': 2500,                   'y':  0,                    'theta': 1 },
+                                'small_back'            : {'x': -3500,                  'y':   -200,                 'theta':  0                },
+                                'small_forward'         : {'x': 2500,                   'y':  -100,                    'theta': 0 },
                                 'turn'                  : {'x': turn_x,  'y': TURN_RIGHT_Y if self.image.deep_x > 0 else TURN_LEFT_Y, 'theta': self.turn_angle() },
                                 'imu_fix'               : {'x': TURN_RIGHT_X if self.get_imu() > 0 else TURN_LEFT_X,  'y': TURN_RIGHT_Y if self.get_imu() > 0 else TURN_LEFT_Y, 'theta': self.imu_angle()  },
                                 'slope_fix'             : {'x': TURN_LEFT_X if deep.slope > 0 else TURN_RIGHT_X,      'y': TURN_LEFT_Y if deep.slope > 0 else TURN_RIGHT_Y,     'theta': self.slope()      },
@@ -465,6 +465,10 @@ class Obs:
                 send.sendHeadMotor(1,2048,100)
                 send.sendHeadMotor(2,HEAD_HEIGHT,100)
                 time.sleep(0.5)
+                send.sendBodySector(1111)
+                time.sleep(2)
+                send.sendBodySector(1218)
+                time.sleep(1)
                 send.sendBodyAuto(0,0,0,0,1,0)
                 self.start_walking = True
             if self.preturn_left:                      #指定初始向左旋轉
@@ -588,6 +592,8 @@ class Obs:
                 send.sendContinuousValue(0,0,0,0,0)
                 send.sendBodyAuto(0,0,0,0,1,0)
                 time.sleep(0.5)
+                send.sendBodySector(29)
+                time.sleep(1.5)
                 self.start_walking = False
             # send.sendContinuousValue(0,0,0,0,0)
             # self.walk.move('stay')
