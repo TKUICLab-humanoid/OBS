@@ -29,8 +29,8 @@ MAX_FORWARD_THETA     =     0
 TURN_RIGHT_X            = -2500
 TURN_RIGHT_Y            =   1700
 TURN_RIGHT_THETA        =    -8
-TURN_LEFT_X             = -1500
-TURN_LEFT_Y             = -1500
+TURN_LEFT_X             = -2400
+TURN_LEFT_Y             = -1900
 TURN_LEFT_THETA         =     8
 # REDDOOR_MOVE_RIGHT      = -2400
 # REDDOOR_MOVE_LEFT       =  2400                                                     
@@ -43,7 +43,7 @@ class Walk():
         self.image.calculate()
         # imu_flag = self.get_imu() < 0 
         # slope_x_fix             =  100 if self.image.red_y_max  <  150 else -100 if self.image.red_y_max  >  200 else 0
-        reddoor_x_fix           =  400 if self.image.b_y_max <  180 else -400 if self.image.b_y_max >  190 else 0
+        reddoor_x_fix           =  400 if self.image.b_y_max <  155 else -1400 if self.image.b_y_max >  165 else 0  #越遠數字越小
         right_straight_y        = -400 if self.image.center_deep  <  5 else  400 if (self.image.center_deep > 3) and  (self.image.center_deep != 24) else 0                  
         left_straight_y         = 200 if self.image.center_deep <  5 else  -400 if (self.image.center_deep > 3) and  (self.image.center_deep != 24)  else 0                  
         straight_90degree_fix   =  -3   if ((self.get_imu() < 0 and abs(self.get_imu()) < 87) or (self.get_imu() > 0 and abs(self.get_imu()) > 87)) else 3             
@@ -70,7 +70,7 @@ class Walk():
                                 'preturn_left'          : {'x': TURN_LEFT_X,            'y':  TURN_LEFT_Y,          'theta': TURN_LEFT_THETA   },
                                 'preturn_right'         : {'x': TURN_RIGHT_X,           'y':  TURN_RIGHT_Y,         'theta': TURN_RIGHT_THETA  },
                                 'reddoor_right_move'    : {'x': -1500 + reddoor_x_fix,  'y':  -2500,   'theta': 0 + self.imu_angle()  },
-                                'reddoor_left_move'     : {'x': -1600 + reddoor_x_fix,  'y':  2500,    'theta': 1 + self.imu_angle()  }}
+                                'reddoor_left_move'     : {'x': -1500 + reddoor_x_fix,  'y':  2500,    'theta': 1 + self.imu_angle()  }}
         action              = actions.get(action_id,None)
         if action is not None:
             x              = action['x']
@@ -184,6 +184,7 @@ class Normal_Obs_Parameter:
         self.line_at_right              = False
         self.at_reddoor_flag            = False
         self.deep_y                     = 24
+        self.deep_center_y              = 24
         self.deep_x                     = 0
         self.yellow_center_deep         = 0       #黃色中心深度值
         self.y_move                     = 0
@@ -268,6 +269,7 @@ class Normal_Obs_Parameter:
         right_weight           = np.dot(filter_matrix,  right_weight_matrix)
         left_weight            = np.dot(filter_matrix,  left_weight_matrix)
         self.deep_y                 = min(deep.adult)
+        self.deep_center_y      = min(deep.adult[11:22])
         self.deep_sum               = sum(deep.adult)
         self.left_deep              = deep.adult[4]
         self.left_center_deep              = deep.adult[8]
@@ -326,27 +328,27 @@ class Obs:
             self.walk.move('imu_fix')
         self.imu_ok = True
         #-------------------------------------
-        while send.color_mask_subject_YMax[2][0] < 180:
+        while send.color_mask_subject_YMax[2][0] < 170: #越遠數字越小
             self.image.calculate()
             self.walk.move('small_forward') 
-        while send.color_mask_subject_YMax[2][0] > 190:
+        while send.color_mask_subject_YMax[2][0] > 180:
             self.image.calculate()
             self.walk.move('small_back') 
         #-------------------------------------
         if send.DIOValue == 26 :
             self.image.calculate()
-            while self.image.center_deep < 12:
+            while self.image.deep_center_y < 12:
                 self.image.calculate()
                 self.walk.move('reddoor_right_move')
-            while abs(self.walk.get_imu()) < 60:
+            while abs(self.walk.get_imu()) < 15:
                 self.walk.move('turn_right')
         #-------------------------------------
         elif send.DIOValue == 25 :
             self.image.calculate()
-            while self.image.center_deep < 12: #abs(self.image.deep_x) > 13
+            while self.image.deep_center_y < 12: #abs(self.image.deep_x) > 13
                 self.image.calculate()
                 self.walk.move('reddoor_left_move')
-            while abs(self.walk.get_imu()) < 55:
+            while abs(self.walk.get_imu()) < 15:
                 self.walk.move('turn_left')
 
     def Turn_Head(self):
@@ -465,10 +467,10 @@ class Obs:
                 send.sendHeadMotor(1,2048,100)
                 send.sendHeadMotor(2,HEAD_HEIGHT,100)
                 time.sleep(0.5)
-                send.sendBodySector(1111)
-                time.sleep(2)
-                send.sendBodySector(1218)
-                time.sleep(1)
+                # send.sendBodySector(1111)
+                # time.sleep(2)
+                # send.sendBodySector(1218)
+                # time.sleep(1)
                 send.sendBodyAuto(0,0,0,0,1,0)
                 self.start_walking = True
             if self.preturn_left:                      #指定初始向左旋轉
@@ -477,7 +479,7 @@ class Obs:
                     rospy.loginfo(f'imu =  {self.walk.get_imu()}')
                 self.preturn_left = False
             elif self.preturn_right:                        #指定初始向右旋轉 
-                while abs(self.walk.get_imu()) < 45:
+                while abs(self.walk.get_imu()) < 5:
                     self.walk.move('preturn_right')
                     rospy.loginfo(f'imu =  {self.walk.get_imu()}')
                 self.preturn_right = False
@@ -592,8 +594,8 @@ class Obs:
                 send.sendContinuousValue(0,0,0,0,0)
                 send.sendBodyAuto(0,0,0,0,1,0)
                 time.sleep(0.5)
-                send.sendBodySector(29)
-                time.sleep(1.5)
+                # send.sendBodySector(29)
+                # time.sleep(1.5)
                 self.start_walking = False
             # send.sendContinuousValue(0,0,0,0,0)
             # self.walk.move('stay')
