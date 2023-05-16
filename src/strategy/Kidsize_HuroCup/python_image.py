@@ -623,6 +623,7 @@ class Obs:
                 self.walk.move('max_speed')
                     
         if not send.is_start :
+            send.sendSensorReset(1,1,1)
             if self.start_walking :
                 send.sendContinuousValue(0,0,0,0,0)
                 send.sendBodyAuto(0,0,0,0,1,0)
