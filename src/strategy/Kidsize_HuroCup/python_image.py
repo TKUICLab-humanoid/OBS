@@ -82,7 +82,6 @@ class Walk():
             y              = action['y']
             theta          = action['theta']
             send.sendContinuousValue(x, y, z, theta, sensor)
-        rospy.loginfo(f'walk status =  {y}')
         rospy.loginfo(f'walk status =  {action_id}')
     
     def imu_yaw_ini(self):
@@ -327,7 +326,7 @@ class Normal_Obs_Parameter:
         # rospy.loginfo(f'x_center_cnt =  {x_center_cnt}')
         # rospy.loginfo(f'x_center_num =  {x_center_num}')
         # rospy.loginfo(f'deep_y =  {self.deep_y}')
-        rospy.loginfo(f'deep_x =  {send.color_mask_subject_YMax[2][0]}')
+        rospy.loginfo(f'deep_x =  {self.deep_x}')
         # rospy.loginfo(f'b_left_deep =  {self.b_left_deep}')
         # rospy.loginfo(f'b_center_deep =  {self.b_center_deep}')
         # rospy.loginfo(f'rrrrrrrrrrrrrrr =  {self.line_at_right}')
@@ -367,7 +366,7 @@ class Obs:
             while self.image.red_deep_center_y < 10:
                 self.image.calculate()
                 self.walk.move('reddoor_right_move')
-            while abs(self.walk.get_imu()) < 15:
+            while abs(self.walk.get_imu()) < 10:
                 self.walk.move('turn_right')
         #-------------------------------------
         elif send.DIOValue == 25 :
@@ -375,7 +374,7 @@ class Obs:
             while self.image.red_deep_center_y < 10: #abs(self.image.deep_x) > 13
                 self.image.calculate()
                 self.walk.move('reddoor_left_move')
-            while abs(self.walk.get_imu()) < 15:
+            while abs(self.walk.get_imu()) < 10:
                 self.walk.move('turn_left')
 
     def Turn_Head(self):
@@ -446,7 +445,7 @@ class Obs:
             time.sleep(1)
             self.image.calculate()
             # if abs(self.walk.get_imu()) > 45:             #右轉回正
-            while abs(self.walk.get_imu()) > 60:
+            while abs(self.walk.get_imu()) > 40:
                 self.walk.move('turn_right_back')
         elif (left_deep_sum > right_deep_sum) or (self.image.line_at_right) :         #左轉
             self.image.calculate()
@@ -483,7 +482,7 @@ class Obs:
             time.sleep(1)
             self.image.calculate()
             # if abs(self.walk.get_imu()) > 50:               #左轉回正
-            while abs(self.walk.get_imu()) > 55:    
+            while abs(self.walk.get_imu()) > 40:    
                 self.walk.move('turn_left_back')
 
     def main(self):
@@ -495,8 +494,8 @@ class Obs:
                 self.walk.imu_yaw_ini()
                 self.preturn_left = False
                 # self.preturn_left = True
-                self.preturn_right = False
-                # self.preturn_right = True
+                # self.preturn_right = False
+                self.preturn_right = True
                 send.sendHeadMotor(1,2048,100)
                 send.sendHeadMotor(2,HEAD_HEIGHT,100)
                 time.sleep(0.5)
@@ -512,7 +511,7 @@ class Obs:
                     rospy.loginfo(f'imu =  {self.walk.get_imu()}')
                 self.preturn_left = False
             elif self.preturn_right:                        #指定初始向右旋轉 
-                while abs(self.walk.get_imu()) < 60:
+                while abs(self.walk.get_imu()) < 55:
                     self.walk.move('preturn_right')
                     rospy.loginfo(f'imu =  {self.walk.get_imu()}')
                 self.preturn_right = False
