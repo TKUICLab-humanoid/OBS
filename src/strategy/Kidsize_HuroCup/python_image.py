@@ -30,13 +30,13 @@ MAX_FORWARD_THETA     =     1
 TURN_RIGHT_X            = -2100
 TURN_RIGHT_Y            =   1900
 TURN_RIGHT_THETA        =    -8
-IMU_RIGHT_X            = -2300
-IMU_RIGHT_Y            =   1000
-TURN_LEFT_X             = -2500
-TURN_LEFT_Y             = -1500
+IMU_RIGHT_X            = -1900
+IMU_RIGHT_Y            =   1400
+TURN_LEFT_X             = -2200
+TURN_LEFT_Y             = -1900
 TURN_LEFT_THETA         =     8
-IMU_LEFT_X            = -2300
-IMU_LEFT_Y            =   -600
+IMU_LEFT_X            = -2200
+IMU_LEFT_Y            =   -1900
 # REDDOOR_MOVE_RIGHT      = -2400
 # REDDOOR_MOVE_LEFT       =  2400                                                     
 
@@ -48,17 +48,17 @@ class Walk():
         self.image.calculate()
         # imu_flag = self.get_imu() < 0 
         # slope_x_fix             =  100 if self.image.red_y_max  <  150 else -100 if self.image.red_y_max  >  200 else 0
-        reddoor_x_fix           =  700 if self.image.red_deep_center_y > 5 else -2000 if self.image.red_deep_center_y < 4 else 0  #越遠數字越big
+        reddoor_x_fix           =  1200 if self.image.red_deep_center_y > 6 else -700 if self.image.red_deep_center_y < 5 else 0  #越遠數字越big
         right_straight_y        = -400 if self.image.center_deep  <  4 else  400 if (self.image.center_deep > 3) and  (self.image.center_deep != 24) else 0                  
         left_straight_y         = 200 if self.image.center_deep <  4 else  -400 if (self.image.center_deep > 3) and  (self.image.center_deep != 24)  else 0                  
         straight_90degree_fix   =  -3   if ((self.get_imu() < 0 and abs(self.get_imu()) < 90) or (self.get_imu() > 0 and abs(self.get_imu()) > 80)) else 3             
         turn_x                  =   self.straight_speed() + 500 if self.image.y_deep_y < 10 else self.straight_speed()
         # turn_direction_x        =   TURN_RIGHT_X if self.get_imu() > 0 else TURN_LEFT_X  # fix_angle for turn_x
         # turn_direction_y        =   TURN_RIGHT_X if self.get_imu() > 0 else TURN_LEFT_X  # fix_angle for turn_x
-        actions             = { 'stay'                  : {'x':  -2000,                  'y':   100,                 'theta': 1                },
+        actions             = { 'stay'                  : {'x':  -1400,                  'y':   0,                 'theta': 1                },
                                 'max_speed'             : {'x':  MAX_FORWARD_X,         'y':   MAX_FORWARD_Y,        'theta': MAX_FORWARD_THETA },
-                                'small_back'            : {'x': -3500,                  'y':   200,                 'theta':  1                },
-                                'small_forward'         : {'x': 2500,                   'y':  200,                    'theta': 1 },
+                                'small_back'            : {'x': -3500,                  'y':   0,                 'theta':  1                },
+                                'small_forward'         : {'x': 2500,                   'y':  100,                    'theta': 1 },
                                 'turn'                  : {'x': turn_x,  'y': TURN_RIGHT_Y if self.image.deep_x > 0 else TURN_LEFT_Y, 'theta': self.turn_angle() },
                                 'imu_fix'               : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.imu_angle()  },
                                 'slope_fix'             : {'x': TURN_LEFT_X if deep.slope > 0 else TURN_RIGHT_X,      'y': TURN_LEFT_Y if deep.slope > 0 else TURN_RIGHT_Y,     'theta': self.slope()      },
@@ -74,8 +74,8 @@ class Walk():
                                 # 'left_left'           : {'x': SMALL_FORWARD_X,        'y':  SMALL_FORWARD_Y + straight_y_fix,     'theta': SMALL_FORWARD_THETA + straight_90degree_fix    },
                                 'preturn_left'          : {'x': TURN_LEFT_X,            'y':  TURN_LEFT_Y,          'theta': TURN_LEFT_THETA   },
                                 'preturn_right'         : {'x': TURN_RIGHT_X,           'y':  TURN_RIGHT_Y,         'theta': TURN_RIGHT_THETA  },
-                                'reddoor_right_move'    : {'x': -2400 + reddoor_x_fix,  'y':  -2800,   'theta': 1 + self.imu_angle()  },
-                                'reddoor_left_move'     : {'x': -2400 + reddoor_x_fix,  'y':  2800,    'theta': 0 + self.imu_angle()  }}
+                                'reddoor_right_move'    : {'x': -1700 + reddoor_x_fix,  'y':  -2400,   'theta': 1 + self.imu_angle()  },
+                                'reddoor_left_move'     : {'x': -1900 + reddoor_x_fix,  'y':  2000,    'theta': 1 + self.imu_angle()  }}
         action              = actions.get(action_id,None)
         if action is not None:
             x              = action['x']
@@ -354,16 +354,17 @@ class Obs:
             self.walk.move('imu_fix')
         self.imu_ok = True
         #-------------------------------------
-        while send.color_mask_subject_YMax[2][0] < 165: #越遠數字越小
+        while self.image.red_deep_center_y > 6: #越遠數字越小
             self.image.calculate()
             self.walk.move('small_forward') 
-        while send.color_mask_subject_YMax[2][0] >  175:
+        while self.image.red_deep_center_y < 5:
             self.image.calculate()
             self.walk.move('small_back') 
+            
         #-------------------------------------
         if send.DIOValue == 26 :
             self.image.calculate()
-            while self.image.red_deep_center_y < 10:
+            while self.image.red_deep_center_y < 15:
                 self.image.calculate()
                 self.walk.move('reddoor_right_move')
             while abs(self.walk.get_imu()) < 10:
@@ -371,7 +372,7 @@ class Obs:
         #-------------------------------------
         elif send.DIOValue == 25 :
             self.image.calculate()
-            while self.image.red_deep_center_y < 10: #abs(self.image.deep_x) > 13
+            while self.image.red_deep_center_y < 15: #abs(self.image.deep_x) > 13
                 self.image.calculate()
                 self.walk.move('reddoor_left_move')
             while abs(self.walk.get_imu()) < 10:
@@ -494,8 +495,8 @@ class Obs:
                 self.walk.imu_yaw_ini()
                 self.preturn_left = False
                 # self.preturn_left = True
-                # self.preturn_right = False
-                self.preturn_right = True
+                self.preturn_right = False
+                # self.preturn_right = True
                 send.sendHeadMotor(1,2048,100)
                 send.sendHeadMotor(2,HEAD_HEIGHT,100)
                 time.sleep(0.5)
