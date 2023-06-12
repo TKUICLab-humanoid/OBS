@@ -21,7 +21,7 @@ import math
 
 deep            = Deep_Calculate()
 send            = Sendmessage()
-HEAD_HEIGHT     = 2660
+HEAD_HEIGHT     = 1436
 FOCUS_MATRIX    = [0, 0, 0, 1, 2, 3, 5, 6, 6, 6, 7, 7, 8, 9, 10, 11, 11, 10, 9, 8, 7, 7, 6, 6, 6, 5, 3, 2, 1, 0, 0, 0]
 # FOCUS_MATRIX    = [0, 0, 0, 1, 2, 3, 5, 6, 6, 6, 7, 7, 8, 8, 9, 10, 10, 9, 8, 8, 7, 7, 6, 6, 6, 5, 3, 2, 1, 0, 0, 0]
 MAX_FORWARD_X         =  5500
@@ -385,7 +385,7 @@ class Obs:
             while abs(self.walk.get_imu()) < 70:
                 self.walk.move('turn_right')
             send.sendHeadMotor(1,2647,100)
-            send.sendHeadMotor(2, HEAD_HEIGHT - 120, 100) 
+            send.sendHeadMotor(2, HEAD_HEIGHT + 120, 100) 
             time.sleep(1)
             self.image.calculate()
             while abs(self.image.red_deep_center_y) < 12 :     #轉頭後直走 平移修正 abs(self.image.deep_x) >= 6
@@ -410,7 +410,7 @@ class Obs:
                 self.walk.move('turn_left')
                 self.image.calculate()
             send.sendHeadMotor(1,1449,100)
-            send.sendHeadMotor(2,HEAD_HEIGHT - 120,100) 
+            send.sendHeadMotor(2,HEAD_HEIGHT + 120,100) 
             time.sleep(1)
             self.image.calculate()
             while  abs(self.image.red_deep_center_y) < 12 :
@@ -428,29 +428,29 @@ class Obs:
         if not self.image.line_at_right and not self.image.line_at_left: 
             time.sleep(1)
             send.sendHeadMotor(1, 1497, 100)
-            send.sendHeadMotor(2, HEAD_HEIGHT -160, 100) #80
+            send.sendHeadMotor(2, HEAD_HEIGHT +160, 100) #80
             send.sendHeadMotor(1, 1497, 100)
-            send.sendHeadMotor(2, HEAD_HEIGHT -160, 100)
+            send.sendHeadMotor(2, HEAD_HEIGHT +160, 100)
             send.sendHeadMotor(1,1497,100)
-            send.sendHeadMotor(2, HEAD_HEIGHT -160, 100)
+            send.sendHeadMotor(2, HEAD_HEIGHT +160, 100)
             time.sleep(1.8) 
             self.image.calculate()
             right_deep_sum = self.image.deep_sum
             send.sendHeadMotor(1, 2599, 100)
-            send.sendHeadMotor(2, HEAD_HEIGHT -160, 100)
+            send.sendHeadMotor(2, HEAD_HEIGHT +160, 100)
             send.sendHeadMotor(1, 2599, 100)
-            send.sendHeadMotor(2, HEAD_HEIGHT -160, 100)
+            send.sendHeadMotor(2, HEAD_HEIGHT +160, 100)
             send.sendHeadMotor(1, 2599, 100)
-            send.sendHeadMotor(2, HEAD_HEIGHT -160, 100)
+            send.sendHeadMotor(2, HEAD_HEIGHT +160, 100)
             time.sleep(1.8)
             self.image.calculate()
             left_deep_sum = self.image.deep_sum
             send.sendHeadMotor(1, 2048, 100)
-            send.sendHeadMotor(2, HEAD_HEIGHT -80, 100)
+            send.sendHeadMotor(2, HEAD_HEIGHT +80, 100)
             send.sendHeadMotor(1, 2048, 100)
-            send.sendHeadMotor(2, HEAD_HEIGHT -80, 100)
+            send.sendHeadMotor(2, HEAD_HEIGHT +80, 100)
             send.sendHeadMotor(1,2048,100)
-            send.sendHeadMotor(2, HEAD_HEIGHT -80, 100)
+            send.sendHeadMotor(2, HEAD_HEIGHT +80, 100)
             time.sleep(1)
             self.image.calculate()
 
@@ -474,7 +474,7 @@ class Obs:
             while abs(self.walk.get_imu()) < 70:
                 self.walk.move('turn_right')
             send.sendHeadMotor(1,2647,100)
-            send.sendHeadMotor(2, HEAD_HEIGHT - 120, 100) 
+            send.sendHeadMotor(2, HEAD_HEIGHT + 120, 100) 
             time.sleep(1)
             self.image.calculate()
             # self.walk.move('stay')
@@ -511,7 +511,7 @@ class Obs:
                 self.walk.move('turn_left')
                 self.image.calculate()
             send.sendHeadMotor(1,1449,100)
-            send.sendHeadMotor(2,HEAD_HEIGHT - 120,100) 
+            send.sendHeadMotor(2,HEAD_HEIGHT + 120,100) 
             time.sleep(1)
             self.image.calculate()
             # self.walk.move('stay')
