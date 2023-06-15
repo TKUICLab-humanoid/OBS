@@ -25,18 +25,18 @@ HEAD_HEIGHT     = 1436
 FOCUS_MATRIX    = [0, 0, 0, 1, 2, 3, 5, 6, 6, 6, 7, 7, 8, 9, 10, 11, 11, 10, 9, 8, 7, 7, 6, 6, 6, 5, 3, 2, 1, 0, 0, 0]
 # FOCUS_MATRIX    = [0, 0, 0, 1, 2, 3, 5, 6, 6, 6, 7, 7, 8, 8, 9, 10, 10, 9, 8, 8, 7, 7, 6, 6, 6, 5, 3, 2, 1, 0, 0, 0]
 MAX_FORWARD_X         =  5500
-MAX_FORWARD_Y         =  -400
+MAX_FORWARD_Y         =  -500
 MAX_FORWARD_THETA     =  0
-TURN_RIGHT_X            = -700
-TURN_RIGHT_Y            =   1700
+TURN_RIGHT_X            = -400
+TURN_RIGHT_Y            =   1500
 TURN_RIGHT_THETA        =    -8
-IMU_RIGHT_X            = -500
-IMU_RIGHT_Y            =   500
+IMU_RIGHT_X            = -400 #angle : 5
+IMU_RIGHT_Y            =   1000
 TURN_LEFT_X             = -900
-TURN_LEFT_Y             = -2200
+TURN_LEFT_Y             = -1900
 TURN_LEFT_THETA         =     8
-IMU_LEFT_X            = -800
-IMU_LEFT_Y            =   -1500
+IMU_LEFT_X            = -1100 #angle : 5
+IMU_LEFT_Y            =   -1400
 # REDDOOR_MOVE_RIGHT      = -2400
 # REDDOOR_MOVE_LEFT       =  2400                                                     
 
@@ -54,17 +54,17 @@ class Walk():
         # imu_flag = self.get_imu() < 0 
         # slope_x_fix             =  100 if self.image.red_y_max  <  150 else -100 if self.image.red_y_max  >  200 else 0
         reddoor_x_fix           =  1000 if self.image.red_deep_center_y > 7 else -1000 if self.image.red_deep_center_y < 6 else 0  #越遠數字越big
-        right_straight_y        = -1000 if self.image.center_deep  <  5 else  2000 if (self.image.center_deep > 4) and  (self.image.center_deep != 24) else 0                  
-        left_straight_y         = 1000 if self.image.center_deep <  5 else  -1500 if (self.image.center_deep > 4) and  (self.image.center_deep != 24)  else 0                  
+        right_straight_y        = -1500 if self.image.center_deep  <  5 else  2000 if (self.image.center_deep > 4) and  (self.image.center_deep != 24) else 0                  
+        left_straight_y         = 2200 if self.image.center_deep <  5 else  -1500 if (self.image.center_deep > 4) and  (self.image.center_deep != 24)  else 0                  
         straight_90degree_fix   =  -3   if ((self.get_imu() < 0 and abs(self.get_imu()) < 90) or (self.get_imu() > 0 and abs(self.get_imu()) > 87)) else 3             
         turn_x                  =   self.straight_speed()  if self.image.y_deep_y < 10 else self.straight_speed()
         # turn_direction_x        =   TURN_RIGHT_X if self.get_imu() > 0 else TURN_LEFT_X  # fix_angle for turn_x
         # turn_direction_y        =   TURN_RIGHT_X if self.get_imu() > 0 else TURN_LEFT_X  # fix_angle for turn_x
-        actions             = { 'stay'                  : {'x':  -600,                  'y':   -300,                 'theta': 0                },
+        actions             = { 'stay'                  : {'x':  -800,                  'y':   -300,                 'theta': -1                },
                                 'max_speed'             : {'x':  self.now_speed,         'y':   MAX_FORWARD_Y,        'theta': MAX_FORWARD_THETA },
                                 # 'change_speed'          : {'x': self.straight_speed(),  'y':   MAX_FORWARD_Y,        'theta': MAX_FORWARD_THETA },
-                                'small_back'            : {'x': -2000,                  'y':   -400,                 'theta':  -1                },
-                                'small_forward'         : {'x': 2500,                   'y':  -400,                    'theta': 0 },
+                                'small_back'            : {'x': -2000,                  'y':   -500,                 'theta':  -1                },
+                                'small_forward'         : {'x': 2500,                   'y':  -500,                    'theta': 0 },
                                 'turn'                  : {'x': turn_x,  'y': TURN_RIGHT_Y if self.image.deep_x > 0 else TURN_LEFT_Y, 'theta': self.turn_angle() },
                                 'imu_fix'               : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.imu_angle()  },
                                 'slope_fix'             : {'x': TURN_LEFT_X if deep.slope > 0 else TURN_RIGHT_X,      'y': TURN_LEFT_Y if deep.slope > 0 else TURN_RIGHT_Y,     'theta': self.slope()      },
@@ -120,10 +120,10 @@ class Walk():
         return 0     
     
     def imu_angle(self):      
-        imu_ranges = [  (90,   -9), 
+        imu_ranges = [  (90,   -8), 
                         (60,   -8), 
-                        (45,   -7), 
-                        (20,   -5), 
+                        (45,   -8), 
+                        (20,   -6), 
                         (10,   -4), 
                         ( 5,   -3), 
                         ( 2,   -2), 
@@ -131,10 +131,10 @@ class Walk():
                         (-2,    1),
                         (-5,    2),
                         (-10,   3),
-                        (-20,   5),
-                        (-45,   7),
+                        (-20,   6),
+                        (-45,   8),
                         (-60,   8),
-                        (-90,   9)]
+                        (-90,   8)]
         for imu_range in imu_ranges:
             if self.imu_yaw >= imu_range[0]:
                 return imu_range[1]
@@ -301,7 +301,8 @@ class Normal_Obs_Parameter:
         right_weight           = np.dot(filter_matrix,  right_weight_matrix)
         left_weight            = np.dot(filter_matrix,  left_weight_matrix)
         self.deep_y                 = min(deep.adult)
-        self.deep_center_y      = min(deep.adult[8:25])
+        self.deep_center_y      = min(deep.adult[10:23])
+        self.max_deep_center_y      = max(deep.adult[10:23])
         self.red_deep_center_y  = min(deep.adult[10:23])
         self.deep_sum               = sum(deep.adult)
         self.deep_sum_l               = sum(deep.adult[0:16])
@@ -343,7 +344,7 @@ class Normal_Obs_Parameter:
         # rospy.loginfo(f'rrrrrrrrrrrrrrr =  {self.line_at_right}')
         # rospy.loginfo(f'llllllllllllll =  {send.color_mask_subject_YMax[2][0]}')
         # print(send.color_mask_subject_YMax[2][0])
-        print(self.deep_center_y)
+        # print(self.deep_center_y)
 
 
 class Obs:
@@ -382,8 +383,9 @@ class Obs:
         #     while abs(self.walk.get_imu()) < 10:
         #         self.walk.move('turn_right')
         if send.DIOValue == 26 :
-            while abs(self.walk.get_imu()) < 70:
+            while abs(self.walk.get_imu()) < 60:
                 self.walk.move('turn_right')
+            self.walk.move('stay')
             send.sendHeadMotor(1,2647,100)
             send.sendHeadMotor(2, HEAD_HEIGHT + 120, 100) 
             time.sleep(1)
@@ -406,9 +408,10 @@ class Obs:
         #     while abs(self.walk.get_imu()) < 10:
         #         self.walk.move('turn_left')
         elif send.DIOValue == 25 :
-            while abs(self.walk.get_imu()) < 60 :
+            while abs(self.walk.get_imu()) < 70 :
                 self.walk.move('turn_left')
                 self.image.calculate()
+            self.walk.move('stay')
             send.sendHeadMotor(1,1449,100)
             send.sendHeadMotor(2,HEAD_HEIGHT + 120,100) 
             time.sleep(1)
@@ -427,29 +430,31 @@ class Obs:
         self.walk.move('stay')
         if not self.image.line_at_right and not self.image.line_at_left: 
             time.sleep(1)
-            send.sendHeadMotor(1, 1497, 100)
+            send.sendHeadMotor(1, 1550, 100)
             send.sendHeadMotor(2, HEAD_HEIGHT +160, 100) #80
-            send.sendHeadMotor(1, 1497, 100)
+            send.sendHeadMotor(1, 1550, 100)
             send.sendHeadMotor(2, HEAD_HEIGHT +160, 100)
-            send.sendHeadMotor(1,1497,100)
+            send.sendHeadMotor(1, 1550, 100)
             send.sendHeadMotor(2, HEAD_HEIGHT +160, 100)
             time.sleep(1.8) 
             self.image.calculate()
-            right_deep_sum = self.image.deep_sum
-            send.sendHeadMotor(1, 2599, 100)
+            rospy.loginfo(f'dy =  {self.image.max_deep_center_y}')
+            right_deep_sum = self.image.max_deep_center_y #self.image.deep_sum
+            send.sendHeadMotor(1, 2546, 100)
             send.sendHeadMotor(2, HEAD_HEIGHT +160, 100)
-            send.sendHeadMotor(1, 2599, 100)
+            send.sendHeadMotor(1, 2546, 100)
             send.sendHeadMotor(2, HEAD_HEIGHT +160, 100)
-            send.sendHeadMotor(1, 2599, 100)
+            send.sendHeadMotor(1, 2546, 100)
             send.sendHeadMotor(2, HEAD_HEIGHT +160, 100)
             time.sleep(1.8)
             self.image.calculate()
-            left_deep_sum = self.image.deep_sum
+            rospy.loginfo(f'dy =  {self.image.max_deep_center_y}')
+            left_deep_sum = self.image.max_deep_center_y
             send.sendHeadMotor(1, 2048, 100)
             send.sendHeadMotor(2, HEAD_HEIGHT +80, 100)
             send.sendHeadMotor(1, 2048, 100)
             send.sendHeadMotor(2, HEAD_HEIGHT +80, 100)
-            send.sendHeadMotor(1,2048,100)
+            send.sendHeadMotor(1, 2048, 100)
             send.sendHeadMotor(2, HEAD_HEIGHT +80, 100)
             time.sleep(1)
             self.image.calculate()
@@ -471,8 +476,9 @@ class Obs:
                 self.image.calculate()
             # elif self.image.b_y_max > 240 :                
             # if abs(self.walk.get_imu()) < 70:                   #靠近後右旋轉至90度
-            while abs(self.walk.get_imu()) < 70:
+            while abs(self.walk.get_imu()) < 60:
                 self.walk.move('turn_right')
+            self.walk.move('stay')
             send.sendHeadMotor(1,2647,100)
             send.sendHeadMotor(2, HEAD_HEIGHT + 120, 100) 
             time.sleep(1)
@@ -509,7 +515,7 @@ class Obs:
             # if abs(self.walk.get_imu()) < 65 :                           #靠近後轉至90度
             while abs(self.walk.get_imu()) < 60 :
                 self.walk.move('turn_left')
-                self.image.calculate()
+            self.walk.move('stay')
             send.sendHeadMotor(1,1449,100)
             send.sendHeadMotor(2,HEAD_HEIGHT + 120,100) 
             time.sleep(1)
@@ -552,12 +558,12 @@ class Obs:
                 send.sendBodyAuto(0,0,0,0,1,0)
                 self.start_walking = True
             if self.preturn_left:                      #指定初始向左旋轉
-                while abs(self.walk.get_imu()) < 45:
+                while abs(self.walk.get_imu()) < 78:
                     self.walk.move('preturn_left')
                     rospy.loginfo(f'imu =  {self.walk.get_imu()}')
                 self.preturn_left = False
             elif self.preturn_right:                        #指定初始向右旋轉 
-                while abs(self.walk.get_imu()) < 15:
+                while abs(self.walk.get_imu()) < 10:
                     self.walk.move('preturn_right')
                     rospy.loginfo(f'imu =  {self.walk.get_imu()}')
                 self.preturn_right = False
@@ -588,8 +594,9 @@ class Obs:
                     self.first_reddoor = False
                 #一般往左右避障
                 if (14 > self.image.deep_x > 5) or (-5 > self.image.deep_x > -14) :
-                    # while self.image.red_deep_center_y < 3   : #and self.red_avoid_distance == False
+                    # while self.image.deep_center_y < 3   : #and self.red_avoid_distance == False
                     #     self.walk.move('small_back')
+                    #     self.image.calculate()
                 # if (13 > self.image.deep_x > -13) :        
                     self.walk.straight_speed()
                     if ((abs(self.walk.get_imu()) > 5) and (not self.imu_ok)) and (abs(self.image.deep_x) >= 9) :       #IMU修正
@@ -671,7 +678,7 @@ class Obs:
                     self.red_avoid_distance = True
                     if self.image.line_at_left or self.image.line_at_right:
                         self.imu_ok = True
-                    elif self.image.deep_center_y < 6 :
+                    elif self.image.deep_center_y < 6 and  3 >= self.image.deep_x >= -3:
                         self.imu_ok = False
                     # elif 3 >= self.image.deep_x >= -3 :
                     #     self.imu_ok = False
@@ -704,6 +711,7 @@ if __name__ == '__main__':
         strategy = Obs()
         r = rospy.Rate(20)
         while not rospy.is_shutdown():
+            
             # if send.Web :
             #     pass
             # if not send.Web :
