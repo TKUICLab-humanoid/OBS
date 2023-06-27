@@ -186,16 +186,17 @@ class Fuzzy():
         Dx   = ctrl.Antecedent(np.arange(-16, 17, 1), 'Dx')
         Turn = ctrl.Consequent(np.arange(-13, 14, 1), 'Turn')
 
-        Dx['R_Full']    = fuzz.trimf(Dx.universe,   [-16, -16, -8])
-        Dx['R_O']       = fuzz.trimf(Dx.universe,   [-14, -12, -2])
-        Dx['No']        = fuzz.trimf(Dx.universe,   [-3, 0, 3])
-        Dx['L_O']       = fuzz.trimf(Dx.universe,   [2, 12, 14])
-        Dx['L_Full']    = fuzz.trimf(Dx.universe,   [8, 16, 16])
-        Turn['T_Right'] = fuzz.trimf(Turn.universe, [-13, -13, -7])
-        Turn['T_R']     = fuzz.trimf(Turn.universe, [-8, -8, -2])
-        Turn['NoTurn']  = fuzz.trimf(Turn.universe, [-3, 0, 3])
-        Turn['T_L']     = fuzz.trimf(Turn.universe, [2, 8, 8])
-        Turn['T_Left']  = fuzz.trimf(Turn.universe, [7, 13, 13])
+        Dx['R_Full']    = fuzz.trimf(Dx.universe,   [-16, -16, - 8])
+        Dx['R_O']       = fuzz.trimf(Dx.universe,   [-14, -12, - 2])
+        Dx['No']        = fuzz.trimf(Dx.universe,   [- 3,   0,   3])
+        Dx['L_O']       = fuzz.trimf(Dx.universe,   [  2,  12,  14])
+        Dx['L_Full']    = fuzz.trimf(Dx.universe,   [  8,  16,  16])
+
+        Turn['T_Right'] = fuzz.trimf(Turn.universe, [-13, -13, - 7])
+        Turn['T_R']     = fuzz.trimf(Turn.universe, [- 8, - 8, - 2])
+        Turn['NoTurn']  = fuzz.trimf(Turn.universe, [- 3,   0,   3])
+        Turn['T_L']     = fuzz.trimf(Turn.universe, [  2,   8,   8])
+        Turn['T_Left']  = fuzz.trimf(Turn.universe, [  7,  13,  13])
 
         rule1 = ctrl.Rule(Dx['L_Full'], Turn['T_Right'])
         rule2 = ctrl.Rule(Dx['L_O'],    Turn['T_R'])
@@ -212,25 +213,31 @@ class Fuzzy():
         turning.compute()
         # 解模糊得到控制輸出
         self.Turn_value = int(turning.output['Turn'])
-        print("Dx = ",self.image.deep_x)
-        print("Turn = ",self.Turn_value)
+        # rospy.loginfo(f'Dx =  {self.image.deep_x}')
+        # rospy.loginfo(f'Turn =  {self.Turn_value}') 
+        # print("Dx = ",self.image.deep_x)
+        # print("Turn = ",self.Turn_value)
+
         Dy = ctrl.Antecedent(np.arange(0, 25, 1), 'Dy')
         Speed = ctrl.Consequent(np.arange(0, 31, 1), 'Speed')
-        Dy['C_OBS'] = fuzz.trimf(Dy.universe, [0, 0, 7])
-        Dy['NC_OBS'] = fuzz.trimf(Dy.universe, [2, 12, 12])
-        Dy['NOR_OBS'] = fuzz.trimf(Dy.universe, [6, 15, 15])
-        Dy['NF_OBS'] = fuzz.trimf(Dy.universe, [10, 20, 20])
-        Dy['F_OBS'] = fuzz.trimf(Dy.universe, [18, 24, 24])
-        Speed['FAST'] = fuzz.trimf(Speed.universe, [20, 30, 30])
-        Speed['N_F'] = fuzz.trimf(Speed.universe, [13, 25, 25])
-        Speed['NOR_S'] = fuzz.trimf(Speed.universe, [5, 8, 13])
-        Speed['N_S'] = fuzz.trimf(Speed.universe, [1, 5, 6])
-        Speed['SLOW'] = fuzz.trimf(Speed.universe, [0, 0, 2])
-        rule6 = ctrl.Rule(Dy['C_OBS'], Speed['SLOW'])
-        rule7 = ctrl.Rule(Dy['NC_OBS'], Speed['N_S'])
-        rule8 = ctrl.Rule(Dy['NOR_OBS'], Speed['NOR_S'])
-        rule9 = ctrl.Rule(Dy['NF_OBS'], Speed['N_F'])
-        rule10 = ctrl.Rule(Dy['F_OBS'], Speed['FAST'])
+
+        Dy['C_OBS']     = fuzz.trimf(Dy.universe,    [ 0,  0,  7])
+        Dy['NC_OBS']    = fuzz.trimf(Dy.universe,    [ 2, 12, 12])
+        Dy['NOR_OBS']   = fuzz.trimf(Dy.universe,    [ 6, 17, 17])
+        Dy['NF_OBS']    = fuzz.trimf(Dy.universe,    [10, 19, 19])
+        Dy['F_OBS']     = fuzz.trimf(Dy.universe,    [18, 24, 24])
+
+        Speed['FAST']   = fuzz.trimf(Speed.universe, [20, 27, 27])
+        Speed['N_F']    = fuzz.trimf(Speed.universe, [13, 22, 25])
+        Speed['NOR_S']  = fuzz.trimf(Speed.universe, [ 5,  15, 20])
+        Speed['N_S']    = fuzz.trimf(Speed.universe, [ 1,  5,  6])
+        Speed['SLOW']   = fuzz.trimf(Speed.universe, [ 0,  0,  2])
+
+        rule6  = ctrl.Rule(Dy['C_OBS'],   Speed['SLOW'])
+        rule7  = ctrl.Rule(Dy['NC_OBS'],  Speed['N_S'])
+        rule8  = ctrl.Rule(Dy['NOR_OBS'], Speed['NOR_S'])
+        rule9  = ctrl.Rule(Dy['NF_OBS'],  Speed['N_F'])
+        rule10 = ctrl.Rule(Dy['F_OBS'],   Speed['FAST'])
         # 建立模糊控制系統
         speed_ctrl = ctrl.ControlSystem([rule6, rule7, rule8,rule9,rule10])
         speeding = ctrl.ControlSystemSimulation(speed_ctrl)
@@ -239,7 +246,9 @@ class Fuzzy():
         speeding.input['Dy'] = Dy_value
         speeding.compute()
         # 解模糊得到控制輸出
-        self.Speed_value = 100*(int(speeding.output['Speed']))   
+        self.Speed_value = 100*(int(speeding.output['Speed']))
+        rospy.loginfo(f'dy =  {self.image.deep_center_y}') 
+        rospy.loginfo(f'speed =  {self.Speed_value}')  
 
 class Normal_Obs_Parameter:
     def __init__(self):
@@ -311,6 +320,7 @@ class Normal_Obs_Parameter:
             left_weight            = np.dot(filter_matrix,  left_weight_matrix)
             self.deep_y                 = min(deep.aa)
             self.deep_sum               = sum(deep.aa)
+            self.deep_center_y      = min(deep.aa[10:23])
             self.left_deep              = deep.aa[4]
             self.right_deep             = deep.aa[28]
             self.center_deep            = deep.aa[16]
