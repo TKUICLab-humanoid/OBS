@@ -4,7 +4,7 @@
 import rospy
 import numpy as np
 from hello1 import Sendmessage
-from ddd import deep_calculate
+from image import deep_calculate
 # from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 from tku_msgs.msg import camera
@@ -30,12 +30,12 @@ HEAD_HEIGHT     = 1550
 FOCUS_MATRIX    = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]
 SMALL_FORWARD_X         = 1500                                                     
 SMALL_FORWARD_Y         =  200                                                     
-SMALL_FORWARD_THETA     =  1                                                       
+SMALL_FORWARD_THETA     =    1                                                       
 TURN_RIGHT_X            = -500                                                     
-TURN_RIGHT_Y            =  1200                                                     
+TURN_RIGHT_Y            = 1200                                                     
 TURN_RIGHT_THETA        =   -7                                                     
-TURN_LEFT_X             =  0                                                     
-TURN_LEFT_Y             =  -1000                                                     
+TURN_LEFT_X             =    0                                                     
+TURN_LEFT_Y             =-1000                                                     
 TURN_LEFT_THETA         =    7                                                     
 
 class Walk():
@@ -180,9 +180,11 @@ class Walk():
 class Fuzzy():
     def __init__(self):
         self.image = Normal_Obs_Parameter()
+        # self.deep = deep_calculate()
 
     def Fuzzy(self):
         self.image.calculate()
+        # self.deep.blue_obs()
         Dx   = ctrl.Antecedent(np.arange(-16, 17, 1), 'Dx')
         Turn = ctrl.Consequent(np.arange(-13, 14, 1), 'Turn')
 
@@ -219,7 +221,7 @@ class Fuzzy():
         # print("Turn = ",self.Turn_value)
 
         Dy = ctrl.Antecedent(np.arange(0, 25, 1), 'Dy')
-        Speed = ctrl.Consequent(np.arange(0, 31, 1), 'Speed')
+        Speed = ctrl.Consequent(np.arange(0, 26, 1), 'Speed')
 
         Dy['C_OBS']     = fuzz.trimf(Dy.universe,    [ 0,  0,  7])
         Dy['NC_OBS']    = fuzz.trimf(Dy.universe,    [ 2, 12, 12])
@@ -227,12 +229,12 @@ class Fuzzy():
         Dy['NF_OBS']    = fuzz.trimf(Dy.universe,    [10, 19, 19])
         Dy['F_OBS']     = fuzz.trimf(Dy.universe,    [18, 24, 24])
 
-        Speed['FAST']   = fuzz.trimf(Speed.universe, [20, 27, 27])
-        Speed['N_F']    = fuzz.trimf(Speed.universe, [13, 22, 25])
+        Speed['SLOW']   = fuzz.trimf(Speed.universe, [ 0,  0,  0])
+        Speed['N_S']    = fuzz.trimf(Speed.universe, [ 0,  5,  6])
         Speed['NOR_S']  = fuzz.trimf(Speed.universe, [ 5,  15, 20])
-        Speed['N_S']    = fuzz.trimf(Speed.universe, [ 1,  5,  6])
-        Speed['SLOW']   = fuzz.trimf(Speed.universe, [ 0,  0,  2])
-
+        Speed['N_F']    = fuzz.trimf(Speed.universe, [13, 22, 25])
+        Speed['FAST']   = fuzz.trimf(Speed.universe, [20, 27, 27])
+        
         rule6  = ctrl.Rule(Dy['C_OBS'],   Speed['SLOW'])
         rule7  = ctrl.Rule(Dy['NC_OBS'],  Speed['N_S'])
         rule8  = ctrl.Rule(Dy['NOR_OBS'], Speed['NOR_S'])
@@ -242,7 +244,7 @@ class Fuzzy():
         speed_ctrl = ctrl.ControlSystem([rule6, rule7, rule8,rule9,rule10])
         speeding = ctrl.ControlSystemSimulation(speed_ctrl)
         # 執行模糊控制
-        Dy_value =  self.image.center_deep
+        Dy_value =  self.image.deep_center_y
         speeding.input['Dy'] = Dy_value
         speeding.compute()
         # 解模糊得到控制輸出
@@ -252,6 +254,7 @@ class Fuzzy():
 
 class Normal_Obs_Parameter:
     def __init__(self):
+        self.deep                       = deep_calculate()
         self.line_at_left               = False
         self.line_at_right              = False
         self.at_reddoor_flag            = False
@@ -292,7 +295,9 @@ class Normal_Obs_Parameter:
                 xmax_two           = send.color_mask_subject_XMax[2][1]
                 self.blue_rightside     = max(xmin_one, xmin_two)
                 self.blue_leftside      = min(xmax_one, xmax_two)
-        else : 
+        else :
+            self.deep.blue_obs() 
+            self.deep.obs()
             self.at_reddoor_flag = False
     #----------------Blue_DeepMatrix-----------------
             self.b_y_max        = send.color_mask_subject_YMax[2][0]
@@ -318,12 +323,12 @@ class Normal_Obs_Parameter:
             right_weight_matrix    = list(range(31,-1,-1))      #31~0
             right_weight           = np.dot(filter_matrix,  right_weight_matrix)#內積
             left_weight            = np.dot(filter_matrix,  left_weight_matrix)
-            self.deep_y                 = min(deep.aa)
-            self.deep_sum               = sum(deep.aa)
-            self.deep_center_y      = min(deep.aa[10:23])
-            self.left_deep              = deep.aa[4]
-            self.right_deep             = deep.aa[28]
-            self.center_deep            = deep.aa[16]
+            self.deep_y                 = min(deep.obs_deep)
+            self.deep_sum               = sum(deep.obs_deep)
+            self.deep_center_y      = min(deep.obs_deep[10:23])
+            self.left_deep              = deep.obs_deep[4]
+            self.right_deep             = deep.obs_deep[28]
+            self.center_deep            = deep.obs_deep[16]
             x_boundary             = 31 if left_weight > right_weight else 0
 
             if send.color_mask_subject_cnts[1] == 2 and send.color_mask_subject_YMax[0][1] > 150 and send.color_mask_subject_YMax[1][1] > 150:
