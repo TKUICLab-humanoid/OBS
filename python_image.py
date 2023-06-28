@@ -3,7 +3,10 @@
 # from turtle import st
 import rospy
 import numpy as np
-from hello1 import Sendmessage
+# from hello1 import Sendmessage
+import sys
+sys.path.append('/home/iclab/Desktop/adult_hurocup/src/strategy')
+from Python_API import Sendmessage
 from ddd import deep_calculate
 # from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
@@ -154,7 +157,7 @@ class Walk():
                 if deep.slope >= slopel_range[0]:
                     return slopel_range[1]
             return 0 
-        if send.color_mask_subject_size[5][0] == 0 :
+        if np.array(send.color_mask_subject_size[5])[0] == 0 :
             slope_angle = 0
         return slope_angle
 
@@ -201,56 +204,58 @@ class Normal_Obs_Parameter:
         self.b_y_max                  = 0
 
     def calculate(self):
-        self.red_y_max = send.color_mask_subject_YMax[5][0]
-        if send.color_mask_subject_size[5][0] > 5000:                      #有紅時計算紅門資訊
-            self.at_reddoor_flag = True
-            self.red_x_min = send.color_mask_subject_XMin[5][0] 
-            self.red_x_max = send.color_mask_subject_XMax[5][0]
+        if send.color_mask_subject_cnts[5] > 0:
+            self.red_y_max = np.array(send.color_mask_subject_YMax[5])[0]
+            if np.array(send.color_mask_subject_size[5])[0] > 5000:                      #有紅時計算紅門資訊
+                self.at_reddoor_flag = True
+                self.red_x_min = np.array(send.color_mask_subject_XMin[5])[0] 
+                self.red_x_max = np.array(send.color_mask_subject_XMax[5])[0]
 
-            if send.color_mask_subject_cnts[2] == 1:
-                self.b_x_min = send.color_mask_subject_XMin[2][0]
-                self.b_x_max = send.color_mask_subject_XMax[2][0]
-            elif send.color_mask_subject_cnts[2] == 2:
-                xmax_one           = send.color_mask_subject_XMax[2][0]
-                xmin_one           = send.color_mask_subject_XMin[2][0]
-                xmin_two           = send.color_mask_subject_XMin[2][1]
-                xmax_two           = send.color_mask_subject_XMax[2][1]
-                self.blue_rightside     = max(xmin_one, xmin_two)
-                self.blue_leftside      = min(xmax_one, xmax_two)
+                if send.color_mask_subject_cnts[2] == 1:
+                    self.b_x_min = np.array(send.color_mask_subject_XMin[2])[0]
+                    self.b_x_max = np.array(send.color_mask_subject_XMax[2])[0]
+                elif send.color_mask_subject_cnts[2] == 2:
+                    xmax_one           = np.array(send.color_mask_subject_XMax[2])[0]
+                    xmin_one           = np.array(send.color_mask_subject_XMin[2])[0]
+                    xmin_two           = np.array(send.color_mask_subject_XMin[2])[1]
+                    xmax_two           = np.array(send.color_mask_subject_XMax[2])[1]
+                    self.blue_rightside     = max(xmin_one, xmin_two)
+                    self.blue_leftside      = min(xmax_one, xmax_two)
         else : 
             self.at_reddoor_flag = False
+        if send.color_mask_subject_cnts[2] > 0:
+            self.b_y_max        = np.array(send.color_mask_subject_YMax[2])[0]
     #----------------Blue_DeepMatrix-----------------
-            self.b_y_max        = send.color_mask_subject_YMax[2][0]
-            self.b_deep_y       = min(deep.ba)
-            self.b_deep_sum     = sum(deep.ba)
-            self.b_left_deep    = deep.ba[2]
-            self.b_right_deep   = deep.ba[30]
-            self.b_center_deep  = deep.ba[16]
-    #----------------Y_line_DeepMatrix---------------
-            # self.y_deep_y           = min(deep.yellow_deep)
-            # self.y_deep_sum         = sum(deep.yellow_deep)
-            # self.y_left_deep        = deep.yellow_deep[2]
-            # self.y_right_deep       = deep.yellow_deep[30]
-            # self.yellow_center_deep = deep.yellow_deep[16]
-            # self.y_deep_left_sum    = sum(deep.yellow_deep[0:15])
-            # self.y_deep_right_sum   = sum(deep.yellow_deep[16:31])
-    #----------------Filter_matrix-------------------
-            filter_matrix          = [max(0, a - b) for a, b in zip(FOCUS_MATRIX, deep.aa)] #將FOCUS_MATRIX和deep.blue_yellow_deep結合後相減，如果<0則給0，>0則給相減值
-            x_center_num           = sum(i for i, num in enumerate(FOCUS_MATRIX - np.array(deep.aa)) if num >= 0)#np.array=>[1,2]=>[1 2]，list(enumerate([1 2],[3 5]))=[(0,-2),(1,-3)] ##計算差值>=0的index(i)總和
-            x_center_cnt           = np.sum(np.array(FOCUS_MATRIX) - np.array(deep.aa) >= 0) #有幾個相減後>0
-            x_center               = (x_center_num / x_center_cnt) if x_center_cnt > 0 else 0
-            left_weight_matrix     = list(range(32))            #0~31
-            right_weight_matrix    = list(range(31,-1,-1))      #31~0
-            right_weight           = np.dot(filter_matrix,  right_weight_matrix)#內積
-            left_weight            = np.dot(filter_matrix,  left_weight_matrix)
-            self.deep_y                 = min(deep.aa)
-            self.deep_sum               = sum(deep.aa)
-            self.left_deep              = deep.aa[4]
-            self.right_deep             = deep.aa[28]
-            self.center_deep            = deep.aa[16]
-            x_boundary             = 31 if left_weight > right_weight else 0
-
-            if send.color_mask_subject_cnts[1] == 2 and send.color_mask_subject_YMax[0][1] > 150 and send.color_mask_subject_YMax[1][1] > 150:
+        self.b_deep_y       = min(deep.ba)
+        self.b_deep_sum     = sum(deep.ba)
+        self.b_left_deep    = deep.ba[2]
+        self.b_right_deep   = deep.ba[30]
+        self.b_center_deep  = deep.ba[16]
+#----------------Y_line_DeepMatrix---------------
+        # self.y_deep_y           = min(deep.yellow_deep)
+        # self.y_deep_sum         = sum(deep.yellow_deep)
+        # self.y_left_deep        = deep.yellow_deep[2]
+        # self.y_right_deep       = deep.yellow_deep[30]
+        # self.yellow_center_deep = deep.yellow_deep[16]
+        # self.y_deep_left_sum    = sum(deep.yellow_deep[0:15])
+        # self.y_deep_right_sum   = sum(deep.yellow_deep[16:31])
+#----------------Filter_matrix-------------------
+        filter_matrix          = [max(0, a - b) for a, b in zip(FOCUS_MATRIX, deep.aa)] #將FOCUS_MATRIX和deep.blue_yellow_deep結合後相減，如果<0則給0，>0則給相減值
+        x_center_num           = sum(i for i, num in enumerate(FOCUS_MATRIX - np.array(deep.aa)) if num >= 0)#np.array=>[1,2]=>[1 2]，list(enumerate([1 2],[3 5]))=[(0,-2),(1,-3)] ##計算差值>=0的index(i)總和
+        x_center_cnt           = np.sum(np.array(FOCUS_MATRIX) - np.array(deep.aa) >= 0) #有幾個相減後>0
+        x_center               = (x_center_num / x_center_cnt) if x_center_cnt > 0 else 0
+        left_weight_matrix     = list(range(32))            #0~31
+        right_weight_matrix    = list(range(31,-1,-1))      #31~0
+        right_weight           = np.dot(filter_matrix,  right_weight_matrix)#內積
+        left_weight            = np.dot(filter_matrix,  left_weight_matrix)
+        self.deep_y                 = min(deep.aa)
+        self.deep_sum               = sum(deep.aa)
+        self.left_deep              = deep.aa[4]
+        self.right_deep             = deep.aa[28]
+        self.center_deep            = deep.aa[16]
+        x_boundary             = 31 if left_weight > right_weight else 0
+        if send.color_mask_subject_cnts[1] > 0:
+            if send.color_mask_subject_cnts[1] == 2 and np.array(send.color_mask_subject_YMax[0])[1] > 150 and np.array(send.color_mask_subject_YMax[1])[1] > 150:
                 self.deep_x = 0
                 if self.y_deep_left_sum < self.y_deep_right_sum:
                     self.line_at_right = False
@@ -258,19 +263,21 @@ class Normal_Obs_Parameter:
                 elif self.y_deep_left_sum >= self.y_deep_right_sum:
                     self.line_at_right = True
                     self.line_at_left  = False
-            else:    
+            else:
                 self.deep_x = x_center - x_boundary
-            # rospy.loginfo(f'right_weight_matrix =  {right_weight_matrix}')
-            # rospy.loginfo(f'left_weight_matrix =  {left_weight_matrix}')
-            # rospy.loginfo(f'filter =  {filter_matrix}')
-            # rospy.loginfo(f'xb =  {x_boundary}')
-            # rospy.loginfo(f'xc =  {x_center}')
-            # rospy.loginfo(f'right_weight =  {right_weight}')
-            # rospy.loginfo(f'left_weight =  {left_weight}')
-            # rospy.loginfo(f'x_center_cnt =  {x_center_cnt}')
-            # rospy.loginfo(f'x_center_num =  {x_center_num}')
-            # rospy.loginfo(f'deep_y =  {self.deep_y}')
-            # rospy.loginfo(f'deep_x =  {self.deep_x}')
+        else:    
+            self.deep_x = x_center - x_boundary
+        # rospy.loginfo(f'right_weight_matrix =  {right_weight_matrix}')
+        # rospy.loginfo(f'left_weight_matrix =  {left_weight_matrix}')
+        # rospy.loginfo(f'filter =  {filter_matrix}')
+        # rospy.loginfo(f'xb =  {x_boundary}')
+        # rospy.loginfo(f'xc =  {x_center}')
+        # rospy.loginfo(f'right_weight =  {right_weight}')
+        # rospy.loginfo(f'left_weight =  {left_weight}')
+        # rospy.loginfo(f'x_center_cnt =  {x_center_cnt}')
+        # rospy.loginfo(f'x_center_num =  {x_center_num}')
+        # rospy.loginfo(f'deep_y =  {self.deep_y}')
+        # rospy.loginfo(f'deep_x =  {self.deep_x}')
 
 class Obs:
     def __init__(self):
@@ -361,7 +368,7 @@ class Obs:
                     time.sleep(2.8)
                     # time.sleep(0.3)
                     crawl_cnt += 1
-                send.color_mask_subject_YMax[1][0] = 0
+                np.array(send.color_mask_subject_YMax[1])[0] = 0
                 self.b_y_max = 0
                 send.sendHeadMotor(1,2048,100)
                 send.sendHeadMotor(2,2500,100)
@@ -370,7 +377,7 @@ class Obs:
                     #Image_Init()
                     strategy.Normal_Obs_Parameter()
                     time.sleep(0.1)
-                    if (self.b_y_max >= 85 and send.color_mask_subject_size[2][0] > 5000) or (send.color_mask_subject_YMax[1][0] >= 60 and send.color_mask_subject_size[1][0] > 5000):
+                    if (self.b_y_max >= 85 and np.array(send.color_mask_subject_size[2])[0] > 5000) or (np.array(send.color_mask_subject_YMax[1])[0] >= 60 and np.array(send.color_mask_subject_size[1])[0] > 5000):
                         break
                     else:
                         send.sendBodySector(456)
@@ -639,6 +646,8 @@ class Obs:
                     self.walk.move('max_speed')
                     
         if not send.is_start :
+            self.image.calculate()
+            print(self.image.b_y_max)
             if self.start_walking :
                 send.sendContinuousValue(0,0,0,0,0)
                 send.sendBodyAuto(0,0,0,0,1,0)
@@ -650,6 +659,7 @@ class Obs:
 if __name__ == '__main__':
 
     try:
+        aaaa = rospy.init_node('talker', anonymous=True)
         walk = Walk()
         strategy = Obs()
         r = rospy.Rate(20)
