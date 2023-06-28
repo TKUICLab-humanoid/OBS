@@ -3,7 +3,10 @@
 # from turtle import st
 import rospy
 import numpy as np
-from hello1 import Sendmessage
+import sys
+sys.path.append('/home/iclab/Desktop/adult_hurocup/src/strategy')
+from Python_API import Sendmessage
+# from hello1 import Sendmessage
 from image import deep_calculate
 # from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
@@ -220,26 +223,24 @@ class Fuzzy():
         # print("Dx = ",self.image.deep_x)
         # print("Turn = ",self.Turn_value)
 
-        Dy = ctrl.Antecedent(np.arange(0, 25, 1), 'Dy')
-        Speed = ctrl.Consequent(np.arange(0, 26, 1), 'Speed')
-
-        Dy['C_OBS']     = fuzz.trimf(Dy.universe,    [ 0,  0,  7])
-        Dy['NC_OBS']    = fuzz.trimf(Dy.universe,    [ 2, 12, 12])
+        Dy      = ctrl.Antecedent(np.arange(0, 25, 1), 'Dy')
+        Speed   = ctrl.Consequent(np.arange(0, 26, 1), 'Speed')
+        Dy['C_OBS'  ]   = fuzz.trimf(Dy.universe,    [ 0,  0,  7])
+        Dy['NC_OBS' ]   = fuzz.trimf(Dy.universe,    [ 2, 12, 12])
         Dy['NOR_OBS']   = fuzz.trimf(Dy.universe,    [ 6, 17, 17])
-        Dy['NF_OBS']    = fuzz.trimf(Dy.universe,    [10, 19, 19])
-        Dy['F_OBS']     = fuzz.trimf(Dy.universe,    [18, 24, 24])
-
-        Speed['SLOW']   = fuzz.trimf(Speed.universe, [ 0,  0,  0])
-        Speed['N_S']    = fuzz.trimf(Speed.universe, [ 0,  5,  6])
-        Speed['NOR_S']  = fuzz.trimf(Speed.universe, [ 5,  15, 20])
-        Speed['N_F']    = fuzz.trimf(Speed.universe, [13, 22, 25])
-        Speed['FAST']   = fuzz.trimf(Speed.universe, [20, 27, 27])
+        Dy['NF_OBS' ]   = fuzz.trimf(Dy.universe,    [10, 19, 19])
+        Dy['F_OBS'  ]   = fuzz.trimf(Dy.universe,    [18, 24, 24])
+        Speed['SLOW' ]  = fuzz.trimf(Speed.universe, [ 0,  0,  0])
+        Speed['N_S'  ]  = fuzz.trimf(Speed.universe, [ 0,  5,  6])
+        Speed['NOR_S']  = fuzz.trimf(Speed.universe, [ 5, 15, 20])
+        Speed['N_F'  ]  = fuzz.trimf(Speed.universe, [13, 22, 25])
+        Speed['FAST' ]  = fuzz.trimf(Speed.universe, [20, 27, 27])
         
-        rule6  = ctrl.Rule(Dy['C_OBS'],   Speed['SLOW'])
-        rule7  = ctrl.Rule(Dy['NC_OBS'],  Speed['N_S'])
-        rule8  = ctrl.Rule(Dy['NOR_OBS'], Speed['NOR_S'])
-        rule9  = ctrl.Rule(Dy['NF_OBS'],  Speed['N_F'])
-        rule10 = ctrl.Rule(Dy['F_OBS'],   Speed['FAST'])
+        rule6  = ctrl.Rule(Dy['C_OBS'   ],  Speed['SLOW'    ])
+        rule7  = ctrl.Rule(Dy['NC_OBS'  ],  Speed['N_S'     ])
+        rule8  = ctrl.Rule(Dy['NOR_OBS' ],  Speed['NOR_S'   ])
+        rule9  = ctrl.Rule(Dy['NF_OBS'  ],  Speed['N_F'     ])
+        rule10 = ctrl.Rule(Dy['F_OBS'   ],  Speed['FAST'    ])
         # 建立模糊控制系統
         speed_ctrl = ctrl.ControlSystem([rule6, rule7, rule8,rule9,rule10])
         speeding = ctrl.ControlSystemSimulation(speed_ctrl)
@@ -278,80 +279,102 @@ class Normal_Obs_Parameter:
         self.red_y_max                  = 0
         self.b_y_max                    = 0
 
-    def calculate(self):
+    def reddoor_info(self):
         self.red_y_max = send.color_mask_subject_YMax[5][0]
+        self.red_x_min = send.color_mask_subject_XMin[5][0] 
+        self.red_x_max = send.color_mask_subject_XMax[5][0]
+        if send.color_mask_subject_cnts[2] == 1:
+            self.b_x_min = send.color_mask_subject_XMin[2][0]
+            self.b_x_max = send.color_mask_subject_XMax[2][0]
+        elif send.color_mask_subject_cnts[2] == 2:
+            xmax_one                = send.color_mask_subject_XMax[2][0]
+            xmin_one                = send.color_mask_subject_XMin[2][0]
+            xmin_two                = send.color_mask_subject_XMin[2][1]
+            xmax_two                = send.color_mask_subject_XMax[2][1]
+            self.blue_rightside     = max(xmin_one, xmin_two)
+            self.blue_leftside      = min(xmax_one, xmax_two)
+
+    def yellow_obs_info(self):
+        self.y_deep_y           = min(deep.yellow_deep)
+        self.y_deep_sum         = sum(deep.yellow_deep)
+        self.y_left_deep        = deep.yellow_deep[2]
+        self.y_right_deep       = deep.yellow_deep[30]
+        self.yellow_center_deep = deep.yellow_deep[16]
+        self.y_deep_left_sum    = sum(deep.yellow_deep[0:15])
+        self.y_deep_right_sum   = sum(deep.yellow_deep[16:31])
+    
+    def blue_obs_info(self):
+        # deep.blue_obs()
+        # print(send.color_mask_subject_YMax[2])
+        if send.color_mask_subject_cnts[2] > 0:
+            # self.b_y_max        = send.color_mask_subject_YMax[2]
+            # aa = self.b_y_max[0]
+            # blue_Xmax_array = np.array(send.color_mask_subject_XMax[2])
+            print(np.array(send.color_mask_subject_XMax[2])[2])
+            # aa = self.b_y_max[0])
+            # self.b_deep_y       = min(deep.blue_deep)
+            # self.b_deep_sum     = sum(deep.blue_deep)
+            # self.b_left_deep    = deep.blue_deep[2]
+            # self.b_right_deep   = deep.blue_deep[30]
+            # self.b_center_deep  = deep.blue_deep[16]
+            # print("cnt",send.color_mask_subject_cnts[2])
+            # print("cnt  = ",send.color_mask_subject_cnts[2])
+            # if send.color_mask_subject_cnts[2] == 2:
+            #     self.blue_rightside     = max(send.color_mask_subject_XMin[2])
+            #     self.blue_leftside      = min(send.color_mask_subject_XMax[2])
+            # else:
+            #     self.blue_rightside = 0
+            #     self.blue_leftside = 0
+            # print("xMax = ",send.color_mask_subject_XMax[2])
+            
+            # print("xMin = ",send.color_mask_subject_XMin[2])
+            # print("max  = ",self.blue_leftside)
+            # print("min  = ",self.blue_rightside)
+    def calculate(self):
         if send.color_mask_subject_size[5][0] > 5000:                      #有紅時計算紅門資訊
-            self.at_reddoor_flag = True
-            self.red_x_min = send.color_mask_subject_XMin[5][0] 
-            self.red_x_max = send.color_mask_subject_XMax[5][0]
+            self.reddoor_info()
+        if send.color_mask_subject_cnts[2] > 0:
+            self.blue_obs_info()
+        deep.obs()
+        self.at_reddoor_flag = False
+#----------------Filter_matrix-------------------
+        filter_matrix          = [max(0, a - b) for a, b in zip(FOCUS_MATRIX, deep.obs_deep)] #將FOCUS_MATRIX和deep.blue_yellow_deep結合後相減，如果<0則給0，>0則給相減值
+        x_center_num           = sum(i for i, num in enumerate(FOCUS_MATRIX - np.array(deep.obs_deep)) if num >= 0)#np.array=>[1,2]=>[1 2]，list(enumerate([1 2],[3 5]))=[(0,-2),(1,-3)] ##計算差值>=0的index(i)總和
+        x_center_cnt           = np.sum(np.array(FOCUS_MATRIX) - np.array(deep.obs_deep) >= 0) #有幾個相減後>0
+        x_center               = (x_center_num / x_center_cnt) if x_center_cnt > 0 else 0
+        left_weight_matrix     = list(range(32))            #0~31
+        right_weight_matrix    = list(range(31,-1,-1))      #31~0
+        right_weight           = np.dot(filter_matrix,  right_weight_matrix)#內積
+        left_weight            = np.dot(filter_matrix,  left_weight_matrix)
+        self.deep_y            = min(deep.obs_deep)
+        self.deep_sum          = sum(deep.obs_deep)
+        self.deep_center_y     = min(deep.obs_deep[10:23])
+        self.left_deep         = deep.obs_deep[4]
+        self.right_deep        = deep.obs_deep[28]
+        self.center_deep       = deep.obs_deep[16]
+        x_boundary             = 31 if left_weight > right_weight else 0
 
-            if send.color_mask_subject_cnts[2] == 1:
-                self.b_x_min = send.color_mask_subject_XMin[2][0]
-                self.b_x_max = send.color_mask_subject_XMax[2][0]
-            elif send.color_mask_subject_cnts[2] == 2:
-                xmax_one           = send.color_mask_subject_XMax[2][0]
-                xmin_one           = send.color_mask_subject_XMin[2][0]
-                xmin_two           = send.color_mask_subject_XMin[2][1]
-                xmax_two           = send.color_mask_subject_XMax[2][1]
-                self.blue_rightside     = max(xmin_one, xmin_two)
-                self.blue_leftside      = min(xmax_one, xmax_two)
-        else :
-            self.deep.blue_obs() 
-            self.deep.obs()
-            self.at_reddoor_flag = False
-    #----------------Blue_DeepMatrix-----------------
-            self.b_y_max        = send.color_mask_subject_YMax[2][0]
-            self.b_deep_y       = min(deep.ba)
-            self.b_deep_sum     = sum(deep.ba)
-            self.b_left_deep    = deep.ba[2]
-            self.b_right_deep   = deep.ba[30]
-            self.b_center_deep  = deep.ba[16]
-    #----------------Y_line_DeepMatrix---------------
-            # self.y_deep_y           = min(deep.yellow_deep)
-            # self.y_deep_sum         = sum(deep.yellow_deep)
-            # self.y_left_deep        = deep.yellow_deep[2]
-            # self.y_right_deep       = deep.yellow_deep[30]
-            # self.yellow_center_deep = deep.yellow_deep[16]
-            # self.y_deep_left_sum    = sum(deep.yellow_deep[0:15])
-            # self.y_deep_right_sum   = sum(deep.yellow_deep[16:31])
-    #----------------Filter_matrix-------------------
-            filter_matrix          = [max(0, a - b) for a, b in zip(FOCUS_MATRIX, deep.aa)] #將FOCUS_MATRIX和deep.blue_yellow_deep結合後相減，如果<0則給0，>0則給相減值
-            x_center_num           = sum(i for i, num in enumerate(FOCUS_MATRIX - np.array(deep.aa)) if num >= 0)#np.array=>[1,2]=>[1 2]，list(enumerate([1 2],[3 5]))=[(0,-2),(1,-3)] ##計算差值>=0的index(i)總和
-            x_center_cnt           = np.sum(np.array(FOCUS_MATRIX) - np.array(deep.aa) >= 0) #有幾個相減後>0
-            x_center               = (x_center_num / x_center_cnt) if x_center_cnt > 0 else 0
-            left_weight_matrix     = list(range(32))            #0~31
-            right_weight_matrix    = list(range(31,-1,-1))      #31~0
-            right_weight           = np.dot(filter_matrix,  right_weight_matrix)#內積
-            left_weight            = np.dot(filter_matrix,  left_weight_matrix)
-            self.deep_y                 = min(deep.obs_deep)
-            self.deep_sum               = sum(deep.obs_deep)
-            self.deep_center_y      = min(deep.obs_deep[10:23])
-            self.left_deep              = deep.obs_deep[4]
-            self.right_deep             = deep.obs_deep[28]
-            self.center_deep            = deep.obs_deep[16]
-            x_boundary             = 31 if left_weight > right_weight else 0
-
-            if send.color_mask_subject_cnts[1] == 2 and send.color_mask_subject_YMax[0][1] > 150 and send.color_mask_subject_YMax[1][1] > 150:
-                self.deep_x = 0
-                if self.y_deep_left_sum < self.y_deep_right_sum:
-                    self.line_at_right = False
-                    self.line_at_left  = True
-                elif self.y_deep_left_sum >= self.y_deep_right_sum:
-                    self.line_at_right = True
-                    self.line_at_left  = False
-            else:    
-                self.deep_x = x_center - x_boundary
-            # rospy.loginfo(f'right_weight_matrix =  {right_weight_matrix}')
-            # rospy.loginfo(f'left_weight_matrix =  {left_weight_matrix}')
-            # rospy.loginfo(f'filter =  {filter_matrix}')
-            # rospy.loginfo(f'xb =  {x_boundary}')
-            # rospy.loginfo(f'xc =  {x_center}')
-            # rospy.loginfo(f'right_weight =  {right_weight}')
-            # rospy.loginfo(f'left_weight =  {left_weight}')
-            # rospy.loginfo(f'x_center_cnt =  {x_center_cnt}')
-            # rospy.loginfo(f'x_center_num =  {x_center_num}')
-            # rospy.loginfo(f'deep_y =  {self.deep_y}')
-            # rospy.loginfo(f'deep_x =  {self.deep_x}')
+        if send.color_mask_subject_cnts[1] == 2 and send.color_mask_subject_YMax[0][1] > 150 and send.color_mask_subject_YMax[1][1] > 150:
+            self.deep_x = 0
+            if self.y_deep_left_sum < self.y_deep_right_sum:
+                self.line_at_right = False
+                self.line_at_left  = True
+            elif self.y_deep_left_sum >= self.y_deep_right_sum:
+                self.line_at_right = True
+                self.line_at_left  = False
+        else:    
+            self.deep_x = x_center - x_boundary
+        # rospy.loginfo(f'right_weight_matrix =  {right_weight_matrix}')
+        # rospy.loginfo(f'left_weight_matrix =  {left_weight_matrix}')
+        # rospy.loginfo(f'filter =  {filter_matrix}')
+        # rospy.loginfo(f'xb =  {x_boundary}')
+        # rospy.loginfo(f'xc =  {x_center}')
+        # rospy.loginfo(f'right_weight =  {right_weight}')
+        # rospy.loginfo(f'left_weight =  {left_weight}')
+        # rospy.loginfo(f'x_center_cnt =  {x_center_cnt}')
+        # rospy.loginfo(f'x_center_num =  {x_center_num}')
+        # rospy.loginfo(f'deep_y =  {self.deep_y}')
+        # rospy.loginfo(f'deep_x =  {self.deep_x}')
 
 class Obs:
     def __init__(self):
@@ -721,7 +744,8 @@ class Obs:
                     self.walk.move('max_speed')
                     
         if not send.is_start :
-            self.fuzzy.Fuzzy()
+            # self.fuzzy.Fuzzy()
+            self.image.blue_obs_info()
             # self.fuzzy.Turn_value
             if self.start_walking :
                 send.sendContinuousValue(0,0,0,0,0)
@@ -734,6 +758,7 @@ class Obs:
 if __name__ == '__main__':
 
     try:
+        aaaa = rospy.init_node('talker', anonymous=True)
         walk = Walk()
         strategy = Obs()
         r = rospy.Rate(20)

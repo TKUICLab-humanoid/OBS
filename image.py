@@ -37,7 +37,7 @@ class Cv_Brige():
             self.cv_image = self.bridge.imgmsg_to_cv2(imgmsg, "bgr8")
         except CvBridgeError as e:
             print(e)
-        # self.cv_image = cv2.resize(self.cv_image, (320, 240))
+        self.cv_image = cv2.resize(self.cv_image, (320, 240))
         self.cv_image_2 = cv2.resize(self.cv_image, (32, 24))
         
 
@@ -47,7 +47,6 @@ class deep_calculate():
 
     def obs(self):
         # self.cvbrige.convert()
-        
         self.Deep_Matrix = []
         for compress_width in range(0, 32, 1):
             self.Deep_Matrix.append(0)
@@ -229,6 +228,7 @@ if __name__ == '__main__':
             if send.Web == True:
                 pass
             if send.Web == False:
+                Cv_Brige()
                 deep_calculate()
                 rospy.spin()
     except rospy.ROSInterruptException:
