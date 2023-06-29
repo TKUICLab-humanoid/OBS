@@ -18,8 +18,9 @@ class deep_calculate:
         self.Image_compress_sub = rospy.Subscriber("colormodel_image",Image, self.convert)			# 訂閱攝像頭資訊 #"/kidsize/camera/image_raw" #"compress_image" #"/usb_cam/image_raw"
         # rospy.spin()
         self.first_red = True
-        self.ya = 0
-        self.aa = 0
+        # self.ya = 0
+        # self.aa = 0
+        # self.ba = 0
         self.x1 = 0
         self.y1 = 0
         self.x2 = 1
@@ -31,6 +32,7 @@ class deep_calculate:
         self.degree = 0
         self.red_width = 0
         self.Y_Dy = 24
+        
 
     def convert(self, imgmsg):
         try:                             #影像通訊
@@ -79,6 +81,7 @@ class deep_calculate:
         self.Ymin = 0
         flag = True
         self.redsize = False
+        
 
         for compress_width in range(0, 32, 1):                      #黃線黃障分離＆紅門斜率計算
             self.a = True

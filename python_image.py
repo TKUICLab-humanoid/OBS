@@ -26,7 +26,7 @@ deep            = deep_calculate()
 send            = Sendmessage()
 CRMAX           = 65 #R_Max       65 55
 CRMIN           = 55 #R_MIn       55 45
-HEAD_HEIGHT     = 1550
+HEAD_HEIGHT     = 1436
 FOCUS_MATRIX    = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 10, 10, 10, 10, 10, 10, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]
 SMALL_FORWARD_X         = 1500                                                     
 SMALL_FORWARD_Y         = -400                                                     
@@ -128,6 +128,7 @@ class Walk():
         return 0
 
     def slope(self):
+        self.image.calculate()
 #-------------------fix to l---------------------
         if deep.slope > 0:          
             slopel_ranges = [(2,     0), 
@@ -158,7 +159,7 @@ class Walk():
                 if deep.slope >= slopel_range[0]:
                     return slopel_range[1]
             return 0 
-        if np.array(send.color_mask_subject_size[5])[0] == 0 :
+        if self.image.red_y_max == 0 :
             slope_angle = 0
         return slope_angle
 
@@ -202,37 +203,45 @@ class Normal_Obs_Parameter:
         self.blue_leftside              = 0
         self.blue_rightside             = 0
         self.red_y_max                  = 0
-        self.b_y_max                  = 0
+        self.b_y_max                    = 0
 
     def calculate(self):
-        if send.color_mask_subject_cnts[5] > 0:
-            self.red_y_max = np.array(send.color_mask_subject_YMax[5])[0]
-            if np.array(send.color_mask_subject_size[5])[0] > 5000:                      #有紅時計算紅門資訊
-                self.at_reddoor_flag = True
-                self.red_x_min = np.array(send.color_mask_subject_XMin[5])[0] 
-                self.red_x_max = np.array(send.color_mask_subject_XMax[5])[0]
-
-                if send.color_mask_subject_cnts[2] == 1:
-                    self.b_x_min = np.array(send.color_mask_subject_XMin[2])[0]
-                    self.b_x_max = np.array(send.color_mask_subject_XMax[2])[0]
-                elif send.color_mask_subject_cnts[2] == 2:
-                    xmax_one           = np.array(send.color_mask_subject_XMax[2])[0]
-                    xmin_one           = np.array(send.color_mask_subject_XMin[2])[0]
-                    xmin_two           = np.array(send.color_mask_subject_XMin[2])[1]
-                    xmax_two           = np.array(send.color_mask_subject_XMax[2])[1]
-                    self.blue_rightside     = max(xmin_one, xmin_two)
-                    self.blue_leftside      = min(xmax_one, xmax_two)
+        self.red_cnt        = send.color_mask_subject_cnts[5]
+        self.blue_cnt       = send.color_mask_subject_cnts[2]
+        self.yellow_cnt     = send.color_mask_subject_cnts[1]
+        self.red_y_max      = max(np.array(send.color_mask_subject_YMax[5])) if self.red_cnt > 0 else 0
+        if  self.red_y_max > 5000:                      #有紅時計算紅門資訊
+            self.at_reddoor_flag = True
+            self.red_x_min  = np.array(send.color_mask_subject_XMin[5])[0] if self.red_cnt >= 2 else 0
+            self.red_x_max  = np.array(send.color_mask_subject_XMax[5])[0] if self.red_cnt >= 2 else 0
         else : 
             self.at_reddoor_flag = False
-        if send.color_mask_subject_cnts[2] > 0:
-            self.b_y_max        = np.array(send.color_mask_subject_YMax[2])[0]
-    #----------------Blue_DeepMatrix-----------------
-        self.b_deep_y       = min(deep.ba)
-        self.b_deep_sum     = sum(deep.ba)
-        self.b_left_deep    = deep.ba[2]
-        self.b_right_deep   = deep.ba[30]
-        self.b_center_deep  = deep.ba[16]
-#----------------Y_line_DeepMatrix---------------
+
+#----------------Blue_OBS_info-----------------
+        # if send.color_mask_subject_cnts[2] == 1:
+        self.b_x_min            =     np.array(send.color_mask_subject_XMin[2]) if self.blue_cnt == 1 else 0
+        self.b_x_max            =     np.array(send.color_mask_subject_XMax[2]) if self.blue_cnt == 1 else 0
+        # elif send.color_mask_subject_cnts[2] == 2:
+        # xmax_one                = np.array(send.color_mask_subject_XMax[2])[0] if self.blue_cnt >= 2 else 0
+        # xmin_one                = np.array(send.color_mask_subject_XMin[2])[0] if self.blue_cnt >= 2 else 0
+        # xmin_two                = np.array(send.color_mask_subject_XMin[2])[1] if self.blue_cnt >= 2 else 0
+        # xmax_two                = np.array(send.color_mask_subject_XMax[2])[1] if self.blue_cnt >= 2 else 0
+        # self.blue_rightside     = max(xmin_one, xmin_two)
+        # self.blue_leftside      = min(xmax_one, xmax_two)
+        self.blue_rightside     = min(np.array(send.color_mask_subject_XMax[2])) if self.blue_cnt >= 2 else 0
+        self.blue_leftside      = max(np.array(send.color_mask_subject_XMin[2])) if self.blue_cnt >= 2 else 0
+        self.b_y_max            = max(np.array(send.color_mask_subject_YMax[2])) if self.blue_cnt >  0 else 0
+        self.first_blue_size    = max(np.array(send.color_mask_subject_size[2])) if self.blue_cnt >  1 else 0
+        self.b_deep_y           = min(np.array(deep.ba))
+        self.b_deep_sum         = sum(np.array(deep.ba))
+        self.b_left_deep        =     np.array(deep.ba)[2]
+        self.b_right_deep       =     np.array(deep.ba)[30]
+        self.b_center_deep      =     np.array(deep.ba)[16]
+#----------------Yellow_OBS_info---------------
+        self.yellow_Ymax        = max(np.array(send.color_mask_subject_YMax[1]))     if self.yellow_cnt > 0 else 0
+        self.first_yellow_Ymax  =     np.array(send.color_mask_subject_YMax[1])[0]   if self.yellow_cnt > 2 else self.yellow_Ymax
+        self.sec_yellow_Ymax    =     np.array(send.color_mask_subject_YMax[1])[1]   if self.yellow_cnt > 2 else 0
+        self.first_yellow_size  = max(np.array(send.color_mask_subject_size[1]))     if self.yellow_cnt > 1 else 0
         # self.y_deep_y           = min(deep.yellow_deep)
         # self.y_deep_sum         = sum(deep.yellow_deep)
         # self.y_left_deep        = deep.yellow_deep[2]
@@ -245,28 +254,25 @@ class Normal_Obs_Parameter:
         x_center_num           = sum(i for i, num in enumerate(FOCUS_MATRIX - np.array(deep.aa)) if num >= 0)#np.array=>[1,2]=>[1 2]，list(enumerate([1 2],[3 5]))=[(0,-2),(1,-3)] ##計算差值>=0的index(i)總和
         x_center_cnt           = np.sum(np.array(FOCUS_MATRIX) - np.array(deep.aa) >= 0) #有幾個相減後>0
         x_center               = (x_center_num / x_center_cnt) if x_center_cnt > 0 else 0
-        left_weight_matrix     = list(range(32))            #0~31
-        right_weight_matrix    = list(range(31,-1,-1))      #31~0
-        right_weight           = np.dot(filter_matrix,  right_weight_matrix)#內積
-        left_weight            = np.dot(filter_matrix,  left_weight_matrix)
-        self.deep_y                 = min(deep.aa)
-        self.deep_sum               = sum(deep.aa)
-        self.left_deep              = deep.aa[4]
-        self.right_deep             = deep.aa[28]
-        self.center_deep            = deep.aa[16]
+        left_weight_matrix     =    list(range(32))            #0~31
+        right_weight_matrix    =    list(range(31,-1,-1))      #31~0
+        right_weight           =    np.dot(filter_matrix,  right_weight_matrix)#內積
+        left_weight            =    np.dot(filter_matrix,  left_weight_matrix)
+        self.deep_y            = min(deep.aa)
+        self.deep_sum          = sum(deep.aa)
+        self.left_deep         =    np.array(deep.aa)[4]
+        self.right_deep        =    np.array(deep.aa)[28]
+        self.center_deep       =    np.array(deep.aa)[16]
         x_boundary             = 31 if left_weight > right_weight else 0
-        if send.color_mask_subject_cnts[1] > 0:
-            if send.color_mask_subject_cnts[1] == 2 and np.array(send.color_mask_subject_YMax[0])[1] > 150 and np.array(send.color_mask_subject_YMax[1])[1] > 150:
-                self.deep_x = 0
-                if self.y_deep_left_sum < self.y_deep_right_sum:
-                    self.line_at_right = False
-                    self.line_at_left  = True
-                elif self.y_deep_left_sum >= self.y_deep_right_sum:
-                    self.line_at_right = True
-                    self.line_at_left  = False
-            else:
-                self.deep_x = x_center - x_boundary
-        else:    
+        if  (self.yellow_cnt >= 2) and (self.first_yellow_Ymax > 150) and (self.sec_yellow_Ymax > 150):
+            self.deep_x = 0
+            if  self.y_deep_left_sum < self.y_deep_right_sum:
+                self.line_at_right = False
+                self.line_at_left  = True
+            elif self.y_deep_left_sum >= self.y_deep_right_sum:
+                self.line_at_right = True
+                self.line_at_left  = False
+        else:
             self.deep_x = x_center - x_boundary
         # rospy.loginfo(f'right_weight_matrix =  {right_weight_matrix}')
         # rospy.loginfo(f'left_weight_matrix =  {left_weight_matrix}')
@@ -302,6 +308,7 @@ class Obs:
             send.sendContinuousValue(0, 0 , 0 , 0 , 0)
         
         elif self.first_reddoor :
+            self.image.calculate()
             while self.image.red_y_max > 220 :
                 self.image.calculate()
                 self.walk.move('small_back')
@@ -311,6 +318,7 @@ class Obs:
                     self.walk.move('slope_fix')
                 self.need_fix_slope = False
             else :
+                self.image.calculate()
                 if (self.image.red_y_max < 210) and not self.redoor_distence :     #前後距離修正（值越大離門越近） 55/65   離紅門太遠時前進
                     self.walk.move('small_forward')
                 elif (self.image.red_y_max > 220) and not self.redoor_distence :   #前後距離修正（值越大離門越近） 55/65   離紅門太近時候退
@@ -343,7 +351,9 @@ class Obs:
                         self.walk.move('slope_right_translate') 
 
     def crawl(self):
+        self.image.calculate()
         while self.image.red_y_max < CRMIN or self.image.red_y_max > CRMAX or CRMIN <= self.image.red_y_max <= CRMAX:
+            self.image.calculate()
             if(self.image.red_y_max < CRMIN):            #前進修正
                 self.walk.slope()
                 self.walk.move('small_forward')
@@ -369,16 +379,14 @@ class Obs:
                     time.sleep(2.8)
                     # time.sleep(0.3)
                     crawl_cnt += 1
-                np.array(send.color_mask_subject_YMax[1])[0] = 0
-                self.b_y_max = 0
                 send.sendHeadMotor(1,2048,100)
                 send.sendHeadMotor(2,2500,100)
                 time.sleep(1)
                 while crawl_cnt < 8:                   #邊爬邊判斷是否離障礙物太近
                     #Image_Init()
-                    strategy.Normal_Obs_Parameter()
+                    self.image.calculate()
                     time.sleep(0.1)
-                    if (self.b_y_max >= 85 and np.array(send.color_mask_subject_size[2])[0] > 5000) or (np.array(send.color_mask_subject_YMax[1])[0] >= 60 and np.array(send.color_mask_subject_size[1])[0] > 5000):
+                    if (self.b_y_max >= 85 and self.image.first_blue_size > 5000) or (self.image.first_yellow_Ymax >= 60 and self.image.first_yellow_size > 5000):
                         break
                     else:
                         send.sendBodySector(456)
@@ -426,30 +434,30 @@ class Obs:
         self.walk.move('stay')
         if not self.image.line_at_right and not self.image.line_at_left: 
             time.sleep(1)
-            send.sendHeadMotor(1,1497,100)
-            send.sendHeadMotor(2,HEAD_HEIGHT,100)
-            send.sendHeadMotor(1,1497,100)
-            send.sendHeadMotor(2,HEAD_HEIGHT,100)
-            send.sendHeadMotor(1,1497,100)
-            send.sendHeadMotor(2,HEAD_HEIGHT,100)
+            send.sendHeadMotor(1,1550,100)
+            send.sendHeadMotor(2,HEAD_HEIGHT +160,100)
+            send.sendHeadMotor(1,1550,100)
+            send.sendHeadMotor(2,HEAD_HEIGHT +160,100)
+            send.sendHeadMotor(1,1550,100)
+            send.sendHeadMotor(2,HEAD_HEIGHT +160,100)
             time.sleep(1.8) 
             self.image.calculate()
             self.image.right_deep_sum = self.image.deep_sum
-            send.sendHeadMotor(1,2599,100)
-            send.sendHeadMotor(2,HEAD_HEIGHT,100)
-            send.sendHeadMotor(1,2599,100)
-            send.sendHeadMotor(2,HEAD_HEIGHT,100)
-            send.sendHeadMotor(1,2599,100)
-            send.sendHeadMotor(2,HEAD_HEIGHT,100)
+            send.sendHeadMotor(1,2546,100)
+            send.sendHeadMotor(2,HEAD_HEIGHT +160,100)
+            send.sendHeadMotor(1,2546,100)
+            send.sendHeadMotor(2,HEAD_HEIGHT +160,100)
+            send.sendHeadMotor(1,2546,100)
+            send.sendHeadMotor(2,HEAD_HEIGHT +160,100)
             time.sleep(1.8)
             self.image.calculate()
             self.left_deep_sum = self.image.deep_sum
             send.sendHeadMotor(1,2048,100)
-            send.sendHeadMotor(2,HEAD_HEIGHT+100,100)
+            send.sendHeadMotor(2,HEAD_HEIGHT+80,100)
             send.sendHeadMotor(1,2048,100)
-            send.sendHeadMotor(2,HEAD_HEIGHT+100,100)
+            send.sendHeadMotor(2,HEAD_HEIGHT+80,100)
             send.sendHeadMotor(1,2048,100)
-            send.sendHeadMotor(2,HEAD_HEIGHT+100,100)
+            send.sendHeadMotor(2,HEAD_HEIGHT+80,100)
             time.sleep(0.3)
         else :
             self.image.right_deep_sum = 0
@@ -537,8 +545,8 @@ class Obs:
         #=============================strategy=============================
             if not self.start_walking :                        #指撥後初始動作
                 #self.walk.imu_yaw_ini()
-                #self.preturn_left = False
-                self.preturn_left = True
+                self.preturn_left = False
+                # self.preturn_left = True
                 self.preturn_right = False
                 # self.preturn_right = True
                 send.sendHeadMotor(1,2048,100)
@@ -649,7 +657,10 @@ class Obs:
                     
         if not send.is_start :
             self.image.calculate()
-            print(self.image.b_y_max)
+            print("yellow",self.image.yellow_Ymax)
+            print("yellow 0ne = ",self.image.first_yellow_Ymax)
+            print("yellow two = ",self.image.sec_yellow_Ymax)
+            # print(deep.ba)
             if self.start_walking :
                 send.sendContinuousValue(0,0,0,0,0)
                 send.sendBodyAuto(0,0,0,0,1,0)
