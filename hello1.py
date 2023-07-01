@@ -23,6 +23,7 @@ class Sendmessage:
         self.single_motor_data_pub = rospy.Publisher("/package/SingleMotorData",SingleMotorData, queue_size=100)
         self.sensor_pub = rospy.Publisher("sensorset",SensorSet, queue_size=100)  
         self.paradata_pub = rospy.Publisher("/package/parameterdata",Parameter_message, queue_size=100)
+        self.parameter_pub = rospy.Publisher("/web/parameter_Topic",parameter, queue_size=100)
         self.continuous_back = rospy.Publisher("/walkinggait/Continuousback",Bool, queue_size=100)
         #初始化宣告
         self.Web = False

@@ -192,6 +192,7 @@ class deep_calculate:
                     self.Deep_Matrix[compress_width] = 24
 
         self.aa = self.Deep_Matrix
+        self.filter_sum_aa = sum([element for element in np.array(self.aa) if element != 24])
         # cv2.imshow("Image_show",cv_image)
         cv2.waitKey(1)
 #----------------------------------------------------------------------#黃色深度
