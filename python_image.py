@@ -3,10 +3,8 @@
 # from turtle import st
 import rospy
 import numpy as np
-# from hello1 import Sendmessage
-import sys
-sys.path.append('/home/iclab/Desktop/kid_hurocup/src/strategy')
-from Python_API import Sendmessage
+
+from hello1 import Sendmessage
 from ddd import deep_calculate
 # from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
@@ -26,7 +24,7 @@ deep            = deep_calculate()
 send            = Sendmessage()
 CRMAX           = 65 #R_Max       65 55
 CRMIN           = 55 #R_MIn       55 45
-HEAD_HEIGHT     = 1550
+HEAD_HEIGHT     = 1436
 FOCUS_MATRIX    = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 10, 10, 10, 10, 10, 10, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]
 SMALL_FORWARD_X         = 1500                                                     
 SMALL_FORWARD_Y         = -0                                                     
@@ -218,19 +216,8 @@ class Normal_Obs_Parameter:
         print(self.red_cnt)
         if send.color_mask_subject_size[5][0] > 5000:                      #有紅時計算紅門資訊
             self.at_reddoor_flag = True
-            self.red_x_min = send.color_mask_subject_XMin[5][0] 
-            self.red_x_max = send.color_mask_subject_XMax[5][0]
-
-            if send.color_mask_subject_cnts[2] == 1:
-                self.b_x_min = send.color_mask_subject_XMin[2][0]
-                self.b_x_max = send.color_mask_subject_XMax[2][0]
-            elif send.color_mask_subject_cnts[2] == 2:
-                xmax_one           = send.color_mask_subject_XMax[2][0]
-                xmin_one           = send.color_mask_subject_XMin[2][0]
-                xmin_two           = send.color_mask_subject_XMin[2][1]
-                xmax_two           = send.color_mask_subject_XMax[2][1]
-                self.blue_rightside     = max(xmin_one, xmin_two)
-                self.blue_leftside      = min(xmax_one, xmax_two)
+            self.red_x_min  = np.array(send.color_mask_subject_XMin[5])[0] if self.red_cnt >= 2 else 0
+            self.red_x_max  = np.array(send.color_mask_subject_XMax[5])[0] if self.red_cnt >= 2 else 0
         else : 
             self.at_reddoor_flag = False
 
