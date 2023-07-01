@@ -3,10 +3,10 @@
 # from turtle import st
 import rospy
 import numpy as np
-# from hello1 import Sendmessage
-import sys
-sys.path.append('/home/iclab/Desktop/adult_hurocup/src/strategy')
-from Python_API import Sendmessage
+from hello1 import Sendmessage
+# import sys
+# sys.path.append('/home/iclab/Desktop/adult_hurocup/src/strategy')
+# from Python_API import Sendmessage
 from ddd import Deep_Calculate
 # from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
