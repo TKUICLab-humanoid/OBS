@@ -24,22 +24,22 @@ import math
 
 deep            = deep_calculate()
 send            = Sendmessage()
-CRMAX           = 35 #R_Max       65 55
-CRMIN           = 45 #R_MIn       55 45
+CRMAX           = 25 #R_Max       65 55 more far more small
+CRMIN           = 35 #R_MIn       55 45
 HEAD_HEIGHT     = 1550
-FOCUS_MATRIX    = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 10, 11, 11, 11, 11, 10, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]
+FOCUS_MATRIX    = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 10, 10, 11, 11, 10, 10, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]
 MAX_FORWARD_X         = 2500                                                     
-MAX_FORWARD_Y         = -200                                                        
-MAX_FORWARD_THETA     =  0                                                       
-TURN_RIGHT_X            = -400                                                     
-TURN_RIGHT_Y            =  1200                                                     
-TURN_RIGHT_THETA        =   -4  
-IMU_RIGHT_X            = -300 #angle : 5
-IMU_RIGHT_Y            =   800                                                   
-TURN_LEFT_X             =  -100                                                     
-TURN_LEFT_Y             =  -800                                                     
+MAX_FORWARD_Y         = -100                                                            
+MAX_FORWARD_THETA     =  -1                                                       
+TURN_RIGHT_X            = -200                                                     
+TURN_RIGHT_Y            =  800                                                     
+TURN_RIGHT_THETA        =   -5  
+IMU_RIGHT_X            = 200 #angle : 5
+IMU_RIGHT_Y            =   700                                                   
+TURN_LEFT_X             =  400                                                     
+TURN_LEFT_Y             =  -500                                                     
 TURN_LEFT_THETA         =    5   
-IMU_LEFT_X            = -200 #angle : 5
+IMU_LEFT_X            = 300 #angle : 5
 IMU_LEFT_Y            =   -600                                                
 
 class Walk():
@@ -50,19 +50,19 @@ class Walk():
         self.image.calculate()
         imu_flag = self.get_imu() < 0     #判斷是否<0
         slope_x_fix             = 100 if self.image.red_y_max < 60 else -100 if self.image.red_y_max > 70 else 0            #if y < 150則x=100,elif y > 200則x = -100,else x = 0         
-        right_straight_y        = -200 if self.image.center_deep <= 6  else 300 if self.image.center_deep >= 7 else 0                  
-        left_straight_y         = -200 if self.image.center_deep <= 7  else 300 if self.image.center_deep >= 8 else 0                  
+        right_straight_y        = -200 if self.image.center_deep <= 9  else 600 if self.image.center_deep >= 10 else 0                  
+        left_straight_y         = -200 if self.image.center_deep <= 9  else 600 if self.image.center_deep >= 10 else 0                  
         straight_90degree_fix   = -2 if ((imu_flag and abs(self.get_imu()) < 85) or (not imu_flag and abs(self.get_imu()) > 85)) else 2   #如果(flag=true且imu<87)則=2,或(flag=false且imu>-87)就=-2          
         turn_x                  =   self.straight_speed()*2 if self.image.yellow_center_deep < 12 else self.straight_speed()  
         turn_direction_x        =   TURN_RIGHT_X if self.get_imu() > 0 else TURN_LEFT_X  # fix_angle for turn_x
-        actions             = { 'stay'                  : {'x':  0,                 'y':   0,               'theta': -1 },
+        actions             = { 'stay'                  : {'x':  200,                 'y':   400,               'theta': -1 },
                                 'max_speed'             : {'x':  MAX_FORWARD_X,     'y':   MAX_FORWARD_Y,   'theta': MAX_FORWARD_THETA },
-                                'small_back'            : {'x': -1500,              'y':  100,             'theta': 0 },
-                                'small_forward'         : {'x':  1500,              'y':  0,                'theta': -1 },
+                                'small_back'            : {'x': -1500,              'y':  200,             'theta': -1 },
+                                'small_forward'         : {'x':  1500,              'y':  200,                'theta': 0 },
                                 'imu_fix'               : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.imu_angle()  },
-                                'slope_fix'             : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.slope()      },
-                                'slope_right_translate' : {'x': -100 + slope_x_fix, 'y': -1000,            'theta': -2 + self.slope()      },
-                                'slope_left_translate'  : {'x': 0 + slope_x_fix, 'y':  900,      'theta': 0 + self.slope()      },
+                                'slope_fix'             : {'x': IMU_RIGHT_X-200 if self.get_imu() > 0 else IMU_LEFT_X-200,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.slope()      },
+                                'slope_right_translate' : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -3 + self.slope()      },
+                                'slope_left_translate'  : {'x': 200 + slope_x_fix, 'y':  700,      'theta': 0 + self.slope()      },
                                 'turn_right'            : {'x': TURN_RIGHT_X,       'y':  TURN_RIGHT_Y,     'theta': TURN_RIGHT_THETA  },
                                 'turn_right_back'       : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y,            'theta': TURN_LEFT_THETA                 },#.
                                 'turn_left'             : {'x': TURN_LEFT_X,        'y':  TURN_LEFT_Y,      'theta': TURN_LEFT_THETA   },
@@ -111,7 +111,7 @@ class Walk():
     def imu_angle(self):      
         imu_ranges = [  (90,  -4), 
                         (60,  -4), 
-                        (45,  -4), 
+                        (45,  -3), 
                         (20,  -3), 
                         (10,  -2), 
                         (5,   -1), 
@@ -147,13 +147,13 @@ class Walk():
             return 0
 #--------------------fix to r--------------------
         elif deep.slope <= 0:     
-            slopel_ranges = [(-2,      -4), 
-                             (-1,     -4), 
-                             (-0.3,   -4), 
-                             (-0.2,   -4), 
-                             (-0.15,  -3), 
-                             (-0.1,   -3), 
-                             (-0.06,  -3), 
+            slopel_ranges = [(-2,      -3), 
+                             (-1,     -3), 
+                             (-0.3,   -3), 
+                             (-0.2,   -3), 
+                             (-0.15,  -2), 
+                             (-0.1,   -2), 
+                             (-0.06,  -2), 
                              (-0.03,  -2), 
                              (0,       -1)]
             for slopel_range in slopel_ranges:
@@ -320,46 +320,46 @@ class Obs:
             time.sleep(0.2)
             send.sendContinuousValue(0, 0 , 0 , 0 , 0)
         
-        elif self.first_reddoor :
-            while self.image.red_y_max > 180 :
-                self.image.calculate()
+        # elif self.first_reddoor :
+        while self.image.red_y_max > 150 :
+            self.image.calculate()
+            self.walk.move('small_back')
+
+        if abs(deep.slope) > 0.03 and self.need_fix_slope:                     #不平行紅門時修斜率
+            while abs(deep.slope) > 0.03 :
+                self.walk.move('slope_fix')
+            self.need_fix_slope = False
+        else :
+            if (self.image.red_y_max < 45) and not self.redoor_distence :     #前後距離修正（值越大離門越近） 55/65   離紅門太遠時前進
+                self.walk.move('small_forward')
+            elif (self.image.red_y_max > 45) and not self.redoor_distence :   #前後距離修正（值越大離門越近） 55/65   離紅門太近時候退
                 self.walk.move('small_back')
-
-            if abs(deep.slope) > 0.03 and self.need_fix_slope:                     #不平行紅門時修斜率
-                while abs(deep.slope) > 0.03 :
-                    self.walk.move('slope_fix')
-                self.need_fix_slope = False
-            else :
-                if (self.image.red_y_max < 60) and not self.redoor_distence :     #前後距離修正（值越大離門越近） 55/65   離紅門太遠時前進
-                    self.walk.move('small_forward')
-                elif (self.image.red_y_max > 60) and not self.redoor_distence :   #前後距離修正（值越大離門越近） 55/65   離紅門太近時候退
-                    self.walk.move('small_back')
-                else :                          #判斷須左移或右移 都不需則進爬
-                    self.redoor_distence = True
-                    if self.image.red_x_min < 2 and self.image.red_x_max > 315 :
-                        if (self.image.b_x_max == 0 and self.image.b_x_min == 0 and self.image.blue_leftside <= 40 and self.blue_at_right ) or (self.image.b_x_max == 0 and self.image.b_x_min == 0 and self.image.blue_rightside > 260 and self.blue_at_left ) or (self.image.b_x_max == 0 and self.image.b_x_min == 0 and self.image.blue_rightside == 0 and self.image.blue_leftside == 0):
-                            while abs(deep.slope) > 0.03 :
-                                self.walk.move('slope_fix')
-                            self.crawl()
-                        elif (self.image.b_x_min < 2 and self.image.b_x_max > 60):
-                            self.blue_at_right = True
-                            self.blue_at_left = False
-                            self.walk.move('slope_right_translate')
-                        elif (self.image.b_x_max > 315 and self.image.b_x_min < 265):
-                            self.blue_at_left = True
-                            self.blue_at_right = False
-                            self.walk.move('slope_left_translate')
-                        else :
-                            if self.blue_at_right :
-                                self.walk.move('slope_right_translate')
-                            elif self.blue_at_left :
-                                self.walk.move('slope_left_translate')
-
-                    elif self.image.red_x_min < 2 and self.image.red_x_max < 315 : 
+            else :                          #判斷須左移或右移 都不需則進爬
+                self.redoor_distence = True
+                if self.image.red_x_min < 2 and self.image.red_x_max > 315 :
+                    if (self.image.b_x_max == 0 and self.image.b_x_min == 0 and self.image.blue_leftside <= 40 and self.blue_at_right ) or (self.image.b_x_max == 0 and self.image.b_x_min == 0 and self.image.blue_rightside > 260 and self.blue_at_left ) or (self.image.b_x_max == 0 and self.image.b_x_min == 0 and self.image.blue_rightside == 0 and self.image.blue_leftside == 0):
+                        while abs(deep.slope) > 0.03 :
+                            self.walk.move('slope_fix')
+                        self.crawl()
+                    elif (self.image.b_x_min < 2 and self.image.b_x_max > 60):
+                        self.blue_at_right = True
+                        self.blue_at_left = False
+                        self.walk.move('slope_right_translate')
+                    elif (self.image.b_x_max > 315 and self.image.b_x_min < 265):
+                        self.blue_at_left = True
+                        self.blue_at_right = False
                         self.walk.move('slope_left_translate')
+                    else :
+                        if self.blue_at_right :
+                            self.walk.move('slope_right_translate')
+                        elif self.blue_at_left :
+                            self.walk.move('slope_left_translate')
 
-                    elif self.image.red_x_min > 2 and self.image.red_x_max > 315 : 
-                        self.walk.move('slope_right_translate') 
+                elif self.image.red_x_min < 2 and self.image.red_x_max < 315 : 
+                    self.walk.move('slope_left_translate')
+
+                elif self.image.red_x_min > 2 and self.image.red_x_max > 315 : 
+                    self.walk.move('slope_right_translate') 
 # if (self.image.red_x_max == 0 and self.image.red_x_min == 0 and self.image.blue_leftside <= 28 and self.blue_at_right ) or 
 # (self.image.b_x_max == 0 and self.image.b_x_min == 0 and self.image.blue_rightside > 292 and self.blue_at_left ) or 
 # (self.image.b_x_max == 0 and self.image.b_x_min == 0 and self.image.blue_rightside == 0 and self.image.blue_leftside == 0):
@@ -403,7 +403,7 @@ class Obs:
         send.sendHeadMotor(1,2048,100)
         send.sendHeadMotor(2,2500,100)
         time.sleep(1)
-        while self.crawl_cnt < 8:                   #邊爬邊判斷是否離障礙物太近
+        while self.crawl_cnt < 7:                   #邊爬邊判斷是否離障礙物太近
             #Image_Init()
             # strategy.Normal_Obs_Parameter()
             self.image.calculate()
@@ -486,16 +486,16 @@ class Obs:
             self.left_deep_sum = 0
         if (self.right_deep_sum > self.left_deep_sum) or self.image.line_at_left:        #右轉
             self.image.calculate()
-            if (self.image.b_center_deep > 8):                   #靠近障礙物
-                while ( self.image.b_center_deep > 8 ):
+            if (self.image.b_center_deep > 10):                   #靠近障礙物
+                while ( self.image.b_center_deep > 10):
                     self.image.calculate()
                     self.walk.move('small_forward')
-            elif ( self.image.b_center_deep < 7 ):                #遠離障礙物
-                while ( self.image.b_center_deep < 7 ):
+            elif ( self.image.b_center_deep < 9):                #遠離障礙物
+                while ( self.image.b_center_deep < 9 ):
                     self.image.calculate()
                     self.walk.move('small_back')
-            if abs(self.walk.get_imu()) < 60:                   #靠近後右旋轉至90度
-                while abs(self.walk.get_imu()) < 60:
+            if abs(self.walk.get_imu()) < 75:                   #靠近後右旋轉至90度
+                while abs(self.walk.get_imu()) < 75:
                     self.walk.move('turn_right')
             send.sendHeadMotor(1,2647,100)
             send.sendHeadMotor(2,1550,100) 
@@ -519,21 +519,21 @@ class Obs:
             send.sendHeadMotor(2,HEAD_HEIGHT,100) 
             time.sleep(0.5)
             self.image.calculate()
-            if abs(self.walk.get_imu()) > 35:             #右轉回正
-                while abs(walk.get_imu()) > 35:
+            if abs(self.walk.get_imu()) > 40:             #右轉回正
+                while abs(walk.get_imu()) > 40:
                     self.walk.move('turn_right_back')
         elif (self.left_deep_sum > self.right_deep_sum) or self.image.line_at_right:         #左轉
             self.image.calculate()
-            if (self.image.b_center_deep > 7):                   #靠近障礙物
-                while ( self.image.b_center_deep > 7 ):
+            if (self.image.b_center_deep > 10):                   #靠近障礙物
+                while ( self.image.b_center_deep > 10 ):
                     self.image.calculate()
                     self.walk.move('small_forward') 
-            elif ( self.image.b_center_deep < 6 ):                #遠離障礙物
-                while ( self.image.b_center_deep < 6 ):
+            elif ( self.image.b_center_deep < 9 ):                #遠離障礙物
+                while ( self.image.b_center_deep < 9 ):
                     self.image.calculate()
                     self.walk.move('small_back') 
-            if abs(self.walk.get_imu()) < 60:                           #靠近後轉至90度
-                while abs(self.walk.get_imu()) < 60:
+            if abs(self.walk.get_imu()) < 75:                           #靠近後轉至90度
+                while abs(self.walk.get_imu()) < 75:
                     self.walk.move('turn_left')
             send.sendHeadMotor(1,1447,100)
             send.sendHeadMotor(2,1550,100) 
@@ -557,8 +557,8 @@ class Obs:
             time.sleep(0.5)
             self.image.calculate()
             #----看到黃線
-            if abs(self.walk.get_imu()) > 35:               #左轉回正
-                while abs(self.walk.get_imu()) > 35:    
+            if abs(self.walk.get_imu()) > 40:               #左轉回正
+                while abs(self.walk.get_imu()) > 40:    
                     self.walk.move('turn_left_back')
 
     def main(self):
@@ -571,20 +571,24 @@ class Obs:
                 self.walk.imu_yaw_ini()
                 self.preturn_left = False
                 # self.preturn_left = True
-                self.preturn_right = False
-                # self.preturn_right = True
+                # self.preturn_right = False
+                self.preturn_right = True
+                send.sendHeadMotor(1,2048,100)
+                send.sendHeadMotor(2,HEAD_HEIGHT  ,100)
+                send.sendHeadMotor(1,2048,100)
+                send.sendHeadMotor(2,HEAD_HEIGHT  ,100)
                 send.sendHeadMotor(1,2048,100)
                 send.sendHeadMotor(2,HEAD_HEIGHT  ,100)
                 time.sleep(0.5)
                 send.sendBodyAuto(0,0,0,0,1,0)
                 self.start_walking = True
             if self.preturn_left:                      #指定初始向左旋轉
-                while abs(self.walk.get_imu()) < 15:
+                while abs(self.walk.get_imu()) < 25:
                     self.walk.move('preturn_left')
                     rospy.loginfo(f'imu =  {self.walk.get_imu()}')
                 self.preturn_left = False
             elif self.preturn_right:                        #指定初始向右旋轉 
-                while abs(self.walk.get_imu()) < 15:
+                while abs(self.walk.get_imu()) < 25:
                     self.walk.move('preturn_right')
                     rospy.loginfo(f'imu =  {self.walk.get_imu()}')
                 self.preturn_right = False
@@ -619,7 +623,7 @@ class Obs:
                         #         if self.image.b_y_max > 0 :
                         #             break
                         #     self.need_imu_back = False
-                        if ((abs(self.walk.get_imu()) > 5) and (not self.imu_ok)) and (self.image.deep_x >= 7) :       #IMU修正
+                        if ((abs(self.walk.get_imu()) > 5) and (not self.imu_ok)) and (self.image.deep_x >= 8) :       #IMU修正
                             self.walk.move('imu_fix')
                         else:
                             self.walk.move('turn_right')
@@ -635,7 +639,7 @@ class Obs:
                         #         if self.image.b_y_max > 0 :
                         #             break
                         #     self.need_imu_back = False
-                        if ((abs(self.walk.get_imu()) > 5) and (not self.imu_ok)) and (self.image.deep_x <= -7) :      #IMU修正
+                        if ((abs(self.walk.get_imu()) > 5) and (not self.imu_ok)) and (self.image.deep_x <= -8) :      #IMU修正
                             self.walk.move('imu_fix')
                         else:
                             self.walk.move('turn_left')
@@ -650,11 +654,11 @@ class Obs:
                                 if self.image.b_y_max > 0 :
                                     break
                             self.need_imu_back = False
-                        if ( abs(self.walk.get_imu()) > 3) and (not self.imu_ok) :                   #IMU修正
-                            while ( abs(self.walk.get_imu()) > 3) and (not self.imu_ok) :
+                        if ( abs(self.walk.get_imu()) > 5) and (not self.imu_ok) :                   #IMU修正
+                            while ( abs(self.walk.get_imu()) > 5) and (not self.imu_ok) :
                                 self.walk.move('imu_fix')
                                 self.image.calculate()
-                                if abs(self.walk.get_imu()) < 3:        #轉頭策略
+                                if abs(self.walk.get_imu()) < 10:        #轉頭策略
                                     if ( self.image.b_left_deep < 15 ) and ( self.image.b_right_deep < 15 ) and ( self.image.b_center_deep < 15 ):
                                         self.turn_head()
                                         self.imu_ok = True
@@ -669,7 +673,7 @@ class Obs:
                                         self.imu_ok = True
                                 else:
                                     pass
-                        elif (abs(self.walk.get_imu()) < 3) and (self.imu_ok):
+                        elif (abs(self.walk.get_imu()) < 10) and (self.imu_ok):
                             if ( self.image.b_left_deep < 15 ) and ( self.image.b_right_deep < 15 ) and ( self.image.b_center_deep < 15 ):
                                 self.turn_head()
                                 self.imu_ok = True
