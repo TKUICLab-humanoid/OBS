@@ -21,6 +21,7 @@ class Deep_Calculate:
         self.first_red = True
         self.yellow_deep = 0
         self.aa = 0
+        self.ya = []
         self.x1 = 0
         self.y1 = 0
         self.x2 = 1
