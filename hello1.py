@@ -169,10 +169,6 @@ class Sendmessage:
             walkparameter.X_Swing_COM = right_z_shift
             walkparameter.Y_Swing_Shift = stand_height
             walkparameter.BASE_LIFT_Z = base_lift_z
-            walkparameter.rightfoot_shift_z = right_z_shift
-            walkparameter.com_y_swing = com_y_shift
-            walkparameter.now_stand_height = stand_height
-            walkparameter.now_com_height = com_height
             walkparameter.Stand_Balance = False
 
             self.parameter_pub.publish(walkparameter)
@@ -189,10 +185,6 @@ class Sendmessage:
             parasend2FPGA.X_Swing_COM = right_z_shift
             parasend2FPGA.Y_Swing_Shift = stand_height
             parasend2FPGA.BASE_LIFT_Z = base_lift_z
-            parasend2FPGA.rightfoot_shift_z = right_z_shift
-            parasend2FPGA.com_y_swing = com_y_shift
-            parasend2FPGA.now_stand_height = stand_height
-            parasend2FPGA.now_com_height = com_height
             parasend2FPGA.Stand_Balance = False
 
             self.paradata_pub.publish(parasend2FPGA)
@@ -288,7 +280,7 @@ class Sendmessage:
 
     def DIOackFunction(self,msg):
     #取得當前DIO值
-        if msg.data & 0x10:
+        if msg.data & 0x20:
             self.is_start = True
         else:
             self.is_start = False
