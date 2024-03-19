@@ -31,15 +31,15 @@ TURN_RIGHT_X            = -400
 TURN_RIGHT_Y            =  1000                                                     
 TURN_RIGHT_THETA        =   -4  
 #=========================================== 
-IMU_RIGHT_X            =  -600 
+IMU_RIGHT_X            =  -400 
 IMU_RIGHT_Y            =  1000           
 #===========================================                                         
 TURN_LEFT_X             =  0                                                    
-TURN_LEFT_Y             =  -400                                                     
+TURN_LEFT_Y             =  -600                                                     
 TURN_LEFT_THETA         =    5  
 #=========================================== 
-IMU_LEFT_X            =   -200 
-IMU_LEFT_Y            =   -700   
+IMU_LEFT_X            =   0 
+IMU_LEFT_Y            =   -600   
 #===========================================                                             
 
 class Walk(): #步態、轉彎、直走速度、IMU
@@ -55,13 +55,13 @@ class Walk(): #步態、轉彎、直走速度、IMU
         straight_90degree_fix   = -2 if ((imu_flag and abs(self.get_imu()) < 90) or (not imu_flag and abs(self.get_imu()) > 90)) else 2   #turn head 保持90度直走         
         turn_x                  =   self.straight_speed()*2 if self.image.yellow_center_deep < 12 else self.straight_speed()  
         turn_direction_x        =   TURN_RIGHT_X if self.get_imu() > 0 else TURN_LEFT_X  # fix_angle for turn_x
-        actions             = { 'stay'                  : {'x':  -100,                 'y':  400,               'theta': 0 },
+        actions             = { 'stay'                  : {'x':  -100,                 'y':  300,               'theta': 0 },
                                 'max_speed'             : {'x':  MAX_FORWARD_X,     'y':   MAX_FORWARD_Y,   'theta': MAX_FORWARD_THETA },
                                 'small_back'            : {'x': -1500,              'y':  500,             'theta': 0 },
                                 'small_forward'         : {'x':  1500,              'y':  300,                'theta': 0 },
                                 'imu_fix'               : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.imu_angle()  },
                                 # 'slope_fix'             : {'x': IMU_RIGHT_X-200 if self.get_imu() > 0 else IMU_LEFT_X-200,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.slope()      },
-                                'slope_fix'             : {'x': -300 if deep.slope > 0 else -400,                   'y':    -200 if deep.slope > 0 else 900,           'theta': self.slope()},
+                                'slope_fix'             : {'x': -300 if deep.slope > 0 else -400,                   'y':    -500 if deep.slope > 0 else 900,           'theta': self.slope()},
                                 'imu_right_translate'   : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -2 + self.imu_angle()      },
                                 'imu_left_translate'    : {'x':  100+ slope_x_fix, 'y':  1500,      'theta': 1 + self.imu_angle()      },
                                 'slope_right_translate' : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -2 + self.slope()      },
@@ -142,8 +142,8 @@ class Walk(): #步態、轉彎、直走速度、IMU
             slopel_ranges = [(1,     3), 
                              (0.5,   2), 
                              (0.3,   2), 
-                             (0.2,   2), 
-                             (0.15,  2), 
+                             (0.2,   1), 
+                             (0.15,  1), 
                              (0.1,   1), 
                              (0.06,  1), 
                              (0.03,  1), 
@@ -157,8 +157,8 @@ class Walk(): #步態、轉彎、直走速度、IMU
             slopel_ranges = [(-1,     -3), 
                              (-0.5,   -2), 
                              (-0.3,   -2), 
-                             (-0.2,   -2), 
-                             (-0.15,  -2), 
+                             (-0.2,   -1), 
+                             (-0.15,  -1), 
                              (-0.1,   -1), 
                              (-0.06,  -1), 
                              (-0.03,  -1), 
@@ -386,14 +386,14 @@ class Obs: #各種避障動作
                 elif (send.color_mask_subject_cnts[2] == 2):
                     # if(send.color_mask_subject_XMax[2][0]<60 and send.color_mask_subject_XMin[2][1]<295):
                     self.image.calculate()
-                    if self.image.blue_rightside < 260 and self.image.blue_leftside <60:
+                    if self.image.blue_rightside < 266 and self.image.blue_leftside <56:
                         self.image.calculate()
                         self.blue_at_left = True
                         self.blue_at_right = False
                         self.walk.move('slope_left_translate')
                         print("555555555555555")
                     # elif(send.color_mask_subject_XMax[2][0]>20 and send.color_mask_subject_XMin[2][1]>265):
-                    elif self.image.blue_rightside > 260 and self.image.blue_leftside > 60:
+                    elif self.image.blue_rightside > 266 and self.image.blue_leftside > 56:
                         self.image.calculate()
                         self.blue_at_left = True
                         self.blue_at_right = False
@@ -519,7 +519,7 @@ class Obs: #各種避障動作
         send.sendHeadMotor(1,2048,100)
         send.sendHeadMotor(2,2400,100) #頭往上抬
         time.sleep(1)
-        while self.crawl_cnt < 7:   #cnt3數到7(4次)
+        while self.crawl_cnt < 8:   #cnt3數到7(4次)
             send.sendBodySector(2222)
             time.sleep(3.5)
             self.crawl_cnt += 1               
@@ -527,7 +527,7 @@ class Obs: #各種避障動作
             # print("blue_ymax   = ",self.b_y_max) #change
             if (send.color_mask_subject_YMax[2][0] >= 35 and send.color_mask_subject_size[2][0] > 5000) or (send.color_mask_subject_YMax[1][0] >= 35 and send.color_mask_subject_size[1][0] > 5000): #爬到黃色或藍色夠近或夠大
                 break
-        if self.crawl_cnt > 6 :
+        if self.crawl_cnt > 7 :
             send.sendBodySector(3333)
             time.sleep(11)
             send.sendBodySector(29)    
@@ -535,8 +535,8 @@ class Obs: #各種避障動作
             send.sendHeadMotor(1,2048,100)
             send.sendHeadMotor(2,HEAD_HEIGHT,100)
             time.sleep(1)
-            # send.sendBodySector(111)
-            # time.sleep(3.5)
+            send.sendBodySector(111)
+            time.sleep(3.5)
             send.sendBodySector(1218)
             time.sleep(0.5)
             send.sendBodyAuto(0,0,0,0,1,0) 
