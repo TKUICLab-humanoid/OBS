@@ -23,23 +23,23 @@ CRMIN           = 63 # red door 前後修正3 值越大離門越近 #68
 HEAD_HEIGHT     = 1550 #頭高，位置為馬達目標刻度，2048為正朝前方
 FOCUS_MATRIX    = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 10, 10, 11, 11, 10, 10, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]
 #=========================================== 
-MAX_FORWARD_X         = 3000                                                     
+MAX_FORWARD_X         = 2500                                                     
 MAX_FORWARD_Y         = 200                                                            
 MAX_FORWARD_THETA     = 0                                     
 #===========================================                 
-TURN_RIGHT_X            = 500                                                     
-TURN_RIGHT_Y            = 700                                                     
+TURN_RIGHT_X            = -400                                                     
+TURN_RIGHT_Y            = 900                                                     
 TURN_RIGHT_THETA        =   -4  
 #=========================================== 
-IMU_RIGHT_X            =  300 
+IMU_RIGHT_X            =  -400 
 IMU_RIGHT_Y            =  800           
 #===========================================                                         
-TURN_LEFT_X             =  200                                                    
-TURN_LEFT_Y             =  -1000                                                     
+TURN_LEFT_X             =  -100                                                    
+TURN_LEFT_Y             =  -700                                                     
 TURN_LEFT_THETA         =    5  
 #=========================================== 
-IMU_LEFT_X            =   200 
-IMU_LEFT_Y            =   -1000   
+IMU_LEFT_X            =   -400 
+IMU_LEFT_Y            =   -700   
 #===========================================                                             
 
 class Walk(): #步態、轉彎、直走速度、IMU
@@ -49,23 +49,23 @@ class Walk(): #步態、轉彎、直走速度、IMU
     def move(self, action_id, z=0, sensor= 0):
         self.image.calculate()
         imu_flag = self.get_imu() < 0     #判斷是否<0 
-        slope_x_fix             = 500 if self.image.red_y_max < 35 else -500 if self.image.red_y_max > 45 else 0            #red door 平移 前後修正 值越大越遠
+        slope_x_fix             = 500 if self.image.red_y_max < 20 else -100 if self.image.red_y_max > 45 else 0            #red door 平移 前後修正 值越大越遠
         right_straight_y        = -200 if self.image.center_deep <= 3  else 500 if self.image.center_deep >= 7 else 0     #turn head 右轉 直走 值越大越遠             
         left_straight_y         = -200 if self.image.center_deep <= 4  else 500 if self.image.center_deep >= 9 else 0     #turn head 左轉 直走 值越大越遠
         straight_90degree_fix   = -2 if ((imu_flag and abs(self.get_imu()) < 90) or (not imu_flag and abs(self.get_imu()) > 90)) else 2   #turn head 保持90度直走         
         turn_x                  =   self.straight_speed()*2 if self.image.yellow_center_deep < 12 else self.straight_speed()  
         turn_direction_x        =   TURN_RIGHT_X if self.get_imu() > 0 else TURN_LEFT_X  # fix_angle for turn_x
-        actions             = { 'stay'                  : {'x':  500,                 'y':  200,               'theta': 0 },
+        actions             = { 'stay'                  : {'x':  -100,                 'y':  200,               'theta': 0 },
                                 'max_speed'             : {'x':  MAX_FORWARD_X,     'y':   MAX_FORWARD_Y,   'theta': MAX_FORWARD_THETA },
                                 'small_back'            : {'x': -1500,              'y':  300,             'theta': -1 },
                                 'small_forward'         : {'x':  1500,              'y':  300,                'theta': 0 },
                                 'imu_fix'               : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.imu_angle()  },
                                 # 'slope_fix'             : {'x': IMU_RIGHT_X-200 if self.get_imu() > 0 else IMU_LEFT_X-200,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.slope()      },
-                                'slope_fix'             : {'x': 100 if deep.slope > 0 else 500,                   'y':    -500 if deep.slope > 0 else 700,           'theta': self.slope()},
-                                'imu_right_translate'   : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -2 + self.imu_angle()      },
-                                'imu_left_translate'    : {'x':  100+ slope_x_fix, 'y':  1500,      'theta': 2 + self.imu_angle()      },
-                                'slope_right_translate' : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -2 + self.slope()      },
-                                'slope_left_translate'  : {'x':  100+ slope_x_fix, 'y':  1500,      'theta': 2 + self.slope()      },
+                                'slope_fix'             : {'x': 0 if deep.slope > 0 else -200,                   'y':    -500 if deep.slope > 0 else 700,           'theta': self.slope()},
+                                'imu_right_translate'   : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -1 + self.imu_angle()      },
+                                'imu_left_translate'    : {'x':  100+ slope_x_fix, 'y':  1500,      'theta': 1 + self.imu_angle()      },
+                                'slope_right_translate' : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -1 + self.slope()      },
+                                'slope_left_translate'  : {'x':  100+ slope_x_fix, 'y':  1500,      'theta': 1 + self.slope()      },
                                 'dx_turn'               : {'x': TURN_RIGHT_X if self.image.deep_x > 0 else TURN_LEFT_X,       'y':  TURN_RIGHT_Y if self.image.deep_x > 0 else TURN_LEFT_Y,     'theta': self.turn_angle()  },
                                 'turn_right_for_wall'   : {'x': TURN_RIGHT_X,       'y':  TURN_RIGHT_Y,     'theta': TURN_RIGHT_THETA  },
                                 'turn_right_back'       : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y,            'theta': TURN_LEFT_THETA                 },#.
@@ -386,14 +386,14 @@ class Obs: #各種避障動作
                 elif (send.color_mask_subject_cnts[2] == 2):
                     # if(send.color_mask_subject_XMax[2][0]<60 and send.color_mask_subject_XMin[2][1]<295):
                     self.image.calculate()
-                    if self.image.blue_rightside < 268 and self.image.blue_leftside <54:
+                    if self.image.blue_rightside < 260 and self.image.blue_leftside <45:
                         self.image.calculate()
                         self.blue_at_left = True
                         self.blue_at_right = False
                         self.walk.move('slope_left_translate')
                         print("555555555555555")
                     # elif(send.color_mask_subject_XMax[2][0]>20 and send.color_mask_subject_XMin[2][1]>265):
-                    elif self.image.blue_rightside > 268 and self.image.blue_leftside > 54:
+                    elif self.image.blue_rightside > 260 and self.image.blue_leftside > 45:
                         self.image.calculate()
                         self.blue_at_left = True
                         self.blue_at_right = False
@@ -428,9 +428,9 @@ class Obs: #各種避障動作
                 send.sendHeadMotor(2,HEAD_HEIGHT+150,180)
                 time.sleep(1.5) 
                 self.image.calculate()
-                if send.color_mask_subject_size[5][0] > 5000:
-                    self.door_at_right = True
-                    self.door_at_left = False
+                # if send.color_mask_subject_size[5][0] > 5000:
+                #     self.door_at_right = True
+                #     self.door_at_left = False
                 send.sendHeadMotor(1,2599,180) #頭往左轉
                 send.sendHeadMotor(2,HEAD_HEIGHT+150,180)
                 send.sendHeadMotor(1,2599,180)
@@ -439,9 +439,9 @@ class Obs: #各種避障動作
                 send.sendHeadMotor(2,HEAD_HEIGHT+150,180)
                 time.sleep(1.5)
                 self.image.calculate()
-                if send.color_mask_subject_size[5][0] > 5000:
-                    self.door_at_left = True
-                    self.door_at_right = False
+                # if send.color_mask_subject_size[5][0] > 5000:
+                #     self.door_at_left = True
+                #     self.door_at_right = False
                 send.sendHeadMotor(1,2048,180) #頭轉正
                 send.sendHeadMotor(2,HEAD_HEIGHT+150,180)
                 send.sendHeadMotor(1,2048,180)
@@ -532,6 +532,8 @@ class Obs: #各種避障動作
             time.sleep(11)
             send.sendBodySector(29)    
             time.sleep(0.5)
+            send.sendBodySector(19)
+            time.sleep(0.5)
             send.sendHeadMotor(1,2048,100)
             send.sendHeadMotor(2,HEAD_HEIGHT,100)
             time.sleep(1)
@@ -544,6 +546,8 @@ class Obs: #各種避障動作
             send.sendBodySector(3333)
             time.sleep(14)
             send.sendBodySector(29)    
+            time.sleep(0.5)
+            send.sendBodySector(19)
             time.sleep(0.5)
             send.sendBodySector(1218)
             time.sleep(0.5)
