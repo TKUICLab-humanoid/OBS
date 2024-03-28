@@ -27,19 +27,19 @@ MAX_FORWARD_X         = 2500
 MAX_FORWARD_Y         = 200                                                            
 MAX_FORWARD_THETA     = 0                                     
 #===========================================                 
-TURN_RIGHT_X            = -400                                                     
-TURN_RIGHT_Y            = 900                                                     
+TURN_RIGHT_X            = 200                                                     
+TURN_RIGHT_Y            = 800                                                     
 TURN_RIGHT_THETA        =   -4  
 #=========================================== 
-IMU_RIGHT_X            =  -400 
+IMU_RIGHT_X            =  100 
 IMU_RIGHT_Y            =  800           
 #===========================================                                         
 TURN_LEFT_X             =  -100                                                    
-TURN_LEFT_Y             =  -700                                                     
+TURN_LEFT_Y             =  -1000                                                     
 TURN_LEFT_THETA         =    5  
 #=========================================== 
-IMU_LEFT_X            =   -400 
-IMU_LEFT_Y            =   -700   
+IMU_LEFT_X            =   100 
+IMU_LEFT_Y            =   -900   
 #===========================================                                             
 
 class Walk(): #步態、轉彎、直走速度、IMU
@@ -55,17 +55,17 @@ class Walk(): #步態、轉彎、直走速度、IMU
         straight_90degree_fix   = -2 if ((imu_flag and abs(self.get_imu()) < 90) or (not imu_flag and abs(self.get_imu()) > 90)) else 2   #turn head 保持90度直走         
         turn_x                  =   self.straight_speed()*2 if self.image.yellow_center_deep < 12 else self.straight_speed()  
         turn_direction_x        =   TURN_RIGHT_X if self.get_imu() > 0 else TURN_LEFT_X  # fix_angle for turn_x
-        actions             = { 'stay'                  : {'x':  -100,                 'y':  200,               'theta': 0 },
+        actions             = { 'stay'                  : {'x':  -100,                 'y':  100,               'theta': 0 },
                                 'max_speed'             : {'x':  MAX_FORWARD_X,     'y':   MAX_FORWARD_Y,   'theta': MAX_FORWARD_THETA },
-                                'small_back'            : {'x': -1500,              'y':  300,             'theta': -1 },
+                                'small_back'            : {'x': -1500,              'y':  200,             'theta': -1 },
                                 'small_forward'         : {'x':  1500,              'y':  300,                'theta': 0 },
                                 'imu_fix'               : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.imu_angle()  },
                                 # 'slope_fix'             : {'x': IMU_RIGHT_X-200 if self.get_imu() > 0 else IMU_LEFT_X-200,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.slope()      },
-                                'slope_fix'             : {'x': 0 if deep.slope > 0 else -200,                   'y':    -500 if deep.slope > 0 else 700,           'theta': self.slope()},
-                                'imu_right_translate'   : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -1 + self.imu_angle()      },
-                                'imu_left_translate'    : {'x':  100+ slope_x_fix, 'y':  1500,      'theta': 1 + self.imu_angle()      },
-                                'slope_right_translate' : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -1 + self.slope()      },
-                                'slope_left_translate'  : {'x':  100+ slope_x_fix, 'y':  1500,      'theta': 1 + self.slope()      },
+                                'slope_fix'             : {'x': 0 if deep.slope > 0 else 100,                   'y':    -500 if deep.slope > 0 else 700,           'theta': self.slope()},
+                                'imu_right_translate'   : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -2 + self.imu_angle()      },
+                                'imu_left_translate'    : {'x':  100+ slope_x_fix, 'y':  1500,      'theta': 2 + self.imu_angle()      },
+                                'slope_right_translate' : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -2 + self.slope()      },
+                                'slope_left_translate'  : {'x':  100+ slope_x_fix, 'y':  1500,      'theta': 2 + self.slope()      },
                                 'dx_turn'               : {'x': TURN_RIGHT_X if self.image.deep_x > 0 else TURN_LEFT_X,       'y':  TURN_RIGHT_Y if self.image.deep_x > 0 else TURN_LEFT_Y,     'theta': self.turn_angle()  },
                                 'turn_right_for_wall'   : {'x': TURN_RIGHT_X,       'y':  TURN_RIGHT_Y,     'theta': TURN_RIGHT_THETA  },
                                 'turn_right_back'       : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y,            'theta': TURN_LEFT_THETA                 },#.
@@ -506,8 +506,6 @@ class Obs: #各種避障動作
         time.sleep(6)
         # send.sendBodySector(222) #執行motion儲存的sector
         # time.sleep(2.2)
-        # send.sendBodySector(29) #stand
-        # time.sleep(0.5)
         send.sendBodySector(1111)
         time.sleep(8)
         while self.crawl_cnt < 3:    #count 3次            
@@ -529,10 +527,8 @@ class Obs: #各種避障動作
                 break
         if self.crawl_cnt > 6 :
             send.sendBodySector(3333)
-            time.sleep(11)
+            time.sleep(12)
             send.sendBodySector(29)    
-            time.sleep(0.5)
-            send.sendBodySector(19)
             time.sleep(0.5)
             send.sendHeadMotor(1,2048,100)
             send.sendHeadMotor(2,HEAD_HEIGHT,100)
@@ -546,8 +542,6 @@ class Obs: #各種避障動作
             send.sendBodySector(3333)
             time.sleep(14)
             send.sendBodySector(29)    
-            time.sleep(0.5)
-            send.sendBodySector(19)
             time.sleep(0.5)
             send.sendBodySector(1218)
             time.sleep(0.5)
@@ -696,8 +690,8 @@ class Obs: #各種避障動作
                 self.preturn_left = False
                 # self.preturn_left = True
                 #================================================
-                self.preturn_right = False
-                # self.preturn_right = True
+                # self.preturn_right = False
+                self.preturn_right = True
                 #================================================
                 send.sendHeadMotor(1,2048,100) #頭部初始動作
                 send.sendHeadMotor(2,HEAD_HEIGHT  ,100)
@@ -709,12 +703,12 @@ class Obs: #各種避障動作
                 send.sendBodyAuto(0,0,0,0,1,0) #步態呼叫
                 self.start_walking = True
             if self.preturn_left:
-                while abs(self.walk.get_imu()) < 5:
+                while abs(self.walk.get_imu()) < 55:
                     self.walk.move('preturn_left')
                     rospy.loginfo(f'imu =  {self.walk.get_imu()}')
                 self.preturn_left = False
             elif self.preturn_right:
-                while abs(self.walk.get_imu()) < 35:
+                while abs(self.walk.get_imu()) < 30:
                     self.walk.move('preturn_right')
                     rospy.loginfo(f'imu =  {self.walk.get_imu()}')
                 self.preturn_right = False
