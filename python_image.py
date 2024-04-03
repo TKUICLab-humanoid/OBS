@@ -25,21 +25,21 @@ import math
 deep                  = Deep_Calculate()
 send                  = Sendmessage()
 HEAD_HEIGHT           = 1436
-FOCUS_MATRIX          = [0, 0, 1, 1, 2, 3, 5, 6, 6, 7, 8, 9, 10, 11, 12, 13, 13, 12, 11, 10, 9, 8, 7, 6, 6, 5, 3, 2, 1, 1, 0, 0]
-# FOCUS_MATRIX    = [0, 0, 0, 1, 2, 3, 5, 6, 6, 6, 7, 7, 8, 8, 9, 10, 10, 9, 8, 8, 7, 7, 6, 6, 6, 5, 3, 2, 1, 0, 0, 0]
+# FOCUS_MATRIX          = [0, 0, 1, 1, 2, 3, 5, 6, 6, 7, 8, 9, 10, 11, 12, 13, 13, 12, 11, 10, 9, 8, 7, 6, 6, 5, 3, 2, 1, 1, 0, 0]
+FOCUS_MATRIX    = [0, 0, 0, 1, 2, 3, 5, 6, 6, 6, 7, 7, 8, 8, 9, 10, 10, 9, 8, 8, 7, 7, 6, 6, 6, 5, 3, 2, 1, 0, 0, 0]
 MAX_FORWARD_X         =  5000
 MAX_FORWARD_Y         =  0
 MAX_FORWARD_THETA     =  0
 TURN_RIGHT_X          = 0
-TURN_RIGHT_Y          =  1800
+TURN_RIGHT_Y          =  1300
 TURN_RIGHT_THETA      =    -5
 IMU_RIGHT_X           = 0 #angle : 5
-IMU_RIGHT_Y           =  1500
+IMU_RIGHT_Y           =  1300
 TURN_LEFT_X           = 0
 TURN_LEFT_Y           = -1500
 TURN_LEFT_THETA       =     5
 IMU_LEFT_X            = -100 #angle : 5
-IMU_LEFT_Y            = -1100
+IMU_LEFT_Y            = -1200
 # REDDOOR_MOVE_RIGHT      = -2400
 # REDDOOR_MOVE_LEFT       =  2400                                                     
 
@@ -555,11 +555,11 @@ class Obs:
                 self.preturn_left = False
                 # self.preturn_left = True
                 #---------------------------------------
-                # self.preturn_right = False
-                self.preturn_right = True
+                self.preturn_right = False
+                # self.preturn_right = True
                 #=======================================
                 # self.red_go_left = True
-                self.red_go_right = True
+                # self.red_go_right = True
                 #=======================================
                 send.sendHeadMotor(1,2048,100)
                 send.sendHeadMotor(2,HEAD_HEIGHT,100)
