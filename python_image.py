@@ -18,8 +18,8 @@ import math
 
 deep            = deep_calculate()  #在ddd
 send            = Sendmessage()     #在hello1
-CRMAX           = 60 # red door 前後修正3 值越大離門越近 #68
-CRMIN           = 60 # red door 前後修正3 值越大離門越近 #68
+CRMAX           = 58 # red door 前後修正3 值越大離門越近 #68
+CRMIN           = 58 # red door 前後修正3 值越大離門越近 #68
 HEAD_HEIGHT     = 1550 #頭高，位置為馬達目標刻度，2048為正朝前方
 FOCUS_MATRIX    = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 10, 10, 11, 11, 10, 10, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]
 #=========================================== 
@@ -27,12 +27,12 @@ MAX_FORWARD_X         = 3000
 MAX_FORWARD_Y         = 300                                                            
 MAX_FORWARD_THETA     = 0                                     
 #===========================================                 
-TURN_RIGHT_X            = -200                                                     
-TURN_RIGHT_Y            = 1000                                                     
+TURN_RIGHT_X            = 0                                                     
+TURN_RIGHT_Y            = 900                                                     
 TURN_RIGHT_THETA        =   -4  
 #=========================================== 
-IMU_RIGHT_X            =  -200 
-IMU_RIGHT_Y            =  900           
+IMU_RIGHT_X            =  -100 
+IMU_RIGHT_Y            =  1000           
 #===========================================                                         
 TURN_LEFT_X             = 100                                                    
 TURN_LEFT_Y             =  -400                                                     
@@ -56,17 +56,17 @@ class Walk(): #步態、轉彎、直走速度、IMU
         straight_90degree_fix   = -2 if ((imu_flag and abs(self.get_imu()) < 90) or (not imu_flag and abs(self.get_imu()) > 90)) else 2   #turn head 保持90度直走         
         turn_x                  =   self.straight_speed()*2 if self.image.yellow_center_deep < 12 else self.straight_speed()  
         turn_direction_x        =   TURN_RIGHT_X if self.get_imu() > 0 else TURN_LEFT_X  # fix_angle for turn_x
-        actions             = { 'stay'                  : {'x':  -100,                 'y':  300,               'theta': 0 },
+        actions             = { 'stay'                  : {'x':  0,                 'y':  300,               'theta': 0 },
                                 'max_speed'             : {'x':  self.total_movement, 'y':   MAX_FORWARD_Y,    'theta': MAX_FORWARD_THETA },
-                                'small_back'            : {'x': -1500,              'y':  500,             'theta': -1 },
+                                'small_back'            : {'x': -1500,              'y':  600,             'theta': -1 },
                                 'small_forward'         : {'x':  1500,              'y':  300,                'theta': 0 },
                                 'imu_fix'               : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.imu_angle()  },
                                 # 'slope_fix'             : {'x': IMU_RIGHT_X-200 if self.get_imu() > 0 else IMU_LEFT_X-200,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.slope()      },
-                                'slope_fix'             : {'x': -100 if deep.slope > 0 else -200,                   'y':    -200 if deep.slope > 0 else 800,           'theta': self.slope()},
-                                'imu_right_translate'   : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -1 + self.imu_angle()      },
+                                'slope_fix'             : {'x': -100 if deep.slope > 0 else -200,                   'y':    -300 if deep.slope > 0 else 800,           'theta': self.slope()},
+                                'imu_right_translate'   : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -2 + self.imu_angle()      },
                                 'imu_left_translate'    : {'x':  100+ slope_x_fix, 'y':  1000,      'theta': 1 + self.imu_angle()      },
-                                'slope_right_translate' : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -1 + self.slope()      },
-                                'slope_left_translate'  : {'x':  100+ slope_x_fix, 'y':  1500,      'theta': 1 + self.slope()      },
+                                'slope_right_translate' : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -2 + self.slope()      },
+                                'slope_left_translate'  : {'x':  100+ slope_x_fix, 'y':  1000,      'theta': 1 + self.slope()      },
                                 'dx_turn'               : {'x': TURN_RIGHT_X if self.image.deep_x > 0 else TURN_LEFT_X,       'y':  TURN_RIGHT_Y if self.image.deep_x > 0 else TURN_LEFT_Y,     'theta': self.turn_angle()  },
                                 'turn_right_for_wall'   : {'x': TURN_RIGHT_X,       'y':  TURN_RIGHT_Y,     'theta': TURN_RIGHT_THETA  },
                                 'turn_right_back'       : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y,            'theta': TURN_LEFT_THETA                 },#.
@@ -400,7 +400,7 @@ class Obs: #各種避障動作
                 elif (send.color_mask_subject_cnts[2] == 2):
                     # if(send.color_mask_subject_XMax[2][0]<60 and send.color_mask_subject_XMin[2][1]<295):
                     self.image.calculate()
-                    if self.image.blue_rightside < 290 and self.image.blue_leftside < 65: #停在太右邊 blue_rightside調大
+                    if self.image.blue_rightside < 255 and self.image.blue_leftside < 35: #停在太右邊 blue_rightside調大
                         self.image.calculate()
                         # self.blue_at_left = True
                         # self.blue_at_right = False
@@ -410,7 +410,7 @@ class Obs: #各種避障動作
                         print("blue_rightside", self.image.blue_rightside)
                         print("blue_leftside", self.image.blue_leftside)
                     # elif(send.color_mask_subject_XMax[2][0]>20 and send.color_mask_subject_XMin[2][1]>265):
-                    elif self.image.blue_rightside > 265 and self.image.blue_leftside >50: #停在太左邊 blue_leftside調小 #290 65
+                    elif self.image.blue_rightside > 255 and self.image.blue_leftside >35: #停在太左邊 blue_leftside調小 #290 65
                         self.image.calculate()
                         # self.blue_at_left = True
                         # self.blue_at_right = False
@@ -528,7 +528,7 @@ class Obs: #各種避障動作
             elif (send.color_mask_subject_cnts[2] == 2):
                 # if(send.color_mask_subject_XMax[2][0]<60 and send.color_mask_subject_XMin[2][1]<295):
                 self.image.calculate()
-                if self.image.blue_rightside < 290 and self.image.blue_leftside < 65: #停在太右邊 blue_rightside調大
+                if self.image.blue_rightside < 255 and self.image.blue_leftside < 35: #停在太右邊 blue_rightside調大
                     self.image.calculate()
                     # self.blue_at_left = True
                     # self.blue_at_right = False
@@ -538,7 +538,7 @@ class Obs: #各種避障動作
                     print("blue_rightside", self.image.blue_rightside)
                     print("blue_leftside", self.image.blue_leftside)
                 # elif(send.color_mask_subject_XMax[2][0]>20 and send.color_mask_subject_XMin[2][1]>265):
-                elif self.image.blue_rightside > 265 and self.image.blue_leftside > 50:  #停在太左邊 blue_leftside調小 #290 65
+                elif self.image.blue_rightside > 255 and self.image.blue_leftside > 35:  #停在太左邊 blue_leftside調小 #290 65
                     self.image.calculate()
                     # self.blue_at_left = True
                     # self.blue_at_right = False
@@ -569,9 +569,9 @@ class Obs: #各種避障動作
         time.sleep(1)
         send.sendBodyAuto(0,0,0,0,1,0) #mode = 1為continue步態 #停下來
         time.sleep(2)  
-        send.sendBodySector(333) #執行motion儲存的sector
+        send.sendBodySector(333) #手水平放下（屁股有障礙物）
         time.sleep(6)
-        # send.sendBodySector(222) #執行motion儲存的sector
+        # send.sendBodySector(222) #手直接放下（左右側有障礙物）
         # time.sleep(2.2)
         send.sendBodySector(1111)
         time.sleep(8)
@@ -761,11 +761,11 @@ class Obs: #各種避障動作
             if not self.start_walking :                        #指撥後初始動作
                 # self.walk.imu_yaw_ini() #imu歸0 (imu_yaw = 0)
                 #================================================
-                # self.preturn_left = False
-                self.preturn_left = True
+                self.preturn_left = False
+                # self.preturn_left = True
                 #================================================
-                self.preturn_right = False
-                # self.preturn_right = True
+                # self.preturn_right = False
+                self.preturn_right = True
                 #================================================
                 send.sendHeadMotor(1,2048,100) #頭部初始動作
                 send.sendHeadMotor(2,HEAD_HEIGHT  ,100)
@@ -777,12 +777,12 @@ class Obs: #各種避障動作
                 send.sendBodyAuto(0,0,0,0,1,0) #步態呼叫
                 self.start_walking = True
             if self.preturn_left:
-                while abs(self.walk.get_imu()) < 23:
+                while abs(self.walk.get_imu()) < 7:
                     self.walk.move('preturn_left')
                     rospy.loginfo(f'imu =  {self.walk.get_imu()}')
                 self.preturn_left = False
             elif self.preturn_right:
-                while abs(self.walk.get_imu()) < 60:
+                while abs(self.walk.get_imu()) < 3:
                     self.walk.move('preturn_right')
                     rospy.loginfo(f'imu =  {self.walk.get_imu()}')
                 self.preturn_right = False
@@ -921,6 +921,11 @@ class Obs: #各種避障動作
         if not send.is_start :
             # send.sendSensorReset(1,1,1) #將(Roll, Pitch, Yaw) 歸零
             print(deep.slope)
+            self.image.calculate()
+            print("blue_rightside", self.image.blue_rightside)
+            print("blue_leftside", self.image.blue_leftside)
+            print("CRMIN:", self.image.red_y_max)
+            print("blue_cnt:", send.color_mask_subject_cnts[2])
             # print("blue_ymax   = ",send.color_mask_subject_YMax[2][0])
             # print("yellow_ymax = ",send.color_mask_subject_YMax[1][0])
             # print('ready')
