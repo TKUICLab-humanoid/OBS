@@ -18,9 +18,9 @@ class deep_calculate:
         self.Image_compress_sub = rospy.Subscriber("colormodel_image",Image, self.convert)			# 訂閱攝像頭資訊 #"/kidsize/camera/image_raw" #"compress_image" #"/usb_cam/image_raw"
         # rospy.spin()
         self.first_red = True
-        self.ya = 0
-        self.aa = 0
-        self.ba = 0
+        self.ya = np.zeros(32)
+        self.aa = np.zeros(32)
+        self.ba = np.zeros(32)
         self.x1 = 0
         self.y1 = 0
         self.x2 = 1
@@ -212,7 +212,7 @@ class deep_calculate:
         # cv2.imshow("Image_show",cv_image)
         cv2.waitKey(1)
 #----------------------------------------------------------------------#藍色深度
-        self.B_Deep_Matrix = []
+        self.B_Deep_Matrix = []*32
         for compress_width in range(0, 32, 1):
             self.B_Deep_Matrix.append(0)
             for compress_height in range(23, -1, -1):
