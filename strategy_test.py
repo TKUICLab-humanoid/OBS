@@ -24,8 +24,8 @@ HEAD_HEIGHT     = 1550 #頭高，位置為馬達目標刻度，2048為正朝前�
 FOCUS_MATRIX    = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 10, 10, 11, 11, 10, 10, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]
 #=========================================== 
 MAX_FORWARD_X         = 3000                                                     
-MAX_FORWARD_Y         = 300                                                            
-MAX_FORWARD_THETA     = -1                                     
+MAX_FORWARD_Y         = 0                                                            
+MAX_FORWARD_THETA     = 0                                     
 #===========================================                 
 TURN_RIGHT_X            = -100                                                     
 TURN_RIGHT_Y            = 800                                                     
@@ -59,14 +59,14 @@ class Walk(): #步態、轉彎、直走速度、IMU
         actions             = { 'stay'                  : {'x':  0,                 'y':  100,               'theta': 0 },
                                 'max_speed'             : {'x':  self.total_movement, 'y':   MAX_FORWARD_Y,    'theta': MAX_FORWARD_THETA },
                                 'small_back'            : {'x': -1500,              'y':  0,                'theta': -1 },
-                                'small_forward'         : {'x':  1500,              'y':  -100,                'theta': 0 },
+                                'small_forward'         : {'x':  1500,              'y':  -100,                'theta': -1 },
                                 'imu_fix'               : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.imu_angle()  },
                                 # 'slope_fix'             : {'x': IMU_RIGHT_X-200 if self.get_imu() > 0 else IMU_LEFT_X-200,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.slope()      },
-                                'slope_fix'             : {'x': -200 if deep.slope > 0 else -100,                   'y':    -500 if deep.slope > 0 else 500,           'theta': self.slope()},
-                                'imu_right_translate'   : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -1 + self.imu_angle()      },
-                                'imu_left_translate'    : {'x':  100+ slope_x_fix, 'y':  1000,      'theta': 1 + self.imu_angle()      },
-                                'slope_right_translate' : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -1 + self.slope()      },
-                                'slope_left_translate'  : {'x':  100+ slope_x_fix, 'y':  1000,      'theta': 1 + self.slope()      },
+                                'slope_fix'             : {'x': 100 if deep.slope > 0 else 200,                   'y':    -800 if deep.slope > 0 else 500,           'theta': self.slope()},
+                                'imu_right_translate'   : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -2 + self.imu_angle()      },
+                                'imu_left_translate'    : {'x':  100+ slope_x_fix, 'y':  1000,      'theta': 0 + self.imu_angle()      },
+                                'slope_right_translate' : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -2 + self.slope()      },
+                                'slope_left_translate'  : {'x':  100+ slope_x_fix, 'y':  1000,      'theta': 0 + self.slope()      },
                                 'dx_turn'               : {'x': TURN_RIGHT_X if self.image.deep_x > 0 else TURN_LEFT_X,       'y':  TURN_RIGHT_Y if self.image.deep_x > 0 else TURN_LEFT_Y,     'theta': self.turn_angle()  },
                                 'turn_right_for_wall'   : {'x': TURN_RIGHT_X,       'y':  TURN_RIGHT_Y,     'theta': TURN_RIGHT_THETA  },
                                 'turn_right_back'       : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y,            'theta': TURN_LEFT_THETA                 },#.
@@ -344,6 +344,7 @@ class Obs: #各種避障動作
                 self.distance_between_redoor = True
             
         if self.status == "slope_fix":
+            print("slope:", deep.slope)
             self.image.calculate()
             if abs(deep.slope) > 0.03 :
                 self.walk.move('slope_fix') #self.walk.move('imu_fix') #根據斜率修正IMU
@@ -551,6 +552,7 @@ class Obs: #各種避障動作
             if abs(deep.slope) > 0.03: #紅門太斜
                 self.walk.slope()
                 self.walk.move('slope_fix')
+                
             else:
                 self.status = "crawl_door_motion"
 
@@ -607,7 +609,7 @@ class Obs: #各種避障動作
             #     time.sleep(3.5)
             #     self.crawl_cnt += 1               
             #     self.image.calculate()
-            #     # print("blue_ymax   = ",self.b_y_max) #change
+            #     # print("blue_ymaxq   = ",self.b_y_max) #change
             #     if (send.color_mask_subject_YMax[2][0] >= 35 and send.color_mask_subject_size[2][0] > 5000) or (send.color_mask_subject_YMax[1][0] >= 35 and send.color_mask_subject_size[1][0] > 5000): #爬到黃色或藍色夠近或夠大
             #         self.status = "stand_up"
             # else:
