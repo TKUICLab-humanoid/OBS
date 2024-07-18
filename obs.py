@@ -32,17 +32,17 @@ MAX_FORWARD_Y         = -100
 MAX_FORWARD_THETA     = 0                                     
 #===========================================                 
 TURN_RIGHT_X            = 0                                                     
-TURN_RIGHT_Y            = 700                                                     
+TURN_RIGHT_Y            = 800                                                     
 TURN_RIGHT_THETA        =  -4  
 #=========================================== 
-IMU_RIGHT_X            =  -100 
+IMU_RIGHT_X            =  0 
 IMU_RIGHT_Y            =  700           
 #===========================================                                         
-TURN_LEFT_X             =  200                                                    
-TURN_LEFT_Y             =  -500                                                     
+TURN_LEFT_X             =  -100                                                    
+TURN_LEFT_Y             =  -700                                                     
 TURN_LEFT_THETA         =    3  
 #=========================================== 
-IMU_LEFT_X            =   0 
+IMU_LEFT_X            =   100 
 IMU_LEFT_Y            =   -700   
 #===========================================                                             
 
@@ -62,8 +62,8 @@ class Walk(): #步態、轉彎、直走速度、IMU
         turn_direction_x        =   TURN_RIGHT_X if self.get_imu() > 0 else TURN_LEFT_X  # fix_angle for turn_x
         actions             = { 'stay'                  : {'x':  200,                 'y':  0,               'theta': -1 },
                                 'max_speed'             : {'x':  self.total_movement, 'y':   MAX_FORWARD_Y,    'theta': MAX_FORWARD_THETA },
-                                'small_back'            : {'x': -1500,              'y':  0,                'theta': 0 },
-                                'small_forward'         : {'x':  1500,              'y':  0,                'theta': -1 },
+                                'small_back'            : {'x': -1500,              'y':  -100,                'theta': 0 },
+                                'small_forward'         : {'x':  1500,              'y':  200,                'theta': 0 },
                                 'imu_fix'               : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.imu_angle()  },
                                 # 'slope_fix'             : {'x': IMU_RIGHT_X-200 if self.get_imu() > 0 else IMU_LEFT_X-200,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.slope()      },
                                 'slope_fix'             : {'x': -100 if deep.slope > 0 else 100,                   'y':    -700 if deep.slope > 0 else 400,           'theta': self.slope()},
@@ -943,7 +943,7 @@ class Obs: #各種避障動作
             rospy.loginfo("imu : %s", self.walk.get_imu())
             rospy.loginfo("deep_x : %s", self.image.deep_x)
             rospy.loginfo("imu : %s", self.imu)
-            
+            rospy.loginfo("imu_ok : %s", self.imu_ok)
         #=============================strategy=============================
             if not self.start_walking :                        #指撥後初始動作
                 # self.walk.imu_yaw_ini() #imu歸0 (imu_yaw = 0)
@@ -1012,6 +1012,7 @@ class Obs: #各種避障動作
                 else:
                     self.walk.move('max_speed') 
                     rospy.loginfo("max_speedmax_speedmax_speed")
+                    self.imu_ok = False 
                         
             elif self.status == "imu_fix":
                 if self.last_status == "dx_turn" :
