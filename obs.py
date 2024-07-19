@@ -15,6 +15,7 @@ import cv2
 import sys
 import time
 import math
+import sys
 
 deep            = deep_calculate()  #在ddd
 send            = Sendmessage()     #在hello1
@@ -32,17 +33,17 @@ MAX_FORWARD_Y         = -100
 MAX_FORWARD_THETA     = 0                                     
 #===========================================                 
 TURN_RIGHT_X            = 0                                                     
-TURN_RIGHT_Y            = 800                                                     
+TURN_RIGHT_Y            = 700                                                     
 TURN_RIGHT_THETA        =  -4  
 #=========================================== 
-IMU_RIGHT_X            =  0 
+IMU_RIGHT_X            =  -100 
 IMU_RIGHT_Y            =  700           
 #===========================================                                         
-TURN_LEFT_X             =  -100                                                    
-TURN_LEFT_Y             =  -700                                                     
+TURN_LEFT_X             =  200                                                    
+TURN_LEFT_Y             =  -500                                                     
 TURN_LEFT_THETA         =    3  
 #=========================================== 
-IMU_LEFT_X            =   100 
+IMU_LEFT_X            =   0 
 IMU_LEFT_Y            =   -700   
 #===========================================                                             
 
@@ -62,8 +63,8 @@ class Walk(): #步態、轉彎、直走速度、IMU
         turn_direction_x        =   TURN_RIGHT_X if self.get_imu() > 0 else TURN_LEFT_X  # fix_angle for turn_x
         actions             = { 'stay'                  : {'x':  200,                 'y':  0,               'theta': -1 },
                                 'max_speed'             : {'x':  self.total_movement, 'y':   MAX_FORWARD_Y,    'theta': MAX_FORWARD_THETA },
-                                'small_back'            : {'x': -1500,              'y':  -100,                'theta': 0 },
-                                'small_forward'         : {'x':  1500,              'y':  200,                'theta': 0 },
+                                'small_back'            : {'x': -1500,              'y':  0,                'theta': 0 },
+                                'small_forward'         : {'x':  1500,              'y':  0,                'theta': -1 },
                                 'imu_fix'               : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.imu_angle()  },
                                 # 'slope_fix'             : {'x': IMU_RIGHT_X-200 if self.get_imu() > 0 else IMU_LEFT_X-200,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.slope()      },
                                 'slope_fix'             : {'x': -100 if deep.slope > 0 else 100,                   'y':    -700 if deep.slope > 0 else 400,           'theta': self.slope()},
@@ -113,12 +114,12 @@ class Walk(): #步態、轉彎、直走速度、IMU
                         (4,  -4), 
                         (2,  -4),  
                         (0,   0),
-                        (-2,  1),
-                        (-4,  1),
-                        (-6,  2),
-                        (-8,  2),
-                        (-12, 3),
-                        (-17, 3)]
+                        (-2,  2),
+                        (-4,  2),
+                        (-6,  3),
+                        (-8,  3),
+                        (-12, 4),
+                        (-17, 4)]
         for turn_range in turn_ranges:           
             if  self.image.deep_x >= turn_range[0]:
                 return turn_range[1]
@@ -263,8 +264,8 @@ class Normal_Obs_Parameter: #計算各種深度
             self.b_left_deep    = deep.ba[2]   #第2行深度(藍)
             self.b_right_deep   = deep.ba[30]  #第30行深度(倒數第二行)(藍)
             self.b_center_deep  = deep.ba[16]  #第16行深度(中間)(藍)
-            self.center_to_left_diff = abs(self.b_center_deep - self.b_left_deep)
-            self.center_to_right_diff = abs(self.b_center_deep - self.b_right_deep)
+            # self.center_to_left_diff = abs(self.b_center_deep - self.b_left_deep)
+            # self.center_to_right_diff = abs(self.b_center_deep - self.b_right_deep)
     #----------------Y_line_DeepMatrix---------------
             self.y_deep_y           = min(deep.ya) #黃色深度最小值(離最近)
             self.y_deep_sum         = sum(deep.ya)
@@ -297,11 +298,19 @@ class Normal_Obs_Parameter: #計算各種深度
             self.right_deep        = deep.aa[28] #第28行深度(倒數第四行)(全色)
             self.center_deep       = deep.aa[16] #第16行深度(中間)(全色)
             self.blue_mid_deep     = deep.aa[12:21]#第12行到第21行每一行深度的矩陣
+            self.center_to_left_diff = abs(self.center_deep - self.left_deep)
+            self.center_to_right_diff = abs(self.center_deep - self.right_deep)
             x_boundary             = 31 if left_weight > right_weight else 0 #boundary point
 
             if send.color_mask_subject_cnts[1] == 2 and send.color_mask_subject_YMax[1][0] > 140 and send.color_mask_subject_YMax[1][1] > 140:
                 if abs(send.color_mask_subject_XMax[1][0] - send.color_mask_subject_XMin[1][1] ) > 70: #黃色通道
                     self.deep_x = 0 #dx歸0
+                    if self.y_deep_left_sum > self.y_deep_right_sum :
+                        self.line_at_right = True
+                        self.line_at_left = False
+                    else:
+                        self.line_at_left = True
+                        self.line_at_right = False
             else:
                 self.deep_x = x_center - x_boundary #dx=Xc-Xb
                 if abs(self.deep_x) > 16:
@@ -929,21 +938,28 @@ class Obs: #各種避障動作
                 self.turn_head_once = True
                 self.wall_distance = True
 
+
+
     def main(self):
-        if send.is_start : #策略主指撥開關
-            self.image.calculate() #計算障礙物的各種參數(深度、左右權重、dx...)
+        self.control_cursor()  # 在日志输出前清屏并重置光标位置
+        if send.is_start:  # 策略主指撥開關
+            self.image.calculate()  # 計算障礙物的各種參數(深度、左右權重、dx...)
             rospy.loginfo("last_status : %s", self.last_status)
             rospy.loginfo("now_status : %s", self.status)
-            if self.status == "turn_head": 
+            if self.status == "turn_head":
                 rospy.loginfo("turnhead_status : %s", self.turnhead_status)
                 rospy.loginfo("last_turnhead_status : %s", self.last_turnhead_status)
             elif self.status == "red_door":
                 rospy.loginfo("reddoor_status : %s", self.reddoor_status)
-                rospy.loginfo("last_reddoor_status : %s", self.last_reddor_status)
+                rospy.loginfo("last_reddoor_status : %s", self.last_reddoor_status)
+            elif self.status == "crawl":
+                rospy.loginfo("crawl_status : %s", self.crawl_status)
+                rospy.loginfo("last_crawl_status : %s", self.last_crawl_status)
+
             rospy.loginfo("imu : %s", self.walk.get_imu())
             rospy.loginfo("deep_x : %s", self.image.deep_x)
             rospy.loginfo("imu : %s", self.imu)
-            rospy.loginfo("imu_ok : %s", self.imu_ok)
+            
         #=============================strategy=============================
             if not self.start_walking :                        #指撥後初始動作
                 # self.walk.imu_yaw_ini() #imu歸0 (imu_yaw = 0)
@@ -999,48 +1015,76 @@ class Obs: #各種避障動作
                 self.crawl()
 
             elif self.status == "turn_head":
-                if abs(self.walk.get_imu()) > 5 :
-                    self.last_status = "turn_head"
-                    self.status = "imu_fix"
-                else:
-                    self.turn_head()
+                self.turn_head()
+                
+
 
             elif self.status == "walking_forward":
-                if 16 > abs(self.image.deep_x) > 3 :
+                if 16 > abs(self.image.deep_x) > 4 :
                     self.last_status = "walking_forward"
                     self.status = "dx_turn"
+                elif self.image.deep_x == 0 and self.last_status == "dx_turn":
+                    self.last_status = "walking_forward"
+                    self.status = "imu_fix"
                 else:
+                    if abs(self.walk.get_imu()) > 5:
+                        self.imu_ok = False
+                    else:
+                        self.imu_ok = True
                     self.walk.move('max_speed') 
                     rospy.loginfo("max_speedmax_speedmax_speed")
-                    self.imu_ok = False 
                         
             elif self.status == "imu_fix":
                 if self.last_status == "dx_turn" :
-                    if abs(self.walk.get_imu()) > 5 and (abs(self.image.deep_x) > 6):
+                    if abs(self.walk.get_imu()) > 5 and (abs(self.image.deep_x) > 6) :
                         self.walk.move('imu_fix')
                     else:
                         self.imu_ok = True
                         self.last_status = "imu_fix"
                         self.status = "dx_turn"
-                elif self.last_status == "turn_head":
-                    if abs(self.walk.get_imu()) > 5:
+                elif self.last_status == "ready_turn_head":
+                    if abs(self.walk.get_imu()) > 3:
                         self.walk.move('imu_fix')
                     else:
                         self.imu_ok = True
                         self.last_status = "imu_fix"
-                        self.status = "turn_head"
+                        self.status = "walking_forward"
+                elif self.last_status == "walking_forward":
+                    if abs(self.walk.get_imu()) > 5:
+                        if abs(self.image.deep_x) < 3:
+                            self.last_status = "imu_fix"
+                            self.status = "walking_forward"
+                        else:
+                            self.walk.move('imu_fix')
+                    else:
+                        self.imu_ok = True
+                        self.last_status = "imu_fix"
+                        self.status = "walking_forward"
 
             elif self.status == "dx_turn":
                 # if (send.color_mask_subject_cnts[1] >= 2) and (abs(send.color_mask_subject_X[1][0] - send.color_mask_subject_X[1][1]) < 100):
                 
-                if 16 > abs(self.image.deep_x) > 3:
+                if 16 > abs(self.image.deep_x) > 4:
                     self.image.calculate()
                     if abs(self.walk.get_imu()) > 5 and not self.imu_ok:
-                        self.last_status = "dx_turn"
-                        self.status = "imu_fix"
-                    elif (self.image.center_to_left_diff <= 2 and self.image.center_to_right_diff <= 2) or (16 > abs(self.image.deep_x) > 13):
-                        self.last_status = "dx_turn"
-                        self.status = "turn_head"
+                    # elif  abs(self.walk.get_imu()) < 5:
+                        if abs(self.image.deep_x) > 10:
+                            if abs(self.walk.get_imu()) > 3 :
+                                self.last_status = "ready_turn_head"
+                                self.status = "imu_fix"
+                            
+                            elif  self.imu_ok:
+                                self.image.calculate()
+                                if (self.image.center_to_left_diff <= 2 and self.image.center_to_right_diff <= 2) or (self.image.line_at_right) or (self.image.line_at_left):#(16 > abs(self.image.deep_x) > 13):
+                                    # self.turn_head()
+                                    self.status = "turn_head"
+                                else:
+                                    self.last_status = "dx_turn"
+                                    self.status = "walking_forward"
+
+                        else:
+                            self.last_status = "dx_turn"
+                            self.status = "imu_fix"
                     else:
                         self.walk.move('dx_turn')
                 else:
@@ -1092,11 +1136,16 @@ class Obs: #各種避障動作
                     
         if not send.is_start :
             self.status = "strategy_not_start"
+            self.control_cursor()  # 在日志输出前清屏并重置光标位置
             rospy.loginfo("now_status : %s", self.status)
             self.image.calculate()
+            rospy.loginfo("center_to_left_diff : %s", self.image.center_to_left_diff)
+            rospy.loginfo("center_to_right_diff : %s", self.image.center_to_right_diff)
+            rospy.loginfo("line_at_right : %s", self.image.line_at_right)
+            rospy.loginfo("line_at_left : %s", self.image.line_at_left)
             # rospy.loginfo("imu: %s", self.walk.get_imu())
             # rospy.loginfo("aa = %s", deep.aa)
-            # rospy.loginfo("dx = %s", self.image.deep_x)
+            rospy.loginfo("dx = %s", self.image.deep_x)
             # rospy.loginfo("red_ymax = %s", send.color_mask_subject_YMax[5][0])
             # rospy.loginfo("red_X_center = %s", send.color_mask_subject_X[5][0])
             # rospy.loginfo("blue_rightside = %s", self.image.blue_rightside)
@@ -1114,9 +1163,9 @@ class Obs: #各種避障動作
             # rospy.loginfo("send.color_mask_subject_size[2][0] %s", send.color_mask_subject_size[2][0])
             # rospy.loginfo("x_center = %s", self.image.x_center)
             # # rospy.loginfo("self.image.blue_leftside %s", self.image.blue_leftside)
-            # # rospy.loginfo("self.image.blue_rifgtside %s", self.image.blue_rifgtside)
-            # # rospy.loginfo("y_deep_min = %s", self.image.y_deep_y)
-            # # rospy.loginfo("yellow_ymax = %s", send.color_mask_subject_YMax[1][0])
+            # rospy.loginfo("self.image.blue_rifgtside %s", self.image.blue_rifgtside)
+            # rospy.loginfo("y_deep_min = %s", self.image.y_deep_y)
+            # rospy.loginfo("yellow_ymax = %s", send.color_mask_subject_YMax[1][0])
             if self.start_walking :
                 send.sendContinuousValue(0,0,0,0,0) #x,y,z,theta填入walking介面移動數值
                 send.sendBodyAuto(0,0,0,0,1,0) #mode=1為continue步態
@@ -1124,6 +1173,10 @@ class Obs: #各種避障動作
                 self.start_walking = False
             # send.sendContinuousValue(0,0,0,0,0)
             # self.walk.move('stay')
+
+    def control_cursor(self):
+        sys.stdout.write("\033[2J\033[H")  # 清屏并将光标移动到左上角
+        sys.stdout.flush()
 
 if __name__ == '__main__':
 
