@@ -287,14 +287,14 @@ class Normal_Obs_Parameter: #計算各種深度
                 #如果黃黃通道接藍障會不會看到3個黃色?
                 # if abs(send.color_mask_subject_XMax[1][0] - send.color_mask_subject_XMin[1][1] ) > 70: #黃色通道
                 # self.deep_x = 0 #dx歸0
-            elif send.color_mask_subject_XMax[1][0] > 160 and send.color_mask_subject_XMin[1][1] > 160 and abs(send.color_mask_subject_XMax[1][0] - send.color_mask_subject_XMin[1][1] ) < 100: #黃線在右邊
+            elif send.color_mask_subject_cnts[1] == 2 and send.color_mask_subject_XMax[1][0] > 160 and send.color_mask_subject_XMin[1][1] > 160 and abs(send.color_mask_subject_XMax[1][0] - send.color_mask_subject_XMin[1][1] ) < 100: #黃線在右邊
                 self.deep_x = x_center - x_boundary
                 print('rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr')
                 #self.line_at_right_test = True 
                 #self.line_at_left_test  = False
                 self.line_at_right = True 
                 self.line_at_left  = False
-            elif send.color_mask_subject_XMax[1][0] < 160 and send.color_mask_subject_XMin[1][1] < 160 and abs(send.color_mask_subject_XMax[1][0] - send.color_mask_subject_XMin[1][1] ) < 100: #黃線在左邊
+            elif send.color_mask_subject_cnts[1] == 2 and send.color_mask_subject_XMax[1][0] < 160 and send.color_mask_subject_XMin[1][1] < 160 and abs(send.color_mask_subject_XMax[1][0] - send.color_mask_subject_XMin[1][1] ) < 100: #黃線在左邊
                 self.deep_x = x_center - x_boundary
                 print('llllllllllllllllllllllllllllllllll')
                 #self.line_at_right_test = True 
@@ -331,6 +331,7 @@ class Obs: #各種避障動作
         self.right_deep_sum         = 0
         self.crawl_cnt              = 0
         self.translate              = False
+        self.i                      = 0
 
     def red_door(self): #前後修正1 -> 修斜率 -> 前後修正2 -> 平移 -> 前後修正3 -> 趴下
         
@@ -614,6 +615,13 @@ class Obs: #各種避障動作
             time.sleep(0.5)
             send.sendBodySector(12182)
             time.sleep(1)
+            while self.i < 1000:
+                self.walk.move('max_speed')  
+                self.i += 1
+            send.sendBodySector(29)    
+            time.sleep(0.5)
+            send.sendBodySector(111)
+            time.sleep(3.5)
             # send.sendBodySector(1218)
             # time.sleep(0.5)
             # send.sendBodySector(299)
@@ -761,10 +769,10 @@ class Obs: #各種避障動作
             # print('b=',self.image.b_x_max)
         #=============================strategy=============================
             if not self.start_walking :                        #指撥後初始動作
-                self.walk.imu_yaw_ini() #imu歸0 (imu_yaw = 0)
+                # self.walk.imu_yaw_ini() #imu歸0 (imu_yaw = 0)
                 #================================================
-                # self.preturn_left = False
-                self.preturn_left = True
+                self.preturn_left = False
+                # self.preturn_left = True
                 #================================================
                 self.preturn_right = False
                 # self.preturn_right = True
@@ -811,14 +819,14 @@ class Obs: #各種避障動作
                             self.imu_ok = True
                         elif (self.image.y_deep_left_sum < self.image.y_deep_right_sum) or (self.image.y_deep_right_sum > 350) :
                             self.image.line_at_right = False
-                            self.imu_ok = False
+                            # self.imu_ok = False
                     elif self.image.line_at_left :
                         if self.image.y_deep_left_sum < self.image.y_deep_right_sum :
                             self.image.line_at_left = True
                             self.imu_ok = True
                         elif (self.image.y_deep_left_sum > self.image.y_deep_right_sum) or (self.image.y_deep_right_sum > 350) :
                             self.image.line_at_left = False
-                            self.imu_ok = False
+                            # self.imu_ok = False
                     
                     if 13 > self.image.deep_x > 4 : #deep_x = dx  #normal turn 右轉 範圍越大越容易旋轉 三個地方要調整 大的數字不動
                         self.walk.straight_speed()
@@ -932,7 +940,7 @@ class Obs: #各種避障動作
             print("dx:", self.image.deep_x)
 
             # print("blue_ymax   = ",send.color_mask_subject_YMax[2][0])
-            # print("yellow_ymax = ",send.color_mask_subject_YMax[1][0])
+            print("yellow= ",send.color_mask_subject_cnts[1])
             # print('ready')
             if self.start_walking :
                 send.sendContinuousValue(0,0,0,0,0) #x,y,z,theta填入walking介面移動數值
