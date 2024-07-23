@@ -24,22 +24,22 @@ HEAD_HEIGHT     = 1570 #頭高，位置為馬達目標刻度，2048為正朝前�
 FOCUS_MATRIX    = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 10, 10, 11, 11, 10, 10, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]
 #=========================================== 
 MAX_FORWARD_X         = 3000                                                     
-MAX_FORWARD_Y         = 200                                                            
+MAX_FORWARD_Y         = -100                                                            
 MAX_FORWARD_THETA     = 0                                     
 #===========================================                 
-TURN_RIGHT_X            = 100                                                     
+TURN_RIGHT_X            = -100                                                     
 TURN_RIGHT_Y            = 600                                                     
-TURN_RIGHT_THETA        =   -4  
+TURN_RIGHT_THETA        =   -3  
 #=========================================== 
-IMU_RIGHT_X            =  -200 
-IMU_RIGHT_Y            =  700           
+IMU_RIGHT_X            =  -100 
+IMU_RIGHT_Y            =  600           
 #===========================================                                         
 TURN_LEFT_X             = 0                                                    
-TURN_LEFT_Y             =  -900                                                     
-TURN_LEFT_THETA         =    4  
+TURN_LEFT_Y             =  -600                                                     
+TURN_LEFT_THETA         =    3  
 #=========================================== 
 IMU_LEFT_X            =   0 
-IMU_LEFT_Y            =   -900   
+IMU_LEFT_Y            =   -600   
 #===========================================                                             
 
 class Walk(): #步態、轉彎、直走速度、IMU
@@ -62,11 +62,11 @@ class Walk(): #步態、轉彎、直走速度、IMU
                                 'small_forward'         : {'x':  1500,              'y':  200,                'theta': 0 },
                                 'imu_fix'               : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.imu_angle()  },
                                 # 'slope_fix'             : {'x': IMU_RIGHT_X-200 if self.get_imu() > 0 else IMU_LEFT_X-200,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.slope()      },
-                                'slope_fix'             : {'x': -100 if deep.slope > 0 else -200,                   'y':    -600 if deep.slope > 0 else 500,           'theta': self.slope()},
-                                'imu_right_translate'   : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -1 + self.imu_angle()      },
-                                'imu_left_translate'    : {'x':  100+ slope_x_fix, 'y':  1000,      'theta': 1 + self.imu_angle()      },
-                                'slope_right_translate' : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -1 + self.slope()      },
-                                'slope_left_translate'  : {'x':  100+ slope_x_fix, 'y':  1000,      'theta': 1 + self.slope()      },
+                                'slope_fix'             : {'x': 0 if deep.slope > 0 else -100,                   'y':    -600 if deep.slope > 0 else 600,           'theta': self.slope()},
+                                'imu_right_translate'   : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -2 + self.imu_angle()      },
+                                'imu_left_translate'    : {'x':  100+ slope_x_fix, 'y':  800,      'theta': 1 + self.imu_angle()      },
+                                'slope_right_translate' : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -2 + self.slope()      },
+                                'slope_left_translate'  : {'x':  100+ slope_x_fix, 'y':  800,      'theta': 1 + self.slope()      },
                                 'dx_turn'               : {'x': TURN_RIGHT_X if self.image.deep_x > 0 else TURN_LEFT_X,       'y':  TURN_RIGHT_Y if self.image.deep_x > 0 else TURN_LEFT_Y,     'theta': self.turn_angle()  },
                                 'turn_right_for_wall'   : {'x': TURN_RIGHT_X,       'y':  TURN_RIGHT_Y,     'theta': TURN_RIGHT_THETA  },
                                 'turn_right_back'       : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y,            'theta': TURN_LEFT_THETA                 },#.
@@ -774,8 +774,8 @@ class Obs: #各種避障動作
                 self.preturn_left = False
                 # self.preturn_left = True
                 #================================================
-                self.preturn_right = False
-                # self.preturn_right = True
+                # self.preturn_right = False
+                self.preturn_right = True
                 #================================================
                 send.sendHeadMotor(1,2048,100) #頭部初始動作
                 send.sendHeadMotor(2,HEAD_HEIGHT  ,100)
@@ -792,7 +792,7 @@ class Obs: #各種避障動作
                     rospy.loginfo(f'imu =  {self.walk.get_imu()}')
                 self.preturn_left = False
             elif self.preturn_right:
-                while abs(self.walk.get_imu()) < 40:
+                while abs(self.walk.get_imu()) < 55:
                     self.walk.move('preturn_right')
                     rospy.loginfo(f'imu =  {self.walk.get_imu()}')
                 self.preturn_right = False
