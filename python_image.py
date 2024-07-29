@@ -18,8 +18,8 @@ import math
 
 deep            = deep_calculate()  #在ddd
 send            = Sendmessage()     #在hello1
-CRMAX           = 58 # red door 前後修正3 值越大離門越近 #68
-CRMIN           = 58 # red door 前後修正3 值越大離門越近 #68
+CRMAX           = 85 # red door 前後修正3 值越大離門越近 #68
+CRMIN           = 85 # red door 前後修正3 值越大離門越近 #68
 HEAD_HEIGHT     = 1570 #頭高，位置為馬達目標刻度，2048為正朝前方
 FOCUS_MATRIX    = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 10, 10, 11, 11, 10, 10, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]
 #=========================================== 
@@ -27,19 +27,19 @@ MAX_FORWARD_X         = 3000
 MAX_FORWARD_Y         = -100                                                            
 MAX_FORWARD_THETA     = 0                                     
 #===========================================                 
-TURN_RIGHT_X            = -100                                                     
-TURN_RIGHT_Y            = 600                                                     
+TURN_RIGHT_X            = 0                                                     
+TURN_RIGHT_Y            = 300                                                     
 TURN_RIGHT_THETA        =   -3  
 #=========================================== 
-IMU_RIGHT_X            =  -100 
-IMU_RIGHT_Y            =  600           
+IMU_RIGHT_X            =  0 
+IMU_RIGHT_Y            =  500           
 #===========================================                                         
-TURN_LEFT_X             = 0                                                    
-TURN_LEFT_Y             =  -600                                                     
+TURN_LEFT_X             = -200                                                    
+TURN_LEFT_Y             = -400                                                     
 TURN_LEFT_THETA         =    3  
 #=========================================== 
-IMU_LEFT_X            =   0 
-IMU_LEFT_Y            =   -600   
+IMU_LEFT_X            =   -100 
+IMU_LEFT_Y            =   -500   
 #===========================================                                             
 
 class Walk(): #步態、轉彎、直走速度、IMU
@@ -56,17 +56,44 @@ class Walk(): #步態、轉彎、直走速度、IMU
         straight_90degree_fix   = -2 if ((imu_flag and abs(self.get_imu()) < 90) or (not imu_flag and abs(self.get_imu()) > 90)) else 2   #turn head 保持90度直走         
         turn_x                  =   self.straight_speed()*2 if self.image.yellow_center_deep < 12 else self.straight_speed()  
         turn_direction_x        =   TURN_RIGHT_X if self.get_imu() > 0 else TURN_LEFT_X  # fix_angle for turn_x
-        actions             = { 'stay'                  : {'x':  0,                 'y':  -100,               'theta': 0 },
-                                'max_speed'             : {'x':  self.total_movement, 'y':   MAX_FORWARD_Y,    'theta': MAX_FORWARD_THETA },
-                                'small_back'            : {'x': -1500,              'y':  200,             'theta': 0 },
-                                'small_forward'         : {'x':  1500,              'y':  200,                'theta': 0 },
-                                'imu_fix'               : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.imu_angle()  },
+        actions             = { 'stay'                  : {'x'      : 0,     \
+                                                           'y'      : 0,   \
+                                                           'theta'  : 0       },
+                                ################################################
+                                'max_speed'             : {'x':  self.total_movement,'y':   MAX_FORWARD_Y,  'theta': MAX_FORWARD_THETA },
+                                ################################################
+                                'small_back'            : {'x'      : -1500,            \
+                                                           'y'      :  200,             \
+                                                           'theta'  : 1 },
+                                ################################################
+                                'small_forward'         : {'x'      :  1500,            \
+                                                           'y'      :  -200,             \
+                                                           'theta'  : 0 },
+                                ################################################
+                                'imu_fix'               : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  \
+                                                           'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y,\
+                                                           'theta': self.imu_angle()  },
                                 # 'slope_fix'             : {'x': IMU_RIGHT_X-200 if self.get_imu() > 0 else IMU_LEFT_X-200,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.slope()      },
-                                'slope_fix'             : {'x': 0 if deep.slope > 0 else -100,                   'y':    -600 if deep.slope > 0 else 600,           'theta': self.slope()},
-                                'imu_right_translate'   : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -2 + self.imu_angle()      },
-                                'imu_left_translate'    : {'x':  100+ slope_x_fix, 'y':  800,      'theta': 1 + self.imu_angle()      },
-                                'slope_right_translate' : {'x': 0 + slope_x_fix, 'y': -1000,            'theta': -2 + self.slope()      },
-                                'slope_left_translate'  : {'x':  100+ slope_x_fix, 'y':  800,      'theta': 1 + self.slope()      },
+                                'slope_fix'             : {'x'      : -200 if deep.slope > 0 else 0,                   \
+                                                           'y'      : -400 if deep.slope > 0 else 300,           \
+                                                           'theta'  : self.slope()},
+                                ################################################
+                                'imu_right_translate'   : {'x'      : 0 + slope_x_fix, \
+                                                           'y'      : -1000,            \
+                                                           'theta'  : -2 + self.imu_angle()},
+                                ################################################
+                                'imu_left_translate'    : {'x'      :  100+ slope_x_fix, \
+                                                           'y'      :  1000,               \
+                                                           'theta'  : 1 + self.imu_angle()      },
+                                ################################################
+                                'slope_right_translate' : {'x'      : 0 + slope_x_fix, \
+                                                           'y'      : -1000,           \
+                                                           'theta'  : -2 + self.slope()      },
+                                ################################################
+                                'slope_left_translate'  : {'x'      :  100+ slope_x_fix, \
+                                                           'y'      :  1000,      \
+                                                           'theta'  : 1 + self.slope()      },
+                                ################################################
                                 'dx_turn'               : {'x': TURN_RIGHT_X if self.image.deep_x > 0 else TURN_LEFT_X,       'y':  TURN_RIGHT_Y if self.image.deep_x > 0 else TURN_LEFT_Y,     'theta': self.turn_angle()  },
                                 'turn_right_for_wall'   : {'x': TURN_RIGHT_X,       'y':  TURN_RIGHT_Y,     'theta': TURN_RIGHT_THETA  },
                                 'turn_right_back'       : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y,            'theta': TURN_LEFT_THETA                 },#.
@@ -90,8 +117,8 @@ class Walk(): #步態、轉彎、直走速度、IMU
             else:
                 self.total_movement = 1500
             send.sendContinuousValue(x, y, z, theta, sensor)
-        print(action_id)
-        print(self.total_movement)
+        rospy.loginfo(action_id)
+        rospy.loginfo(self.total_movement)
 
     def imu_yaw_ini(self):
         self.imu_yaw = 0
@@ -103,8 +130,8 @@ class Walk(): #步態、轉彎、直走速度、IMU
     def turn_angle(self):   #一般 旋轉角度
         self.image.calculate()
         turn_ranges = [ (17, -4), 
-                        (12, -3), 
-                        (8,  -3), 
+                        (12, -4), 
+                        (8,  -4), 
                         (6,  -2), 
                         (4,  -2), 
                         (2,  -1),  
@@ -176,7 +203,7 @@ class Walk(): #步態、轉彎、直走速度、IMU
             return 0 
         if send.color_mask_subject_size[5][0] < 5000 :
             slope_angle = 0
-        # print(slope_angle)
+        rospy.loginfo(slope_angle)
         return slope_angle
 
     def straight_speed(self):   #一般避障 前進速度
@@ -281,36 +308,28 @@ class Normal_Obs_Parameter: #計算各種深度
             self.center_deep            = deep.aa[16] #第16行深度(中間)(全色)
             x_boundary             = 31 if left_weight > right_weight else 0 #boundary point
 
-            if send.color_mask_subject_cnts[1] == 2 and send.color_mask_subject_YMax[1][0] > 140 and send.color_mask_subject_YMax[1][1] > 140 and abs(send.color_mask_subject_XMax[1][0] - send.color_mask_subject_XMin[1][1] ) > 100:
-                self.deep_x = 0
-            # if send.color_mask_subject_cnts[1] == 2 and send.color_mask_subject_YMax[1][0] > 60 and send.color_mask_subject_YMax[1][1] > 60: #yellow yellow 值越大 越不容易直走
-                #如果黃黃通道接藍障會不會看到3個黃色?
-                # if abs(send.color_mask_subject_XMax[1][0] - send.color_mask_subject_XMin[1][1] ) > 70: #黃色通道
-                # self.deep_x = 0 #dx歸0
-            elif send.color_mask_subject_cnts[1] == 2 and send.color_mask_subject_XMax[1][0] > 160 and send.color_mask_subject_XMin[1][1] > 160 and abs(send.color_mask_subject_XMax[1][0] - send.color_mask_subject_XMin[1][1] ) < 100: #黃線在右邊
-                self.deep_x = x_center - x_boundary
-                print('rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr')
-                #self.line_at_right_test = True 
-                #self.line_at_left_test  = False
-                self.line_at_right = True 
-                self.line_at_left  = False
-            elif send.color_mask_subject_cnts[1] == 2 and send.color_mask_subject_XMax[1][0] < 160 and send.color_mask_subject_XMin[1][1] < 160 and abs(send.color_mask_subject_XMax[1][0] - send.color_mask_subject_XMin[1][1] ) < 100: #黃線在左邊
-                self.deep_x = x_center - x_boundary
-                print('llllllllllllllllllllllllllllllllll')
-                #self.line_at_right_test = True 
-                #self.line_at_left_test  = False
-                self.line_at_right = False
-                self.line_at_left  = True                               
-            # else:    
-            # print("wl = ",left_weight)
-            # print("wr = ",right_weight)
-            # print("xc = ",x_center)
-            # print("xb = ",x_boundary)
+            if send.color_mask_subject_cnts[1] == 2 :
+                if abs(send.color_mask_subject_XMax[1][0] - send.color_mask_subject_XMin[1][1]) < 100:
+                    if send.color_mask_subject_XMax[1][0] > 160 and send.color_mask_subject_XMin[1][1] > 160: #黃線在右邊
+                        self.deep_x = x_center - x_boundary
+                        rospy.loginfo("rrrrr")
+                        self.line_at_right = True 
+                        self.line_at_left  = False
+                    elif send.color_mask_subject_XMax[1][0] < 160 and send.color_mask_subject_XMin[1][1] < 160: #黃線在左邊
+                        self.deep_x = x_center - x_boundary
+                        rospy.loginfo("lllll")
+                        self.line_at_right = False
+                        self.line_at_left  = True
+                elif abs(send.color_mask_subject_XMax[1][0] - send.color_mask_subject_XMin[1][1]) > 100:
+                    self.deep_x = 0
             else:
                 self.deep_x = x_center - x_boundary #dx=Xc-Xb
-            print("b_cnt = ",send.color_mask_subject_cnts[2])
-            print("b_l_max = ",send.color_mask_subject_XMax[2][0])
-            print("b_r_min = ",send.color_mask_subject_XMin[2][1])
+            rospy.loginfo(
+                "b_cnt = %d, b_l_max = %d, b_r_min = %d",
+                send.color_mask_subject_cnts[2],
+                send.color_mask_subject_XMax[2][0],
+                send.color_mask_subject_XMin[2][1]
+            )
 class Obs: #各種避障動作
     def __init__(self):
         self.image          = Normal_Obs_Parameter()
@@ -341,9 +360,6 @@ class Obs: #各種避障動作
             send.sendHeadMotor(2,HEAD_HEIGHT + 150,100)
             time.sleep(0.2)
             send.sendContinuousValue(0, 0 , 0 , 0 , 0)
-        # while True:
-        #     self.image.calculate() #計算障礙物的各種參數(深度、左右權重、dx...)
-        #     print("red_y_max:", (self.image.red_y_max))
         self.image.calculate()
         while self.image.red_y_max > 130 : #red door 前後修正1 值越大離門越近 #離紅門太近了
             self.image.calculate()
@@ -366,17 +382,14 @@ class Obs: #各種避障動作
         # self.redoor_distence = True
         while 1 :     
             self.image.calculate()
-            #print("red_size", send.color_mask_subject_size[5][0])
-            #print("red_num", send.color_mask_subject_cnts[5])
             if (self.image.red_x_min < 2 and self.image.red_x_max > 315) and send.color_mask_subject_size[5][0] > 5000: #紅門在眼前
                 self.image.calculate()
-                print("xxxxxxxxxxxxxxxxxxxxxxxxx")
-                print('b_cnt = ',send.color_mask_subject_cnts[2])
+                rospy.loginfo("xxxxxxxxxxxxxxxxxxxxxxxxx")
+                rospy.loginfo("b_cnt = %d",send.color_mask_subject_cnts[2])
                 # if (self.image.b_x_max == 0 and self.image.b_x_min == 0 and self.image.blue_leftside <= 45 and self.image.blue_rightside > 260 and self.blue_at_right ) or (self.image.b_x_max == 0 and self.image.b_x_min == 0 and self.image.blue_leftside <= 45 and self.image.blue_rightside > 260 and self.blue_at_left ) : #or (self.image.b_x_max == 0 and self.image.b_x_min == 0 and self.image.blue_rightside == 0 and self.image.blue_leftside == 0)
                 if  self.translate:
                     while abs(deep.slope) > 0.03 :
                         self.walk.move('slope_fix')
-                        # print('333333333333333333333333')
                     self.crawl()
                     break
                 elif (send.color_mask_subject_cnts[2] == 1):
@@ -386,14 +399,14 @@ class Obs: #各種避障動作
                         # self.blue_at_left = False
                         self.translate = False
                         self.walk.move('slope_right_translate')
-                        print("333333333333333333333")
+                        rospy.loginfo("333333333333333333333")
                     elif (self.image.b_x_max > 315 and self.image.b_x_min < 265):
                         self.image.calculate()
                         # self.blue_at_left = True
                         # self.blue_at_right = False
                         self.translate = False
                         self.walk.move('slope_left_translate')
-                        print("4444444444444444444444")
+                        rospy.loginfo("4444444444444444444444")
                     else:
                         self.translate = True
 
@@ -407,9 +420,9 @@ class Obs: #各種避障動作
                         # self.blue_at_right = False
                         self.walk.move('slope_left_translate')
                         self.translate = False
-                        print("555555555555555")
-                        print("blue_rightside", self.image.blue_rightside)
-                        print("blue_leftside", self.image.blue_leftside)
+                        rospy.loginfo("555555555555555")
+                        rospy.loginfo("blue_rightside: %d", self.image.blue_rightside)
+                        rospy.loginfo("blue_leftside: %d", self.image.blue_leftside)
                     # elif(send.color_mask_subject_XMax[2][0]>20 and send.color_mask_subject_XMin[2][1]>265):
                     elif self.image.blue_rightside > 255 and self.image.blue_leftside >35: #停在太左邊 blue_leftside調小 #290 65
                         self.image.calculate()
@@ -417,14 +430,14 @@ class Obs: #各種避障動作
                         # self.blue_at_right = False
                         self.walk.move('slope_right_translate')
                         self.translate = False
-                        print("666666666666666")
-                        print("blue_rightside", self.image.blue_rightside)
-                        print("blue_leftside", self.image.blue_leftside)
+                        rospy.loginfo("666666666666666")
+                        rospy.loginfo("blue_rightside: %d", self.image.blue_rightside)
+                        rospy.loginfo("blue_leftside: %d", self.image.blue_leftside)
                     else:
                         self.translate = True
                 else :
                     self.image.calculate()
-                    print("77777777777777777777")
+                    rospy.loginfo("77777777777777777777")
                     if self.blue_at_right :
                         self.walk.move('slope_right_translate')
                     elif self.blue_at_left :
@@ -491,10 +504,10 @@ class Obs: #各種避障動作
             if self.translate :
                 while abs(deep.slope) > 0.03 :
                     self.walk.move('slope_fix')
-                    print('44444444444444444444444444444')
+                    rospy.loginfo('44444444444444444444444444444')
                 break
             # elif (self.image.b_x_min < 2 and self.image.b_x_max > 50):
-            #     print("8888888888888888888")
+            #     rospy.loginfo("8888888888888888888")
             #     self.blue_at_right = True
             #     self.blue_at_left = False
             #     self.walk.move('slope_right_translate')
@@ -514,14 +527,14 @@ class Obs: #各種避障動作
                     # self.blue_at_left = False
                     self.translate = False
                     self.walk.move('slope_right_translate')
-                    print("333333333333333333333")
+                    rospy.loginfo("333333333333333333333")
                 elif (self.image.b_x_max > 315 and self.image.b_x_min < 265):
                     self.image.calculate()
                     # self.blue_at_left = True
                     # self.blue_at_right = False
                     self.translate = False
                     self.walk.move('slope_left_translate')
-                    print("4444444444444444444444")
+                    rospy.loginfo("4444444444444444444444")
                 else:
                     self.translate = True
 
@@ -535,9 +548,9 @@ class Obs: #各種避障動作
                     # self.blue_at_right = False
                     self.walk.move('slope_left_translate')
                     self.translate = False
-                    print("555555555555555")
-                    print("blue_rightside", self.image.blue_rightside)
-                    print("blue_leftside", self.image.blue_leftside)
+                    rospy.loginfo("555555555555555")
+                    rospy.loginfo("blue_rightside: %s", self.image.blue_rightside)
+                    rospy.loginfo("blue_leftside: %s", self.image.blue_leftside)
                 # elif(send.color_mask_subject_XMax[2][0]>20 and send.color_mask_subject_XMin[2][1]>265):
                 elif self.image.blue_rightside > 255 and self.image.blue_leftside > 35:  #停在太左邊 blue_leftside調小 #290 65
                     self.image.calculate()
@@ -545,9 +558,9 @@ class Obs: #各種避障動作
                     # self.blue_at_right = False
                     self.walk.move('slope_right_translate') 
                     self.translate = False
-                    print("666666666666666")
-                    print("blue_rightside", self.image.blue_rightside)
-                    print("blue_leftside", self.image.blue_leftside)
+                    rospy.loginfo("666666666666666")
+                    rospy.loginfo("blue_rightside: %s", self.image.blue_rightside)
+                    rospy.loginfo("blue_leftside: %s", self.image.blue_leftside)
                 else:
                     self.translate = True
         self.image.calculate()
@@ -556,11 +569,11 @@ class Obs: #各種避障動作
                 self.image.calculate()
                 self.walk.slope()
                 self.walk.move('small_forward')
-                print("CRMIN:", self.image.red_y_max)
+                rospy.loginfo("CRMIN: %s", self.image.red_y_max)
         elif(self.image.red_y_max > CRMAX):          #離紅門太近
             while(self.image.red_y_max > CRMAX):         
                 self.image.calculate()
-                print("CRMAX:", self.image.red_y_max)
+                rospy.loginfo("CRMAX: %s", self.image.red_y_max)
                 self.walk.slope()
                 self.walk.move('small_back')  
         while abs(deep.slope) > 0.03: #紅門太斜
@@ -574,26 +587,39 @@ class Obs: #各種避障動作
         time.sleep(6)
         # send.sendBodySector(222) #手直接放下（左右側有障礙物）
         # time.sleep(2.2)
+        send.sendHeadMotor(2,1080,180)
+        send.sendHeadMotor(2,1080,180)
+        send.sendHeadMotor(2,1080,180)
+        time.sleep(0.3)
         send.sendBodySector(1111)
         time.sleep(8)
-        while self.crawl_cnt < 3:    #count 3次            
+        while self.crawl_cnt < 4:    #count 3次            
             send.sendBodySector(2222)
             time.sleep(2)
             # time.sleep(0.3)
             self.crawl_cnt += 1
+            print("vndsfwovnsklfw : ",self.crawl_cnt)
         send.color_mask_subject_YMax[1][0] = 0 #黃色YMax =0
         send.sendHeadMotor(1,2048,100)
         send.sendHeadMotor(2,2400,100) #頭往上抬
         time.sleep(1)
         while self.crawl_cnt < 8:   #cnt3數到7(4次)
-            send.sendBodySector(2222)
-            time.sleep(2)
-            self.crawl_cnt += 1               
             self.image.calculate()
-            # print("blue_ymax   = ",self.b_y_max) #change
-            if (send.color_mask_subject_YMax[2][0] >= 35 and send.color_mask_subject_size[2][0] > 5000) or (send.color_mask_subject_YMax[1][0] >= 35 and send.color_mask_subject_size[1][0] > 5000): #爬到黃色或藍色夠近或夠大
+            rospy.loginfo("blue_deep = %s", self.image.deep_y)
+            # rospy.loginfo("blue_ymax   = %s", self.b_y_max) #change
+            # if (send.color_mask_subject_YMax[2][0] >= 35 \
+            #     and send.color_mask_subject_size[2][0] > 5000) \
+            #     or (send.color_mask_subject_YMax[1][0] >= 35 \
+            #     and send.color_mask_subject_size[1][0] > 5000): #爬到黃色或藍色夠近或夠大
+            #     break
+            if self.image.deep_y != 24:# or self.image.y_deep_y <=23:
                 break
+            else:
+                send.sendBodySector(2222)
+                time.sleep(2)
+                self.crawl_cnt += 1 
         if self.crawl_cnt > 7 :
+            rospy.loginfo("blue_deep = %s", self.image.deep_y)
             send.sendBodySector(3333)
             time.sleep(14.5)
             send.sendBodySector(29)    
@@ -609,29 +635,39 @@ class Obs: #各種避障動作
             # time.sleep(0.5)
             send.sendBodyAuto(0,0,0,0,1,0) 
         else :
+            rospy.loginfo("blue_deep = %s", self.image.deep_y)
             send.sendBodySector(3333)
             time.sleep(14.5)
             send.sendBodySector(29)    
             time.sleep(0.5)
-            send.sendBodySector(12182)
+            # send.sendBodySector(12182)
+            # time.sleep(1)
+            send.sendBodySector(123)
             time.sleep(1)
-            while self.i < 1000:
+            send.sendBodyAuto(0,0,0,0,1,0) 
+            while self.i < 300:
                 self.walk.move('max_speed')  
-                self.i += 1
+                self.i += 5
+            send.sendBodyAuto(0,0,0,0,1,0) 
+            # send.sendBodySector(29)    
+            time.sleep(1)
             send.sendBodySector(29)    
             time.sleep(0.5)
+            send.sendHeadMotor(1,2048,100)
+            send.sendHeadMotor(2,HEAD_HEIGHT,100)
             send.sendBodySector(111)
             time.sleep(3.5)
+            send.sendBodyAuto(0,0,0,0,1,0) 
+
             # send.sendBodySector(1218)
             # time.sleep(0.5)
             # send.sendBodySector(299)
             # time.sleep(0.5)
             # send.sendBodySector(18)
             # time.sleep(0.5)
-            send.sendHeadMotor(1,2048,100)
-            send.sendHeadMotor(2,HEAD_HEIGHT,100)
-            time.sleep(2)
-            send.sendBodyAuto(0,0,0,0,1,0)
+
+            # time.sleep(2)
+            # send.sendBodyAuto(0,0,0,0,1,0)
 
     def turn_head(self):
         self.walk.move('stay')
@@ -650,7 +686,7 @@ class Obs: #各種避障動作
                 self.door_at_right = True
                 self.door_at_left = False
             self.right_deep_sum = sum(deep.aa) #filter_sum_aa #右邊深度總和
-            print(self.line_at_right_single)
+            rospy.loginfo(self.line_at_right_single)
             send.sendHeadMotor(1,2599,180) #頭往左轉
             send.sendHeadMotor(2,HEAD_HEIGHT+150,180)
             send.sendHeadMotor(1,2599,180)
@@ -664,7 +700,7 @@ class Obs: #各種避障動作
                 self.door_at_left = True
                 self.door_at_right = False
             self.left_deep_sum = sum(deep.aa) #左邊深度總和
-            print(self.line_at_left_single)
+            rospy.loginfo(self.line_at_left_single)
             send.sendHeadMotor(1,2048,180) #頭回中間
             send.sendHeadMotor(2,HEAD_HEIGHT,180)
             send.sendHeadMotor(1,2048,180)
@@ -679,8 +715,8 @@ class Obs: #各種避障動作
             self.image.calculate()
             if (self.image.b_center_deep > 7):                   #turn head 右轉 前後修正 越大越遠
                 while ( self.image.b_center_deep > 7):
-                    # print("aaaaaaaaaaaa")
-                    # print('c_deep:', self.image.b_center_deep)
+                    # rospy.loginfo("aaaaaaaaaaaa")
+                    # rospy.loginfo('c_deep: %s', self.image.b_center_deep)
                     self.image.calculate()
                     self.walk.move('small_forward')
             elif ( self.image.b_center_deep < 6):                 #turn head 右轉 前後修正 越大越遠
@@ -711,8 +747,8 @@ class Obs: #各種避障動作
             self.image.calculate() 
             if (self.image.b_center_deep > 8):                   #turn head 左轉 前後修正 越大越遠
                 while ( self.image.b_center_deep > 8 ):
-                    print( self.image.b_center_deep)
-                    print("bbbbbbbbbbbb")
+                    rospy.loginfo(self.image.b_center_deep)
+                    rospy.loginfo("bbbbbbbbbbbb")
                     self.image.calculate()
                     self.walk.move('small_forward') 
             elif ( self.image.b_center_deep < 7 ):                #turn head 左轉 前後修正 越大越遠 
@@ -722,7 +758,7 @@ class Obs: #各種避障動作
             if abs(self.walk.get_imu()) < 70:                           #turn head 旋轉角度  左轉 越大轉越多
                 while abs(self.walk.get_imu()) < 65:
                     self.walk.move('turn_left_for_wall')
-                    print('llllllllllllllllllllllllllll')
+                    rospy.loginfo('llllllllllllllllllllllllllll')
             send.sendHeadMotor(1,1447,100) #身體面相左，頭往右轉看牆
             send.sendHeadMotor(2,1550,100) 
             time.sleep(0.5)
@@ -746,27 +782,25 @@ class Obs: #各種避障動作
             # while True:
             self.image.calculate() #計算障礙物的各種參數(深度、左右權重、dx...)
                         # self.image.calculate()
-            print('dx:', self.image.deep_x)
-            # print('y_YMAX1:', send.color_mask_subject_YMax[1][0])
-            # print('y_YMAX2:', send.color_mask_subject_YMax[1][1])
-            # print('y_XMAX1:', send.color_mask_subject_XMax[1][0])
-            # print('y_XMin2:', send.color_mask_subject_XMin[1][1])
-            # print('y_cnt:', send.color_mask_subject_cnts[1])
-            # print('imu:', self.walk.get_imu())
-            print('red_y_max:', self.image.red_y_max)
-            print('blue_rightside:', self.image.blue_rightside)
-            print('blue_leftside:', self.image.blue_leftside)
-            
-            
-            # print('line_at_right:', self.image.line_at_right)
-            # print('line_at_left:', self.image.line_at_left)
-            # print('blue_rightside:', self.image.blue_rightside)
-            # print('blue_leftside:', self.image.blue_leftside)
+            rospy.loginfo('dx: %s', self.image.deep_x)
+            # rospy.loginfo('y_YMAX1: %s', send.color_mask_subject_YMax[1][0])
+            # rospy.loginfo('y_YMAX2: %s', send.color_mask_subject_YMax[1][1])
+            # rospy.loginfo('y_XMAX1: %s', send.color_mask_subject_XMax[1][0])
+            # rospy.loginfo('y_XMin2: %s', send.color_mask_subject_XMin[1][1])
+            # rospy.loginfo('y_cnt: %s', send.color_mask_subject_cnts[1])
+            # rospy.loginfo('imu: %s', self.walk.get_imu())
+            rospy.loginfo('red_y_max: %s', self.image.red_y_max)
+            rospy.loginfo('blue_rightside: %s', self.image.blue_rightside)
+            rospy.loginfo('blue_leftside: %s', self.image.blue_leftside)
+            # rospy.loginfo('line_at_right: %s', self.image.line_at_right)
+            # rospy.loginfo('line_at_left: %s', self.image.line_at_left)
+            # rospy.loginfo('blue_rightside: %s', self.image.blue_rightside)
+            # rospy.loginfo('blue_leftside: %s', self.image.blue_leftside)
                 
             
             
-            # print('a=',self.image.b_x_min)
-            # print('b=',self.image.b_x_max)
+            # rospy.loginfo('a=%s', self.image.b_x_min)
+            # rospy.loginfo('b=%s', self.image.b_x_max)
         #=============================strategy=============================
             if not self.start_walking :                        #指撥後初始動作
                 # self.walk.imu_yaw_ini() #imu歸0 (imu_yaw = 0)
@@ -774,8 +808,8 @@ class Obs: #各種避障動作
                 self.preturn_left = False
                 # self.preturn_left = True
                 #================================================
-                # self.preturn_right = False
-                self.preturn_right = True
+                self.preturn_right = False
+                # self.preturn_right = True
                 #================================================
                 send.sendHeadMotor(1,2048,100) #頭部初始動作
                 send.sendHeadMotor(2,HEAD_HEIGHT  ,100)
@@ -792,7 +826,7 @@ class Obs: #各種避障動作
                     rospy.loginfo(f'imu =  {self.walk.get_imu()}')
                 self.preturn_left = False
             elif self.preturn_right:
-                while abs(self.walk.get_imu()) < 55:
+                while abs(self.walk.get_imu()) < 45:
                     self.walk.move('preturn_right')
                     rospy.loginfo(f'imu =  {self.walk.get_imu()}')
                 self.preturn_right = False
@@ -809,7 +843,7 @@ class Obs: #各種避障動作
                     #     if (deep.ya[i] !=24) and (abs(self.walk.get_imu()) < 45):
                     #         self.yyyyy += 1
                     # self.image.calculate()
-                    # # print(self.yyyyy)
+                    # rospy.loginfo(self.yyyyy)
                     # if self.yyyyy >= 14:
                     #     while 1 :
                     #         self.walk.move('max_speed')
@@ -863,9 +897,9 @@ class Obs: #各種避障動作
                     elif (self.image.deep_x < 17 and self.image.deep_x >= 13) or (self.image.deep_x <= -13 and self.image.deep_x > -17) :
                         # while True:
                             # # self.image.calculate()
-                            # print("dx = ",self.image.deep_x)
+                            #rospy.loginfo("dx = %s", self.image.deep_x)
                         self.image.calculate()
-                        # print("dx = ",self.image.deep_x)
+                        #rospy.loginfo("dx = %s", self.image.deep_x)
                         # self.walk.move('stay')
 
                         if (self.image.b_y_max >= 170) and ( abs(self.walk.get_imu()) <= 5 ) and (self.need_imu_back) and (abs(self.image.deep_x) > 3) and (self.image.center_deep != 24) :        #離障礙物太近-->後退
@@ -889,14 +923,14 @@ class Obs: #各種避障動作
                                     elif  self.image.deep_sum_l >= self.image.deep_sum_r :
                                         while abs(self.walk.get_imu()) < 20:    
                                             self.walk.move('turn_left_for_wall')
-                                            print('dx:', self.image.deep_x)
-                                            print('deep_sum_l:', self.image.deep_sum_l)
+                                            rospy.loginfo('dx: %s', self.image.deep_x)
+                                            rospy.loginfo('deep_sum_l: %s', self.image.deep_sum_l)
                                         self.imu_ok = True
                                     elif  self.image.deep_sum_l < self.image.deep_sum_r :
                                         while abs(self.walk.get_imu()) < 20:    
                                             self.walk.move('turn_right_for_wall')
-                                            print('dx:', self.image.deep_x)
-                                            print('deep_sum_r:', self.image.deep_sum_r)
+                                            rospy.loginfo('dx: %s', self.image.deep_x)
+                                            rospy.loginfo('deep_sum_r: %s', self.image.deep_sum_r)
                                         self.imu_ok = True
                                 else:
                                     pass
@@ -909,14 +943,14 @@ class Obs: #各種避障動作
                             elif  self.image.deep_sum_l >= self.image.deep_sum_r :
                                 while abs(self.walk.get_imu()) < 20:    
                                     self.walk.move('turn_left_for_wall')
-                                    print('dx:', self.image.deep_x)
-                                    print('deep_sum_l:', self.image.deep_sum_l)
+                                    rospy.loginfo('dx: %s', self.image.deep_x)
+                                    rospy.loginfo('deep_sum_l: %s', self.image.deep_sum_l)
                                 self.imu_ok = True
                             elif  self.image.deep_sum_l < self.image.deep_sum_r :
                                 while abs(self.walk.get_imu()) < 20:    
                                     self.walk.move('turn_right_for_wall')
-                                    print('dx:', self.image.deep_x)
-                                    print('deep_sum_r:', self.image.deep_sum_r)
+                                    rospy.loginfo('dx: %s', self.image.deep_x)
+                                    rospy.loginfo('deep_sum_r: %s', self.image.deep_sum_r)
                                 self.imu_ok = True
 
                     elif (4 >= self.image.deep_x >= -4) or (abs(self.image.deep_x) >= 17):                  #normal turn 直走 跟一般旋轉值要相等
@@ -930,18 +964,19 @@ class Obs: #各種避障動作
                     
         if not send.is_start :
             # send.sendSensorReset(1,1,1) #將(Roll, Pitch, Yaw) 歸零
-            print(deep.slope)
+            rospy.loginfo(deep.slope)
             self.image.calculate()
-            # print("blue_rightside", self.image.blue_rightside)
-            # print("blue_leftside", self.image.blue_leftside)
-            # print("CRMIN:", self.image.red_y_max)
-            # print("blue_cnt:", send.color_mask_subject_cnts[2])
-            # print("blue_cnt:", send.color_mask_subject_cnts[2])
-            print("dx:", self.image.deep_x)
-
-            # print("blue_ymax   = ",send.color_mask_subject_YMax[2][0])
-            print("yellow= ",send.color_mask_subject_cnts[1])
-            # print('ready')
+            # rospy.loginfo("blue_rightside", self.image.blue_rightside)
+            # rospy.loginfo("blue_leftside", self.image.blue_leftside)
+            rospy.loginfo("CRMIN:%s", self.image.red_y_max)
+            # rospy.loginfo("blue_cnt:", send.color_mask_subject_cnts[2])
+            # rospy.loginfo("blue_cnt:", send.color_mask_subject_cnts[2])
+            # rospy.loginfo("dx: %s", self.image.deep_x)
+            # rospy.loginfo("blue_ymax %s ",send.color_mask_subject_YMax[2][0])
+            # rospy.loginfo("yellow= %s", send.color_mask_subject_cnts[1])
+            rospy.loginfo("deep_y= %s", self.image.deep_y)
+            # rospy.loginfo("y_deep_y= %s", self.image.y_deep_y)
+            # rospy.loginfo('ready')
             if self.start_walking :
                 send.sendContinuousValue(0,0,0,0,0) #x,y,z,theta填入walking介面移動數值
                 send.sendBodyAuto(0,0,0,0,1,0) #mode=1為continue步態
