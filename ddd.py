@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #coding=utf-8
 from re import T
 import rospy
@@ -18,9 +18,9 @@ class deep_calculate:
         self.Image_compress_sub = rospy.Subscriber("colormodel_image",Image, self.convert)			# 訂閱攝像頭資訊 #"/kidsize/camera/image_raw" #"compress_image" #"/usb_cam/image_raw"
         # rospy.spin()
         self.first_red = True
-        self.ya = 0
-        self.aa = 0
-        self.ba = 0
+        self.ya = [0] * 32
+        self.aa = [0] * 32
+        self.ba = [0] * 32
         self.x1 = 0
         self.y1 = 0
         self.x2 = 1
