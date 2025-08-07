@@ -26,8 +26,8 @@ HEAD_HORIZONTAL = 2048 #頭水平，位置為馬達目標刻度，2048為正朝�
 HEAD_HEIGHT     = 1550 #頭高，位置為馬達目標刻度，2048為正朝前方
 FOCUS_MATRIX    = [7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 10, 10, 11, 11, 10, 10, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7]
 #===========================================
-STAY_X                          = 200
-STAY_Y                          = -300
+STAY_X                          = 100
+STAY_Y                          = -100
 STAY_THETA                      = 0
 #=========================================== 
 MAX_FORWARD_X                   = 2500                                                     
@@ -35,56 +35,59 @@ MAX_FORWARD_Y                   = 100
 MAX_FORWARD_THETA               = 0          
 #=========================================== 
 SMALL_FORWARD_X                 = 1600                                                     
-SMALL_FORWARD_Y                 = -300                                                            
+SMALL_FORWARD_Y                 = -100                                                            
 SMALL_FORWARD_THETA             = 0             
 #=========================================== 
 SMALL_BACK_X                    = -1500                                                     
-SMALL_BACK_Y                    = -200                                                            
+SMALL_BACK_Y                    = -100                                                            
 SMALL_BACK_THETA                = 0         
 #=========================================== 
 IMU_RIGHT_X                     = 0
-IMU_RIGHT_Y                     = 600               
+IMU_RIGHT_Y                     = 700               
 #===========================================                 
 TURN_RIGHT_X                    = 0                                                    
-TURN_RIGHT_Y                    = 500                                                     
-TURN_RIGHT_THETA                = -4           
+TURN_RIGHT_Y                    = 700                                                     
+TURN_RIGHT_THETA                = -4          #3 
 #=========================================== 
 IMU_LEFT_X                      = -200
-IMU_LEFT_Y                      = -800 
+IMU_LEFT_Y                      = -600 
 #===========================================                                         
 TURN_LEFT_X                     = -200                                                    
-TURN_LEFT_Y                     = -800                                                     
-TURN_LEFT_THETA                 = 4  
+TURN_LEFT_Y                     = -700                                                     
+TURN_LEFT_THETA                 = 4            #3
 #===========================================
-SLOPE_RIGHT_TRANSLATE_X         = 0   
-SLOPE_RIGHT_TRANSLATE_Y         = -1000
-SLOPE_RIGHT_TRANSLATE_THETA     = -1
+SLOPE_RIGHT_TRANSLATE_X         = -100   
+SLOPE_RIGHT_TRANSLATE_Y         = -1200
+SLOPE_RIGHT_TRANSLATE_THETA     = -2
 #===========================================
 SLOPE_LEFT_TRANSLATE_X          = -200
-SLOPE_LEFT_TRANSLATE_Y          = 1000
+SLOPE_LEFT_TRANSLATE_Y          = 1200
 SLOPE_LEFT_TRANSLATE_THETA      = 2
 #===========================================
 YY_WALKWAY            =     110 #黃黃通道大小
 YY_ERRO               =     15 #黃黃通道中心與畫面中心誤差值
 #===========================================     
-CRMAX           = 75 # red door 前後修正3 值越大離門越近 #68
-CRMIN           = 75 # red door 前後修正3 值越大離門越近 #68  
+CRMAX           = 79 # red door 前後修正3 值越大離門越近 #68
+CRMIN           = 79 # red door 前後修正3 值越大離門越近 #68  
 
 REDDOOR_FIX     = "imu" #"slpoe" 平移修正方法選擇
-REDDOOR_IMU     = False #紅門爬起後修正imu
+REDDOOR_IMU     = False
+REDDOOR_AFTER     = 'None' #紅門爬起後修正 'None' 'simp_turn_head' 'turn_head'
+
 #===========================================
 PRETURN_LEFT          = False 
 # PRETURN_LEFT          = True #預轉身左
-PRETURN_LEFT_ANGLE    = 60
+PRETURN_LEFT_ANGLE    = 70
 
-# PRETURN_RIGHT         = False
-PRETURN_RIGHT         = True #預轉身右
-PRETURN_RIGHT_ANGLE   = 30
+PRETURN_RIGHT         = False
+# PRETURN_RIGHT         = True #預轉身右
+PRETURN_RIGHT_ANGLE   = 80
 #===========================================
+YELLOW_WALKWAY              = False
 YELLOW_SMALL_TURNHEAD       = False #通道不夠大轉頭
-YELLOW_BLUE                 = False #黃線接藍牆
-YELLOW_IMU_LEFT        = False #黃色與藍牆夠近時 走完轉頭先imu_fix
-YELLOW_IMU_RIGHT       = False #黃色與藍牆夠近時 走完轉頭先imu_fix  
+YELLOW_BLUE                 = True#黃線接藍牆
+YELLOW_IMU_LEFT        = True #黃色與藍牆夠近時 或 兩個藍色中有洞使用深度判斷 走完轉頭先imu_fix
+YELLOW_IMU_RIGHT       = False #黃色與藍牆夠近時 或 兩個藍色中有洞使用深度判斷 走完轉頭先imu_fix  
 SIMP_TURN_HEAD              = False #簡單轉頭 原本turn_for_wall的地方會先simp_turn_head再turn_for_wall
 
 FORCE_TURN_LEFT             = False #進轉頭策略 不轉頭強置左轉
@@ -102,12 +105,12 @@ class Walk(): #步態、轉彎、直走速度、IMU
 
     def move(self, action_id, z=0, sensor= 0):
         #self.image.calculate()
-        imu_flag = self.get_imu() < 0     #判斷是否<0 
+        imu_flag = send.imu_value_Yaw < 0     #判斷是否<0 
         # self.forward_speed = self.straight_speed()
         slope_x_fix             = 500 if self.image.red_y_max < 90 else -300 if self.image.red_y_max > 100 else 0            #red door 平移 前後修正 值越大越遠
         right_straight_y        = -500 if self.image.center_deep<= 3  else 500 #if self.image.right_deep >= 7 else 0     #turn head 右轉 直走 值越大越遠             
         left_straight_y         = 300 if self.image.center_deep<= 3  else -200 #if self.image.left_deep >= 5 else 0     #turn head 左轉 直走 值越大越遠
-        straight_90degree_fix   = -2 if ((imu_flag and abs(self.get_imu()) < 90) or (not imu_flag and abs(self.get_imu()) > 90)) else 2   #turn head 保持90度直走         
+        straight_90degree_fix   = -2 if ((imu_flag and abs(send.imu_value_Yaw) < 90) or (not imu_flag and abs(send.imu_value_Yaw) > 90)) else 2   #turn head 保持90度直走         
         # turn_x                  =   self.straight_speed()*2 if self.image.yellow_center_deep < 12 else self.straight_speed()  
         # turn_direction_x        =   TURN_RIGHT_X if self.get_imu() > 0 else TURN_LEFT_X  # fix_angle for turn_x
         actions             = { 'stay'                  : {'x'      : STAY_X,     \
@@ -124,21 +127,21 @@ class Walk(): #步態、轉彎、直走速度、IMU
                                                            'y'      :  SMALL_FORWARD_Y,             \
                                                            'theta'  :  SMALL_FORWARD_THETA},
                                 ################################################
-                                'imu_fix'               : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  \
-                                                           'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y,\
+                                'imu_fix'               : {'x': IMU_RIGHT_X if (send.imu_value_Yaw-self.face_imu) > 0 else IMU_LEFT_X,  \
+                                                           'y': IMU_RIGHT_Y if (send.imu_value_Yaw-self.face_imu) > 0 else IMU_LEFT_Y,\
                                                            'theta': self.imu_angle()  },
                                 # 'slope_fix'             : {'x': IMU_RIGHT_X-200 if self.get_imu() > 0 else IMU_LEFT_X-200,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y, 'theta': self.slope()      },
                                 'slope_fix'             : {'x'      : IMU_LEFT_X   if deep.slope > 0 else IMU_RIGHT_X,                   \
                                                            'y'      : IMU_LEFT_Y  if deep.slope > 0 else IMU_RIGHT_Y,           \
                                                            'theta'  : self.slope()},
                                 ################################################
-                                'imu_right_translate'   : {'x'      : 0 + slope_x_fix, \
-                                                           'y'      : -1000,            \
-                                                           'theta'  : -2 + self.imu_angle()},
+                                'imu_right_translate'   : {'x'      : SLOPE_RIGHT_TRANSLATE_X, \
+                                                           'y'      : SLOPE_RIGHT_TRANSLATE_Y,            \
+                                                           'theta'  : SLOPE_RIGHT_TRANSLATE_THETA + self.imu_angle()},
                                 ################################################
-                                'imu_left_translate'    : {'x'      :  0+ slope_x_fix, \
-                                                           'y'      :  1200,               \
-                                                           'theta'  : 1 + self.imu_angle()      },
+                                'imu_left_translate'    : {'x'      : SLOPE_LEFT_TRANSLATE_X, \
+                                                           'y'      : SLOPE_LEFT_TRANSLATE_Y,               \
+                                                           'theta'  : SLOPE_LEFT_TRANSLATE_THETA + self.imu_angle()      },
                                 ################################################
                                 'slope_right_translate' : {'x'      : SLOPE_RIGHT_TRANSLATE_X + slope_x_fix, \
                                                            'y'      : SLOPE_RIGHT_TRANSLATE_Y,           \
@@ -150,9 +153,9 @@ class Walk(): #步態、轉彎、直走速度、IMU
                                 ################################################
                                 'dx_turn'               : {'x': TURN_RIGHT_X if self.image.deep_x > 0 else TURN_LEFT_X,       'y':  TURN_RIGHT_Y if self.image.deep_x > 0 else TURN_LEFT_Y,     'theta': self.turn_angle()  },
                                 'turn_right_for_wall'   : {'x': TURN_RIGHT_X,       'y':  TURN_RIGHT_Y,     'theta': TURN_RIGHT_THETA  },
-                                'turn_right_back'       : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y,            'theta': TURN_LEFT_THETA                 },#.
+                                'turn_right_back'       : {'x': IMU_RIGHT_X if send.imu_value_Yaw > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if send.imu_value_Yaw > 0 else IMU_LEFT_Y,            'theta': TURN_LEFT_THETA                 },#.
                                 'turn_left_for_wall'    : {'x': TURN_LEFT_X,        'y':  TURN_LEFT_Y,      'theta': TURN_LEFT_THETA   },
-                                'turn_left_back'        : {'x': IMU_RIGHT_X if self.get_imu() > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if self.get_imu() > 0 else IMU_LEFT_Y,            'theta': TURN_RIGHT_THETA                },#.
+                                'turn_left_back'        : {'x': IMU_RIGHT_X if send.imu_value_Yaw > 0 else IMU_LEFT_X,  'y': IMU_RIGHT_Y if send.imu_value_Yaw > 0 else IMU_LEFT_Y,            'theta': TURN_RIGHT_THETA                },#.
                                 'face_right_forward'    : {'x': MAX_FORWARD_X,    'y':  MAX_FORWARD_Y + right_straight_y ,    'theta': MAX_FORWARD_THETA + straight_90degree_fix    },
                                 # 'right_right'         : {'x': SMALL_FORWARD_X,    'y':  SMALL_FORWARD_Y + straight_y_fix,     'theta': SMALL_FORWARD_THETA + straight_90degree_fix    },
                                 'face_left_forward'     : {'x': MAX_FORWARD_X,    'y':  MAX_FORWARD_Y + left_straight_y,     'theta': MAX_FORWARD_THETA + straight_90degree_fix   },
@@ -174,14 +177,14 @@ class Walk(): #步態、轉彎、直走速度、IMU
                 self.total_movement = 1500
             send.sendContinuousValue(x, y, z, theta, sensor)        
         status.action_id = action_id        
-        status.ContinuousValue = [x,y,self.total_movement,theta]
+        status.ContinuousValue = [x,y,theta]
 
     # def imu_yaw_ini(self):
     #     self.imu_yaw = 0
 
-    def get_imu(self):
-        self.imu_yaw = send.imu_value_Yaw
-        return self.imu_yaw 
+    # def get_imu(self):
+    #     self.imu_yaw = send.imu_value_Yaw
+    #     return self.imu_yaw 
 
     def turn_angle(self):   #一般 旋轉角度        
         turn_ranges = [ (17, -4), 
@@ -221,7 +224,7 @@ class Walk(): #步態、轉彎、直走速度、IMU
                         (-90,   4),
                         (-180,   4)]
         for imu_range in imu_ranges:           
-            if (self.imu_yaw-self.face_imu) >= imu_range[0]:
+            if (send.imu_value_Yaw-self.face_imu) >= imu_range[0]:
                 return imu_range[1]
         return 0
 
@@ -317,6 +320,7 @@ class Normal_Obs_Parameter: #計算各種深度
         self.yellow_through  = False
         self.yellow_move = False
         self.yellow_size = False
+        self.center_deep_y = 0
 
     def calculate(self):
         self.red_y_max = send.color_mask_subject_YMax[5][0]
@@ -388,7 +392,8 @@ class Normal_Obs_Parameter: #計算各種深度
             self.yellow_rightside      = max(Y_XMin1, Y_XMin2)
             self.yellow_leftside     = min(Y_XMax1, Y_XMax2)
             
-            if min(send.color_mask_subject_size[1][0],send.color_mask_subject_size[1][1])>8000 and send.color_mask_subject_cnts[1]==2:
+            if min(send.color_mask_subject_size[1][0],send.color_mask_subject_size[1][1])>8000 and send.color_mask_subject_cnts[1]==2 and\
+                YELLOW_WALKWAY:
                 self.yellow_size = True
 
             
@@ -479,7 +484,7 @@ class RobotStatus:
         
         #==========機器人狀態==========#
         self.action_id = "stop"
-        self.ContinuousValue = [0,0,0,0]
+        self.ContinuousValue = [0,0,0]
         #==========避障狀態==========#
         self.obs_action = "" #無障 一般避障 紅門
         #==========基礎數據==========#
@@ -520,7 +525,7 @@ class RobotStatus:
         #==========避障狀態==========#
         # self.obs_action = "無障" #無障 一般避障 紅門
         #==========基礎數據==========#
-        self.imu = self.walk.get_imu()
+        # self.imu = send.imu_value_Yaw
         # self.deep_x = self.image.deep_x
         # self.deep_y = self.image.deep_y
         # self.deep_sum_l = self.image.deep_sum_l
@@ -561,7 +566,7 @@ ContinuousValue  : {self.ContinuousValue}\n\
 #===============避障狀態===============#\n\
 obs_action       : {self.obs_action}\n\
 #===============基礎數據===============#\n\
-imu              : {self.imu}\n\
+imu              : {send.imu_value_Yaw}\n\
 deep_x           : {self.image.deep_x}\n\
 deep_y           : {self.image.deep_y}\n\
 center_deep_y    : {self.image.center_deep_y}\n\
@@ -581,11 +586,10 @@ reddoor_state    : {self.reddoor_state}\n\
 bcnt             : {send.color_mask_subject_cnts[2]}\n\
 bx min max       : {self.image.b_x_min} {self.image.b_x_max}\n\
 blue_side        : {self.image.blue_leftside} {self.image.blue_rightside}\n\
-slope_angle      : {self.slope_angle}\n\
 red_y_max        : {self.image.red_y_max}\n\
 red_size         : {send.color_mask_subject_size[5][0]}\n\
 crawl_cnt        : {self.crawl_cnt}\n\
-deep.slope       : {deep.slope}\n\
+slope            : {deep.slope}\n\
 face_imu         : {self.walk.face_imu}\n\
 #=================轉頭=================#\n\
 turnHead_state   : {self.turnHead_state}\n\
@@ -594,7 +598,7 @@ deep L R         : {deep.aa[14]} {deep.aa[18]}\n\
         ")
         # '''
 
-        # sys.stdout.write(f"test:{}\n")                
+        sys.stdout.write(f"test:{strategy.reddoor_running}\n")                
 
     def draw_function(self):        
             
@@ -607,9 +611,12 @@ deep L R         : {deep.aa[14]} {deep.aa[18]}\n\
             send.drawImageFunction(6,0,self.image.yellow_rightside,self.image.yellow_rightside,0,240,160,32,240)#右邊黃通 (紅棕色)
             send.drawImageFunction(7,0,int(self.image.yellow_center),int(self.image.yellow_center),0,240,255,0,0)#中間黃通 (紫色)
         else:
-            send.drawImageFunction(1,0,40,40,int(240-max(deep.aa[3:6])*10),240,192,192,192)#左邊深度 (淺灰色)
-            send.drawImageFunction(2,0,280,280,int(240-max(deep.aa[27:30])*10),240,192,192,192)#右邊深度 (淺灰色)
-            send.drawImageFunction(3,0,160,160,int(240-deep.aa[16]*10),240,128,42,42)#中間深度 (紫色) 
+            # send.drawImageFunction(1,0,40,40,int(240-max(deep.aa[3:6])*10),240,192,192,192)#左邊深度 (淺灰色)
+            # send.drawImageFunction(2,0,280,280,int(240-max(deep.aa[27:30])*10),240,192,192,192)#右邊深度 (淺灰色)
+            # send.drawImageFunction(3,0,160,160,int(240-deep.aa[16]*10),240,128,42,42)#中間深度 (紫色) 
+            send.drawImageFunction(1,0,0,0,0,0,0,0,0)#左邊深度
+            send.drawImageFunction(2,0,0,0,0,0,0,0,0)#右邊深度
+            send.drawImageFunction(3,0,0,0,0,0,255,255,255)#畫面中心 (白色)
             send.drawImageFunction(4,0,int(self.image.deep_x*10 if self.image.deep_x > 0 else (self.image.deep_x+32)*10),\
                                int(self.image.deep_x*10 if self.image.deep_x > 0 else (self.image.deep_x+32)*10),0,240,255,0,0)#dx (紅色)            
             send.drawImageFunction(5,0,0,0,0,0,0,0,0)#左邊黃通 
@@ -627,7 +634,10 @@ deep L R         : {deep.aa[14]} {deep.aa[18]}\n\
             self.draw_function()
             # time.sleep(0.1)  # 不要太頻繁
 
-
+            if strategy.reddoor_running:
+                time.sleep(0.2)
+            if strategy.turn_head_dx:
+                time.sleep(0.1)
             if not send.is_start :
                 self.running = False                
                 break        
@@ -663,9 +673,10 @@ class Obs: #各種避障動作
         self.temp_dx                = 0
         self.turn_head_flag         = False
         self.yb                     = False
+        self.reddoor_running        = False
 
     def red_door(self): #前後修正1 -> 修斜率 -> 前後修正2 -> 平移 -> 前後修正3 -> 趴下
-        
+        self.reddoor_running = True
         if not self.first_reddoor:
             self.first_reddoor = True   
             send.sendHeadMotor(1,HEAD_HORIZONTAL,100) #頭在中間
@@ -677,20 +688,24 @@ class Obs: #各種避障動作
         #     self.walk.move('small_back')
         #     status.reddoor_state = "離紅門太近"            
 
-        if abs(deep.slope) > 0.03 :     # red door 修斜率
+        if abs(deep.slope) > 0.1 :     # red door 修斜率
             status.reddoor_state = "修斜率1"
-            while abs(deep.slope) > 0.03 and status.running:                
+            while abs(deep.slope) > 0.1 and status.running:                
                 self.walk.move('slope_fix') #self.walk.move('imu_fix') #根據斜率修正IMU
-            self.walk.face_imu = self.walk.get_imu()
+                self.image.calculate()   
 
-        if (send.color_mask_subject_YMax[5][0] < 85) :     #red door 前後修正2 值越大離門越近 
+            self.walk.move('stay')    
+            time.sleep(1)    
+            self.walk.face_imu = send.imu_value_Yaw
+
+        if (send.color_mask_subject_YMax[5][0] < 110) :     #red door 前後修正2 值越大離門越近 
             status.reddoor_state = "離紅門太遠"
-            while send.color_mask_subject_YMax[5][0] < 85 and status.running: #離紅門太遠了                
+            while send.color_mask_subject_YMax[5][0] < 110 and status.running: #離紅門太遠了                
                 self.walk.move('small_forward') 
                 
-        elif (self.image.red_y_max > 85) or self.image.b_center_deep == 0:   #red door  前後修正2 值越大離門越近 
+        elif (self.image.red_y_max > 135) or self.image.b_center_deep == 0:   #red door  前後修正2 值越大離門越近 
             status.reddoor_state = "離紅門太近"
-            while self.image.red_y_max > 85 or self.image.b_center_deep == 0 and status.running:                
+            while self.image.red_y_max > 135 or self.image.b_center_deep == 0 and status.running:                
                 self.walk.move('small_back')
                 
         while 1 and status.running:     
@@ -698,10 +713,12 @@ class Obs: #各種避障動作
             if (self.image.red_x_min < 2 and self.image.red_x_max > 315) and send.color_mask_subject_size[5][0] > 5000: #紅門在眼前
                 
                 if  self.translate:
-                    while abs(deep.slope) > 0.03 and status.running:
+                    while abs(deep.slope) > 0.1 and status.running:
                         self.walk.move('slope_fix')
                         status.reddoor_state = "修斜率2"
-                    self.walk.face_imu = self.walk.get_imu()
+                    self.walk.move('stay')    
+                    # time.sleep(0.5)                            
+                    self.walk.face_imu = send.imu_value_Yaw
                     self.crawl()
                     break
                 elif (send.color_mask_subject_cnts[2] == 1):
@@ -724,14 +741,14 @@ class Obs: #各種避障動作
                         status.reddoor_state = "位置修正完畢"
                 
                 elif (send.color_mask_subject_cnts[2] == 2):                    
-                    if self.image.blue_rightside < 255 and self.image.blue_leftside < 35: #停在太右邊 blue_rightside調大                        
+                    if self.image.blue_rightside < 255 and self.image.blue_leftside < 40: #停在太右邊 blue_rightside調大                        
                         # self.walk.move('slope_left_translate')
                         # self.walk.move('imu_left_translate') 
                         self.walk.move(f"{REDDOOR_FIX}_left_translate")
                         self.translate = False                        
                         status.reddoor_state = "紅門左平移 2B"
                         
-                    elif self.image.blue_rightside > 255 and self.image.blue_leftside >35: #停在太左邊 blue_leftside調小 #290 65                        
+                    elif self.image.blue_rightside > 255 and self.image.blue_leftside >40: #停在太左邊 blue_leftside調小 #290 65                        
                         # self.walk.move('slope_right_translate')
                         # self.walk.move('imu_right_translate') 
                         self.walk.move(f"{REDDOOR_FIX}_right_translate")
@@ -788,9 +805,11 @@ class Obs: #各種避障動作
                 # send.sendHeadMotor(1,HEAD_HORIZONTAL,180)
                 # send.sendHeadMotor(2,HEAD_HEIGHT+150,180)
                 # time.sleep(0.3)                
-                while abs(deep.slope) > 0.03 and status.running:                
+                while abs(deep.slope) > 0.1 and status.running:                
                     self.walk.move('slope_fix') #self.walk.move('imu_fix') #根據斜率修正IMU
-                self.walk.face_imu = self.walk.get_imu()
+                self.walk.move('stay')    
+                time.sleep(0.5)                                  
+                self.walk.face_imu = send.imu_value_Yaw
                 # if self.door_at_right :
                 #     while self.image.red_x_min < 160 and status.running:                        
                 #         self.walk.move('imu_right_translate')
@@ -802,39 +821,41 @@ class Obs: #各種避障動作
         self.translate = False        
         while 1 and status.running:            
             if self.translate :
-                while abs(deep.slope) > 0.03 and status.running:
+                while abs(deep.slope) > 0.1 and status.running:
                     self.walk.move('slope_fix')                    
                     status.reddoor_state = "修斜率3"
-                self.walk.face_imu = self.walk.get_imu()                                        
+                self.walk.move('stay')    
+                # time.sleep(0.5)                
+                self.walk.face_imu = send.imu_value_Yaw                                        
                 break
 
             elif (send.color_mask_subject_cnts[2] == 1):
-                if (self.image.b_x_min < 2 and self.image.b_x_max > 50):                    
+                if (self.image.b_x_min < 2 and self.image.b_x_max > 20):                    
                     self.translate = False
                     # self.walk.move('slope_right_translate')
                     # self.walk.move('imu_right_translate')
                     self.walk.move(f"{REDDOOR_FIX}_right_translate")                    
                     status.reddoor_state = "紅門右平移 1B"
 
-                elif (self.image.b_x_max > 315 and self.image.b_x_min < 280):                    
+                elif (self.image.b_x_max > 315 and self.image.b_x_min < 245):                    
                     self.translate = False
                     # self.walk.move('slope_left_translate')      
                     # self.walk.move('imu_left_translate')    
                     self.walk.move(f"{REDDOOR_FIX}_left_translate")          
                     status.reddoor_state = "紅門左平移 1B"
                 else:
-                    # self.translate = True
+                    self.translate = True
                     status.reddoor_state = "位置修正完畢"
             
             elif (send.color_mask_subject_cnts[2] == 2):                
-                if self.image.blue_rightside < 255 and self.image.blue_leftside < 35: #停在太右邊 blue_rightside調大                    
+                if self.image.blue_rightside < 255 and self.image.blue_leftside < 25: #停在太右邊 blue_rightside調大                    
                     # self.walk.move('slope_left_translate')
                     # self.walk.move('imu_left_translate')
                     self.walk.move(f"{REDDOOR_FIX}_left_translate")
                     self.translate = False                    
                     status.reddoor_state = "紅門左平移 2B"
                     
-                elif self.image.blue_rightside > 255 and self.image.blue_leftside > 35:  #停在太左邊 blue_leftside調小 #290 65                    
+                elif self.image.blue_rightside > 255 and self.image.blue_leftside > 25:  #停在太左邊 blue_leftside調小 #290 65                    
                     # self.walk.move('slope_right_translate') 
                     # self.walk.move('imu_right_translate')
                     self.walk.move(f"{REDDOOR_FIX}_right_translate")
@@ -860,9 +881,9 @@ class Obs: #各種避障動作
         #     self.walk.slope()
         #     self.walk.move('slope_fix')
         #     status.reddoor_state = "修斜率4"
-        while ( abs(self.walk.get_imu()) > 2) and status.running:
-            self.walk.move('imu_fix')
-            status.reddoor_state = "修斜率4"
+        # while ( abs(send.imu_value_Yaw) > 2) and status.running:
+        #     self.walk.move('imu_fix')
+        #     status.reddoor_state = "修斜率4"
 
         send.sendContinuousValue(0, 0 , 0 , 0 , 0) 
         time.sleep(1)
@@ -870,48 +891,49 @@ class Obs: #各種避障動作
         send.sendBodyAuto(0,0,0,0,1,0) #mode = 1為continue步態 #停下來
 
         # '''
-        time.sleep(2)  
-        send.sendBodySector(333) #手水平放下（屁股有障礙物）
-        time.sleep(4.4)
-        send.sendBodySector(29)   
-        time.sleep(0.5)        
-        send.sendHeadMotor(2,1080,180)
-        send.sendHeadMotor(2,1080,180)
-        send.sendHeadMotor(2,1080,180)
-        time.sleep(0.3)
-        send.sendBodySector(1111)
-        time.sleep(8)
-        while self.crawl_cnt < 5:    #count 6次            
-            send.sendBodySector(2222)
-            time.sleep(2)
-            self.crawl_cnt += 1
-            self.status.crawl_cnt += 1            
-        send.color_mask_subject_YMax[1][0] = 0 #黃色YMax =0
-        send.sendHeadMotor(1,HEAD_HORIZONTAL,100)
-        send.sendHeadMotor(2,2400,100) #頭往上抬
-        send.sendHeadMotor(1,HEAD_HORIZONTAL,100)
-        send.sendHeadMotor(2,2400,100) #頭往上抬
-        send.sendHeadMotor(1,HEAD_HORIZONTAL,100)
-        send.sendHeadMotor(2,2400,100) #頭往上抬
-        time.sleep(3)
-        while self.crawl_cnt < 9 and self.image.deep_y == 24:   #cnt3數到7(4次)            
-            send.sendBodySector(2222)
-            time.sleep(2)
-            self.crawl_cnt += 1 
-        if self.crawl_cnt > 8 :            
-            time.sleep(1)
-            send.sendBodySector(3333)
-            time.sleep(11)
-            # send.sendBodySector(29)    
-            # time.sleep(0.5)
-            # send.sendHeadMotor(1,HEAD_HORIZONTAL,100)
-            # send.sendHeadMotor(2,HEAD_HEIGHT,100)
-            # time.sleep(1)
-            # send.sendBodySector(111)
-            # time.sleep(3.5)            
-            # send.sendBodyAuto(0,0,0,0,1,0) 
-            
-        else :            
+        if status.running:
+            time.sleep(2)  
+            send.sendBodySector(333) #手水平放下（屁股有障礙物）
+            time.sleep(4.4)
+            send.sendBodySector(29)   
+            time.sleep(0.5)        
+            send.sendHeadMotor(2,1080,180)
+            send.sendHeadMotor(2,1080,180)
+            send.sendHeadMotor(2,1080,180)
+            time.sleep(0.3)
+            send.sendBodySector(1111)
+            time.sleep(8)
+            while self.crawl_cnt < 5:    #count 6次            
+                send.sendBodySector(2222)
+                time.sleep(2)
+                self.crawl_cnt += 1
+                self.status.crawl_cnt += 1            
+            send.color_mask_subject_YMax[1][0] = 0 #黃色YMax =0
+            send.sendHeadMotor(1,HEAD_HORIZONTAL,100)
+            send.sendHeadMotor(2,2400,100) #頭往上抬
+            send.sendHeadMotor(1,HEAD_HORIZONTAL,100)
+            send.sendHeadMotor(2,2400,100) #頭往上抬
+            send.sendHeadMotor(1,HEAD_HORIZONTAL,100)
+            send.sendHeadMotor(2,2400,100) #頭往上抬
+            time.sleep(3)
+            while self.crawl_cnt < 7 and self.image.deep_y == 24:   #cnt3數到7(4次)            
+                send.sendBodySector(2222)
+                time.sleep(2)
+                self.crawl_cnt += 1 
+            # if self.crawl_cnt > 8 :            
+            #     time.sleep(1)
+            #     send.sendBodySector(3333)
+            #     time.sleep(11)
+            #     # send.sendBodySector(29)    
+            #     # time.sleep(0.5)
+            #     # send.sendHeadMotor(1,HEAD_HORIZONTAL,100)
+            #     # send.sendHeadMotor(2,HEAD_HEIGHT,100)
+            #     # time.sleep(1)
+            #     # send.sendBodySector(111)
+            #     # time.sleep(3.5)            
+            #     # send.sendBodyAuto(0,0,0,0,1,0) 
+                
+            # else :            
             status.reddoor_state = "提早爬起"
             time.sleep(1)
             send.sendBodySector(3333)
@@ -927,27 +949,33 @@ class Obs: #各種避障動作
                 
             send.sendBodyAuto(0,0,0,0,1,0)             
             time.sleep(1)
-        send.sendBodySector(29)    
-        time.sleep(0.5)
-        send.sendHeadMotor(1,HEAD_HORIZONTAL,100)
-        send.sendHeadMotor(2,HEAD_HEIGHT,100)
-        send.sendBodySector(111)
-        time.sleep(3.5)
-        send.sendBodyAuto(0,0,0,0,1,0) 
-        self.walk.face_imu = 0
-        if REDDOOR_IMU:
-            while ( abs(self.walk.get_imu()) > 2) and status.running:
-                self.walk.move('imu_fix')
-        # '''
-        # while True and status.running:
-        #     rospy.sleep(0.1)
-        status.reddoor_state = "爬行完畢"
+            send.sendBodySector(29)    
+            time.sleep(0.5)
+            send.sendHeadMotor(1,HEAD_HORIZONTAL,100)
+            send.sendHeadMotor(2,HEAD_HEIGHT,100)
+            send.sendBodySector(111)
+            time.sleep(3.5)
+            send.sendBodyAuto(0,0,0,0,1,0) 
+            self.walk.face_imu = 0
+            if REDDOOR_IMU:
+                while ( abs(send.imu_value_Yaw) > 2) and status.running:
+                    self.walk.move('imu_fix')
+            if REDDOOR_AFTER == 'simp_turn_head':
+                self.simp_turn_head()
+            elif REDDOOR_AFTER == 'turn_head':
+                self.turn_head()
+            # '''
+            # while True and status.running:
+            #     rospy.sleep(0.1)
+            self.reddoor_running = False
+            status.reddoor_state = "爬行完畢"
 
     def turn_head(self):
         self.walk.move('stay')
         status.obs_action = "轉頭"
         self.yellow_flag = False
         self.turn_head_flag = True
+        self.turn_head_dx = False
         if not self.image.line_at_right and not self.image.line_at_left and (not FORCE_TURN_LEFT) and (not FORCE_TURN_RIGHT): 
             time.sleep(1)
             send.sendHeadMotor(1,HEAD_HORIZONTAL-531,180) #頭往右轉
@@ -1007,12 +1035,12 @@ class Obs: #各種避障動作
                 while ( self.image.center_deep > 8) and status.running and (not self.yb):                  
                     status.turnHead_state = "距離牆太遠"
                     self.walk.move('small_forward')                    
-            elif ( self.image.center_deep < 6) and (not self.yb):
-                while ( self.image.center_deep < 6 ) and status.running and (not self.yb):                    
+            elif ( self.image.center_deep < 5) and (not self.yb):
+                while ( self.image.center_deep < 5 ) and status.running and (not self.yb):                    
                     status.turnHead_state = "距離牆太近"
                     self.walk.move('small_back')                   
-            if abs(self.walk.get_imu()) < 85:
-                while abs(self.walk.get_imu()) < 85 and status.running:
+            if abs(send.imu_value_Yaw) < 70:
+                while abs(send.imu_value_Yaw) < 70 and status.running:
                     status.turnHead_state = "右轉"
                     self.walk.move('turn_right_for_wall')                    
             send.sendHeadMotor(1,HEAD_HORIZONTAL+601,100) #身體面相右，頭往左轉看牆
@@ -1023,8 +1051,13 @@ class Obs: #各種避障動作
             self.walk.move("stay")
             time.sleep(2)            
             
-            # while abs(self.image.deep_x) >= 5 and status.running:     
-            while deep.aa[14] <= 11 and status.running:                              
+            while abs(self.image.deep_x) >= 5 and status.running and (not YELLOW_IMU_RIGHT):
+                self.turn_head_dx = True
+                status.turnHead_state = "頭面向牆"
+                self.walk.move('face_right_forward')                
+                if send.color_mask_subject_XMin[5][0] <80 and send.color_mask_subject_cnts[5] >= 1 and send.color_mask_subject_size[5][0] > 3000:
+                    break     
+            while deep.aa[18] <= 11 and status.running and YELLOW_IMU_RIGHT:                              
                 status.turnHead_state = "頭面向牆"
                 self.walk.move('face_right_forward')                
                 if send.color_mask_subject_XMin[5][0] <80 and send.color_mask_subject_cnts[5] >= 1 and send.color_mask_subject_size[5][0] > 3000:
@@ -1039,8 +1072,8 @@ class Obs: #各種避障動作
             send.sendHeadMotor(1,HEAD_HORIZONTAL,100) #頭轉正
             send.sendHeadMotor(2,HEAD_HEIGHT,100) 
             time.sleep(0.5)
-            if abs(self.walk.get_imu()) > 50:
-                while abs(walk.get_imu()) > 50 and status.running: 
+            if abs(send.imu_value_Yaw) > 50:
+                while abs(send.imu_value_Yaw) > 50 and status.running: 
                     status.turnHead_state = "回正"
                     self.walk.move('turn_right_back')
             if self.door_at_right :
@@ -1051,21 +1084,21 @@ class Obs: #各種避障動作
             self.image.line_at_right = False
             self.line_at_right_single = False
             if YELLOW_IMU_RIGHT:
-                while ( abs(self.walk.get_imu()) > 2) and status.running:
+                while ( abs(send.imu_value_Yaw) > 2) and status.running:
                     self.walk.move('imu_fix')
                         
         elif (self.left_deep_sum > self.right_deep_sum) or self.image.line_at_right or self.line_at_right_single or self.door_at_left or FORCE_TURN_LEFT:            
             status.turnHead_state = "左轉判斷"
-            if (self.image.center_deep > 10) and (not self.yb):
-                while ( self.image.center_deep > 10 ) and status.running and (not self.yb):
+            if (self.image.center_deep > 8) and (not self.yb):
+                while ( self.image.center_deep > 8 ) and status.running and (not self.yb):
                     status.turnHead_state = "距離牆太遠"
                     self.walk.move('small_forward') 
-            elif ( self.image.center_deep < 8 ) and (not self.yb):
-                while ( self.image.center_deep < 8 ) and status.running and (not self.yb):
+            elif ( self.image.center_deep < 5 ) and (not self.yb):
+                while ( self.image.center_deep < 5 ) and status.running and (not self.yb):
                     status.turnHead_state = "距離牆太近"
                     self.walk.move('small_back') 
-            if abs(self.walk.get_imu()) < 70:                           #turn head 旋轉角度  左轉 越大轉越多
-                while abs(self.walk.get_imu()) < 70 and status.running:
+            if abs(send.imu_value_Yaw) < 70:                           #turn head 旋轉角度  左轉 越大轉越多
+                while abs(send.imu_value_Yaw) < 70 and status.running:
                     status.turnHead_state = "左轉"
                     self.walk.move('turn_left_for_wall')                    
             send.sendHeadMotor(1,HEAD_HORIZONTAL-601,100) #身體面相左，頭往右轉看牆
@@ -1075,8 +1108,13 @@ class Obs: #各種避障動作
             self.walk.move("stay")
             time.sleep(2)   
 
-            # while abs(self.image.deep_x) >= 5 and status.running:
-            while deep.aa[14] <= 11 and status.running:                 
+            while abs(self.image.deep_x) >= 5 and status.running and (not YELLOW_IMU_LEFT):
+                self.turn_head_dx = True
+                status.turnHead_state = "頭面向牆"
+                self.walk.move('face_left_forward')
+                if send.color_mask_subject_XMax[5][0] > 240 and send.color_mask_subject_cnts[5] >= 1 and send.color_mask_subject_size[5][0] > 3000:
+                    break            
+            while deep.aa[14] <= 11 and status.running and YELLOW_IMU_LEFT:                 
                 status.turnHead_state = "頭面向牆"
                 self.walk.move('face_left_forward')
                 if send.color_mask_subject_XMax[5][0] > 240 and send.color_mask_subject_cnts[5] >= 1 and send.color_mask_subject_size[5][0] > 3000:
@@ -1091,8 +1129,8 @@ class Obs: #各種避障動作
             send.sendHeadMotor(1,HEAD_HORIZONTAL,100)#頭轉正
             send.sendHeadMotor(2,HEAD_HEIGHT,100) 
             time.sleep(0.5)            
-            if abs(self.walk.get_imu()) > 50:               #turn head 左轉 回正 數字越小越正對
-                while abs(self.walk.get_imu()) > 50 and status.running:    
+            if abs(send.imu_value_Yaw) > 50:               #turn head 左轉 回正 數字越小越正對
+                while abs(send.imu_value_Yaw) > 50 and status.running:    
                     status.turnHead_state = "回正"
                     self.walk.move('turn_left_back')                    
             if self.door_at_left :
@@ -1103,7 +1141,7 @@ class Obs: #各種避障動作
             self.image.line_at_left = False
             self.line_at_left_single = False
             if YELLOW_IMU_LEFT:
-                while ( abs(self.walk.get_imu()) > 2) and status.running:
+                while ( abs(send.imu_value_Yaw) > 2) and status.running:
                     self.walk.move('imu_fix')
         status.turnHead_line_at = ""
         self.turn_head_flag = False
@@ -1142,12 +1180,12 @@ class Obs: #各種避障動作
         
         self.simp_turn =  "left" if self.right_deep_sum < self.left_deep_sum else "right" if self.right_deep_sum > self.left_deep_sum else ""
         if self.simp_turn == "left":
-            while abs(self.walk.get_imu()) < 20 and status.running:    
+            while abs(send.imu_value_Yaw) < 20 and status.running:    
                 self.walk.move('turn_left_for_wall')
             
             self.imu_ok = True
         elif self.simp_turn == "right":
-            while abs(self.walk.get_imu()) < 20 and status.running:    
+            while abs(send.imu_value_Yaw) < 20 and status.running:    
                 self.walk.move('turn_right_for_wall')
             
             self.imu_ok = True
@@ -1176,6 +1214,10 @@ class Obs: #各種避障動作
         self.walk.face_imu = 0
         self.crawl_cnt=0
         self.image.yellow_size      = False
+        self.first_reddoor = False
+        self.reddoor_running = False
+        self.i = 0
+        self.turn_head_dx = False
 
     def main(self):        
         
@@ -1204,12 +1246,12 @@ class Obs: #各種避障動作
                 send.sendBodyAuto(0,0,0,0,1,0) #步態呼叫
                 self.start_walking = True
             if self.preturn_left:
-                while abs(self.walk.get_imu()) < PRETURN_LEFT_ANGLE and status.running:
+                while abs(send.imu_value_Yaw) < PRETURN_LEFT_ANGLE and status.running:
                     self.walk.move('preturn_left')
                     
                 self.preturn_left = False
             elif self.preturn_right:
-                while abs(self.walk.get_imu()) < PRETURN_RIGHT_ANGLE and status.running:
+                while abs(send.imu_value_Yaw) < PRETURN_RIGHT_ANGLE and status.running:
                     self.walk.move('preturn_right')
                     
                 self.preturn_right = False
@@ -1238,7 +1280,7 @@ class Obs: #各種避障動作
                         self.image.line_at_left = True
                     elif max(send.color_mask_subject_XMax[1])>160:
                         self.image.line_at_right = True                        
-                    while ( abs(self.walk.get_imu()) > 2) and (not self.imu_ok) and status.running:
+                    while ( abs(send.imu_value_Yaw) > 2) and (not self.imu_ok) and status.running:
                         self.walk.move('imu_fix')
                     self.walk.move('stay')
                     # time.sleep(1)
@@ -1253,7 +1295,7 @@ class Obs: #各種避障動作
                         YELLOW_SMALL_TURNHEAD:
                         self.yb = True
                         status.turnHead_state ="yysmall"
-                        while ( abs(self.walk.get_imu()) > 2) :
+                        while ( abs(send.imu_value_Yaw) > 2) :
                             self.walk.move('imu_fix')                        
                         time.sleep(1)
                         if self.image.center_deep_y <10:
@@ -1261,8 +1303,8 @@ class Obs: #各種避障動作
                     
                     if 13 > self.image.deep_x > 4 : #deep_x = dx  #normal turn 右轉 範圍越大越容易旋轉 三個地方要調整 大的數字不動
                         # self.walk.straight_speed()                        
-                        if ((abs(self.walk.get_imu()) > 5) and (not self.imu_ok)) and (self.image.deep_x >= 6) :       #normal turn 右轉 數值越大 越不容易 修imu
-                            while(abs(self.walk.get_imu()) > 2):
+                        if ((abs(send.imu_value_Yaw) > 5) and (not self.imu_ok)) and (self.image.deep_x >= 6) :       #normal turn 右轉 數值越大 越不容易 修imu
+                            while(abs(send.imu_value_Yaw) > 2):
                                 self.walk.move('imu_fix')
                             self.walk.move('stay')                            
                             time.sleep(0.5)
@@ -1270,47 +1312,47 @@ class Obs: #各種避障動作
                         else:
                             self.walk.move('dx_turn')
 
-                        if abs(self.walk.get_imu()) <= 5 :
+                        if abs(send.imu_value_Yaw) <= 5 :
                             self.imu_ok = True
                         
                     elif -3 > self.image.deep_x > -13 :     #normal turn 左轉 範圍越大越容易旋轉 三個地方要調整 大的數字不動
                         # self.walk.straight_speed()
                         
-                        if ((abs(self.walk.get_imu()) > 5) and (not self.imu_ok)) and (self.image.deep_x <= -3.5) :   #normal turn 左轉 數值越大 越不容易 修imu   
-                            while(abs(self.walk.get_imu()) > 2):
+                        if ((abs(send.imu_value_Yaw) > 5) and (not self.imu_ok)) and (self.image.deep_x <= -3.5) :   #normal turn 左轉 數值越大 越不容易 修imu   
+                            while(abs(send.imu_value_Yaw) > 2):
                                 self.walk.move('imu_fix')
                             self.walk.move('stay')                            
                             time.sleep(0.5)                            
                         else:
                             self.walk.move('dx_turn')
 
-                        if abs(self.walk.get_imu()) <= 2 :
+                        if abs(send.imu_value_Yaw) <= 2 :
                             self.imu_ok = True
                         
                     elif (self.image.deep_x < 17 and self.image.deep_x >= 13) or (self.image.deep_x <= -13 and self.image.deep_x > -17) :                        
 
-                        if (self.image.b_y_max >= 170) and ( abs(self.walk.get_imu()) <= 5 ) and (self.need_imu_back) and (abs(self.image.deep_x) > 3) and (self.image.center_deep != 24) :        #離障礙物太近-->後退
+                        if (self.image.b_y_max >= 170) and ( abs(send.imu_value_Yaw) <= 5 ) and (self.need_imu_back) and (abs(self.image.deep_x) > 3) and (self.image.center_deep != 24) :        #離障礙物太近-->後退
                             while (self.image.b_y_max >= 170) and status.running:                                
                                 self.walk.move('small_back')                                 
                                 if self.image.b_y_max > 0 : #怕機器人的晃動會卡在small back的迴圈
                                     break
                             self.need_imu_back = False
-                        if ( abs(self.walk.get_imu()) > 2) and (not self.imu_ok) :                   #IMU修正
-                            while ( abs(self.walk.get_imu()) > 2) and (not self.imu_ok) and status.running:                                
+                        if ( abs(send.imu_value_Yaw) > 2) and (not self.imu_ok) :                   #IMU修正
+                            while ( abs(send.imu_value_Yaw) > 2) and (not self.imu_ok) and status.running:                                
                                 self.walk.move('imu_fix')                                
-                                if abs(self.walk.get_imu()) < 2:        #轉頭策略
+                                if abs(send.imu_value_Yaw) < 2:        #轉頭策略
                                     if ( self.image.left_deep < 15 ) and ( self.image.right_deep < 15 ) and ( self.image.center_deep < 15 ): #左中右深度皆小於15
                                         self.turn_head()
                                         self.imu_ok = True
                                         break
                                     
                                     elif  self.image.deep_sum_l >= self.image.deep_sum_r and ( self.image.center_deep < 15 ) and (not SIMP_TURN_HEAD):
-                                        while abs(self.walk.get_imu()) < 39 and status.running and (not self.image.YY_2):    
+                                        while abs(send.imu_value_Yaw) < 39 and status.running and (not self.image.YY_2):    
                                             self.walk.move('turn_left_for_wall')
                                             
                                         self.imu_ok = True
                                     elif  self.image.deep_sum_l < self.image.deep_sum_r and ( self.image.center_deep < 15 ) and (not SIMP_TURN_HEAD):
-                                        while abs(self.walk.get_imu()) < 30 and status.running and (not self.image.YY_2):    
+                                        while abs(send.imu_value_Yaw) < 30 and status.running and (not self.image.YY_2):    
                                             self.walk.move('turn_right_for_wall')
                                             
                                         self.imu_ok = True
@@ -1321,18 +1363,18 @@ class Obs: #各種避障動作
 
                                 else:
                                     pass
-                        elif (abs(self.walk.get_imu()) < 2) and (self.imu_ok):
+                        elif (abs(send.imu_value_Yaw) < 2) and (self.imu_ok):
                             if ( self.image.left_deep < 15 ) and ( self.image.right_deep < 15 ) and ( self.image.center_deep < 15 ):
                                 self.turn_head()
                                 self.imu_ok = True
                             
                             elif  self.image.deep_sum_l >= self.image.deep_sum_r and ( self.image.center_deep < 15 ) and (not SIMP_TURN_HEAD):
-                                while abs(self.walk.get_imu()) < 30 and status.running and (not self.image.YY_2):    
+                                while abs(send.imu_value_Yaw) < 30 and status.running and (not self.image.YY_2):    
                                     self.walk.move('turn_left_for_wall')
                                     
                                 self.imu_ok = True
                             elif  self.image.deep_sum_l < self.image.deep_sum_r and ( self.image.center_deep < 15 ) and (not SIMP_TURN_HEAD):
-                                while abs(self.walk.get_imu()) < 30 and status.running and (not self.image.YY_2):    
+                                while abs(send.imu_value_Yaw) < 30 and status.running and (not self.image.YY_2):    
                                     self.walk.move('turn_right_for_wall')
                                     
                                 self.imu_ok = True
@@ -1341,7 +1383,7 @@ class Obs: #各種避障動作
                                 self.simp_turn_head()
                     
                     elif (4 >= self.image.deep_x >= -3) or (20 > abs(self.image.deep_x) >= 17):                  #normal turn 直走 跟一般旋轉值要相等
-                        if self.image.center_deep_y <11:
+                        if self.image.center_deep_y <13:
                             self.walk.move('small_forward')
                         else:
                             self.walk.move('max_speed') #dx一定小於等於16，但有可能測出17
